@@ -59,6 +59,26 @@ Setting this property enables dynamic memory.
 * **FileDirectory**: The FileDirectory objects to copy to the VHD (as used in the "File" resource). 
 Please see the Examples section for more details. 
 
+## Versions
+
+### 2.1
+
+* Added logic to automatically adjust VM’s startup memory when only minimum and maximum memory is specified in configuration
+* Fixed the issue that a manually stopped VM cannot be brought back to running state with DSC
+
+### 2.0
+* Added xVhdFileDirectory Resource
+* Allowed name to be specified with the extension in xVhd (e.g. the Vhd name could either be "sample" or "sample.vhd")
+* When a VHD cannot be removed because it is already being used by another process, an error will be thrown.
+
+### 1.0.0.0
+
+* Initial release with the following resources
+    - xVhd 
+    - xVMHyperV 
+    - xVMSwitch  
+
+
 ## Examples
 
 ### End-to-End Example
@@ -525,22 +545,3 @@ Configuration ChangeAttribute
         }
 }
 ```
-
-## Versions
-
-### 2.1
-
-* Added logic to automatically adjust VM’s startup memory when only minimum and maximum memory is specified in configuration
-* Fixed the issue that a manually stopped VM cannot be brought back to running state with DSC
-
-### 2.0
-* Added xVhdFileDirectory Resource
-* Allowed name to be specified with the extension in xVhd (e.g. the Vhd name could either be "sample" or "sample.vhd")
-* When a VHD cannot be removed because it is already being used by another process, an error will be thrown.
-
-### 1.0.0.0
-
-* Initial release with the following resources
-    - xVhd 
-    - xVMHyperV 
-    - xVMSwitch  
