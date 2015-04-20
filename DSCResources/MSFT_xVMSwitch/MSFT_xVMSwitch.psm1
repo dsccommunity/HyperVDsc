@@ -74,7 +74,7 @@ function Set-TargetResource
                 $parameters = @{}
                 $parameters["Name"] = $Name
                 $parameters["NetAdapterName"] = $NetAdapterName
-                if($AllowManagementOS){$parameters["AllowManagementOS"]=$AllowManagementOS}
+                if($PSBoundParameters.ContainsKey("AllowManagementOS")){$parameters["AllowManagementOS"]=$AllowManagementOS}
                 $null = New-VMSwitch @parameters
                 Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
             }
@@ -106,7 +106,7 @@ function Set-TargetResource
             if($NetAdapterName)
             {
                 $parameters["NetAdapterName"] = $NetAdapterName
-                if($AllowManagementOS)
+                if($PSBoundParameters.ContainsKey("AllowManagementOS"))
                 {
                     $parameters["AllowManagementOS"] = $AllowManagementOS
                 }
