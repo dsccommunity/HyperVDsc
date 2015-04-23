@@ -61,6 +61,9 @@ Please see the Examples section for more details.
 
 ## Versions
 
+### 2.2.1
+
+
 ### 2.1
 
 * Added logic to automatically adjust VM’s startup memory when only minimum and maximum memory is specified in configuration
