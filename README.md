@@ -61,6 +61,10 @@ Please see the Examples section for more details.
 
 ## Versions
 
+### 2.3.0
+
+* Fixed check for presence of param AllowManagementOS.
+
 ### 2.2.1
 
 
