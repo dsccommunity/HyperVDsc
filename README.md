@@ -33,7 +33,7 @@ This resource is particularly useful when bootstrapping DSC Configurations into 
 * **SwitchName**: Virtual switch associated with the VM 
 * **State**: State of the VM: { Running | Paused | Off }
 * **Path**: Folder where the VM data will be stored
-* **Generation**: Associated Virtual disk format { Vhd | Vhdx }
+* **Generation**: Virtual machine generation { 1 | 2 }
 * **StartupMemory**: Startup RAM for the VM 
 * **MinimumMemory**: Minimum RAM for the VM. 
 Setting this property enables dynamic memory.
@@ -60,6 +60,10 @@ Setting this property enables dynamic memory.
 Please see the Examples section for more details. 
 
 ## Versions
+
+### 2.3.1
+
+* Changed virtual machine generation to version number.
 
 ### 2.3.0
 
@@ -279,7 +283,8 @@ Configuration Sample_xVMHyperV_Simple
             Ensure     = 'Present'
             Name       = $VMName
             VhdPath    = $VhdPath
-            Generation = $VhdPath.Split('.')[-1]
+            # Create a generation 1 VM
+            Generation = 1
             DependsOn  = '[WindowsFeature]HyperV'
         }
     }
@@ -324,13 +329,13 @@ Configuration Sample_xVMHyperV_DynamicMemory
             Name   = 'Hyper-V'
         }
 
-        # Ensures a VM with dynamic memory
+        # Ensures a generation 2 VM with dynamic memory
         xVMHyperV NewVM
         {
             Ensure        = 'Present'
             Name          = $VMName
             VhdPath       = $VhdPath
-            Generation    = $VhdPath.Split('.')[-1]
+            Generation = 2
             StartupMemory = $StartupMemory
             MinimumMemory = $MinimumMemory
             MaximumMemory = $MaximumMemory
@@ -401,7 +406,6 @@ Configuration Sample_xVMHyperV_Complete
             SwitchName      = $SwitchName
             State           = $State
             Path            = $Path
-            Generation      = $VhdPath.Split('.')[-1]
             StartupMemory   = $StartupMemory
             MinimumMemory   = $MinimumMemory
             MaximumMemory   = $MaximumMemory

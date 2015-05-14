@@ -1,0 +1,7 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+*.ps1	-text diff merge
+*.psm1	-text diff merge
+*.psd1	-text diff merge
+*.mof	-text diff merge
