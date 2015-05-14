@@ -69,8 +69,9 @@ function Set-TargetResource
         [String]$SwitchName,
 
         # State of the VM
+        [AllowNull()]
         [ValidateSet("Running","Paused","Off")]
-        [String]$State = "Off",
+        [String]$State,
 
         # Folder where the VM data will be stored
         [String]$Path,
@@ -136,8 +137,8 @@ function Set-TargetResource
         # One cannot set the VM's vhdpath, path, generation and switchName after creation 
         else
         {
-            # If the VM is not in right state, set it to right state
-            if($vmObj.State -ne $State)
+            # If state has been specified and the VM is not in right state, set it to right state
+            if($State -and $vmObj.State -ne $State)
             {
                 Write-Verbose -Message "VM $Name is not $State. Expected $State, actual $($vmObj.State)"
                 Set-VMState -Name $Name -State $State -WaitForIP $WaitForIP
@@ -280,8 +281,9 @@ function Test-TargetResource
         [String]$SwitchName,
 
         # State of the VM
+        [AllowNull()]
         [ValidateSet("Running","Paused","Off")]
-        [String]$State = "Off",
+        [String]$State,
 
         # Folder where the VM data will be stored
         [String]$Path,
