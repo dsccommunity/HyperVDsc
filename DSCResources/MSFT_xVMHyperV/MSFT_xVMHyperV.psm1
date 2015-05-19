@@ -69,8 +69,9 @@ function Set-TargetResource
         [String]$SwitchName,
 
         # State of the VM
+        [AllowNull()]
         [ValidateSet("Running","Paused","Off")]
-        [String]$State = "Off",
+        [String]$State,
 
         # Folder where the VM data will be stored
         [String]$Path,
@@ -136,8 +137,8 @@ function Set-TargetResource
         # One cannot set the VM's vhdpath, path, generation and switchName after creation 
         else
         {
-            # If the VM is not in right state, set it to right state
-            if($vmObj.State -ne $State)
+            # If state has been specified and the VM is not in right state, set it to right state
+            if($State -and ($vmObj.State -ne $State))
             {
                 Write-Verbose -Message "VM $Name is not $State. Expected $State, actual $($vmObj.State)"
                 Set-VMState -Name $Name -State $State -WaitForIP $WaitForIP
@@ -186,8 +187,10 @@ function Set-TargetResource
                 $changeProperty["ProcessorCount"]=$ProcessorCount
             }
 
-            # Stop the VM, set the right properties, start the VM
-            Change-VMProperty -Name $Name -VMCommand "Set-VM" -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
+            # Stop the VM, set the right properties, start the VM only if there are properties to change
+            if ($changeProperty.Count -gt 0) {
+                Change-VMProperty -Name $Name -VMCommand "Set-VM" -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
+            }
 
             # If the VM does not have the right MACAddress, stop the VM, set the right MACAddress, start the VM
             if($MACAddress -and ($vmObj.NetWorkAdapters.MacAddress -notcontains $MACAddress))
@@ -255,9 +258,15 @@ function Set-TargetResource
             {
                 Set-VMNetworkAdapter -VMName $Name -StaticMacAddress $MACAddress
             }
-                
-            Set-VMState -Name $Name -State $State -WaitForIP $WaitForIP
-            Write-Verbose -Message "VM $Name created and is $State"
+            
+            Write-Verbose -Message "VM $Name created"
+
+            if ($State)
+            {
+                Set-VMState -Name $Name -State $State -WaitForIP $WaitForIP
+                Write-Verbose -Message "VM $Name is $State"
+            }
+            
         }
     }
 }
@@ -280,8 +289,9 @@ function Test-TargetResource
         [String]$SwitchName,
 
         # State of the VM
+        [AllowNull()]
         [ValidateSet("Running","Paused","Off")]
-        [String]$State = "Off",
+        [String]$State,
 
         # Folder where the VM data will be stored
         [String]$Path,
