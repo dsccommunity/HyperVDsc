@@ -14,15 +14,19 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $ModuleName = 'MSFT_xVMHyperV'
 Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") -Force;
 
-## Create empty functions to be able to mock the Hyper-V cmdlets
-function Get-VM { }
-function New-VM { }
-function Set-VM { }
-function Stop-VM { }
-function Remove-VM { }
-
 Describe 'xVMHyper-V' {
     InModuleScope $ModuleName {
+
+        ## Create empty functions to be able to mock the missing Hyper-V cmdlets
+        ## CmdletBinding required on Get-VM to support $ErrorActionPreference
+        function Get-VM { [CmdletBinding()] param( [Parameter(ValueFromRemainingArguments)] $Name) }
+        function New-VM { }
+        function Set-VM { }
+        function Stop-VM { }
+        function Remove-VM { }
+        function Get-VMNetworkAdapter { }
+        function Set-VMNetworkAdapter { }
+
         $stubVMDisk = New-Item -Path 'TestDrive:\TestVM.vhdx' -ItemType File;
         $StubVMConfig = New-Item -Path 'TestDrive:\TestVM.xml' -ItemType File;
         $stubVM = @{
@@ -37,7 +41,6 @@ Describe 'xVMHyper-V' {
             MaximumMemory = 4096MB;
             ProcessorCount = 1;
             ID = [System.Guid]::NewGuid().ToString();
-            #Status = 'Running';
             CPUUsage = 10;
             MemoryAssigned = 512MB;
             Uptime = New-TimeSpan -Hours 12;
@@ -52,7 +55,7 @@ Describe 'xVMHyper-V' {
         Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'RunningVM' } -MockWith { $runningVM = $stubVM.Clone(); $runningVM['State'] = 'Running'; return [PSCustomObject] $runningVM; }
         Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'StoppedVM' } -MockWith { $stoppedVM = $stubVM.Clone(); $stoppedVM['State'] = 'Off'; return [PSCustomObject] $stoppedVM; }
         Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'PausedVM' } -MockWith { $pausedVM = $stubVM.Clone(); $pausedVM['State'] = 'Paused'; return [PSCustomObject] $pausedVM; }
-        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'NonexistentVM' } -MockWith { Write-Error 'VM not found'; }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'NonexistentVM' } -MockWith { Write-Error 'VM not found.'; }
         Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'DuplicateVM' } -MockWith { return @([PSCustomObject] $stubVM, [PSCustomObject] $stubVM); }
         Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { return $true; }
         
@@ -141,7 +144,7 @@ Describe 'xVMHyper-V' {
             Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'NewVM' } -MockWith { }
             Mock -CommandName New-VM -MockWith { $newVM = $stubVM.Clone(); $newVM['State'] = 'Off'; return $newVM; }
             Mock -CommandName Set-VM -MockWith { return $true; }
-            Mock -CommandName Stop-VM -MockWith { return $true; } # requires output to be piped to Remove-VM
+            Mock -CommandName Stop-VM -MockWith { return $true; } # requires output to be able to pipe something into Remove-VM
             Mock -CommandName Remove-VM -MockWith { return $true; }
             Mock -CommandName Set-VMNetworkAdapter -MockWith { return $true; }
             Mock -CommandName Get-VMNetworkAdapter -MockWith { return $stubVM.NetworkAdapters.IpAddresses; }
