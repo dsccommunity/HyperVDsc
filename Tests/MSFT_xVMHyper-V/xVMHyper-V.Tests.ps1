@@ -14,6 +14,13 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $ModuleName = 'MSFT_xVMHyperV'
 Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") -Force;
 
+## Create empty functions to be able to mock the Hyper-V cmdlets
+function Get-VM { }
+function New-VM { }
+function Set-VM { }
+function Stop-VM { }
+function Remove-VM { }
+
 Describe 'xVMHyper-V' {
     InModuleScope $ModuleName {
         $stubVMDisk = New-Item -Path 'TestDrive:\TestVM.vhdx' -ItemType File;
@@ -153,7 +160,6 @@ Describe 'xVMHyper-V' {
             }
 
             It 'Creates and starts a VM that does not exist when "Ensure" = "Present" and "State" = "Running"' {
-                #Mock -CommandName Change-VMProperty -MockWith { }
                 Set-TargetResource -Name 'NewVM' -State Running @testParams;
                 Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It;
                 Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It;
