@@ -34,7 +34,7 @@ function Get-TargetResource
         SwitchName       = $vmObj.NetworkAdapters[0].SwitchName
         State            = $vmobj.State
         Path             = $vmobj.Path
-        Generation       = if($vmobj.Generation -eq 1){"Vhd"}else{"Vhdx"}
+        Generation       = $vmobj.Generation
         StartupMemory    = $vmobj.MemoryStartup
         MinimumMemory    = $vmobj.MemoryMinimum
         MaximumMemory    = $vmobj.MemoryMaximum
@@ -75,9 +75,9 @@ function Set-TargetResource
         # Folder where the VM data will be stored
         [String]$Path,
 
-        # Associated Virtual disk format - Vhd or Vhdx
-        [ValidateSet("Vhd","Vhdx")]
-        [String]$Generation = "Vhd",
+        # Virtual machine generation
+        [ValidateRange(1,2)]
+        [UInt32]$Generation = 1,
 
         # Startup RAM for the VM
         [ValidateRange(32MB,17342MB)]
@@ -219,11 +219,11 @@ function Set-TargetResource
             $parameters = @{}
             $parameters["Name"] = $Name
             $parameters["VHDPath"] = $VhdPath
+            $parameters["Generation"] = $Generation
 
             # Optional parameters
             if($SwitchName){$parameters["SwitchName"]=$SwitchName}
             if($Path){$parameters["Path"]=$Path}
-            if($Generation){$parameters["Generation"]=if($Generation -eq "Vhd"){1}else{2}}
             $defaultStartupMemory = 512MB
             if($StartupMemory){$parameters["MemoryStartupBytes"]=$StartupMemory}
             elseif($MinimumMemory -and $defaultStartupMemory -lt $MinimumMemory){$parameters["MemoryStartupBytes"]=$MinimumMemory}
@@ -286,9 +286,9 @@ function Test-TargetResource
         # Folder where the VM data will be stored
         [String]$Path,
 
-        # Associated Virtual disk format - Vhd or Vhdx
-        [ValidateSet("Vhd","Vhdx")]
-        [String]$Generation = "Vhd",
+        # Virtual machine generation
+        [ValidateRange(1,2)]
+        [UInt32]$Generation = 1,
 
         # Startup RAM for the VM
         [ValidateRange(32MB,17342MB)]
@@ -359,10 +359,11 @@ function Test-TargetResource
         Throw "StartupMemory($StartupMemory) should not be greater than MaximumMemory($MaximumMemory)"
     }        
 
-    # Check if the generation matches the VhdPath extenstion
-    if($Generation -and ($VhdPath.Split('.')[-1] -ne $Generation))
+    <#  VM Generation has no direct relation to the virtual hard disk format and cannot be changed
+        after the virtual machine has been created. Generation 2 VMs do not support .VHD files.  #>
+    if(($Generation -eq 2) -and ($VhdPath.Split('.')[-1] -eq 'vhd'))
     {
-        Throw "Generation $geneartion should match virtual disk extension $($VhdPath.Split('.')[-1])"
+        Throw "Generation 2 virtual machines do not support the .VHD virtual disk extension."
     }
 
     # Check if $Path exist
@@ -386,6 +387,7 @@ function Test-TargetResource
             if($state -and ($vmObj.State -ne $State)){return $false}
             if($StartupMemory -and ($vmObj.MemoryStartup -ne $StartupMemory)){return $false}
             if($MACAddress -and ($vmObj.NetWorkAdapters.MacAddress -notcontains $MACAddress)){return $false}
+            if($Generation -ne $vmObj.Generation){return $false}
             if($ProcessorCount -and ($vmObj.ProcessorCount -ne $ProcessorCount)){return $false}
             if($MaximumMemory -and ($vmObj.MemoryMaximum -ne $MaximumMemory)){return $false}
             if($MinimumMemory -and ($vmObj.MemoryMinimum -ne $MinimumMemory)){return $false}
@@ -500,4 +502,3 @@ function Get-VMIPAddress
 #endregion
 
 Export-ModuleMember -Function *-TargetResource
-

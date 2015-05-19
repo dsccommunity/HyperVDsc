@@ -33,7 +33,7 @@ This resource is particularly useful when bootstrapping DSC Configurations into 
 * **SwitchName**: Virtual switch associated with the VM 
 * **State**: State of the VM: { Running | Paused | Off }
 * **Path**: Folder where the VM data will be stored
-* **Generation**: Associated Virtual disk format { Vhd | Vhdx }
+* **Generation**: Virtual machine generaion { 1 | 2 }
 * **StartupMemory**: Startup RAM for the VM 
 * **MinimumMemory**: Minimum RAM for the VM. 
 Setting this property enables dynamic memory.
@@ -44,6 +44,12 @@ Setting this property enables dynamic memory.
 * **WaitForIP**: If specified, waits for the VM to get valid IP address
 * **RestartIfNeeded**: If specified, will shutdown and restart the VM as needed for property changes
 * **Ensure**: Ensures that the VM is Present or Absent
+
+The following xVMHyper-V properties **cannot** be changed after VM creation:
+
+* VhdPath
+* Path
+* Generation
 
 ### xVMSwitch
 
@@ -60,6 +66,11 @@ Setting this property enables dynamic memory.
 Please see the Examples section for more details. 
 
 ## Versions
+
+### Unreleased
+
+* Changed the xVMHyper-V Generation property to a number, untethering it to the virtual disk format.
+It is now possible to created a Generation 1 VM with a VHDX file.
 
 ### 2.3.0
 
@@ -144,7 +155,7 @@ Configuration Sample_EndToEndXHyperV_RunningVM
 
     }
 
-    # create the testVM out of the vhd.
+    # create a Generation 1 testVM out of the vhd.
     xVMHyperV testvm
     {
         Name = "$($name)_vm"
@@ -273,13 +284,13 @@ Configuration Sample_xVMHyperV_Simple
             Name   = 'Hyper-V'
         }
 
-        # Ensures a VM with default settings
+        # Ensures a Generation 1 VM with default settings
         xVMHyperV NewVM
         {
             Ensure     = 'Present'
             Name       = $VMName
             VhdPath    = $VhdPath
-            Generation = $VhdPath.Split('.')[-1]
+            Generation = 1
             DependsOn  = '[WindowsFeature]HyperV'
         }
     }
@@ -324,13 +335,13 @@ Configuration Sample_xVMHyperV_DynamicMemory
             Name   = 'Hyper-V'
         }
 
-        # Ensures a VM with dynamic memory
+        # Ensures a Generation 2 VM with dynamic memory
         xVMHyperV NewVM
         {
             Ensure        = 'Present'
             Name          = $VMName
             VhdPath       = $VhdPath
-            Generation    = $VhdPath.Split('.')[-1]
+            Generation    = 2
             StartupMemory = $StartupMemory
             MinimumMemory = $MinimumMemory
             MaximumMemory = $MaximumMemory
@@ -342,7 +353,7 @@ Configuration Sample_xVMHyperV_DynamicMemory
 
 ### Create a VM with dynamic memory, network interface and processor count for a given VHD
 
-This configuration will create a VM with dynamic memory, network interface and processor count settings, given a VHD, on Hyper-V host.
+This configuration will create a Generation 2 VM with dynamic memory, network interface and processor count settings, given a VHD, on Hyper-V host.
 
 ```powershell
 Configuration Sample_xVMHyperV_Complete
@@ -401,7 +412,7 @@ Configuration Sample_xVMHyperV_Complete
             SwitchName      = $SwitchName
             State           = $State
             Path            = $Path
-            Generation      = $VhdPath.Split('.')[-1]
+            Generation      = 2
             StartupMemory   = $StartupMemory
             MinimumMemory   = $MinimumMemory
             MaximumMemory   = $MaximumMemory
