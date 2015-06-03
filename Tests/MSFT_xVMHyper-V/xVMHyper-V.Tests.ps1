@@ -20,22 +20,25 @@ Describe 'xVMHyper-V' {
         ## Create empty functions to be able to mock the missing Hyper-V cmdlets
         ## CmdletBinding required on Get-VM to support $ErrorActionPreference
         function Get-VM { [CmdletBinding()] param( [Parameter(ValueFromRemainingArguments)] $Name) }
-        function New-VM { }
+        ## Generation parameter is required for the mocking -ParameterFilter to work
+        function New-VM { param ( $Generation) }
         function Set-VM { }
         function Stop-VM { }
         function Remove-VM { }
         function Get-VMNetworkAdapter { }
         function Set-VMNetworkAdapter { }
 
-        $stubVMDisk = New-Item -Path 'TestDrive:\TestVM.vhdx' -ItemType File;
+        $stubVhdxDisk = New-Item -Path 'TestDrive:\TestVM.vhdx' -ItemType File;
+        $stubVhdDisk = New-Item -Path 'TestDrive:\TestVM.vhd' -ItemType File;
         $StubVMConfig = New-Item -Path 'TestDrive:\TestVM.xml' -ItemType File;
         $stubVM = @{
             HardDrives = @(
-                @{ Path = $stubVMDisk.FullName; }
+                @{ Path = $stubVhdxDisk.FullName; }
+                @{ Path = $stubVhdDisk.FullName; }
             );
-            State = 'Running';
+            #State = 'Running';
             Path = $StubVMConfig.FullPath;
-            Generation = 2;
+            Generation = 1;
             MemoryStartup = 512MB;
             MinimumMemory = 128MB;
             MaximumMemory = 4096MB;
@@ -62,18 +65,17 @@ Describe 'xVMHyper-V' {
         Context 'Validates Get-TargetResource Method' {
 
             It 'Returns a hashtable' {
-                $targetResource = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVMDisk.FullName;
+                $targetResource = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
                 $targetResource -is [System.Collections.Hashtable] | Should Be $true;
             }
             It 'Throws when multiple VMs are present' {
-                { Get-TargetResource -Name 'DuplicateVM' -VhdPath $stubVMDisk.FullName } | Should Throw;
+                { Get-TargetResource -Name 'DuplicateVM' -VhdPath $stubVhdxDisk.FullName } | Should Throw;
             }
         } #end context Validates Get-TargetResource Method
 
         Context 'Validates Test-TargetResource Method' {
             $testParams = @{
-                VhdPath = $stubVMDisk.FullName;
-                Generation = 'Vhdx';
+                VhdPath = $stubVhdxDisk.FullName;
             }
 
             It 'Returns a boolean' {
@@ -129,20 +131,47 @@ Describe 'xVMHyper-V' {
                 Test-TargetResource -Name 'StoppedVM' -State Running @testParams | Should Be $false;
             }
 
+            It 'Returns $true when VM .vhd file is specified with a generation 1 VM' {
+                Test-TargetResource -Name 'StoppedVM' -VhdPath $stubVhdDisk -Generation 1 | Should Be $true;
+            }
+
+            It 'Returns $true when VM .vhdx file is specified with a generation 1 VM' {
+                Test-TargetResource -Name 'StoppedVM' -VhdPath $stubVhdxDisk -Generation 1 | Should Be $true;
+            }
+
+            It 'Returns $true when VM .vhdx file is specified with a generation 2 VM' {
+                Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'Generation2VM' } -MockWith {
+                    $generation2VM = $stubVM.Clone();
+                    $generation2VM['Generation'] = 2;
+                    return [PSCustomObject] $generation2VM;
+                }
+                Test-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk -Generation 2 | Should Be $true;
+            }
+
+            It 'Throws when a VM .vhd file is specified with a generation 2 VM' {
+                { Test-TargetResource -Name 'Gen2VM' -VhdPath $stubVhdDisk -Generation 2 } | Should Throw;    
+            }
+
             It 'Throws when Hyper-V Tools are not installed' {
+                ## This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { }
                 { Test-TargetResource -Name 'RunningVM' @testParams } | Should Throw;
             }
+            
         } #end context Validates Test-TargetResource Method
         
         Context 'Validates Set-TargetResource Method' {
             $testParams = @{
-                VhdPath = $stubVMDisk.FullName;
-                Generation = 'Vhdx';
+                VhdPath = $stubVhdxDisk.FullName;
             }
 
             Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'NewVM' } -MockWith { }
-            Mock -CommandName New-VM -MockWith { $newVM = $stubVM.Clone(); $newVM['State'] = 'Off'; return $newVM; }
+            Mock -CommandName New-VM -MockWith {
+                $newVM = $stubVM.Clone();
+                $newVM['State'] = 'Off';
+                $newVM['Generation'] = $Generation;
+                return $newVM;
+            }
             Mock -CommandName Set-VM -MockWith { return $true; }
             Mock -CommandName Stop-VM -MockWith { return $true; } # requires output to be able to pipe something into Remove-VM
             Mock -CommandName Remove-VM -MockWith { return $true; }
@@ -187,6 +216,21 @@ Describe 'xVMHyper-V' {
             It 'Changes VM state when existing VM "State" = "Running" and requested "State" = "Off"' {
                  Set-TargetResource -Name 'RunningVM' -State Off @testParams;
                  Assert-MockCalled -CommandName Set-VMState -Exactly -Times 1 -Scope It;
+            }
+
+            It 'Creates a generation 1 VM by default/when not explicitly specified' {
+                Set-TargetResource -Name 'NewVM' @testParams;
+                Assert-MockCalled -CommandName New-VM -ParameterFilter { $Generation -eq 1 } -Scope It;
+            }
+
+            It 'Creates a generation 1 VM when explicitly specified' {
+                Set-TargetResource -Name 'NewVM' -Generation 1 @testParams;
+                Assert-MockCalled -CommandName New-VM -ParameterFilter { $Generation -eq 1 } -Scope It;
+            }
+
+            It 'Creates a generation 2 VM when explicitly specified' {
+                Set-TargetResource -Name 'NewVM' -Generation 2 @testParams;
+                Assert-MockCalled -CommandName New-VM -ParameterFilter { $Generation -eq 2 } -Scope It;
             }
 
             It 'Throws when Hyper-V Tools are not installed' {
