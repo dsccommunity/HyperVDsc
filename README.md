@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
+﻿[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
 
 # xHyper-V
 
@@ -60,6 +60,9 @@ Setting this property enables dynamic memory.
 Please see the Examples section for more details. 
 
 ## Versions
+
+### 2.4.0.0
+* Fixed VM power state issue in xVMHyperV resource
 
 ### 2.3.0
 
