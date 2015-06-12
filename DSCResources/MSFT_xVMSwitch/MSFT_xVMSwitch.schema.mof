@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0.0"), FriendlyName("xVMSwitch")]
+﻿[ClassVersion("1.0.0.0"), FriendlyName("xVMSwitch")]
 class MSFT_xVMSwitch : OMI_BaseResource
 {
     [Key, Description("Name of the VM Switch")] String Name;
@@ -9,6 +9,3 @@ class MSFT_xVMSwitch : OMI_BaseResource
     [Read, Description("Unique ID for the switch")] String Id;
     [Read, Description("Description of the network interface")] String NetAdapterInterfaceDescription;
 };
-
-
-
