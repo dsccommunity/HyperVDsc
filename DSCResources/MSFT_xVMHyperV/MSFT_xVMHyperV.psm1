@@ -77,8 +77,8 @@ function Set-TargetResource
         [String]$Path,
 
         # Virtual machine generation
-		[ValidateRange(1,2)]
-		[UInt32]$Generation = 1,
+        [ValidateRange(1,2)]
+        [UInt32]$Generation = 1,
 
         # Startup RAM for the VM
         [ValidateRange(32MB,17342MB)]
