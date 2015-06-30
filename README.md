@@ -33,7 +33,7 @@ This resource is particularly useful when bootstrapping DSC Configurations into 
 * **SwitchName**: Virtual switch associated with the VM 
 * **State**: State of the VM: { Running | Paused | Off }
 * **Path**: Folder where the VM data will be stored
-* **Generation**: Virtual machine generaion { 1 | 2 }.
+* **Generation**: Virtual machine generation { 1 | 2 }.
 Generation 2 virtual machines __only__ support VHDX files.
 * **StartupMemory**: Startup RAM for the VM 
 * **MinimumMemory**: Minimum RAM for the VM. 
@@ -69,7 +69,10 @@ Please see the Examples section for more details.
 ## Versions
 
 ### Unreleased
-* Decoupled VM generation from underlying VHD formar in xVMHyperV resourse.
+* Decoupled VM generation from underlying VHD format in xVMHyperV resource.
+ * The initial generation property was tied to the virtual disk format which was incorrect and has been rectified.
+ * __This is a breaking change__ due to the xVMHyperV.Generation property has changing from a String to an Integer.
+ * However, this change will only impact configurations that have previously explicitly specified the VM generation is either "vhd" or "vhdx".
 
 ### 2.4.0.0
 * Fixed VM power state issue in xVMHyperV resource
@@ -289,7 +292,7 @@ Configuration Sample_xVMHyperV_Simple
         {
             Ensure     = 'Present'
             Name       = $VMName
-            VhdPath    = $VhdPathx
+            VhdPath    = $VhdxPath
             Generation = 2
             DependsOn  = '[WindowsFeature]HyperV'
         }
