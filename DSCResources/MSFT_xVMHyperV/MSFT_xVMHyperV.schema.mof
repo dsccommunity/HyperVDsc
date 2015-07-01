@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0"), FriendlyName("xVMHyperV")]
+﻿[ClassVersion("1.0.0"), FriendlyName("xVMHyperV")]
 class MSFT_xVMHyperV : OMI_BaseResource
 {
     [Key, Description("Name of the VM")] String Name;
@@ -6,7 +6,7 @@ class MSFT_xVMHyperV : OMI_BaseResource
     [Write, Description("Virtual switch associated with the VM")] String SwitchName;
     [Write, Description("State of the VM."), ValueMap{"Running","Paused","Off"}, Values{"Running","Paused","Off"}] String State;
     [Write, Description("Folder where the VM data will be stored")] String Path;
-    [Write, Description("Associated Virtual disk format - Vhd or Vhdx"), ValueMap{"Vhd","Vhdx"}, Values{"Vhd","Vhdx"}] String Generation;
+    [Write, Description("Virtual machine generation")] Uint32 String Generation;
     [Write, Description("Startup RAM for the VM.")] Uint64 StartupMemory;
     [Write, Description("Minimum RAM for the VM. This enables dynamic memory.")] Uint64 MinimumMemory;
     [Write, Description("Maximum RAM for the VM. This enable dynamic memory.")] Uint64 MaximumMemory;

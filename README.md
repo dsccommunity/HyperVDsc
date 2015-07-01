@@ -33,7 +33,8 @@ This resource is particularly useful when bootstrapping DSC Configurations into 
 * **SwitchName**: Virtual switch associated with the VM 
 * **State**: State of the VM: { Running | Paused | Off }
 * **Path**: Folder where the VM data will be stored
-* **Generation**: Associated Virtual disk format { Vhd | Vhdx }
+* **Generation**: Virtual machine generation { 1 | 2 }.
+Generation 2 virtual machines __only__ support VHDX files.
 * **StartupMemory**: Startup RAM for the VM 
 * **MinimumMemory**: Minimum RAM for the VM. 
 Setting this property enables dynamic memory.
@@ -44,6 +45,12 @@ Setting this property enables dynamic memory.
 * **WaitForIP**: If specified, waits for the VM to get valid IP address
 * **RestartIfNeeded**: If specified, will shutdown and restart the VM as needed for property changes
 * **Ensure**: Ensures that the VM is Present or Absent
+
+The following xVMHyper-V properties **cannot** be changed after VM creation:
+
+* VhdPath
+* Path
+* Generation
 
 ### xVMSwitch
 
@@ -61,6 +68,12 @@ Please see the Examples section for more details.
 
 ## Versions
 
+### Unreleased
+* Decoupled VM generation from underlying VHD format in xVMHyperV resource.
+ * The initial generation property was tied to the virtual disk format which was incorrect and has been rectified.
+ * __This is a breaking change__ due to the xVMHyperV.Generation property has changing from a String to an Integer.
+ * However, this change will only impact configurations that have previously explicitly specified the VM generation is either "vhd" or "vhdx".
+
 ### 2.4.0.0
 * Fixed VM power state issue in xVMHyperV resource
 
@@ -69,7 +82,6 @@ Please see the Examples section for more details.
 * Fixed check for presence of param AllowManagementOS.
 
 ### 2.2.1
-
 
 ### 2.1
 
@@ -87,7 +99,6 @@ Please see the Examples section for more details.
     - xVhd 
     - xVMHyperV 
     - xVMSwitch  
-
 
 ## Examples
 
@@ -147,7 +158,7 @@ Configuration Sample_EndToEndXHyperV_RunningVM
 
     }
 
-    # create the testVM out of the vhd.
+    # create the generation 1 testVM out of the vhd.
     xVMHyperV testvm
     {
         Name = "$($name)_vm"
@@ -247,9 +258,9 @@ Configuration Sample_xVhd_DiffVHD
 }
 ```
 
-### Create a VM for a given VHD
+### Create a generation 2 VM for a given VHD
 
-This configuration will create a VM, given a VHD, on Hyper-V host.
+This configuration will create a VM, given a VHDX, on Hyper-V host.
 
 ```powershell
 Configuration Sample_xVMHyperV_Simple
@@ -262,7 +273,7 @@ Configuration Sample_xVMHyperV_Simple
         [string]$VMName,
 
         [Parameter(Mandatory)]
-        [string]$VhdPath        
+        [string]$VhdxPath        
     )
 
     Import-DscResource -module xHyper-V
@@ -281,8 +292,8 @@ Configuration Sample_xVMHyperV_Simple
         {
             Ensure     = 'Present'
             Name       = $VMName
-            VhdPath    = $VhdPath
-            Generation = $VhdPath.Split('.')[-1]
+            VhdPath    = $VhdxPath
+            Generation = 2
             DependsOn  = '[WindowsFeature]HyperV'
         }
     }
@@ -305,6 +316,10 @@ Configuration Sample_xVMHyperV_DynamicMemory
 
         [Parameter(Mandatory)]
         [string]$VhdPath,
+
+        [Parameter(Mandatory)]
+        [ValidateSet(1,2)]
+        [unit32]$Generation,
 
         [Parameter(Mandatory)]
         [Uint64]$StartupMemory,
@@ -333,7 +348,7 @@ Configuration Sample_xVMHyperV_DynamicMemory
             Ensure        = 'Present'
             Name          = $VMName
             VhdPath       = $VhdPath
-            Generation    = $VhdPath.Split('.')[-1]
+            Generation    = $Generation
             StartupMemory = $StartupMemory
             MinimumMemory = $MinimumMemory
             MaximumMemory = $MaximumMemory
@@ -359,6 +374,10 @@ Configuration Sample_xVMHyperV_Complete
 
         [Parameter(Mandatory)]
         [string]$VhdPath,
+
+        [Parameter(Mandatory)]
+        [ValidateSet(1,2)]
+        [unit32]$Generation,
 
         [Parameter(Mandatory)]
         [Uint64]$StartupMemory,
@@ -404,7 +423,7 @@ Configuration Sample_xVMHyperV_Complete
             SwitchName      = $SwitchName
             State           = $State
             Path            = $Path
-            Generation      = $VhdPath.Split('.')[-1]
+            Generation      = $Generation
             StartupMemory   = $StartupMemory
             MinimumMemory   = $MinimumMemory
             MaximumMemory   = $MaximumMemory
