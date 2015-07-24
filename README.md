@@ -69,10 +69,12 @@ Please see the Examples section for more details.
 ## Versions
 
 ### Unreleased
+
+### 3.0.0.0
 * Decoupled VM generation from underlying VHD format in xVMHyperV resource.
+ * __Breaking change:__ xVMHyperV resource: Generation property type changed from a String to an Integer.
  * The initial generation property was tied to the virtual disk format which was incorrect and has been rectified.
- * __This is a breaking change__ due to the xVMHyperV.Generation property has changing from a String to an Integer.
- * However, this change will only impact configurations that have previously explicitly specified the VM generation is either "vhd" or "vhdx".
+ * This change will only impact configurations that have previously explicitly specified the VM generation is either "vhd" or "vhdx".
 
 ### 2.4.0.0
 * Fixed VM power state issue in xVMHyperV resource
