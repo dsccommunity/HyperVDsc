@@ -60,9 +60,9 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **AllowManagementOS**: Specify if the VM host has access to the physical NIC
 * **Ensure**: Ensures that the VM Switch is Present or Absent 
 
-### xVhdFileDirectory
+### xVhdFile
 
-* **Vhdpath**: Path to the VHD 
+* **VhdPath**: Path to the VHD 
 * **FileDirectory**: The FileDirectory objects to copy to the VHD (as used in the "File" resource). 
 Please see the Examples section for more details. 
 
