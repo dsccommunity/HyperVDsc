@@ -6,7 +6,7 @@ class MSFT_xVMHyperV : OMI_BaseResource
     [Write, Description("Virtual switch associated with the VM")] String SwitchName;
     [Write, Description("State of the VM."), ValueMap{"Running","Paused","Off"}, Values{"Running","Paused","Off"}] String State;
     [Write, Description("Folder where the VM data will be stored")] String Path;
-    [Write, Description("Virtual machine generation")] Uint32 String Generation;
+    [Write, Description("Virtual machine generation")] Uint32 Generation;
     [Write, Description("Startup RAM for the VM.")] Uint64 StartupMemory;
     [Write, Description("Minimum RAM for the VM. This enables dynamic memory.")] Uint64 MinimumMemory;
     [Write, Description("Maximum RAM for the VM. This enable dynamic memory.")] Uint64 MaximumMemory;
