@@ -386,7 +386,7 @@ function SetVHDFile
     }
     elseif ($PSCmdlet.ParameterSetName -eq 'New')
     {
-        If ($type -eq 'Direcotry')
+        If ($type -eq 'Directory')
         {
             New-Item -Path $destinationPath -ItemType $type
         }
