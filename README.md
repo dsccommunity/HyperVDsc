@@ -70,13 +70,20 @@ Please see the Examples section for more details.
 
 ### Unreleased
 
+### 3.1.0.0
+* xVMHyperV: Fixed bug in mof schema (Generation property had two types)
+* xVhdFileDirectory: Fixed typo in type comparison
+* Readme updates
+
 ### 3.0.0.0
+
 * Decoupled VM generation from underlying VHD format in xVMHyperV resource.
  * __Breaking change:__ xVMHyperV resource: Generation property type changed from a String to an Integer.
  * The initial generation property was tied to the virtual disk format which was incorrect and has been rectified.
  * This change will only impact configurations that have previously explicitly specified the VM generation is either "vhd" or "vhdx".
 
 ### 2.4.0.0
+
 * Fixed VM power state issue in xVMHyperV resource
 
 ### 2.3.0
@@ -91,6 +98,7 @@ Please see the Examples section for more details.
 * Fixed the issue that a manually stopped VM cannot be brought back to running state with DSC
 
 ### 2.0
+
 * Added xVhdFileDirectory Resource
 * Allowed name to be specified with the extension in xVhd (e.g. the Vhd name could either be "sample" or "sample.vhd")
 * When a VHD cannot be removed because it is already being used by another process, an error will be thrown.
