@@ -1,4 +1,4 @@
-﻿[ClassVersion("1.0.0"), FriendlyName("xVMHyperV")]
+[ClassVersion("1.0.0"), FriendlyName("xVMHyperV")]
 class MSFT_xVMHyperV : OMI_BaseResource
 {
     [Key, Description("Name of the VM")] String Name;
