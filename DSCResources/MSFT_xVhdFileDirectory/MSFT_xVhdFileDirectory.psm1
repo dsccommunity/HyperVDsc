@@ -256,7 +256,7 @@ function Test-TargetResource
     }
    
 
-   Write-Verbose "Test retruned $result"
+   Write-Verbose "Test returned $result"
    return $result;
 }
 
