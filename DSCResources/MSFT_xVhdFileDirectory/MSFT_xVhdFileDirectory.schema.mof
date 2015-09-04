@@ -16,7 +16,7 @@ Class MSFT_xFileDirectory
 class MSFT_xVhdFileDirectory : OMI_BaseResource
 {
     [Key, Description("Path to the VHD")] String VhdPath;
-    [Optional, Description("Partition number from VHD")] Int PartitionNumber;
+    [Write, Description("Partition number from VHD")] String PartitionNumber;
     [Required, EmbeddedInstance("MSFT_xFileDirectory"), Description("The FileDirectory objects to copy to the VHD")] String FileDirectory[];
         [Write,ValueMap{"ModifiedDate","SHA-1","SHA-256","SHA-512"},Values{"ModifiedDate","SHA-1","SHA-256","SHA-512"}] string CheckSum;
 };
