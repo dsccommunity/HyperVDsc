@@ -69,6 +69,7 @@ Please see the Examples section for more details.
 ## Versions
 
 ### Unreleased
+* Added partition number optional paramter for xVhdFile
 
 ### 3.1.0.0
 * xVMHyperV: Fixed bug in mof schema (Generation property had two types)

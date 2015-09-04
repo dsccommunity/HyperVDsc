@@ -1,4 +1,3 @@
-
 <#
 #  Get the current configuration of the machine 
 #  This function is called when you do Get-DscConfiguration after the configuration is set.
@@ -17,6 +16,10 @@ function Get-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
 
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $PartitionNumber = "1",
+
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
         $CheckSum = 'ModifiedDate'
@@ -32,35 +35,56 @@ function Get-TargetResource
          }
     }
 
-    # Mount VHD.
+
+    # Mount VHD
     $mountVHD = EnsureVHDState -Mounted -vhdPath $vhdPath
-    
-    $itemsFound = foreach($Item in $FileDirectory)
+
+    try 
     {
-        $item = GetItemToCopy -item $item
-        $mountedDrive =  $mountVHD | Get-Disk | Get-Partition | Get-Volume
-        $letterDrive  = "$($mountedDrive.DriveLetter):\" 
-       
-        # show the drive letters.
-        Get-PSDrive | Write-Verbose       
-
-        $finalPath = Join-Path $letterDrive $item.DestinationPath
+        # Show the drive letters after mount 
+        Write-Verbose "List of PSDrives follow"
+        Get-PSDrive | Write-Verbose
+        Write-Verbose "List of all partitions (selectable with PartitionNumber parameter)"
+        $mountedVHD | Get-Disk | Get-Partition | foreach{"PartitionNumber: {0}; DriveLetter: {1}; Size: {2}; Type: {3}" -f $_.PartitionNumber,$_.DriveLetter, $_.Size, $_.Type} | Write-Verbose
         
-        Write-Verbose "Getting the current value at $finalPath ..."
 
-        if (Test-Path $finalPath)
+
+        $mountedPartition = $mountedVHD | Get-Disk | Get-Partition | Where{$_.PartitionNumber -like $PartitionNumber}
+        if(!$mountedPartition)
         {
-            New-CimInstance -ClassName MSFT_FileDirectoryConfiguration -Property @{DestinationPath = $finalPath; Ensure = "Present"} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+            throw "Partition not found"
         }
-        else
-        {            
-            New-CimInstance -ClassName MSFT_FileDirectoryConfiguration -Property @{DestinationPath = $finalPath ; Ensure = "Absent"} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly    
+        elseif($mountedPartition -and !$mountedPartition.DriveLetter)
+        {
+            throw "Partition has no drive letter"
         }
-   }
-
-    # Dismount VHD.
-    EnsureVHDState -Dismounted -vhdPath $VhdPath 
     
+        $driveLetter  = "$($mountedPartition.DriveLetter):\"
+        Write-Verbose "Working with temporary drive letter $($driveLetter):"
+    
+        $itemsFound = foreach($Item in $FileDirectory)
+        {
+            $item = GetItemToCopy -item $item      
+
+            $finalPath = Join-Path $driveLetter $item.DestinationPath
+        
+            Write-Verbose "Getting the current value at $finalPath ..."
+
+            if (Test-Path $finalPath)
+            {
+                New-CimInstance -ClassName MSFT_FileDirectoryConfiguration -Property @{DestinationPath = $finalPath; Ensure = "Present"} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+            }
+            else
+            {            
+                New-CimInstance -ClassName MSFT_FileDirectoryConfiguration -Property @{DestinationPath = $finalPath ; Ensure = "Absent"} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly    
+            }
+       }
+    } 
+    finally 
+    {
+        # Dismount VHD.
+        EnsureVHDState -Dismounted -vhdPath $VhdPath 
+    }
     # Return the result.
     Return @{
       VhdPath = $VhdPath
@@ -83,6 +107,10 @@ function Set-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
 
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $PartitionNumber = "1",
+
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
         $CheckSum = 'ModifiedDate'
@@ -95,17 +123,29 @@ function Set-TargetResource
 
     try
     {
-            # show the drive letters.
+            # Show the drive letters after mount 
+            Write-Verbose "List of PSDrives follow"
             Get-PSDrive | Write-Verbose
+            Write-Verbose "List of all partitions (selectable with PartitionNumber parameter)"
+            $mountedVHD | Get-Disk | Get-Partition | foreach{"PartitionNumber: {0}; DriveLetter: {1}; Size: {2}; Type: {3}" -f $_.PartitionNumber,$_.DriveLetter, $_.Size, $_.Type} | Write-Verbose
 
-            $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Get-Volume
+            $mountedPartition = $mountedVHD | Get-Disk | Get-Partition | Where{$_.PartitionNumber -like $PartitionNumber}
+            if(!$mountedPartition)
+            {
+                throw "Partition not found"
+            }
+            elseif($mountedPartition -and !$mountedPartition.DriveLetter)
+            {
+                throw "Partition has no drive letter"
+            }
+    
+            $driveLetter  = "$($mountedPartition.DriveLetter):\"
+            Write-Verbose "Working with temporary drive letter $($driveLetter):"
             
             foreach ($item in $FileDirectory)
             {
                 $itemToCopy = GetItemToCopy -item $item
-                $letterDrive = "$($mountedDrive.DriveLetter):\"
-                $finalDestinationPath = $letterDrive
-                $finalDestinationPath = Join-Path  $letterDrive  $itemToCopy.DestinationPath
+                $finalDestinationPath = Join-Path  $driveLetter $itemToCopy.DestinationPath
                
                 # if the destination should be removed 
                 if (-not($itemToCopy.Ensure))
@@ -120,7 +160,7 @@ function Set-TargetResource
                     # Copy Scenario
                     if ($itemToCopy.SourcePath)
                     {
-                        SetVHDFile -sourcePath $itemToCopy.SourcePath  -destinationPath $finalDestinationPath -recurse:($itemToCopy.Recurse) -force:($itemToCopy.Force)
+                        SetVHDFile -sourcePath $itemToCopy.SourcePath -destinationPath $finalDestinationPath -recurse:($itemToCopy.Recurse) -force:($itemToCopy.Force)
                     }
                     elseif ($itemToCopy.Content)
                     {
@@ -166,6 +206,10 @@ function Test-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
 
+        [parameter(Mandatory = $false)]
+        [System.String]
+        $PartitionNumber = "1",
+
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
         $CheckSum = 'ModifiedDate'
@@ -183,11 +227,23 @@ function Test-TargetResource
     try 
     {
         # Show the drive letters after mount 
+        Write-Verbose "List of PSDrives follow"
         Get-PSDrive | Write-Verbose
+        Write-Verbose "List of all partitions (selectable with PartitionNumber parameter)"
+        $mountedVHD | Get-Disk | Get-Partition | foreach{"PartitionNumber: {0}; DriveLetter: {1}; Size: {2}; Type: {3}" -f $_.PartitionNumber,$_.DriveLetter, $_.Size, $_.Type} | Write-Verbose
 
-        $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Get-Volume
-        $letterDrive  = "$($mountedDrive.DriveLetter):\"
-        Write-Verbose $letterDrive
+        $mountedPartition = $mountedVHD | Get-Disk | Get-Partition | Where{$_.PartitionNumber -like $PartitionNumber}
+        if(!$mountedPartition)
+        {
+            throw "Partition not found"
+        }
+        elseif($mountedPartition -and !$mountedPartition.DriveLetter)
+        {
+            throw "Partition has no drive letter"
+        }
+    
+        $driveLetter  = "$($mountedPartition.DriveLetter):\"
+        Write-Verbose "Working with temporary drive letter $($driveLetter):"
 
         # return test result equal to true unless one of the tests in the loop below fails.
         $result = $true
@@ -198,8 +254,7 @@ function Test-TargetResource
             $destination =  $itemToCopy.DestinationPath  
             Write-Verbose ("Testing the file with relative VHD destination $destination")
             $destination =  $itemToCopy.DestinationPath
-            $finalDestinationPath = $letterDrive
-            $finalDestinationPath = Join-Path $letterDrive $destination            
+            $finalDestinationPath = Join-Path $driveLetter $destination            
 
             if (Test-Path $finalDestinationPath) 
             {               
@@ -479,4 +534,3 @@ function ItemHasChanged
 }
 
 Export-ModuleMember -Function *-TargetResource
-
