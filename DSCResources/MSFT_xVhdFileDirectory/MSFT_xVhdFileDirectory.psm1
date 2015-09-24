@@ -52,11 +52,11 @@ function Get-TargetResource
         $mountedPartition = $mountedVHD | Get-Disk | Get-Partition | Where{$_.PartitionNumber -like $PartitionNumber}
         if(!$mountedPartition)
         {
-            throw "Partition not found"
+            New-CimInstance -ClassName MSFT_xVhdFileDirectory -Property @{PartitionNumber = $PartitionNumber; Ensure = "Absent"} -clientOnly 
         }
         elseif($mountedPartition -and !$mountedPartition.DriveLetter)
         {
-            throw "Partition has no drive letter"
+            New-CimInstance -ClassName MSFT_xVhdFileDirectory -Property @{PartitionNumberWithDriveLetter = $PartitionNumber; Ensure = "Absent"} -clientOnly 
         }
     
         $driveLetter  = "$($mountedPartition.DriveLetter):\"
@@ -132,11 +132,11 @@ function Set-TargetResource
             $mountedPartition = $mountedVHD | Get-Disk | Get-Partition | Where{$_.PartitionNumber -like $PartitionNumber}
             if(!$mountedPartition)
             {
-                throw "Partition not found"
+                New-CimInstance -ClassName MSFT_xVhdFileDirectory -Property @{PartitionNumber = $PartitionNumber; Ensure = "Absent"} -clientOnly 
             }
             elseif($mountedPartition -and !$mountedPartition.DriveLetter)
             {
-                throw "Partition has no drive letter"
+                New-CimInstance -ClassName MSFT_xVhdFileDirectory -Property @{PartitionNumberWithDriveLetter = $PartitionNumber; Ensure = "Absent"} -clientOnly 
             }
     
             $driveLetter  = "$($mountedPartition.DriveLetter):\"
@@ -235,11 +235,11 @@ function Test-TargetResource
         $mountedPartition = $mountedVHD | Get-Disk | Get-Partition | Where{$_.PartitionNumber -like $PartitionNumber}
         if(!$mountedPartition)
         {
-            throw "Partition not found"
+            New-CimInstance -ClassName MSFT_xVhdFileDirectory -Property @{PartitionNumber = $PartitionNumber; Ensure = "Absent"} -clientOnly 
         }
         elseif($mountedPartition -and !$mountedPartition.DriveLetter)
         {
-            throw "Partition has no drive letter"
+            New-CimInstance -ClassName MSFT_xVhdFileDirectory -Property @{PartitionNumberWithDriveLetter = $PartitionNumber; Ensure = "Absent"} -clientOnly 
         }
     
         $driveLetter  = "$($mountedPartition.DriveLetter):\"
