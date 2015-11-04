@@ -30,7 +30,7 @@ This resource is particularly useful when bootstrapping DSC Configurations into 
 
 * **Name**: The desired VM name 
 * **VhdPath**: The desired VHD associated with the VM 
-* **SwitchName**: Virtual switch associated with the VM 
+* **SwitchName**: Virtual switch(es) associated with the VM
 * **State**: State of the VM: { Running | Paused | Off }
 * **Path**: Folder where the VM data will be stored
 * **Generation**: Virtual machine generation { 1 | 2 }.
@@ -40,7 +40,7 @@ Generation 2 virtual machines __only__ support VHDX files.
 Setting this property enables dynamic memory.
 * **MaximumMemory**: Maximum RAM for the VM.
 Setting this property enables dynamic memory.
-* **MACAddress**: MAC address of the VM
+* **MACAddress**: MAC address(es) of the VM
 * **ProcessorCount**: Processor count for the VM
 * **WaitForIP**: If specified, waits for the VM to get valid IP address
 * **RestartIfNeeded**: If specified, will shutdown and restart the VM as needed for property changes
@@ -67,6 +67,10 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 Please see the Examples section for more details. 
 
 ## Versions
+
+### Unreleased
+
+* MSFT_xVMHyperV: Changed SwitchName and MACAddress parameters to string[] to support assigning multiple NICs to virtual machines.
 
 ### 3.2.0.0
 
