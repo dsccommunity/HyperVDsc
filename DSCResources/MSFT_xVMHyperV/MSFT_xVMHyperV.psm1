@@ -194,7 +194,7 @@ function Set-TargetResource
             }
 
             ## Set VM network switches. This can be done while the VM is running.
-            for ($i = 1; $i -lt $SwitchName.Count; $i++)
+            for ($i = 0; $i -lt $SwitchName.Count; $i++)
             {
                 $switch = $SwitchName[$i]
                 $nic = $vmObj.NetworkAdapters[$i]
@@ -208,7 +208,7 @@ function Set-TargetResource
                 }
                 else {
                     Write-Verbose -Message "VM $Name NIC $i is not present. Expected $switch, actual <missing>"
-                    if (-not [System.String]::IsNullOrEmpty($MACAddress[$i]))
+                    if ($MACAddress -and (-not [System.String]::IsNullOrEmpty($MACAddress[$i])))
                     {
                         Add-VMNetworkAdapter -VMName $Name -SwitchName $switch -StaticMacAddress $MACAddress[$i]
                         Write-Verbose -Message "VM $Name NIC $i added to the correct switch $switch with MAC address $($MACAddress[$i])."
@@ -224,7 +224,7 @@ function Set-TargetResource
             }
             
             # If the VM does not have the right MACAddress, stop the VM, set the right MACAddress, start the VM
-            for ($i = 1; $i -lt $MACAddress.Count; $i++)
+            for ($i = 0; $i -lt $MACAddress.Count; $i++)
             { 
                 $address = $MACAddress[$i]
                 $nic = $vmObj.NetworkAdapters[$i]
@@ -232,8 +232,6 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message "VM $Name NIC $i does not have correct MACAddress. Expected $address, actual $($nic.MacAddress)"
                     Change-VMMACAddress -Name $Name -NICIndex $i -MACAddress $address -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
-                    #Change-VMProperty -Name $Name -VMCommand "Get-VMNetworkAdapter -VMName $Name | Select -Skip $i | Set-VMNetworkAdapter" -ChangeProperty @{StaticMacAddress=$address} -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
-                    #Write-Verbose -Message "VM $Name NIC $i now has correct MACAddress $address."
                 }
             }
 
@@ -307,7 +305,7 @@ function Set-TargetResource
                     VMName = $Name;
                     SwitchName = $SwitchName[$i];
                 }
-                if (-not [System.String]::IsNullOrEmpty($MACAddress[$i]))
+                if ($MACAddress -and (-not [System.String]::IsNullOrEmpty($MACAddress[$i])))
                 {
                     $addVMNetworkAdapterParams['StaticMacAddress'] = $MACAddress[$i];
                 }
@@ -453,7 +451,7 @@ function Test-TargetResource
             {
                 if ($vmObj.NetworkAdapters[$i].SwitchName -ne $SwitchName[$i])
                 {
-                    Write-Verbose "Network Adapter '$i' is not connected to the correct switch. Expected '$($SwitchName[$i])', actual '$($vmObj.NetworkAdapters[$i].SwitchName)'"
+                    Write-Verbose -Message "Network Adapter '$i' is not connected to the correct switch. Expected '$($SwitchName[$i])', actual '$($vmObj.NetworkAdapters[$i].SwitchName)'"
                     return $false
                 }
             }
@@ -463,7 +461,7 @@ function Test-TargetResource
             { 
                 if ($vmObj.NetworkAdapters[$i].MACAddress -ne $MACAddress[$i])
                 {
-                    Write-Verbose "Network Adapter '$i' MAC address is incorrect. Expected '$($MACAddress[$i])', actual '$($vmObj.NetworkAdapters[$i].MACAddress)'"
+                    Write-Verbose -Message "Network Adapter '$i' MAC address is incorrect. Expected '$($MACAddress[$i])', actual '$($vmObj.NetworkAdapters[$i].MACAddress)'"
                     return $false
                 }
             }
