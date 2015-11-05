@@ -457,9 +457,9 @@ Configuration Sample_xVMHyperV_Complete
 }
 ```
 
-### Create multiple internal virtual switches and connect a VM with multiple NICs.
+### Create VM with multiple NICs.
 
-This configuration will create two virtual switches and create a VM with two network interfaces, one attached to each virtual switch.
+This configuration will create two internal virtual switches and create a VM with two network interfaces, one attached to each virtual switch.
 
 ```powershell
 Configuration Sample_xVMHyperV_MultipleNICs
@@ -499,10 +499,10 @@ Configuration Sample_xVMHyperV_MultipleNICs
         # Create each virtual switch
         foreach ($vmSwitch in $SwitchName)
         {
-            # Remove spaces and hypens from the identifier
+            # Remove spaces and hyphens from the identifier
             $vmSwitchName = $vmSwitch -replace ' ','' -replace '-',''
             # Add the virtual switch dependency
-            $xVMHyperVDependsOn += $vmSwitchName
+            $xVMHyperVDependsOn += "[xVMHyperV]$vmSwitchName"
             
             xVMSwitch $vmSwitchName
             {
