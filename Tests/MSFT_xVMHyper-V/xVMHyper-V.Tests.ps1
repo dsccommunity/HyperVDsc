@@ -154,7 +154,7 @@ Describe 'xVMHyper-V' {
             }
 
             It 'Returns $true when VM .vhdx file is specified with a generation 2 VM' {
-                Mock -CommandName Get-VMSecureBoot -MockWith { return $true; }
+                Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
                 Test-TargetResource -Name 'Generation2VM' -Generation 2 @testParams | Should Be $true;
             }
 
@@ -168,12 +168,12 @@ Describe 'xVMHyper-V' {
             }
 
             It 'Returns $true when SecureBoot is On and requested "SecureBoot" = "$true"' {
-                Mock -CommandName Get-VMSecureBoot -MockWith { return $true; }
+                Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
                 Test-TargetResource -Name 'Generation2VM' -Generation 2 @testParams | Should Be $true;
             }
             
             It 'Returns $false when SecureBoot is On and requested "SecureBoot" = "$false"' {
-                Mock -CommandName Get-VMSecureBoot -MockWith { return $true ; }
+                Mock -CommandName Test-VMSecureBoot -MockWith { return $true ; }
                 Test-TargetResource -Name 'Generation2MV' -SecureBoot $false -Generation 2 @testParams | Should be $false;
             }
 
@@ -265,14 +265,14 @@ Describe 'xVMHyper-V' {
             }
 
             It 'Does call "Change-VMSecureBoot" when creating a generation 2 VM' {
-                Mock -CommandName Get-VMSecureBoot -MockWith { return $true; }
+                Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
                 Mock -CommandName Change-VMSecureBoot -MockWith { }
                 Set-TargetResource -Name 'RunningVM' -Generation 2 -SecureBoot $false @testParams;
                 Assert-MockCalled -CommandName Change-VMSecureBoot -Exactly 1 -Scope It;
             }
 
             It 'Does not change Secure Boot for generation 1 VM' {
-                Mock -CommandName Get-VMSecureBoot -MockWith { return $true; }
+                Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
                 Mock -CommandName Change-VMSecureBoot -MockWith { }
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $true @testParams;
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $false @testParams;
@@ -280,14 +280,14 @@ Describe 'xVMHyper-V' {
             }
 
             It 'Does not change Secure Boot for generation 2 VM with VM "SecureBoot" match' {
-                Mock -CommandName Get-VMSecureBoot -MockWith { return $true; }
+                Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
                 Mock -CommandName Change-VMSecureBoot -MockWith { }
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $true -Generation 2 @testParams;
                 Assert-MockCalled -CommandName Change-VMSecureBoot -Exactly -Times 0 -Scope It;
             }
 
             It 'Does change Secure Boot for generation 2 VM with VM "SecureBoot" mismatch' {
-                Mock -CommandName Get-VMSecureBoot -MockWith { return $false; }
+                Mock -CommandName Test-VMSecureBoot -MockWith { return $false; }
                 Mock -CommandName Change-VMSecureBoot -MockWith { }
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $true -Generation 2 @testParams;
                 Assert-MockCalled -CommandName Change-VMSecureBoot -Exactly -Times 1 -Scope It;
@@ -300,21 +300,21 @@ Describe 'xVMHyper-V' {
         
         } #end context Validates Set-TargetResource Method
         
-        Context 'Validates Get-VMSecureBoot Method' {
+        Context 'Validates Test-VMSecureBoot Method' {
         
             It 'Returns $true when "SecureBoot" = "On"' {
                 Mock -CommandName Get-VM -MockWith { }
                 Mock -CommandName Get-VMFirmware -MockWith { return [PSCustomObject] @{ SecureBoot = 'On' }; }
-                Get-VMSecureBoot -Name 'TestVM' | Should Be $true;
+                Test-VMSecureBoot -Name 'TestVM' | Should Be $true;
             }
         
             It 'Returns $false when "SecureBoot" = "Off"' {
                 Mock -CommandName Get-VM -MockWith { }
                 Mock -CommandName Get-VMFirmware -MockWith { return [PSCustomObject] @{ SecureBoot = 'Off' }; }
-                Get-VMSecureBoot -Name 'TestVM' | Should Be $false;
+                Test-VMSecureBoot -Name 'TestVM' | Should Be $false;
             }
         
-        } #end context Validates Get-VMSecureBoot Method
+        } #end context Validates Test-VMSecureBoot Method
         
         Context 'Validates Change-VMSecureBoot Method' {
         

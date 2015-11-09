@@ -27,8 +27,10 @@ function Get-TargetResource
        Throw "More than one VM with the name $Name exist." 
     }
     
+    
     $vmSecureBootState = $false;
     if ($vmobj.Generation -eq 2) {
+       # Retrieve secure boot status (can only be enabled on Generation 2 VMs) and convert to a boolean.
        $vmSecureBootState = ($vmobj | Get-VMFirmware).SecureBoot -eq 'On'
     } 
     
@@ -210,10 +212,12 @@ function Set-TargetResource
 
             if ($Generation -eq 2)
             {
-                $vmSecureBoot = Get-VMSecureBoot -Name $Name
+                ## Retrive the current secure boot state
+                $vmSecureBoot = Test-VMSecureBoot -Name $Name
                 if ($SecureBoot -ne $vmSecureBoot)
                 {
                     Write-Verbose -Message "VM $Name secure boot is incorrect. Expected $SecureBoot, actual $vmSecureBoot"
+                    ## Cannot change the secure boot state whilst the VM is powered on.
                     Change-VMSecureBoot -Name $Name -SecureBoot $SecureBoot -RestartIfNeeded $RestartIfNeeded
                     Write-Verbose -Message "VM $Name secure boot is now correct."
                 }
@@ -279,6 +283,8 @@ function Set-TargetResource
             }
 
             if ($Generation -eq 2) {
+                # Secure boot is only applicable to Generation 2 VMs and it defaults to on.
+                # Therefore, we only need to explicitly set it to off if specified.
                 if ($SecureBoot -eq $false)
                 {
                     Set-VMFirmware -VMName $Name -EnableSecureBoot Off
@@ -433,7 +439,7 @@ function Test-TargetResource
             if($MinimumMemory -and ($vmObj.MemoryMinimum -ne $MinimumMemory)){return $false}
 
             if($vmObj.Generation -eq 2) {
-                if ($SecureBoot -ne (Get-VMSecureBoot -Name $Name)){return $false}
+                if ($SecureBoot -ne (Test-VMSecureBoot -Name $Name)){return $false}
             }
 
             return $true
@@ -528,6 +534,8 @@ function Change-VMProperty
     }
 }
 
+# The 'Change-VMProperty' method cannot be used as it's hard-coded to use the -Name
+# parameter and unfortunately, the Set-VMFirmware cmdlet uses the -VMName parameter instead!
 function Change-VMSecureBoot
 {
     param
@@ -583,7 +591,7 @@ function Change-VMSecureBoot
     }
 }
 
-function Get-VMSecureBoot
+function Test-VMSecureBoot
 {
     param (
         [Parameter(Mandatory)]
