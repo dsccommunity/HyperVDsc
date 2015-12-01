@@ -73,7 +73,7 @@ function Set-TargetResource
             Write-Verbose -Message "Checking switch $Name NetAdapterInterface and BandwidthReservationMode ..."
             if(((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription) -or ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
             {
-                Write-Verbose -Message "Removing switch $Name and creating with right netadapter and BandwidthReservationMode ..."
+                Write-Verbose -Message "Removing switch $Name and creating with the correct properties ..."
                 $switch | Remove-VMSwitch -Force
                 $parameters = @{}
                 $parameters["Name"] = $Name
