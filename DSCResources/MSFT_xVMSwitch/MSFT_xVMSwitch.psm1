@@ -26,6 +26,7 @@ function Get-TargetResource
         NetAdapterName    = $( if($switch.NetAdapterInterfaceDescription){
                               (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription).Name})
         AllowManagementOS = $switch.AllowManagementOS
+        BandwidthReservationMode = $switch.BandwidthReservationMode
         Ensure            = if($switch){'Present'}else{'Absent'}
         Id                = $switch.Id
         NetAdapterInterfaceDescription = $switch.NetAdapterInterfaceDescription
@@ -50,6 +51,9 @@ function Set-TargetResource
 
         [Boolean]$AllowManagementOS,
 
+        [ValidateSet("Default","Weight","Absolute","None")]
+        [String]$BandwidthReservationMode = "Absolute",
+
         [ValidateSet("Present","Absent")]
         [String]$Ensure = "Present"
     )
@@ -66,21 +70,22 @@ function Set-TargetResource
         # If switch is present and it is external type, that means it doesn't have right properties (TEST code ensures that)
         if($switch -and ($switch.SwitchType -eq 'External'))
         {
-            Write-Verbose -Message "Checking switch $Name NetAdapterInterface ..."
-            if((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+            Write-Verbose -Message "Checking switch $Name NetAdapterInterface and BandwidthReservationMode ..."
+            if(((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription) -or ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
             {
-                Write-Verbose -Message "Removing switch $Name and creating with right netadapter ..."
+                Write-Verbose -Message "Removing switch $Name and creating with right netadapter and BandwidthReservationMode ..."
                 $switch | Remove-VMSwitch -Force
                 $parameters = @{}
                 $parameters["Name"] = $Name
                 $parameters["NetAdapterName"] = $NetAdapterName
+                $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
                 if($PSBoundParameters.ContainsKey("AllowManagementOS")){$parameters["AllowManagementOS"]=$AllowManagementOS}
                 $null = New-VMSwitch @parameters
                 Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
             }
             else
             {
-                Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
+                Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName and BandwidthReservationMode $BandwidthReservationMode"
             }
 
             Write-Verbose -Message "Checking switch $Name AllowManagementOS ..."
@@ -103,6 +108,7 @@ function Set-TargetResource
             Write-Verbose -Message "Creating Switch ..."
             $parameters = @{}
             $parameters["Name"] = $Name
+            $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
             if($NetAdapterName)
             {
                 $parameters["NetAdapterName"] = $NetAdapterName
@@ -146,6 +152,9 @@ function Test-TargetResource
 
         [Boolean]$AllowManagementOS,
 
+        [ValidateSet("Default","Weight","Absolute","None")]
+        [String]$BandwidthReservationMode = "Absolute",
+
         [ValidateSet("Present","Absent")]
         [String]$Ensure = "Present"
     )
@@ -183,36 +192,47 @@ function Test-TargetResource
             # If switch should be present, check the switch type
             if($Ensure -eq 'Present')
             {
-                # If switch is the external type, check additional propeties
-                if($switch.SwitchType -eq 'External')
+                #If the BandwidthReservsationMode is correct
+                Write-Verbose -Message "Checking if Switch $Name has correct BandwidthReservationMode ..."
+                if($switch.BandwidthReservationMode -eq $BandwidthReservationMode)
                 {
-                    Write-Verbose -Message "Checking if Switch $Name has correct NetAdapterInterface ..."
-                    if((Get-NetAdapter -Name $NetAdapterName -ErrorAction SilentlyContinue).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+                    Write-Verbose -Message "Switch $Name has correct BandwidthReservationMode"
+
+                    # If switch is the external type, check additional propeties
+                    if($switch.SwitchType -eq 'External')
                     {
-                        return $false
-                    }
-                    else
-                    {
-                        Write-Verbose -Message "Switch $Name has correct NetAdapterInterface"
-                    }
-                    
-                    if($PSBoundParameters.ContainsKey("AllowManagementOS"))
-                    {
-                        Write-Verbose -Message "Checking if Switch $Name has AllowManagementOS set correctly..."
-                        if(($switch.AllowManagementOS -ne $AllowManagementOS))
+                        Write-Verbose -Message "Checking if Switch $Name has correct NetAdapterInterface ..."
+                        if((Get-NetAdapter -Name $NetAdapterName -ErrorAction SilentlyContinue).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
                         {
                             return $false
                         }
                         else
                         {
-                            Write-Verbose -Message "Switch $Name has AllowManagementOS set correctly"
+                            Write-Verbose -Message "Switch $Name has correct NetAdapterInterface"
                         }
+                    
+                        if($PSBoundParameters.ContainsKey("AllowManagementOS"))
+                        {
+                            Write-Verbose -Message "Checking if Switch $Name has AllowManagementOS set correctly..."
+                            if(($switch.AllowManagementOS -ne $AllowManagementOS))
+                            {
+                                return $false
+                            }
+                            else
+                            {
+                                Write-Verbose -Message "Switch $Name has AllowManagementOS set correctly"
+                            }
+                        }
+                        return $true
                     }
-                    return $true
+                    else
+                    {
+                        return $true
+                    }
                 }
                 else
                 {
-                    return $true
+                    return $false
                 }
             }
             # If switch should be absent, but is there, return $false
