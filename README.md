@@ -1,4 +1,4 @@
-﻿[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
 
 # xHyper-V
 
@@ -58,6 +58,7 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **Type**: The desired type of switch: { External | Internal | Private }
 * **NetAdapterName**: Network adapter name for external switch type
 * **AllowManagementOS**: Specify if the VM host has access to the physical NIC
+* **BandwidthReservationMode**: Specify the QoS mode used (options other than NA only supported by Hyper-V 2012+): { Default | Weight | Absolute | None | NA }.
 * **Ensure**: Ensures that the VM Switch is Present or Absent 
 
 ### xVhdFile
