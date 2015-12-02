@@ -57,8 +57,8 @@ function Set-TargetResource
 
         [Boolean]$AllowManagementOS,
 
-        [ValidateSet("Default","Weight","Absolute","None",$null)]
-        [String]$BandwidthReservationMode = $null,
+        [ValidateSet("Default","Weight","Absolute","None","NA")]
+        [String]$BandwidthReservationMode = "NA",
 
         [ValidateSet("Present","Absent")]
         [String]$Ensure = "Present"
@@ -84,7 +84,7 @@ function Set-TargetResource
                 Write-Verbose -Message "The switch $Name NetAdapterInterface is incorrect ..."
                 $removeReaddSwitch = $true
             }
-            elseif($BandwidthReservationMode -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
+            elseif(($BandwidthReservationMode -ne "NA") -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
             {
                 Write-Verbose -Message "The switch $Name BandwidthReservationMode is incorrect ..."
                 $removeReaddSwitch = $true
@@ -97,7 +97,7 @@ function Set-TargetResource
                 $parameters = @{}
                 $parameters["Name"] = $Name
                 $parameters["NetAdapterName"] = $NetAdapterName
-                if($BandwidthReservationMode -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -ge 6.2.0))
+                if(($BandwidthReservationMode -ne "NA") -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -ge 6.2.0))
                 {
                     $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
                 }
@@ -105,6 +105,8 @@ function Set-TargetResource
                 if($PSBoundParameters.ContainsKey("AllowManagementOS")){$parameters["AllowManagementOS"]=$AllowManagementOS}
                 $null = New-VMSwitch @parameters
                 Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
+                # Since the switch is recreated, the $switch variable is stale and needs to be reassigned
+                $switch = (Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue)
             }
             else
             {
@@ -132,7 +134,7 @@ function Set-TargetResource
             $parameters = @{}
             $parameters["Name"] = $Name
 
-            if($BandwidthReservationMode -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -ge 6.2.0))
+            if(($BandwidthReservationMode -ne "NA") -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -ge 6.2.0))
             {
                 $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
             }
@@ -180,8 +182,8 @@ function Test-TargetResource
 
         [Boolean]$AllowManagementOS,
 
-        [ValidateSet("Default","Weight","Absolute","None",$null)]
-        [String]$BandwidthReservationMode = $null,
+        [ValidateSet("Default","Weight","Absolute","None","NA")]
+        [String]$BandwidthReservationMode = "NA",
 
         [ValidateSet("Present","Absent")]
         [String]$Ensure = "Present"
@@ -206,7 +208,7 @@ function Test-TargetResource
         Throw "For Internal or Private switch type, NetAdapterName should not be specified"
     }
 
-    If($BandwidthReservationMode -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt 6.2.0))
+    If(($BandwidthReservationMode -ne "NA") -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt 6.2.0))
     {
         Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
     }
