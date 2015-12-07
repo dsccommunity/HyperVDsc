@@ -9,7 +9,7 @@ configuration Sample_xVHD_MissingPropertyVHD
         [string]$Path,
                 
         [ValidateSet(1,2)]
-        [Uint32 ]$Generation = 1,
+        [Uint32]$Generation = 1,
 
         [ValidateSet("Present","Absent")]
         [string]$Ensure = "Present"    

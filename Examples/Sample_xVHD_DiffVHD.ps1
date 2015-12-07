@@ -14,7 +14,7 @@ configuration Sample_xVhd_DiffVhd
         [string]$ParentPath,
         
         [ValidateSet(1,2)]
-        [Uint32 ]$Generation = 1,
+        [Uint32]$Generation = 1,
 
         [ValidateSet("Present","Absent")]
         [string]$Ensure = "Present"    

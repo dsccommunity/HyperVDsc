@@ -14,7 +14,7 @@ configuration Sample_xVHD_NewVhd
         [Uint64]$MaximumSizeBytes,
 
         [ValidateSet(1,2)]
-        [Uint32 ]$Generation = 1,
+        [Uint32]$Generation = 1,
 
         [ValidateSet("Present","Absent")]
         [string]$Ensure = "Present"        
