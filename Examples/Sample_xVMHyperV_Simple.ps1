@@ -28,7 +28,7 @@ configuration Sample_xVMHyperV_Simple
             Ensure    = 'Present'
             Name      = $VMName
             VhdPath   = $VhdPath
-            Generation = $VhdPath.Split('.')[-1]
+            Generation = 1
             DependsOn = '[WindowsFeature]HyperV'
         }
     }

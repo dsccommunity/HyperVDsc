@@ -37,7 +37,7 @@ configuration Sample_xVMHyperV_DynamicMemory
             Ensure        = 'Present'
             Name          = $VMName
             VhdPath       = $VhdPath
-            Generation    = $VhdPath.Split('.')[-1]
+            Generation    = 1
             StartupMemory = $StartupMemory
             MinimumMemory = $MinimumMemory
             MaximumMemory = $MaximumMemory
