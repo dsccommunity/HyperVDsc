@@ -68,6 +68,10 @@ Please see the Examples section for more details.
 
 ## Versions
 
+### Unreleased
+
+-  Fixed drive letter when mounting VHD when calling resource xVhdFile. Fixes #20.
+
 ### 3.2.0.0
 
 * Added data type System.String to CheckSum parameter of Get/Set/Test-TargetResource functions and aligned indentation.
