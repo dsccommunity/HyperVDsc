@@ -5,6 +5,7 @@ class MSFT_xVMSwitch : OMI_BaseResource
     [Key, Description("Type of switch"), ValueMap{"External","Internal","Private"}, Values{"External","Internal","Private"}] String Type;
     [Write, Description("Network adapter name for external switch type")] String NetAdapterName;
     [Write, Description("Specify is the VM host has access to the physical NIC")] Boolean AllowManagementOS;
+    [Write, Description("Specifies how minimum bandwidth is to be configured on the virtual switch"), ValueMap{"Absolute","None","Weight"}, Values{"Absolute","None","Weight"}] String MinimumBandwidthMode;
     [Write, Description("Whether switch should be present or absent"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
     [Read, Description("Unique ID for the switch")] String Id;
     [Read, Description("Description of the network interface")] String NetAdapterInterfaceDescription;
