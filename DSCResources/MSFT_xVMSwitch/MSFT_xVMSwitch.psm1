@@ -26,6 +26,7 @@ function Get-TargetResource
         NetAdapterName    = $( if($switch.NetAdapterInterfaceDescription){
                               (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription).Name})
         AllowManagementOS = $switch.AllowManagementOS
+        MinimumBandwidthMode = $switch.BandwidthReservationMode
         Ensure            = if($switch){'Present'}else{'Absent'}
         Id                = $switch.Id
         NetAdapterInterfaceDescription = $switch.NetAdapterInterfaceDescription
@@ -50,6 +51,9 @@ function Set-TargetResource
 
         [Boolean]$AllowManagementOS,
 
+        [ValidateSet("Absolute","None","Weight")]
+        [String]$MinimumBandwidthMode,
+
         [ValidateSet("Present","Absent")]
         [String]$Ensure = "Present"
     )
@@ -63,37 +67,70 @@ function Set-TargetResource
     {
         $switch = (Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue)
 
-        # If switch is present and it is external type, that means it doesn't have right properties (TEST code ensures that)
-        if($switch -and ($switch.SwitchType -eq 'External'))
+        # If switch is present that means it doesn't have right properties (TEST code ensures that)
+        if($switch)
         {
-            Write-Verbose -Message "Checking switch $Name NetAdapterInterface ..."
-            if((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+            # If SwitchType is External checking additional settings
+            if($switch.SwitchType -eq 'External')
             {
-                Write-Verbose -Message "Removing switch $Name and creating with right netadapter ..."
+                Write-Verbose -Message "Checking switch $Name NetAdapterInterface ..."
+                if((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+                {
+                    Write-Verbose -Message "Removing switch $Name and creating with right netadapter ..."
+                    $switch | Remove-VMSwitch -Force
+                    $parameters = @{}
+                    $parameters["Name"] = $Name
+                    $parameters["NetAdapterName"] = $NetAdapterName
+                    if($PSBoundParameters.ContainsKey("AllowManagementOS")){$parameters["AllowManagementOS"]=$AllowManagementOS}
+                    if($PSBoundParameters.ContainsKey("MinimumBandwidthMode")){$parameters["MinimumBandwidthMode"] = $MinimumBandwidthMode}
+                    $null = New-VMSwitch @parameters
+                    Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
+                }
+                else
+                {
+                    Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
+                }
+
+                Write-Verbose -Message "Checking switch $Name AllowManagementOS ..."
+                if($PSBoundParameters.ContainsKey("AllowManagementOS") -and ($switch.AllowManagementOS -ne $AllowManagementOS))
+                {
+                    Write-Verbose -Message "Switch $Name AllowManagementOS property is not correct"
+                    $switch | Set-VMSwitch -AllowManagementOS $AllowManagementOS
+                    Write-Verbose -Message "Switch $Name AllowManagementOS property is set to $AllowManagementOS"
+                }
+                else
+                {
+                    Write-Verbose -Message "Switch $Name AllowManagementOS is correctly set"
+                }
+            }
+
+            # If MinimumBandwidthMode is specified check the setting
+            Write-Verbose -Message "Checking MinimumBandwidthMode of switch $Name..."
+            if(($PSBoundParameters.ContainsKey("MinimumBandwidthMode")) -and ($switch.BandwidthReservationMode -ne $MinimumBandwidthMode))
+            {
+                Write-Verbose -Message "The switch $Name has set the wrong MinimumBandwidthMode. Removing switch $Name and recreating with right MinimumBandwidthMode setting ($MinimumBandwidthMode)..."
                 $switch | Remove-VMSwitch -Force
                 $parameters = @{}
                 $parameters["Name"] = $Name
-                $parameters["NetAdapterName"] = $NetAdapterName
-                if($PSBoundParameters.ContainsKey("AllowManagementOS")){$parameters["AllowManagementOS"]=$AllowManagementOS}
+                if($Type -eq "External")
+                {
+                    $parameters["NetAdapterName"] = $NetAdapterName
+                    if($PSBoundParameters.ContainsKey("AllowManagementOS")){$parameters["AllowManagementOS"]=$AllowManagementOS}                    
+                }
+                else
+                {
+                    $parameters["SwitchType"] = $Type
+                } 
+                if($PSBoundParameters.ContainsKey("MinimumBandwidthMode")){$parameters["MinimumBandwidthMode"] = $MinimumBandwidthMode}
                 $null = New-VMSwitch @parameters
-                Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
-            }
-            else
-            {
-                Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
-            }
 
-            Write-Verbose -Message "Checking switch $Name AllowManagementOS ..."
-            if($PSBoundParameters.ContainsKey("AllowManagementOS") -and ($switch.AllowManagementOS -ne $AllowManagementOS))
-            {
-                Write-Verbose -Message "Switch $Name AllowManagementOS property is not correct"
-                $switch | Set-VMSwitch -AllowManagementOS $AllowManagementOS
-                Write-Verbose -Message "Switch $Name AllowManagementOS property is set to $AllowManagementOS"
             }
             else
             {
-                Write-Verbose -Message "Switch $Name AllowManagementOS is correctly set"
+                Write-Verbose "Switch $Name has MinimumBandwidthMode set right"
+
             }
+                
         }
 
         # If the switch is not present, create one
@@ -103,6 +140,12 @@ function Set-TargetResource
             Write-Verbose -Message "Creating Switch ..."
             $parameters = @{}
             $parameters["Name"] = $Name
+            
+            if($PSBoundParameters.ContainsKey("MinimumBandwidthMode"))
+            {
+                $parameters["MinimumBandwidthMode"] = $MinimumBandwidthMode
+            }
+            
             if($NetAdapterName)
             {
                 $parameters["NetAdapterName"] = $NetAdapterName
@@ -146,6 +189,9 @@ function Test-TargetResource
 
         [Boolean]$AllowManagementOS,
 
+        [ValidateSet("Absolute","None","Weight")]
+        [String]$MinimumBandwidthMode,
+
         [ValidateSet("Present","Absent")]
         [String]$Ensure = "Present"
     )
@@ -170,11 +216,11 @@ function Test-TargetResource
     }  
     #endregion
 
-    try
-    {
+    #try
+    #{
         # Check if switch exists
         Write-Verbose -Message "Checking if Switch $Name is $Ensure ..."
-        $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction Stop
+        $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue
 
         # If switch exists
         if($switch)
@@ -208,12 +254,25 @@ function Test-TargetResource
                             Write-Verbose -Message "Switch $Name has AllowManagementOS set correctly"
                         }
                     }
-                    return $true
                 }
-                else
+
+                # Check bandwidth reservation mode of the switch
+                if($PSBoundParameters.ContainsKey("MinimumBandwidthMode"))
                 {
-                    return $true
+                    Write-Verbose -Message "Checking if Switch $Name has MinimumBandwidthMode set correctly..."
+                    if($switch.BandwidthReservationMode -ne $MinimumBandwidthMode)
+                    {
+                        return $false
+                    }
+                    else
+                    {
+                        Write-Verbose -Message "Switch $Name has set MinimumBandwidthMode set correctly"
+                    }
+
                 }
+
+                return $true
+
             }
             # If switch should be absent, but is there, return $false
             else
@@ -221,14 +280,18 @@ function Test-TargetResource
                 return $false
             }
         }
-    }
+        else
+        {
+            Write-Verbose -Message "Switch $Name is not Present"
+            return ($Ensure -eq 'Absent')
+        }
+
+    #}
 
     # If no switch was present
-    catch [System.Management.Automation.ActionPreferenceStopException]
-    {
-        Write-Verbose -Message "Switch $Name is not Present"
-        return ($Ensure -eq 'Absent')
-    }
+    #catch [System.Management.Automation.ActionPreferenceStopException]
+    #{
+    #}
 }
 
 Export-ModuleMember -Function *-TargetResource
