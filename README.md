@@ -72,6 +72,7 @@ Please see the Examples section for more details.
 
 ### Unreleased
 
+-  Fixed drive letter when mounting VHD when calling resource xVhdFile. Fixes #20.
 * MSFT_xVMHyperV: Changed the SwitchName parameter to string[] to support assigning multiple NICs to virtual machines.
 * MSFT_xVMHyperV: Changed the MACAddress parameter to string[] to support assigning multiple MAC addresses to virtual machines.
 
