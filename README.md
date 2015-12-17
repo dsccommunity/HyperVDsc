@@ -73,6 +73,7 @@ Please see the Examples section for more details.
 ### Unreleased
 
 * xHyperV: Added SecureBoot parameter to enable control of the secure boot BIOS setting on generation 2 VMs.
+-  Fixed drive letter when mounting VHD when calling resource xVhdFile. Fixes #20.
 
 ### 3.2.0.0
 
