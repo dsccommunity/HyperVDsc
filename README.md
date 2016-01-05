@@ -35,6 +35,8 @@ This resource is particularly useful when bootstrapping DSC Configurations into 
 * **Path**: Folder where the VM data will be stored
 * **Generation**: Virtual machine generation { 1 | 2 }.
 Generation 2 virtual machines __only__ support VHDX files.
+* **SecureBoot**: Enables or disables secure boot __only on generation 2 virtual machines__.
+If not specified, it defaults to True.
 * **StartupMemory**: Startup RAM for the VM 
 * **MinimumMemory**: Minimum RAM for the VM. 
 Setting this property enables dynamic memory.
@@ -70,6 +72,7 @@ Please see the Examples section for more details.
 
 ### Unreleased
 
+* xHyperV: Added SecureBoot parameter to enable control of the secure boot BIOS setting on generation 2 VMs.
 -  Fixed drive letter when mounting VHD when calling resource xVhdFile. Fixes #20.
 
 ### 3.2.0.0
@@ -275,7 +278,7 @@ Configuration Sample_xVhd_DiffVHD
 }
 ```
 
-### Create a generation 2 VM for a given VHD
+### Create a secure boot generation 2 VM for a given VHD
 
 This configuration will create a VM, given a VHDX, on Hyper-V host.
 
@@ -290,7 +293,7 @@ Configuration Sample_xVMHyperV_Simple
         [string]$VMName,
 
         [Parameter(Mandatory)]
-        [string]$VhdxPath        
+        [string]$VhdxPath    
     )
 
     Import-DscResource -module xHyper-V
@@ -320,6 +323,7 @@ Configuration Sample_xVMHyperV_Simple
 ### Create a VM with dynamic memory for a given VHD
 
 This configuration will create a VM with dynamic memory settings, given a VHD, on Hyper-V host.
+If not specified, Secure Boot will be enabled by default for generation 2 VMs.
 
 ```powershell
 Configuration Sample_xVMHyperV_DynamicMemory
@@ -345,7 +349,10 @@ Configuration Sample_xVMHyperV_DynamicMemory
         [Uint64]$MinimumMemory,
 
         [Parameter(Mandatory)]
-        [Uint64]$MaximumMemory
+        [Uint64]$MaximumMemory,
+        
+        [Parameter()]
+        [Boolean]$SecureBoot = $true  
     )
 
     Import-DscResource -module xHyper-V
@@ -366,6 +373,7 @@ Configuration Sample_xVMHyperV_DynamicMemory
             Name          = $VMName
             VhdPath       = $VhdPath
             Generation    = $Generation
+            SecureBoot    = $SecureBoot
             StartupMemory = $StartupMemory
             MinimumMemory = $MinimumMemory
             MaximumMemory = $MaximumMemory
@@ -416,6 +424,9 @@ Configuration Sample_xVMHyperV_Complete
 
         [ValidateSet('Off','Paused','Running')]
         [String]$State = 'Off',
+        
+        [Parameter()]
+        [Boolean]$SecureBoot = $true,
 
         [Switch]$WaitForIP
     )
@@ -441,6 +452,7 @@ Configuration Sample_xVMHyperV_Complete
             State           = $State
             Path            = $Path
             Generation      = $Generation
+            SecureBoot      = $SecureBoot
             StartupMemory   = $StartupMemory
             MinimumMemory   = $MinimumMemory
             MaximumMemory   = $MaximumMemory
