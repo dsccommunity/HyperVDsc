@@ -27,6 +27,7 @@ Describe 'xVMHyper-V' {
         function Remove-VM { }
         function Get-VMNetworkAdapter { }
         function Set-VMNetworkAdapter { }
+        function Add-VMNetworkAdapter { }
         function Connect-VMNetworkAdapter { param ( $SwitchName ) }
         function Get-VMFirmware { }
         function Set-VMFirmware { }
