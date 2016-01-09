@@ -60,6 +60,7 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **Type**: The desired type of switch: { External | Internal | Private }
 * **NetAdapterName**: Network adapter name for external switch type
 * **AllowManagementOS**: Specify if the VM host has access to the physical NIC
+* **MinimumBandwidthMode**: Specifies how minimum bandwidth is to be configured on the virtual switch: {Absolute | None | Weight}
 * **Ensure**: Ensures that the VM Switch is Present or Absent 
 
 ### xVhdFile
@@ -74,6 +75,7 @@ Please see the Examples section for more details.
 
 * xHyperV: Added SecureBoot parameter to enable control of the secure boot BIOS setting on generation 2 VMs.
 -  Fixed drive letter when mounting VHD when calling resource xVhdFile. Fixes #20.
+-  xVMSwitch: Added support for MinimumBandwidthMode setting. (Important for converged networking configuration of Hyper-V hosts were usually the weight bandwidth mode is used.)
 
 ### 3.2.0.0
 
