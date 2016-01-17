@@ -388,7 +388,7 @@ function Test-TargetResource
         # Enable secure boot for Generation 2 VMs
         [Boolean]$SecureBoot = $true,
 
-        $EnableGuestService = $false
+        [Boolean]$EnableGuestService = $false
     )
 
     #region input validation

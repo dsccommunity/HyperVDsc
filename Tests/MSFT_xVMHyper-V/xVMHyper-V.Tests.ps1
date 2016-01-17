@@ -29,6 +29,9 @@ Describe 'xVMHyper-V' {
         function Set-VMNetworkAdapter { }
         function Get-VMFirmware { }
         function Set-VMFirmware { }
+        function Get-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $Name)}
+        function Enable-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $Name)}
+        function Disable-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $name)}
 
         $stubVhdxDisk = New-Item -Path 'TestDrive:\TestVM.vhdx' -ItemType File;
         $stubVhdDisk = New-Item -Path 'TestDrive:\TestVM.vhd' -ItemType File;
@@ -64,6 +67,7 @@ Describe 'xVMHyper-V' {
         Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'NonexistentVM' } -MockWith { Write-Error 'VM not found.'; }
         Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'DuplicateVM' } -MockWith { return @([PSCustomObject] $stubVM, [PSCustomObject] $stubVM); }
         Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'Generation2VM' } -MockWith { $gen2VM = $stubVM.Clone(); $gen2VM['Generation'] = 2; return [PSCustomObject] $gen2VM; }
+        Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$false}}
         Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { return $true; }
         
         Context 'Validates Get-TargetResource Method' {
