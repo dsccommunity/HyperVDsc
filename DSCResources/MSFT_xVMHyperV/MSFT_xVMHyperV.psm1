@@ -35,27 +35,28 @@ function Get-TargetResource
     } 
     
     @{
-        Name             = $Name
-        VhdPath          = $vmObj.HardDrives[0].Path
-        SwitchName       = $vmObj.NetworkAdapters[0].SwitchName
-        State            = $vmobj.State
-        Path             = $vmobj.Path
-        Generation       = $vmobj.Generation
-        SecureBoot       = $vmSecureBootState
-        StartupMemory    = $vmobj.MemoryStartup
-        MinimumMemory    = $vmobj.MemoryMinimum
-        MaximumMemory    = $vmobj.MemoryMaximum
-        MACAddress       = $vmObj.NetWorkAdapters[0].MacAddress
-        ProcessorCount   = $vmobj.ProcessorCount
-        Ensure           = if($vmobj){"Present"}else{"Absent"}
-        ID               = $vmobj.Id
-        Status           = $vmobj.Status
-        CPUUsage         = $vmobj.CPUUsage
-        MemoryAssigned   = $vmobj.MemoryAssigned
-        Uptime           = $vmobj.Uptime
-        CreationTime     = $vmobj.CreationTime
-        HasDynamicMemory = $vmobj.DynamicMemoryEnabled
-        NetworkAdapters  = $vmobj.NetworkAdapters.IPAddresses
+        Name                = $Name
+        VhdPath             = $vmObj.HardDrives[0].Path
+        SwitchName          = $vmObj.NetworkAdapters[0].SwitchName
+        State               = $vmobj.State
+        Path                = $vmobj.Path
+        Generation          = $vmobj.Generation
+        SecureBoot          = $vmSecureBootState
+        StartupMemory       = $vmobj.MemoryStartup
+        MinimumMemory       = $vmobj.MemoryMinimum
+        MaximumMemory       = $vmobj.MemoryMaximum
+        MACAddress          = $vmObj.NetWorkAdapters[0].MacAddress
+        ProcessorCount      = $vmobj.ProcessorCount
+        Ensure              = if($vmobj){"Present"}else{"Absent"}
+        ID                  = $vmobj.Id
+        Status              = $vmobj.Status
+        CPUUsage            = $vmobj.CPUUsage
+        MemoryAssigned      = $vmobj.MemoryAssigned
+        Uptime              = $vmobj.Uptime
+        CreationTime        = $vmobj.CreationTime
+        HasDynamicMemory    = $vmobj.DynamicMemoryEnabled
+        NetworkAdapters     = $vmobj.NetworkAdapters.IPAddresses
+        EnableGuestService = ($vmobj | Get-VMIntegrationService -Name 'Guest Service Interface').Enabled
     }
 }
 
@@ -118,7 +119,10 @@ function Set-TargetResource
         $Notes,
 
         # Enable secure boot for Generation 2 VMs
-        [Boolean]$SecureBoot = $true
+        [Boolean]$SecureBoot = $true,
+
+        # Enable Guest Services
+        [Boolean]$EnableGuestService = $false
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
@@ -231,6 +235,20 @@ function Set-TargetResource
                     Set-Vm -Name $Name -Notes $Notes
                 }
             }
+
+            #If the VM doesn't have Guest Service Interface correctly configured, update it.
+            $GuestServiceStatus = $vmObj | Get-VMIntegrationService -Name 'Guest Service Interface'
+            if ($GuestServiceStatus.Enabled -eq $false -and $EnableGuestService) {
+                Write-Verbose -Message "VM $Name has Guest Service Interface disabled and should be enabled"
+                $vmObj | Enable-VMIntegrationService -Name 'Guest Service Interface'
+                Write-Verbose -Message "VM $Name Guest Service Interface configured correctly"
+            }
+            elseif ($GuestServiceStatus.Enabled -and -not $EnableGuestService)
+            {
+                Write-Verbose -Message "VM $Name has Guest Service Interface enabled and should be disabled"
+                $vmObj | Disable-VMIntegrationService -Name 'Guest Service Interface'
+                Write-Verbose -Message "VM $Name Guest Service Interface configured correctly"
+            }
         }
     }
 
@@ -289,6 +307,11 @@ function Set-TargetResource
                 {
                     Set-VMFirmware -VMName $Name -EnableSecureBoot Off
                 }
+            }
+
+            if ($EnableGuestService)
+            {
+                Enable-VMIntegrationService -VMName $Name -Name 'Guest Service Interface'
             }
             
             Write-Verbose -Message "VM $Name created"
@@ -363,7 +386,9 @@ function Test-TargetResource
         $Notes,
 
         # Enable secure boot for Generation 2 VMs
-        [Boolean]$SecureBoot = $true
+        [Boolean]$SecureBoot = $true,
+
+        $EnableGuestService = $false
     )
 
     #region input validation
@@ -441,7 +466,7 @@ function Test-TargetResource
             if($vmObj.Generation -eq 2) {
                 if ($SecureBoot -ne (Test-VMSecureBoot -Name $Name)){return $false}
             }
-
+            if (($vmObj | Get-VMIntegrationService -Name 'Guest Service Interface').Enabled -ne $EnableGuestService) {return $false}
             return $true
         }
         else {return $false}
