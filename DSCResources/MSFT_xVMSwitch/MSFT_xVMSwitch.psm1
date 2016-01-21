@@ -68,6 +68,11 @@ function Set-TargetResource
     {
         Throw "Please ensure that the Hyper-V role is installed with its PowerShell module"
     }
+    # Check to see if the BandwidthReservationMode chosen is supported in the OS
+    elseif(($BandwidthReservationMode -ne "NA") -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt 6.2.0))
+    {
+        Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
+    }
 
     if($Ensure -eq 'Present')
     {
@@ -97,11 +102,7 @@ function Set-TargetResource
                 $parameters = @{}
                 $parameters["Name"] = $Name
                 $parameters["NetAdapterName"] = $NetAdapterName
-                if(($BandwidthReservationMode -ne "NA") -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -ge 6.2.0))
-                {
-                    $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
-                }
-
+                $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
                 if($PSBoundParameters.ContainsKey("AllowManagementOS")){$parameters["AllowManagementOS"]=$AllowManagementOS}
                 $null = New-VMSwitch @parameters
                 Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
@@ -197,18 +198,18 @@ function Test-TargetResource
         Throw "Please ensure that Hyper-V role is installed with its PowerShell module"
     }
 
-    If($Type -eq 'External' -and !($NetAdapterName))
+    if($Type -eq 'External' -and !($NetAdapterName))
     {
         Throw "For external switch type, NetAdapterName must be specified"
     }
     
     
-    If($Type -ne 'External' -and $NetAdapterName)
+    if($Type -ne 'External' -and $NetAdapterName)
     {
         Throw "For Internal or Private switch type, NetAdapterName should not be specified"
     }
 
-    If(($BandwidthReservationMode -ne "NA") -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt 6.2.0))
+    if(($BandwidthReservationMode -ne "NA") -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt 6.2.0))
     {
         Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
     }
