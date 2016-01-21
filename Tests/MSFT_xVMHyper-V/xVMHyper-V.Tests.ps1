@@ -91,6 +91,10 @@ Describe 'xVMHyper-V' {
                 $targetResource = Get-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk.FullName;
                 Assert-MockCalled -CommandName Get-VMFirmware -Scope It -Exactly 1;
             }
+            It 'Hash table contains key EnableGuestService' {
+                $targetResource = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
+                $targetResource.ContainsKey('EnableGuestService') | Should Be $true;
+            }
         } #end context Validates Get-TargetResource Method
 
         Context 'Validates Test-TargetResource Method' {
@@ -198,6 +202,19 @@ Describe 'xVMHyper-V' {
             It 'Returns $false when SecureBoot is On and requested "SecureBoot" = "$false"' {
                 Mock -CommandName Test-VMSecureBoot -MockWith { return $true ; }
                 Test-TargetResource -Name 'Generation2MV' -SecureBoot $false -Generation 2 @testParams | Should be $false;
+            }
+
+            It 'Returns $false when EnableGuestService is off and requested "EnableGuestService" = "$true"' {
+                Test-TargetResource -Name 'RunningVM' -EnableGuestService $true @testParams | Should be $false;
+            }
+
+            It 'Returns $true when EnableGuestService is off and "EnableGuestService" is not requested"' {
+                Test-TargetResource -Name 'RunningVM'  @testParams | Should be $true;
+            }
+
+            It 'Returns $true when EnableGuestService is on and requested "EnableGuestService" = "$true"' {
+                Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true}}
+                Test-TargetResource -Name 'RunningVM' -EnableGuestService $true @testParams | Should be $true;
             }
 
             It 'Throws when Hyper-V Tools are not installed' {
@@ -366,6 +383,19 @@ Describe 'xVMHyper-V' {
                 Mock -CommandName Change-VMSecureBoot -MockWith { }
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $true -Generation 2 @testParams;
                 Assert-MockCalled -CommandName Change-VMSecureBoot -Exactly -Times 1 -Scope It;
+            }
+
+            It 'Does call "Enable-VMIntegrationService" when "EnableGuestService" = "$true"' {
+                Mock -CommandName Enable-VMIntegrationService -MockWith { }
+                Set-TargetResource -Name 'RunningVM' -EnableGuestService $true @testParams
+                Assert-MockCalled -CommandName Enable-VMIntegrationService -Exactly -Times 1 -Scope It
+            }
+
+            It 'Does call "Disable-VMIntegrationService" when "Guest Service Interface" = "Enabled" and "EnableGuestService" = "$false" specified' {
+                Mock -CommandName Disable-VMIntegrationService -MockWith { }
+                Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true}}
+                Set-TargetResource -Name 'RunningVM' -EnableGuestService $false @testParams
+                Assert-MockCalled -CommandName Disable-VMIntegrationService -Exactly -Times 1 -Scope It
             }
 
             It 'Throws when Hyper-V Tools are not installed' {
