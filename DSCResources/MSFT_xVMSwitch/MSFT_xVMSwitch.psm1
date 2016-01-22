@@ -135,7 +135,7 @@ function Set-TargetResource
             $parameters = @{}
             $parameters["Name"] = $Name
 
-            if(($BandwidthReservationMode -ne "NA") -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -ge 6.2.0))
+            if($BandwidthReservationMode -ne "NA")
             {
                 $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
             }
