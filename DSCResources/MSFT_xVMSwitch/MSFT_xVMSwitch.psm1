@@ -228,11 +228,11 @@ function Test-TargetResource
             # If switch should be present, check the switch type
             if($Ensure -eq 'Present')
             {
-                #If the BandwidthReservsationMode is correct
+                # If the BandwidthReservsationMode is correct, or if $switch.BandwidthReservationMode is $null which means it isn't supported on the OS
                 Write-Verbose -Message "Checking if Switch $Name has correct BandwidthReservationMode ..."
-                if($switch.BandwidthReservationMode -eq $BandwidthReservationMode)
+                if($switch.BandwidthReservationMode -eq $BandwidthReservationMode -or $switch.BandwidthReservationMode -eq $null)
                 {
-                    Write-Verbose -Message "Switch $Name has correct BandwidthReservationMode"
+                    Write-Verbose -Message "Switch $Name has correct BandwidthReservationMode or it does not apply to this OS"
 
                     # If switch is the external type, check additional propeties
                     if($switch.SwitchType -eq 'External')
