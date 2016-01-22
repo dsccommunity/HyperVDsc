@@ -69,7 +69,7 @@ function Set-TargetResource
         Throw "Please ensure that the Hyper-V role is installed with its PowerShell module"
     }
     # Check to see if the BandwidthReservationMode chosen is supported in the OS
-    elseif(($BandwidthReservationMode -ne "NA") -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt 6.2.0))
+    elseif(($BandwidthReservationMode -ne "NA") -and ([version](Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt [version]'6.2.0'))
     {
         Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
     }
@@ -209,7 +209,7 @@ function Test-TargetResource
         Throw "For Internal or Private switch type, NetAdapterName should not be specified"
     }
 
-    if(($BandwidthReservationMode -ne "NA") -and ((Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt 6.2.0))
+    if(($BandwidthReservationMode -ne "NA") -and ([version](Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt [version]'6.2.0'))
     {
         Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
     }
