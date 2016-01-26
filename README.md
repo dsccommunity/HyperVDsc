@@ -69,12 +69,17 @@ Please see the Examples section for more details.
 
 ## Versions
 
+### Unreleased
+
+* Fixing 'Generation' property value types from String to Integer in some of the examples.
+
 ### 3.2.0.0
 
 * Added data type System.String to CheckSum parameter of Get/Set/Test-TargetResource functions and aligned indentation.
 * Minor fixes
 
 ### 3.1.0.0
+
 * xVMHyperV: Fixed bug in mof schema (Generation property had two types)
 * xVhdFileDirectory: Fixed typo in type comparison
 * Readme updates
