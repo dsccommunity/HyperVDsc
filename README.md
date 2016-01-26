@@ -23,7 +23,8 @@ This resource is particularly useful when bootstrapping DSC Configurations into 
 * **Path**: The desired Path where the VHD will be created
 * **ParentPath**: Parent VHD file path, for differencing disk 
 * **MaximumSizeBytes**: Maximum size of VHD to be created 
-* **Generation**: Virtual disk format: { Vhd | VHDx }
+* **Generation**: Virtual machine generation { 1 | 2 }.
+Generation 2 virtual machines __only__ support VHDX files.
 * **Ensure**: Ensures that the VHD is Present or Absent 
 
 ### xVMHyperV
@@ -154,7 +155,7 @@ Configuration Sample_EndToEndXHyperV_RunningVM
             Ensure         = "Present"
             Name           = $name
             Path           = (Split-Path $baseVhdPath)
-            Generation     = "vhd"
+            Generation     = 1
             ParentPath     =  $baseVhdPath
 
     }
@@ -178,6 +179,7 @@ Configuration Sample_EndToEndXHyperV_RunningVM
         SwitchName = "Test-Switch"
         VhdPath = Join-path (Split-Path $baseVhdPath) "$name.vhd"
         ProcessorCount = 2
+		Generation = 1
         MaximumMemory  = 1GB
         MinimumMemory = 512MB
         RestartIfNeeded =  "TRUE"
@@ -207,8 +209,8 @@ Configuration Sample_xVHD_NewVHD
         [Parameter(Mandatory)]
         [Uint64]$MaximumSizeBytes,
 
-        [ValidateSet("Vhd","Vhdx")]
-        [string]$Generation = "Vhd",
+        [ValidateSet(1, 2)]
+        [uint32]$Generation = 1,
 
         [ValidateSet("Present","Absent")]
         [string]$Ensure = "Present"        
@@ -248,8 +250,8 @@ Configuration Sample_xVhd_DiffVHD
         [Parameter(Mandatory)]
         [string]$ParentPath,
 
-        [ValidateSet("Vhd","Vhdx")]
-        [string]$Generation = "Vhd",
+        [ValidateSet(1, 2)]
+        [uint32]$Generation = 1,
 
         [ValidateSet("Present","Absent")]
         [string]$Ensure = "Present"    
