@@ -1,4 +1,4 @@
-﻿[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
 
 # xHyper-V
 
@@ -30,17 +30,21 @@ This resource is particularly useful when bootstrapping DSC Configurations into 
 
 * **Name**: The desired VM name 
 * **VhdPath**: The desired VHD associated with the VM 
-* **SwitchName**: Virtual switch associated with the VM 
+* **SwitchName**: Virtual switch(es) associated with the VM. 
+Multiple NICs can now be assigned.
 * **State**: State of the VM: { Running | Paused | Off }
 * **Path**: Folder where the VM data will be stored
 * **Generation**: Virtual machine generation { 1 | 2 }.
 Generation 2 virtual machines __only__ support VHDX files.
+* **SecureBoot**: Enables or disables secure boot __only on generation 2 virtual machines__.
+If not specified, it defaults to True.
 * **StartupMemory**: Startup RAM for the VM 
 * **MinimumMemory**: Minimum RAM for the VM. 
 Setting this property enables dynamic memory.
 * **MaximumMemory**: Maximum RAM for the VM.
 Setting this property enables dynamic memory.
-* **MACAddress**: MAC address of the VM
+* **MACAddress**: MAC address(es) of the VM.
+Multiple MAC addresses can now be assigned.
 * **ProcessorCount**: Processor count for the VM
 * **WaitForIP**: If specified, waits for the VM to get valid IP address
 * **RestartIfNeeded**: If specified, will shutdown and restart the VM as needed for property changes
@@ -58,6 +62,7 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **Type**: The desired type of switch: { External | Internal | Private }
 * **NetAdapterName**: Network adapter name for external switch type
 * **AllowManagementOS**: Specify if the VM host has access to the physical NIC
+* **BandwidthReservationMode**: Specify the QoS mode used (options other than NA are only supported on Hyper-V 2012+): { Default | Weight | Absolute | None | NA }.
 * **Ensure**: Ensures that the VM Switch is Present or Absent 
 
 ### xVhdFile
@@ -67,6 +72,17 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 Please see the Examples section for more details. 
 
 ## Versions
+
+### Unreleased
+
+### 3.3.0.0
+
+* xHyperV: Added SecureBoot parameter to enable control of the secure boot BIOS setting on generation 2 VMs.
+-  Fixed drive letter when mounting VHD when calling resource xVhdFile. Fixes #20.
+* MSFT_xVMHyperV: Changed the SwitchName parameter to string[] to support assigning multiple NICs to virtual machines.
+* MSFT_xVMHyperV: Changed the MACAddress parameter to string[] to support assigning multiple MAC addresses to virtual machines.
+* MSFT_xVMHyperV: Added enabling of Guest Service Interface.
+* MSFT_xVMSwitch: Added the BandwidthReservationMode parameter which specifies how minimum bandwidth is to be configured on a virtual switch
 
 ### 3.2.0.0
 
@@ -97,7 +113,7 @@ Please see the Examples section for more details.
 
 ### 2.1
 
-* Added logic to automatically adjust VM’s startup memory when only minimum and maximum memory is specified in configuration
+* Added logic to automatically adjust VM�s startup memory when only minimum and maximum memory is specified in configuration
 * Fixed the issue that a manually stopped VM cannot be brought back to running state with DSC
 
 ### 2.0
@@ -271,7 +287,7 @@ Configuration Sample_xVhd_DiffVHD
 }
 ```
 
-### Create a generation 2 VM for a given VHD
+### Create a secure boot generation 2 VM for a given VHD
 
 This configuration will create a VM, given a VHDX, on Hyper-V host.
 
@@ -286,7 +302,7 @@ Configuration Sample_xVMHyperV_Simple
         [string]$VMName,
 
         [Parameter(Mandatory)]
-        [string]$VhdxPath        
+        [string]$VhdxPath    
     )
 
     Import-DscResource -module xHyper-V
@@ -316,6 +332,7 @@ Configuration Sample_xVMHyperV_Simple
 ### Create a VM with dynamic memory for a given VHD
 
 This configuration will create a VM with dynamic memory settings, given a VHD, on Hyper-V host.
+If not specified, Secure Boot will be enabled by default for generation 2 VMs.
 
 ```powershell
 Configuration Sample_xVMHyperV_DynamicMemory
@@ -341,7 +358,10 @@ Configuration Sample_xVMHyperV_DynamicMemory
         [Uint64]$MinimumMemory,
 
         [Parameter(Mandatory)]
-        [Uint64]$MaximumMemory
+        [Uint64]$MaximumMemory,
+        
+        [Parameter()]
+        [Boolean]$SecureBoot = $true  
     )
 
     Import-DscResource -module xHyper-V
@@ -362,6 +382,7 @@ Configuration Sample_xVMHyperV_DynamicMemory
             Name          = $VMName
             VhdPath       = $VhdPath
             Generation    = $Generation
+            SecureBoot    = $SecureBoot
             StartupMemory = $StartupMemory
             MinimumMemory = $MinimumMemory
             MaximumMemory = $MaximumMemory
@@ -412,6 +433,9 @@ Configuration Sample_xVMHyperV_Complete
 
         [ValidateSet('Off','Paused','Running')]
         [String]$State = 'Off',
+        
+        [Parameter()]
+        [Boolean]$SecureBoot = $true,
 
         [Switch]$WaitForIP
     )
@@ -437,6 +461,7 @@ Configuration Sample_xVMHyperV_Complete
             State           = $State
             Path            = $Path
             Generation      = $Generation
+            SecureBoot      = $SecureBoot
             StartupMemory   = $StartupMemory
             MinimumMemory   = $MinimumMemory
             MaximumMemory   = $MaximumMemory
@@ -448,6 +473,79 @@ Configuration Sample_xVMHyperV_Complete
         }
     }
 }
+```
+
+### Create VM with multiple NICs.
+
+This configuration will create two internal virtual switches and create a VM with two network interfaces, one attached to each virtual switch.
+
+```powershell
+Configuration Sample_xVMHyperV_MultipleNICs
+{
+    param
+    (
+        [string[]]$NodeName = 'localhost',
+
+        [Parameter(Mandatory)]
+        [string]$VMName,
+
+        [Parameter(Mandatory)]
+        [string]$VhdPath,
+        
+        [Parameter(Mandatory)]
+        [string[]]$SwitchName,
+        
+        [Parameter()]
+        [string[]]$MACAddress
+    )
+
+    Import-DscResource -module xHyper-V
+
+    Node $NodeName
+    {
+        # Install HyperV feature, if not installed - Server SKU only
+        WindowsFeature HyperV
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V'
+        }
+        
+        # Dynamically build the 'DependsOn' array for the 'xVMHyperV' feature
+        # based on the number of virtual switches specified
+        $xVMHyperVDependsOn = @('[WindowsFeature]HyperV')
+        
+        # Create each virtual switch
+        foreach ($vmSwitch in $SwitchName)
+        {
+            # Remove spaces and hyphens from the identifier
+            $vmSwitchName = $vmSwitch -replace ' ','' -replace '-',''
+            # Add the virtual switch dependency
+            $xVMHyperVDependsOn += "[xVMHyperV]$vmSwitchName"
+            
+            xVMSwitch $vmSwitchName
+            {
+                Ensure         = 'Present'
+                Name           = $vmSwitch
+                Type           = 'Internal'
+                DependsOn      = '[WindowsFeature]HyperV'
+            }
+        }
+
+        # Ensures a VM with all the properties
+        xVMHyperV $VMName
+        {
+            Ensure     = 'Present'
+            Name       = $VMName
+            VhdPath    = $VhdPath
+            SwitchName = $SwitchName
+            MACAddress = $MACAddress
+            # Use the dynamically created dependency list/array
+            DependsOn  = $xVMHyperVDependsOn
+        }
+    }
+}
+
+Sample_xVMHyperV_MultipleNICs -VMName 'MultiNICVM' -VhdPath 'C:\VMs\MultiNICVM.vhdx' -SwitchName 'Switch 1','Switch-2'
 ```
 
 ### Create an internal VM Switch
