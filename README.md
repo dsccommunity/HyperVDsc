@@ -1,4 +1,4 @@
-﻿[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
 
 # xHyper-V
 
@@ -75,6 +75,8 @@ Please see the Examples section for more details.
 
 ### Unreleased
 
+### 3.3.0.0
+
 * xHyperV: Added SecureBoot parameter to enable control of the secure boot BIOS setting on generation 2 VMs.
 -  Fixed drive letter when mounting VHD when calling resource xVhdFile. Fixes #20.
 * MSFT_xVMHyperV: Changed the SwitchName parameter to string[] to support assigning multiple NICs to virtual machines.
@@ -113,7 +115,7 @@ Please see the Examples section for more details.
 
 ### 2.1
 
-* Added logic to automatically adjust VM’s startup memory when only minimum and maximum memory is specified in configuration
+* Added logic to automatically adjust VM�s startup memory when only minimum and maximum memory is specified in configuration
 * Fixed the issue that a manually stopped VM cannot be brought back to running state with DSC
 
 ### 2.0
