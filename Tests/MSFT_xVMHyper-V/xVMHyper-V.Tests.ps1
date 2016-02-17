@@ -36,6 +36,7 @@ Describe 'xVMHyper-V' {
         function Disable-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $name)}
 
         $stubVhdxDisk = New-Item -Path 'TestDrive:\TestVM.vhdx' -ItemType File;
+        $studVhdxDiskSnapshot = New-Item -Path "TestDrive:\TestVM_D0145678-1576-4435-AB18-9F000C1C17D0.avhdx"  -ItemType File;
         $stubVhdDisk = New-Item -Path 'TestDrive:\TestVM.vhd' -ItemType File;
         $StubVMConfig = New-Item -Path 'TestDrive:\TestVM.xml' -ItemType File;
         $stubNIC1 = @{ SwitchName = 'Test Switch 1'; MacAddress = 'AA-BB-CC-DD-EE-FF'; IpAddresses = @('192.168.0.1','10.0.0.1'); };
@@ -63,14 +64,47 @@ Describe 'xVMHyper-V' {
             Notes = '';
         }
 
-        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'RunningVM' } -MockWith { $runningVM = $stubVM.Clone(); $runningVM['State'] = 'Running'; return [PSCustomObject] $runningVM; }
-        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'StoppedVM' } -MockWith { $stoppedVM = $stubVM.Clone(); $stoppedVM['State'] = 'Off'; return [PSCustomObject] $stoppedVM; }
-        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'PausedVM' } -MockWith { $pausedVM = $stubVM.Clone(); $pausedVM['State'] = 'Paused'; return [PSCustomObject] $pausedVM; }
-        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'NonexistentVM' } -MockWith { Write-Error 'VM not found.'; }
-        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'DuplicateVM' } -MockWith { return @([PSCustomObject] $stubVM, [PSCustomObject] $stubVM); }
-        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'Generation2VM' } -MockWith { $gen2VM = $stubVM.Clone(); $gen2VM['Generation'] = 2; return [PSCustomObject] $gen2VM; }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'RunningVM' } -MockWith {
+            $runningVM = $stubVM.Clone();
+            $runningVM['State'] = 'Running';
+            return [PSCustomObject] $runningVM;
+        }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'StoppedVM' } -MockWith {
+            $stoppedVM = $stubVM.Clone();
+            $stoppedVM['State'] = 'Off';
+            return [PSCustomObject] $stoppedVM;
+        }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'PausedVM' } -MockWith {
+            $pausedVM = $stubVM.Clone();
+            $pausedVM['State'] = 'Paused';
+            return [PSCustomObject] $pausedVM;
+        }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'NonexistentVM' } -MockWith {
+            Write-Error 'VM not found.';
+        }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'DuplicateVM' } -MockWith {
+            return @([PSCustomObject] $stubVM, [PSCustomObject] $stubVM);
+        }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'Generation1Vhd' } -MockWith {
+            $vhdVM = $stubVM.Clone();
+            $vhdVM['HardDrives'] = @( @{ Path = $stubVhdDisk.FullName } );
+            return [PSCustomObject] $vhdVM;
+        }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'Generation2VM' } -MockWith {
+            $gen2VM = $stubVM.Clone();
+            $gen2VM['Generation'] = 2;
+            return [PSCustomObject] $gen2VM;
+        }
         Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$false}}
         Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { return $true; }
+        Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhd') } -MockWith {
+            ## Return single Vhd chain for .vhds
+            return @($stubVhdDisk.FullName);   
+        }
+        Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhdx') } -MockWith {
+            ## Return snapshot hierarchy for .vhdxs
+            return @($stubVhdxDiskSnapshot.FullName, $stubVhdxDisk.FullName);
+        }
         
         Context 'Validates Get-TargetResource Method' {
 
@@ -156,7 +190,7 @@ Describe 'xVMHyper-V' {
             }
 
             It 'Returns $true when VM .vhd file is specified with a generation 1 VM' {
-                Test-TargetResource -Name 'StoppedVM' -VhdPath $stubVhdDisk -Generation 1 | Should Be $true;
+                Test-TargetResource -Name 'Generation1Vhd' -VhdPath $stubVhdDisk -Generation 1 -Verbose | Should Be $true;
             }
 
             It 'Returns $true when VM .vhdx file is specified with a generation 1 VM' {
@@ -184,7 +218,6 @@ Describe 'xVMHyper-V' {
                 Test-TargetResource -Name 'RunningVM' @testParams -MACAddress @($stubNIC1.MACAddress,$stubNIC2.MACAddress) | Should Be $true;
             }
 
-
             It 'Returns $false when multiple MAC addresses not assigned/assigned in the wrong order' {
                 Test-TargetResource -Name 'RunningVM' @testParams -MACAddress @($stubNIC1.MACAddress,$stubNIC2.MACAddress) | Should Be $true;
             }
@@ -200,8 +233,14 @@ Describe 'xVMHyper-V' {
             }
             
             It 'Returns $false when SecureBoot is On and requested "SecureBoot" = "$false"' {
-                Mock -CommandName Test-VMSecureBoot -MockWith { return $true ; }
-                Test-TargetResource -Name 'Generation2MV' -SecureBoot $false -Generation 2 @testParams | Should be $false;
+                Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
+                Test-TargetResource -Name 'Generation2VM' -SecureBoot $false -Generation 2 @testParams | Should be $false;
+            }
+            
+            It 'Returns $true when VM has snapshot chain' {
+                Mock -CommandName Get-VhdHierarchy -MockWith { Write-Host $VhdPath; return @($studVhdxDiskSnapshot, $stubVhdxDisk); }
+
+                Test-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk -Verbose | Should Be $true;
             }
 
             It 'Returns $false when EnableGuestService is off and requested "EnableGuestService" = "$true"' {

@@ -75,6 +75,9 @@ Please see the Examples section for more details.
 
 ### Unreleased
 
+* MSFT_xVMHyperV: Fixed bug causing Test-TargetResource to fail when VM had snapshots.
+* MSFT_xVMHyperV: Adds localization support.
+
 ### 3.3.0.0
 
 * xHyperV: Added SecureBoot parameter to enable control of the secure boot BIOS setting on generation 2 VMs.
@@ -113,7 +116,7 @@ Please see the Examples section for more details.
 
 ### 2.1
 
-* Added logic to automatically adjust VM’s startup memory when only minimum and maximum memory is specified in configuration
+* Added logic to automatically adjust VM's startup memory when only minimum and maximum memory is specified in configuration
 * Fixed the issue that a manually stopped VM cannot be brought back to running state with DSC
 
 ### 2.0
