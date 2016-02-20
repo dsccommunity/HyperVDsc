@@ -77,6 +77,7 @@ Please see the Examples section for more details.
 
 * MSFT_xVMHyperV: Fixed bug causing Test-TargetResource to fail when VM had snapshots.
 * MSFT_xVMHyperV: Adds localization support.
+* MSFT_xVMSwitch: Fixes bug where virtual switches are duplicated when BandwidthReservationMode is not specified.
 
 ### 3.3.0.0
 
