@@ -1,0 +1,11 @@
+[ClassVersion("1.3"), FriendlyName("xVMNetworkAdapter")]
+class MSFT_xVMNetworkAdapter : OMI_BaseResource
+{
+    [Key] String Id;
+    [Required] String Name;
+    [Required] String SwitchName;
+    [Required] String VMName;
+    [Write] Boolean DynamicMacAddress;
+    [Write] String StaticMacAddress;
+    [Write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+};

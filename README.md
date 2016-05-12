@@ -71,9 +71,23 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **FileDirectory**: The FileDirectory objects to copy to the VHD (as used in the "File" resource). 
 Please see the Examples section for more details. 
 
+### xVMNetworkAdapter
+
+* **Id**: Unique string for identifying the resource instance.
+* **Name**: Name of the network adapter as it appears either in the management OS or attached to a VM.
+* **SwitchName**: Virtual Switch name to connect the adapter to.
+* **VMName**: Name of the VM to attach to. If you want to attach new VM Network adapter to the management OS, set this property to 'Management OS'.
+* **DynamicMacAddress**: Set this to $false if you want to specify a static MAC address.
+* **StaticMacAddress**: Specifies static MAC address for the Network adapter.
+* **Ensure**: Ensures that the VM Network Adapter is Present or Absent.
+* 
+Please see the Examples section for more details. 
+
 ## Versions
 
 ### Unreleased
+* Adding a new resource
+	* MSFT_xVMNetworkAdapter: Attaches a new VM network adapter to the management OS or VM.
 
 ### 3.4.0.0
 
