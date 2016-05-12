@@ -46,6 +46,13 @@ try
         }       
     
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
+            function Get-VMNetworkAdapter {
+                [CmdletBinding()]
+                Param(
+                    [string]$Name,
+                    [string]$SwitchType
+                )
+            }
 
             Context 'NetAdapter does not exist' {
                 Mock Get-VMNetworkAdapter
@@ -60,7 +67,10 @@ try
             }
     
             Context 'NetAdapter exists' {
-                Mock Get-VMNetworkAdapter -MockWith { $MockAdapter }
+                Mock -CommandName Get-VMSwitch -MockWith {
+                    return $MockAdapter
+                }
+
                 It 'should return adapter properties' {
                     $Result = Get-TargetResource @TestAdapter
                     $Result.Ensure                 | Should Be 'Present'
