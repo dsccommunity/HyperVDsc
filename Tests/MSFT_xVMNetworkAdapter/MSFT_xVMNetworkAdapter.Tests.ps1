@@ -24,12 +24,6 @@ try
     #region Pester Tests
     InModuleScope $Global:DSCResourceName {
 
-        #Function placeholders
-        function Get-VMNetworkAdapter { }
-        function Set-VMNetworkAdapter { }
-        function Remove-VMNetworkAdapter { }
-        function Add-VMNetworkAdapter { }
-
         # Create the Mock Objects that will be used for running tests
         $MockHostAdapter = [PSCustomObject] @{
             Id                  = 'HostManagement1'
@@ -53,6 +47,11 @@ try
         }       
     
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
+            #Function placeholders
+            function Get-VMNetworkAdapter { }
+            function Set-VMNetworkAdapter { }
+            function Remove-VMNetworkAdapter { }
+            function Add-VMNetworkAdapter { }            
             Context 'NetAdapter does not exist' {
                 Mock Get-VMNetworkAdapter
                 It 'should return ensure as absent' {
@@ -85,6 +84,11 @@ try
         }
 
         Describe "$($Global:DSCResourceName)\Set-TargetResource" {
+            #Function placeholders
+            function Get-VMNetworkAdapter { }
+            function Set-VMNetworkAdapter { }
+            function Remove-VMNetworkAdapter { }
+            function Add-VMNetworkAdapter { }               
             $newAdapter = [PSObject]@{
                 Id                      = 'UniqueString'
                 Name                    = $TestAdapter.Name
@@ -132,6 +136,11 @@ try
         }
 
         Describe "$($Global:DSCResourceName)\Test-TargetResource" {
+            #Function placeholders
+            function Get-VMNetworkAdapter { }
+            function Set-VMNetworkAdapter { }
+            function Remove-VMNetworkAdapter { }
+            function Add-VMNetworkAdapter { }               
             $newAdapter = [PSObject]@{
                 Id                      = 'UniqueString'
                 Name                    = $TestAdapter.Name
