@@ -23,6 +23,13 @@ try
 {
     #region Pester Tests
     InModuleScope $Global:DSCResourceName {
+
+        #Function placeholders
+        function Get-VMNetworkAdapter { }
+        function Set-VMNetworkAdapter { }
+        function Remove-VMNetworkAdapter { }
+        function Add-VMNetworkAdapter { }
+
         # Create the Mock Objects that will be used for running tests
         $MockHostAdapter = [PSCustomObject] @{
             Id                  = 'HostManagement1'
@@ -46,14 +53,6 @@ try
         }       
     
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
-            function Get-VMNetworkAdapter {
-                [CmdletBinding()]
-                Param(
-                    [string]$Name,
-                    [string]$SwitchType
-                )
-            }
-
             Context 'NetAdapter does not exist' {
                 Mock Get-VMNetworkAdapter
                 It 'should return ensure as absent' {
@@ -67,8 +66,8 @@ try
             }
     
             Context 'NetAdapter exists' {
-                Mock -CommandName Get-VMSwitch -MockWith {
-                    return $MockAdapter
+                Mock -CommandName Get-VMNetworkAdapter -MockWith {
+                    $MockAdapter
                 }
 
                 It 'should return adapter properties' {
