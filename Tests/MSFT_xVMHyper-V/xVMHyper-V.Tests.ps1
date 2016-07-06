@@ -97,6 +97,24 @@ Describe 'xVMHyper-V' {
         }
         Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$false}}
         Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { return $true; }
+
+        Context 'Validates Get-VhdHierarchy' {
+
+            It 'Does not throw with null parent path (#52)' {
+                
+                $fakeVhdPath = 'BaseVhd.vhdx';
+                Mock -CommandName Get-VHD -ParameterFilter { $Path -eq $fakeVhdPath } -MockWith {
+                    return [PSCustomObject] @{
+                        Path = $fakeVhdPath;
+                        ParentPath = $null;
+                    }
+                }
+
+                { Get-VhdHierarchy -VhdPath $fakeVhdPath } | Should Not Throw;
+            }
+
+        } #end context validates Get-VhdHierarchy
+
         Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhd') } -MockWith {
             ## Return single Vhd chain for .vhds
             return @($stubVhdDisk.FullName);   
