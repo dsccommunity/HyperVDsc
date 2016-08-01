@@ -34,6 +34,7 @@ Describe 'xVMHyper-V' {
         function Get-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $Name)}
         function Enable-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $Name)}
         function Disable-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $name)}
+        function Get-VHD { param ( $Path ) }
 
         $stubVhdxDisk = New-Item -Path 'TestDrive:\TestVM.vhdx' -ItemType File;
         $studVhdxDiskSnapshot = New-Item -Path "TestDrive:\TestVM_D0145678-1576-4435-AB18-9F000C1C17D0.avhdx"  -ItemType File;
@@ -97,6 +98,7 @@ Describe 'xVMHyper-V' {
         }
         Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$false}}
         Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { return $true; }
+
         Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhd') } -MockWith {
             ## Return single Vhd chain for .vhds
             return @($stubVhdDisk.FullName);   
@@ -479,6 +481,25 @@ Describe 'xVMHyper-V' {
                 Assert-MockCalled -CommandName Set-VMFirmware -Scope It;
             }
         } #end context Validates Change-VMSecureBoot Method
+
+        Context 'Validates Get-VhdHierarchy Method' {
+
+            It 'Does not throw with null parent path (#52)' {
+                
+                ## Must use a different file extension to ensure existing mocks Get-VhdHierarchy or not called
+                $fakeVhdPath = 'BaseVhd.avhdx';
+                Mock -CommandName Get-VHD -ParameterFilter { $Path -eq $fakeVhdPath } -MockWith {
+                    return [PSCustomObject] @{
+                        Path = $fakeVhdPath;
+                        ParentPath = $null;
+                    }
+                }
+
+                { Get-VhdHierarchy -VhdPath $fakeVhdPath } | Should Not Throw;
+            }
+
+        } #end context validates Get-VhdHierarchy
+
 
     } #end inmodulescope
 } #end describe xVMHyper-V
