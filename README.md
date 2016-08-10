@@ -77,6 +77,8 @@ Please see the Examples section for more details.
 ## Versions
 
 ### Unreleased
+
+### 3.5.0.0
 * Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
 
 * MSFT_xVMHyperV: Fixed bug in Test-TargetResource throwing when a Vhd's ParentPath property was null.
