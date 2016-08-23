@@ -13,6 +13,10 @@ function Get-TargetResource
         [System.String]
         $VhdPath,
 
+        [parameter(Mandatory = $false)]
+        [System.Uint32]
+        $VhdPartitionNumber = 1,
+
         [parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
@@ -28,6 +32,7 @@ function Get-TargetResource
             
         Return @{
             VhdPath = $VhdPath
+            VhdPartitionNumber = $VhdPartitionNumber
             FileDirectory = $item
          }
     }
@@ -38,7 +43,7 @@ function Get-TargetResource
     $itemsFound = foreach($Item in $FileDirectory)
     {
         $item = GetItemToCopy -item $item
-        $mountedDrive =  $mountVHD | Get-Disk | Get-Partition | Get-Volume
+        $mountedDrive =  $mountVHD | Get-Disk | Get-Partition | Where-Object -FilterScript { $_.PartitionNumber -eq $VhdPartitionNumber } | Get-Volume
         $letterDrive  = (-join $mountedDrive.DriveLetter) + ":\"
        
         # show the drive letters.
@@ -64,6 +69,7 @@ function Get-TargetResource
     # Return the result.
     Return @{
       VhdPath = $VhdPath
+      VhdPartitionNumber = $VhdPartitionNumber
       FileDirectory = $itemsFound
     }   
 }
@@ -78,6 +84,10 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [System.String]
         $VhdPath,
+
+        [parameter(Mandatory = $false)]
+        [System.Uint32]
+        $VhdPartitionNumber = 1,
 
         [parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
@@ -98,13 +108,12 @@ function Set-TargetResource
             # show the drive letters.
             Get-PSDrive | Write-Verbose
 
-            $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Get-Volume
+            $mountedDrive = $mountedVHD  | Get-Disk | Get-Partition | Where-Object -FilterScript { $_.PartitionNumber -eq $VhdPartitionNumber } | Get-Volume
             
             foreach ($item in $FileDirectory)
             {
                 $itemToCopy = GetItemToCopy -item $item
                 $letterDrive  = (-join $mountedDrive.DriveLetter) + ":\"
-                $finalDestinationPath = $letterDrive
                 $finalDestinationPath = Join-Path  $letterDrive  $itemToCopy.DestinationPath
                
                 # if the destination should be removed 
@@ -162,6 +171,10 @@ function Test-TargetResource
         [System.String]
         $VhdPath,
 
+        [parameter(Mandatory = $false)]
+        [System.Uint32]
+        $VhdPartitionNumber = 1,
+
         [parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
@@ -185,7 +198,7 @@ function Test-TargetResource
         # Show the drive letters after mount 
         Get-PSDrive | Write-Verbose
 
-        $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Get-Volume
+        $mountedDrive = $mountedVHD  | Get-Disk | Get-Partition | Where-Object -FilterScript { $_.PartitionNumber -eq $VhdPartitionNumber } | Get-Volume
         $letterDrive  = (-join $mountedDrive.DriveLetter) + ":\"
         Write-Verbose $letterDrive
 
@@ -195,11 +208,9 @@ function Test-TargetResource
         foreach ($item in $FileDirectory)
         {  
             $itemToCopy = GetItemToCopy -item $item
-            $destination =  $itemToCopy.DestinationPath  
-            Write-Verbose ("Testing the file with relative VHD destination $destination")
             $destination =  $itemToCopy.DestinationPath
-            $finalDestinationPath = $letterDrive
-            $finalDestinationPath = Join-Path $letterDrive $destination            
+            Write-Verbose ("Testing the file with relative VHD destination $destination")
+            $finalDestinationPath = Join-Path $letterDrive $destination
 
             if (Test-Path $finalDestinationPath) 
             {               
@@ -286,10 +297,10 @@ function EnsureVHDState
         if ($PSCmdlet.ParameterSetName -eq 'Mounted')
         {
              # Try mounting the VHD.
-            $mountedVHD = Mount-VHD -Path $vhdPath -Passthru -ErrorAction SilentlyContinue -ErrorVariable var
+            $mountedVHD = Mount-VHD -Path $vhdPath -Passthru -ErrorAction SilentlyContinue -ErrorVariable AlreadyMounted
 
             # If mounting the VHD failed. Dismount the VHD and mount it again.
-            if ($var)
+            if ($AlreadyMounted)
             {
                 Write-Verbose "Mounting Failed. Attempting to dismount and mount it back"
                 Dismount-VHD $vhdPath 
@@ -304,8 +315,7 @@ function EnsureVHDState
         }
         else
         {
-            Dismount-VHD $vhdPath -ea SilentlyContinue
-                
+            Dismount-VHD $vhdPath -ErrorAction SilentlyContinue
         }
 }
 
@@ -479,4 +489,3 @@ function ItemHasChanged
 }
 
 Export-ModuleMember -Function *-TargetResource
-
