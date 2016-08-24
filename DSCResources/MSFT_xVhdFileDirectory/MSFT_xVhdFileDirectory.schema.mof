@@ -2,7 +2,7 @@
 class MSFT_xVhdFileDirectory : OMI_BaseResource
 {
     [Key, Description("Path to the VHD")] String VhdPath;
-    [Required, EmbeddedInstance("File"), Description("The FileDirectory objects to copy to the VHD")] String FileDirectory[];
+    [Required, EmbeddedInstance("MSFT_FileDirectoryConfiguration"), Description("The FileDirectory objects to copy to the VHD")] String FileDirectory[];
     [Write, Description("Specify partition number if more than one partition is present in the VHD")] Uint32 VhdPartitionNumber;
     [Write,ValueMap{"ModifiedDate","SHA-1","SHA-256","SHA-512"},Values{"ModifiedDate","SHA-1","SHA-256","SHA-512"}] string CheckSum;
 };
