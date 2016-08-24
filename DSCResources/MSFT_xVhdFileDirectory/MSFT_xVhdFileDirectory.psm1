@@ -327,7 +327,7 @@ function Test-TargetResource
             # Check the attribute 
             if($itemToCopy.Attributes)
             {
-                $currentAttribute = @(Get-ItemProperty -Path $finalDestinationPath |% Attributes)
+                $currentAttribute = @(Get-ItemProperty -Path $finalDestinationPath | Foreach-Object { $_.Attributes })
                 $result = $currentAttribute.Contains($itemToCopy.Attributes)
             }           
           }
@@ -436,7 +436,7 @@ function GetItemToCopy
     $returnValue.Force =  $returnValue.Force -eq "True"
     $returnValue.Recurse = $returnValue.Recurse -eq "True"
     $returnValue.Ensure = $returnValue.Ensure -eq "Present"
-    $returnValue.Keys | %{ Write-Verbose "$_ => $($returnValue[$_])"}
+    $returnValue.Keys | Foreach-Object { Write-Verbose "$_ => $($returnValue[$_])" }
 
     return $returnValue
 }
