@@ -82,15 +82,15 @@ function Get-TargetResource
     }
     
     # Turn drive letter into a path
-    $letterDrive  = Join-Path -Path $mountedDrive.DriveLetter -ChildPath ":\"
-    Write-Verbose $localizedData.DriveLetterFound -f $letterDrive
+    $letterDrive  = "$($mountedDrive.DriveLetter):\"
+    Write-Verbose ($localizedData.DriveLetter -f $letterDrive)
     
     # Determine if files/folders are present
     $itemsFound = foreach($Item in $FileDirectory)
     {
         $itemToCopy = GetItemToCopy -item $Item
         $finalDestinationPath = Join-Path -Path $letterDrive -ChildPath $itemToCopy.DestinationPath
-        Write-Verbose $localizedData.FinalDestinationPath -f $finalDestinationPath
+        Write-Verbose ($localizedData.FinalDestinationPath -f $finalDestinationPath)
         
         if(Test-Path $finalDestinationPath)
         {
@@ -139,7 +139,7 @@ function Set-TargetResource
 
     if(-not (Test-Path -Path $VhdPath))
     {
-        Write-Verbose $localizedData.VHDMissing -f $VhdPath
+        Write-Verbose ($localizedData.VHDMissing -f $VhdPath)
         break;
     }
     
@@ -159,14 +159,14 @@ function Set-TargetResource
         }
         
         # Turn drive letter into a path
-        $letterDrive  = Join-Path -Path $mountedDrive.DriveLetter -ChildPath ":\"
-        Write-Verbose $localizedData.DriveLetterFound -f $letterDrive
+        $letterDrive  = "$($mountedDrive.DriveLetter):\"
+        Write-Verbose ($localizedData.DriveLetter -f $letterDrive)
             
         foreach($item in $FileDirectory)
         {
             $itemToCopy = GetItemToCopy -item $item
             $finalDestinationPath = Join-Path -Path $letterDrive -ChildPath $itemToCopy.DestinationPath
-            Write-Verbose $localizedData.FinalDestinationPath -f $finalDestinationPath
+            Write-Verbose ($localizedData.FinalDestinationPath -f $finalDestinationPath)
             
             # If the destination should be removed 
             if(-not ($itemToCopy.Ensure))
@@ -238,7 +238,7 @@ function Test-TargetResource
     # If the VHD path does not exist throw an error and stop.
     if(-not (Test-Path $VhdPath))
     {
-        Write-Verbose $localizedData.VHDMissing -f $VhdPath
+        Write-Verbose ($localizedData.VHDMissing -f $VhdPath)
         break;
     }
 
@@ -260,13 +260,13 @@ function Test-TargetResource
         # Check that we only have a single drive letter
         if(($mountedDrive | Measure-Object).Count -gt 1)
         {
-            Write-Verbose $localizedData.TooManyPartitions -f ($mountedDrive | Measure-Object).Count
+            Write-Verbose ($localizedData.TooManyPartitions -f ($mountedDrive | Measure-Object).Count)
             break;
         }
         
         # Turn drive letter into a path
-        $letterDrive  = Join-Path -Path $mountedDrive.DriveLetter -ChildPath ":\"
-        Write-Verbose $localizedData.DriveLetter -f $letterDrive
+        $letterDrive  = "$($mountedDrive.DriveLetter):\"
+        Write-Verbose ($localizedData.DriveLetter -f $letterDrive)
 
         # Return test result equal to true unless one of the tests in the loop below fails.
         $result = $true
@@ -276,7 +276,7 @@ function Test-TargetResource
             $itemToCopy = GetItemToCopy -item $item
             
             $finalDestinationPath = Join-Path -Path $letterDrive -ChildPath $itemToCopy.DestinationPath
-            Write-Verbose $localizedData.FinalDestinationPath -f $finalDestinationPath
+            Write-Verbose ($localizedData.FinalDestinationPath -f $finalDestinationPath)
 
             if(Test-Path $finalDestinationPath) 
             {               
@@ -294,11 +294,11 @@ function Test-TargetResource
                     {
                         # Verify if the file exist inside the folder
                         $fileName = Split-Path $itemToCopy.SourcePath -Leaf                                                        
-                        Write-Verbose $localizedData.CheckIfFileExists -f $fileName,$finalDestinationPath
+                        Write-Verbose ($localizedData.CheckIfFileExists -f $fileName,$finalDestinationPath)
                         $fileExistInDestination = Test-Path -Path (Join-Path -Path $finalDestinationPath -ChildPath $fileName)
 
                         # Report if the file exist on the destination folder.
-                        Write-Verbose $localizedData.CheckIfFileExistsResults -f $finalDestinationPath,$fileExistInDestination
+                        Write-Verbose ($localizedData.CheckIfFileExistsResults -f $finalDestinationPath,$fileExistInDestination)
                         $result = $fileExistInDestination
                         $result = $result -and -not(ItemHasChanged -sourcePath $itemToCopy.SourcePath -destinationPath (Join-Path -Path $finalDestinationPath -ChildPath $fileName) -CheckSum $CheckSum)
                     }                        
@@ -337,7 +337,7 @@ function Test-TargetResource
         EnsureVHDState -Dismounted -vhdPath $VhdPath
     }
     
-    Write-Verbose $localizedData.TestResults -f $result
+    Write-Verbose ($localizedData.TestResults -f $result)
     return $result;
 }
 
@@ -370,7 +370,7 @@ function EnsureVHDState
             # If mounting the VHD failed. Dismount the VHD and mount it again.
             if($AlreadyMounted)
             {
-                Write-Verbose $localizedData.MountFailed -f $vhdPath
+                Write-Verbose ($localizedData.MountFailed -f $vhdPath)
                 Dismount-VHD $vhdPath 
                 $mountedVHD = Mount-VHD -Path $vhdPath -Passthru -ErrorAction SilentlyContinue
 
@@ -378,14 +378,14 @@ function EnsureVHDState
             }
             else
             {
-                Write-Verbose $localizedData.MountedVHD -f $vhdPath
+                Write-Verbose ($localizedData.MountedVHD -f $vhdPath)
                 return $mountedVHD
             }
         }
         else
         {
             Dismount-VHD $vhdPath -ErrorAction SilentlyContinue
-            Write-Verbose $localizedData.DismountedVHD -f $vhdPath
+            Write-Verbose ($localizedData.DismountedVHD -f $vhdPath)
         }
 }
 
@@ -471,18 +471,18 @@ function SetVHDFile
         [switch]$ensure
     )
     
-    Write-Verbose $localizedData.VHDFileStatus -f $($PSCmdlet.ParameterSetName)
+    Write-Verbose ($localizedData.VHDFileStatus -f $($PSCmdlet.ParameterSetName))
     if($PSCmdlet.ParameterSetName -eq 'Copy')
     {
         New-Item -Path (Split-Path $destinationPath) -ItemType Directory -ErrorAction SilentlyContinue        
         try
         {
             Copy-Item -Path $sourcePath -Destination $destinationPath -Force:$force -Recurse:$recurse -ErrorAction SilentlyContinue
-            Write-Verbose $localizedData.CopySuccessful -f $sourcePath,$destinationPath
+            Write-Verbose ($localizedData.CopySuccessful -f $sourcePath,$destinationPath)
         }
         catch
         {
-            Write-Verbose $localizedData.CopyFailed -f $sourcePath,$destinationPath,$_.Exception.Message
+            Write-Verbose ($localizedData.CopyFailed -f $sourcePath,$destinationPath,$_.Exception.Message)
         }
     }
     elseif($PSCmdlet.ParameterSetName -eq 'New')
@@ -502,11 +502,11 @@ function SetVHDFile
         try
         {
             Set-ItemProperty -Path $destinationPath -Name Attributes -Value $attribute -ErrorAction Stop
-            Write-Verbose $localizedData.AttributeChanged -f $destinationPath,$attribute
+            Write-Verbose ($localizedData.AttributeChanged -f $destinationPath,$attribute)
         }
         catch
         {
-            Write-Verbose $localizedData.AttributeChangeFailed -f $destinationPath,$attribute
+            Write-Verbose ($localizedData.AttributeChangeFailed -f $destinationPath,$attribute)
         }
     }
     elseif(-not($ensure))
@@ -514,11 +514,11 @@ function SetVHDFile
         try
         {
             Remove-Item -Path $destinationPath -Force:$force -Recurse:$recurse -ErrorAction Stop
-            Write-Verbose $localizedData.RemoveItemSuccess -f $destinationPath
+            Write-Verbose ($localizedData.RemoveItemSuccess -f $destinationPath)
         }
         catch
         {
-            Write-Verbose $localizedData.RemoveItemFailed -f $destinationPath,$_.Exception.Message
+            Write-Verbose ($localizedData.RemoveItemFailed -f $destinationPath,$_.Exception.Message)
         }
     }
 }
