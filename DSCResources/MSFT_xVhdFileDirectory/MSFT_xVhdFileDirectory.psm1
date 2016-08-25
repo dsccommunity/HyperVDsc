@@ -3,7 +3,7 @@ DATA localizedData
 {
     # same as culture = "en-US"
 ConvertFrom-StringData @'    
-    TooManyPartitions=VHD has more than 1 partition, found {0} partitions.
+    IncorrectPartitionCount=Partitions on VHD has {0] partitions. Unable to continue without specifying partition numbe
     DriveLetter=Drive letter {0} found.
     VHDMissing=VHD does not exist in the specified path {0}.
     DriveLetterFound=Found drive letter: {0}.
@@ -144,7 +144,7 @@ function Set-TargetResource
     }
     
     # mount the VHD.
-    $mountedVHD = EnsureVHDState -Mounted -vhdPath $VhdPath
+    $mountVHD = EnsureVHDState -Mounted -vhdPath $VhdPath
 
     try
     {
@@ -243,7 +243,7 @@ function Test-TargetResource
     }
 
     # mount the vhd.
-    $mountedVHD = EnsureVHDState -Mounted -vhdPath $VhdPath
+    $mountVHD = EnsureVHDState -Mounted -vhdPath $VhdPath
 
     try 
     {
@@ -258,9 +258,9 @@ function Test-TargetResource
         }
         
         # Check that we only have a single drive letter
-        if(($mountedDrive | Measure-Object).Count -gt 1)
+        if((($mountedDrive | Measure-Object).Count -gt 1) -or (($mountedDrive | Measure-Object).Count -eq 0))
         {
-            Write-Verbose ($localizedData.TooManyPartitions -f ($mountedDrive | Measure-Object).Count)
+            Write-Verbose ($localizedData.IncorrectPartitionCount -f ($mountedDrive | Measure-Object).Count)
             break;
         }
         
@@ -268,13 +268,18 @@ function Test-TargetResource
         $letterDrive  = "$($mountedDrive.DriveLetter):\"
         Write-Verbose ($localizedData.DriveLetter -f $letterDrive)
 
+        if (!(Test-Path -Path $letterDrive)) {
+            Write-Verbose "Can't find $letterDrive"
+            Get-PSDrive | Write-Verbose
+            break;
+        }
+
         # Return test result equal to true unless one of the tests in the loop below fails.
         $result = $true
 
         foreach($item in $FileDirectory)
         {  
             $itemToCopy = GetItemToCopy -item $item
-            
             $finalDestinationPath = Join-Path -Path $letterDrive -ChildPath $itemToCopy.DestinationPath
             Write-Verbose ($localizedData.FinalDestinationPath -f $finalDestinationPath)
 
