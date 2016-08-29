@@ -71,6 +71,7 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 ### xVhdFile
 
 * **VhdPath**: Path to the VHD 
+* **VhdPartitionNumber**: Partition number on the VHD
 * **FileDirectory**: The FileDirectory objects to copy to the VHD (as used in the "File" resource). 
 Please see the Examples section for more details. 
 
