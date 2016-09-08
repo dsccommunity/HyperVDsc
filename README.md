@@ -78,6 +78,7 @@ Please see the Examples section for more details.
 ## Versions
 
 ### Unreleased
+* MSFT_xVhdFile: Added optional parameter for partition number in VHD
 
 ### 3.5.0.0
 * Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
