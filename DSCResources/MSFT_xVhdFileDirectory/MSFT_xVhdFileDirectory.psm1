@@ -3,7 +3,7 @@ DATA localizedData
 {
     # same as culture = "en-US"
 ConvertFrom-StringData @'    
-    IncorrectPartitionCount=Partitions on VHD has {0] partitions. Unable to continue without specifying partition numbe
+    IncorrectPartitionCount=Partitions on VHD has {0] partitions. Unable to continue without specifying partition number.
     DriveLetter=Drive letter {0} found.
     VHDMissing=VHD does not exist in the specified path {0}.
     DriveLetterFound=Found drive letter: {0}.
