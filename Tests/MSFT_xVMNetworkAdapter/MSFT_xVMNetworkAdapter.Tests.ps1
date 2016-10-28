@@ -1,5 +1,5 @@
 $Global:DSCModuleName   = 'xHyper-V'
-$Global:DSCResourceName = 'xVMNetworkAdapter'
+$Global:DSCResourceName = 'MSFT_xVMNetworkAdapter'
 
 #region HEADER
 if ( (-not (Test-Path -Path '.\DSCResource.Tests\')) -or `
