@@ -1,5 +1,5 @@
 $Global:DSCModuleName   = 'xHyper-V'
-$Global:DSCResourceName = 'MSFT_xVMNetworkAdapter'
+$Global:DSCResourceName = 'xVMNetworkAdapter'
 
 #region HEADER
 if ( (-not (Test-Path -Path '.\DSCResource.Tests\')) -or `
@@ -29,7 +29,7 @@ try
             Id                  = 'HostManagement1'
             Name                = 'Management'
             SwitchName          = 'HostSwitch'
-            VMName              = 'Management OS'
+            VMName              = 'ManagementOS'
         }
 
         $TestAdapter = [PSObject]@{
@@ -74,7 +74,7 @@ try
                     $Result.Ensure                 | Should Be 'Present'
                     $Result.Name                   | Should Be $TestAdapter.Name
                     $Result.SwitchName             | Should Be $TestAdapter.SwitchName
-                    $Result.VMName                 | Should Be 'Management OS'
+                    $Result.VMName                 | Should Be 'ManagementOS'
                     $Result.Id                     | Should Be $TestAdapter.Id
                 }
                 It 'should call the expected mocks' {
@@ -93,7 +93,7 @@ try
                 Id                      = 'UniqueString'
                 Name                    = $TestAdapter.Name
                 SwitchName              = $TestAdapter.SwitchName
-                VMName                  = 'Management OS'
+                VMName                  = 'ManagementOS'
                 Ensure                  = 'Present'
             }
   
@@ -145,7 +145,7 @@ try
                 Id                      = 'UniqueString'
                 Name                    = $TestAdapter.Name
                 SwitchName              = $TestAdapter.SwitchName
-                VMName                  = 'Management OS'
+                VMName                  = 'ManagementOS'
                 Ensure                  = 'Present'
             }
   
@@ -185,7 +185,7 @@ try
                 }
             }
 
-            Context 'Adapter does not and no action needed' {        
+            Context 'Adapter does not exist and no action needed' {        
                 Mock Get-VMNetworkAdapter
 
                 It 'should return true' {
