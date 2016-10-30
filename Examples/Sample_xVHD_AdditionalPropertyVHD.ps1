@@ -14,8 +14,8 @@ configuration Sample_xVHD_AdditionalPropertyVHD
         [Parameter(Mandatory)]
         [string]$MaximumSizeBytes,
         
-        [ValidateSet("Vhd","Vhdx")]
-        [string]$Generation = "Vhd",
+        [ValidateSet(1,2)]
+        [Uint32]$Generation = 1,
 
         [ValidateSet("Present","Absent")]
         [string]$Ensure = "Present"    

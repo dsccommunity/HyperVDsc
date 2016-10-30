@@ -26,7 +26,8 @@ This resource is particularly useful when bootstrapping DSC Configurations into 
 * **Path**: The desired Path where the VHD will be created
 * **ParentPath**: Parent VHD file path, for differencing disk 
 * **MaximumSizeBytes**: Maximum size of VHD to be created 
-* **Generation**: Virtual disk format: { Vhd | VHDx }
+* **Generation**: Virtual machine generation { 1 | 2 }.
+Generation 2 virtual machines __only__ support VHDX files.
 * **Ensure**: Ensures that the VHD is Present or Absent 
 
 ### xVMHyperV
@@ -97,6 +98,7 @@ Please see the Examples section for more details.
 * MSFT_xVMHyperV: Changed the MACAddress parameter to string[] to support assigning multiple MAC addresses to virtual machines.
 * MSFT_xVMHyperV: Added enabling of Guest Service Interface.
 * MSFT_xVMSwitch: Added the BandwidthReservationMode parameter which specifies how minimum bandwidth is to be configured on a virtual switch
+* Fixing 'Generation' property value types from String to Integer in some of the examples.
 
 ### 3.2.0.0
 
@@ -104,6 +106,7 @@ Please see the Examples section for more details.
 * Minor fixes
 
 ### 3.1.0.0
+
 * xVMHyperV: Fixed bug in mof schema (Generation property had two types)
 * xVhdFileDirectory: Fixed typo in type comparison
 * Readme updates
@@ -184,7 +187,7 @@ Configuration Sample_EndToEndXHyperV_RunningVM
             Ensure         = "Present"
             Name           = $name
             Path           = (Split-Path $baseVhdPath)
-            Generation     = "vhd"
+            Generation     = 1
             ParentPath     =  $baseVhdPath
 
     }
@@ -208,6 +211,7 @@ Configuration Sample_EndToEndXHyperV_RunningVM
         SwitchName = "Test-Switch"
         VhdPath = Join-path (Split-Path $baseVhdPath) "$name.vhd"
         ProcessorCount = 2
+		Generation = 1
         MaximumMemory  = 1GB
         MinimumMemory = 512MB
         RestartIfNeeded =  "TRUE"
@@ -237,8 +241,8 @@ Configuration Sample_xVHD_NewVHD
         [Parameter(Mandatory)]
         [Uint64]$MaximumSizeBytes,
 
-        [ValidateSet("Vhd","Vhdx")]
-        [string]$Generation = "Vhd",
+        [ValidateSet(1, 2)]
+        [uint32]$Generation = 1,
 
         [ValidateSet("Present","Absent")]
         [string]$Ensure = "Present"        
@@ -278,8 +282,8 @@ Configuration Sample_xVhd_DiffVHD
         [Parameter(Mandatory)]
         [string]$ParentPath,
 
-        [ValidateSet("Vhd","Vhdx")]
-        [string]$Generation = "Vhd",
+        [ValidateSet(1, 2)]
+        [uint32]$Generation = 1,
 
         [ValidateSet("Present","Absent")]
         [string]$Ensure = "Present"    

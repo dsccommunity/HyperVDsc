@@ -131,7 +131,7 @@ Configuration Sample_EndToEndXHyperV_RunningVM
             Ensure           = "Present"
             Name             = $name
             Path             = (Split-Path $baseVhdPath)
-            Generation       = "vhd"
+            Generation       = 1
             ParentPath       =  $baseVhdPath
 
     }
