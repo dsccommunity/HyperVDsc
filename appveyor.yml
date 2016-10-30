@@ -8,10 +8,6 @@ install:
         Import-Module -Name .\DscResource.Tests\TestHelper.psm1 -Force
         Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
         Install-Module -Name Pester -Repository PSGallery -Force
-        Install-WindowsFeature -Name Hyper-V,Hyper-V-PowerShell -Restart
-        Get-WindowsFeature -Name Hyper*
-        Restart-Computer -Force
-        Start-Sleep -s 10
 
 #---------------------------------#
 #      build configuration        #
@@ -25,7 +21,6 @@ build: false
 
 test_script:
     - ps: |
-        Get-WindowsFeature -Name Hyper*
         $testResultsFile = ".\TestsResults.xml"
         $res = Invoke-Pester -OutputFormat NUnitXml -OutputFile $testResultsFile -PassThru
         (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testResultsFile))
