@@ -34,10 +34,6 @@ try
     $VMName = 'HyperVIntTestsVM'
     $VMPath = Join-Path -Path $TestEnvironment.WorkingFolder `
         -ChildPath $VMName
-    if (-not (Test-Path -Path $VMPath))
-    {
-        New-Item -Path $VMPath -ItemType Directory -Force
-    }
 
     # Create a config data object to pass to the DSC Configs
     $ConfigData = @{
