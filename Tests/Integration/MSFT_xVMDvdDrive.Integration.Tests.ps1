@@ -17,29 +17,32 @@ $TestEnvironment = Initialize-TestEnvironment `
     -TestType Integration
 #endregion
 
+# Import the common integration test functions
+Import-Module -Name ( Join-Path `
+    -Path $PSScriptRoot `
+    -ChildPath 'IntegrationTestsCommon.psm1' )
+
+# Ensure that the tests can be performed on this computer
+if (-not (Test-HyperVInstalled))
+{
+    Return
+} # if
+
 # Using try/finally to always cleanup even if something awful happens.
 try
 {
-    # Import the common integration test functions
-    Import-Module -Name ( Join-Path `
-        -Path $PSScriptRoot `
-        -ChildPath 'IntegrationTestsCommon.psm1' )
-
-    # Ensure that the tests can be performed on this computer
-    if (-not (Test-HyperVInstalled))
-    {
-        Return
-    } # if
-
     $VMName = 'HyperVIntTestsVM'
     $VMPath = Join-Path -Path $TestEnvironment.WorkingFolder `
         -ChildPath $VMName
 
     # Make sure test VM does not exist
-    if (Get-VM -Name $VMName)
+    if (Get-VM -Name $VMName -ErrorAction SilentlyContinue)
     {
-        Remove-VM -Name $VMName -Force
+        $null = Remove-VM -Name $VMName -Force
     } # if
+
+    # Create the VM that will be used to test with
+    $null = New-VM -Name $VMName -NoVHD -Path $VMPath
 
     # Create a config data object to pass to the DSC Configs
     $ConfigData = @{
@@ -78,12 +81,12 @@ try
 
             It 'Should have set the resource and all the parameters should match' {
                 $current = Get-DscConfiguration | Where-Object {
-                    $_.ConfigurationName -eq "$($script:DSCResourceName)_Mount_Config"
+                    $_.ConfigurationName -eq "$($script:DSCResourceName)_Add_Config"
                 }
                 $current.VMName             | Should Be $VMName
                 $current.ControllerNumber   | Should Be 0
                 $current.ControllerLocation | Should Be 0
-                $current.Path               | Should Be ''
+                $current.Path               | Should BeNullOrEmpty
                 $current.Ensure             | Should Be 'Present'
             }
         }
@@ -118,25 +121,21 @@ try
                 $current.VMName             | Should Be $VMName
                 $current.ControllerNumber   | Should Be 0
                 $current.ControllerLocation | Should Be 0
-                $current.Path               | Should Be ''
+                $current.Path               | Should BeNullOrEmpty
                 $current.Ensure             | Should Be 'Absent'
             }
         }
     }
-
-    if (Get-VM -Name $VMName)
-    {
-        Remove-VM -Name $VMName -Force
-    } # if
-    #endregion Integration Tests for VM DVD Drive
-}
-catch
-{
-    Write-Error -Exception $_
 }
 finally
 {
     #region FOOTER
+    # Make sure the test VM has been removed
+    if (Get-VM -Name $VMName -ErrorAction SilentlyContinue)
+    {
+        $null = Remove-VM -Name $VMName -Force
+    } # if
+
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
 }

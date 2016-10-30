@@ -66,7 +66,7 @@ function Get-TargetResource
     if ($dvdDrive)
     {
         $returnValue = @{
-            ImagePath          = $VMName
+            VMName             = $VMName
             ControllerLocation = $ControllerLocation
             ControllerNumber   = $ControllerNumber
             Path               = $dvdDrive.Path
@@ -76,7 +76,7 @@ function Get-TargetResource
     else
     {
         $returnValue = @{
-            ImagePath          = $VMName
+            VMName             = $VMName
             ControllerLocation = $ControllerLocation
             ControllerNumber   = $ControllerNumber
             Path               = ''
@@ -144,10 +144,10 @@ function Set-TargetResource
     # Get the current status of the VM DVD Drive
     $dvdDrive = Get-TargetResource @PSBoundParameters
 
-    if ($Ensure)
+    if ($Ensure -eq 'Present')
     {
         # The DVD Drive should exist
-        if ($dvdDrive)
+        if ($dvdDrive.Ensure -eq 'Present')
         {
             # The DVD Drive already exists
             if (-not [String]::IsNullOrWhiteSpace($Path) `
@@ -182,7 +182,7 @@ function Set-TargetResource
     else
     {
         # The DVD Drive should not exist
-        if ($dvdDrive)
+        if ($dvdDrive.Ensure -eq 'Present')
         {
             # The DVD Drive does exist, but should not. Change required.
             Write-Verbose -Message ( @(
@@ -257,10 +257,10 @@ function Test-TargetResource
     # Flag to signal whether settings are correct
     [Boolean] $desiredConfigurationMatch = $true
 
-    if ($Ensure)
+    if ($Ensure -eq 'Present')
     {
         # The DVD Drive should exist
-        if ($dvdDrive)
+        if ($dvdDrive.Ensure -eq 'Present')
         {
             # The DVD Drive already exists
             if (-not [String]::IsNullOrWhiteSpace($Path) `
@@ -300,7 +300,7 @@ function Test-TargetResource
     else
     {
         # The DVD Drive should not exist
-        if ($dvdDrive)
+        if ($dvdDrive.Ensure -eq 'Present')
         {
             # The DVD Drive does exist, but should not. Change required.
             Write-Verbose -Message ( @(
@@ -329,6 +329,7 @@ function Test-TargetResource
     .SYNOPSIS
     Validates that the parameters passed are valid. If the parameter combination
     is invalid then an exception will be thrown. The following items are validated:
+    - The VM exists.
     - A disk mount point at the controller number/location exists.
     - A hard disk is not already mounted at the controller number/location.
     - The Path if required is valid.
@@ -378,6 +379,9 @@ function Test-ParameterValid
         $Ensure = 'Present'
     )
 
+    # Does the VM exist?
+    $null = Get-VM -Name $VMName
+
     # Does the controller exist?
     if (-not (Get-VMScsiController -VMName ADCSTest -ControllerNumber $ControllerNumber) `
         -and -not (Get-VMIdeController -VMName ADCSTest -ControllerNumber $ControllerNumber))
@@ -405,14 +409,16 @@ function Test-ParameterValid
     if ($Ensure -eq 'Present')
     {
         # If the path is not blank does it exist?
-        if ([String]::IsNullOrWhiteSpace($Path) `
-            -and (Test-Path -Path $Path))
+        if (-not ([String]::IsNullOrWhiteSpace($Path)))
         {
-            # Path does not exist
-            New-InvalidArgumentError `
-                -ErrorId 'PathDoesNotExistError' `
-                -ErrorMessage ($LocalizedData.PathDoesNotExistError -f `
-                    $Path)
+            if (-not (Test-Path -Path $Path))
+            {
+                # Path does not exist
+                New-InvalidArgumentError `
+                    -ErrorId 'PathDoesNotExistError' `
+                    -ErrorMessage ($LocalizedData.PathDoesNotExistError -f `
+                        $Path)
+            } # if
         } # if
     } # if
 
