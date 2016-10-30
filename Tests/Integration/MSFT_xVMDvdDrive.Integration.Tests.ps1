@@ -35,6 +35,12 @@ try
     $VMPath = Join-Path -Path $TestEnvironment.WorkingFolder `
         -ChildPath $VMName
 
+    # Make sure test VM does not exist
+    if (Get-VM -Name $VMName)
+    {
+        Remove-VM -Name $VMName -Force
+    } # if
+
     # Create a config data object to pass to the DSC Configs
     $ConfigData = @{
         AllNodes = @(
@@ -117,16 +123,20 @@ try
             }
         }
     }
-    #endregion Integration Tests for VM DVD Drive
-}
-finally
-{
-    #region FOOTER
+
     if (Get-VM -Name $VMName)
     {
         Remove-VM -Name $VMName -Force
     } # if
-
+    #endregion Integration Tests for VM DVD Drive
+}
+catch
+{
+    Write-Error -Exception $_
+}
+finally
+{
+    #region FOOTER
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
 }
