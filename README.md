@@ -90,6 +90,7 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * Fix Markdown rule violations in Readme.md identified by [markdownlint](https://github.com/mivok/markdownlint/blob/master/docs/RULES.md).
 * Created standard Unit/Integration test folder structure.
 * Moved unit tests into Unit test folder.
+* Renamed the unit tests to meet standards.
 * Added the following resources:
   * xVMDvdDrive to manage DVD drives attached to a Hyper-V virtual machine.
 
@@ -359,6 +360,62 @@ Configuration Sample_xVMHyperV_Simple
 }
 ```
 
+### Create a secure boot generation 2 VM for a given VHD with a DVD Drive and ISO
+
+This configuration will create a VM, given a VHDX and add a DVD Drive to it with an
+ISO mounted to it.
+
+```powershell
+configuration Sample_xVMHyperV_SimpleWithDvdDrive
+{
+    param
+    (
+        [string[]]$NodeName = 'localhost',
+
+        [Parameter(Mandatory)]
+        [string]$VMName,
+
+        [Parameter(Mandatory)]
+        [string]$VhdPath,
+
+        [string]$ISOPath
+    )
+
+    Import-DscResource -module xHyper-V
+
+    Node $NodeName
+    {
+        # Install HyperV feature, if not installed - Server SKU only
+        WindowsFeature HyperV
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V'
+        }
+
+        # Ensures a VM with default settings
+        xVMHyperV NewVM
+        {
+            Ensure    = 'Present'
+            Name      = $VMName
+            VhdPath   = $VhdPath
+            Generation = $VhdPath.Split('.')[-1]
+            DependsOn = '[WindowsFeature]HyperV'
+        }
+
+        # Adds DVD Drive with ISO
+        xVMDvdDrive NewVMDvdDriveISO
+        {
+            Ensure             = 'Present'
+            Name               = $VMName
+            ControllerNumber   = 0
+            ControllerLocation = 0
+            Path               = $ISOPath
+            DependsOn          = '[xVMHyperV]NewVM'
+        }
+    }
+}
+```
+
 ### Create a VM with dynamic memory for a given VHD
 
 This configuration will create a VM with dynamic memory settings, given a VHD, on Hyper-V host.
@@ -505,7 +562,7 @@ Configuration Sample_xVMHyperV_Complete
 }
 ```
 
-### Create VM with multiple NICs.
+### Create VM with multiple NICs
 
 This configuration will create two internal virtual switches and create a VM with two network interfaces, one attached to each virtual switch.
 
@@ -689,6 +746,7 @@ Configuration xVhdD_CopyFileOrFolder
 
 }
 ```
+
 ### Change an Attribute for a File
 
 ```powershell
