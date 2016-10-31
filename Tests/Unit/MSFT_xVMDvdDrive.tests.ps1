@@ -56,6 +56,7 @@ try
             VMName             = $script:VMName
             ControllerNumber   = 0
             ControllerLocation = 1
+            Verbose            = $True
         }
         $script:splatAddDvdDriveNoPath = @{
             VMName             = $script:VMName
@@ -63,6 +64,7 @@ try
             ControllerLocation = 1
             Path               = ''
             Ensure             = 'Present'
+            Verbose            = $True
         }
         $script:splatAddDvdDrive = @{
             VMName             = $script:VMName
@@ -70,23 +72,44 @@ try
             ControllerLocation = 1
             Path               = $script:TestISOPath
             Ensure             = 'Present'
+            Verbose            = $True
         }
         $script:splatRemoveDvdDrive = @{
             VMName             = $script:VMName
             ControllerNumber   = 0
             ControllerLocation = 1
             Ensure             = 'Absent'
+            Verbose            = $True
         }
         $script:mockGetVM = [pscustomobject] @{
             Name               = $VMName
         }
         $script:mockGetVMScsiController = [pscustomobject] @{
-            VMName               = $VMName
+            VMName             = $VMName
         }
         $script:mockGetVMHardDiskDrive = [pscustomobject] @{
-            VMName               = $VMName
+            VMName             = $VMName
         }
-
+        $script:mockNoDvdDrive = @{
+            VMName             = $script:VMName
+            ControllerNumber   = 0
+            ControllerLocation = 1
+            Ensure             = 'Absent'
+        }
+        $script:mockDvdDriveWithPath = @{
+            VMName             = $script:VMName
+            ControllerNumber   = 0
+            ControllerLocation = 1
+            Path               = $script:TestISOPath
+            Ensure             = 'Present'
+        }
+        $script:mockDvdDriveWithDiffPath = @{
+            VMName             = $script:VMName
+            ControllerNumber   = 0
+            ControllerLocation = 1
+            Path               = 'd:\diff\diff.iso'
+            Ensure             = 'Present'
+        }
         #endregion
 
         #region Function Get-TargetResource
@@ -156,7 +179,6 @@ try
                     -MockWith {} `
                     -Verifiable
 
-                # Mocks that should not be called
                 It 'should not throw exception' {
                     {
                         $script:resource = Get-TargetResource @script:splatGetDvdDrive
@@ -189,7 +211,6 @@ try
                     -MockWith { $script:splatAddDvdDriveNoPath } `
                     -Verifiable
 
-                # Mocks that should not be called
                 It 'should not throw exception' {
                     {
                         $script:resource = Get-TargetResource @script:splatGetDvdDrive
@@ -222,7 +243,6 @@ try
                     -MockWith { $script:splatAddDvdDrive } `
                     -Verifiable
 
-                # Mocks that should not be called
                 It 'should not throw exception' {
                     {
                         $script:resource = Get-TargetResource @script:splatGetDvdDrive
@@ -248,11 +268,278 @@ try
 
         #region Function Set-TargetResource
         Describe 'MSFT_xVMDvdDrive\Set-TargetResource' {
+            #region VM Functions
+            function Add-VMDvdDrive {
+                Param
+                (
+                    [String]
+                    $VMName,
+
+                    [Uint32]
+                    $ControllerNumber,
+
+                    [Uint32]
+                    $ControllerLocation,
+
+                    [String]
+                    $Path
+                )
+            }
+
+            function Set-VMDvdDrive {
+                Param
+                (
+                    [String]
+                    $VMName,
+
+                    [Uint32]
+                    $ControllerNumber,
+
+                    [Uint32]
+                    $ControllerLocation,
+
+                    [String]
+                    $Path
+                )
+            }
+
+            function Remove-VMDvdDrive {
+                Param
+                (
+                    [String]
+                    $VMName,
+
+                    [Uint32]
+                    $ControllerNumber,
+
+                    [Uint32]
+                    $ControllerLocation
+                )
+            }
+            #endregion
+
+            Context 'DVD Drive does not exist but should' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-TargetResource `
+                    -MockWith { $script:mockNoDvdDrive } `
+                    -Verifiable
+
+                Mock `
+                    -CommandName Add-VMDvdDrive `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock -CommandName Set-VMDvdDrive
+                Mock -CommandName Remove-VMDvdDrive
+
+                It 'should not throw exception' {
+                    { Set-TargetResource @script:splatAddDvdDriveNoPath } | Should Not Throw
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
+                    Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 1
+                    Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 0
+                    Assert-MockCalled -CommandName Remove-VMDvdDrive -Exactly 0
+                }
+            }
+
+            Context 'DVD Drive does exist and should, path matches' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-TargetResource `
+                    -MockWith { $script:mockDvdDriveWithPath } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock -CommandName Add-VMDvdDrive
+                Mock -CommandName Set-VMDvdDrive
+                Mock -CommandName Remove-VMDvdDrive
+
+                It 'should not throw exception' {
+                    { Set-TargetResource @script:splatAddDvdDrive } | Should Not Throw
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
+                    Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 0
+                    Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 0
+                    Assert-MockCalled -CommandName Remove-VMDvdDrive -Exactly 0
+                }
+            }
+
+            Context 'DVD Drive does exist and should, path does not match' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-TargetResource `
+                    -MockWith { $script:mockDvdDriveWithDiffPath } `
+                    -Verifiable
+
+                Mock `
+                    -CommandName Set-VMDvdDrive `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock -CommandName Add-VMDvdDrive
+                Mock -CommandName Remove-VMDvdDrive
+
+                It 'should not throw exception' {
+                    { Set-TargetResource @script:splatAddDvdDrive } | Should Not Throw
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
+                    Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 0
+                    Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 1
+                    Assert-MockCalled -CommandName Remove-VMDvdDrive -Exactly 0
+                }
+            }
+
+            Context 'DVD Drive exists and should not' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-TargetResource `
+                    -MockWith { $script:mockDvdDriveWithPath } `
+                    -Verifiable
+
+                Mock `
+                    -CommandName Remove-VMDvdDrive `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock -CommandName Add-VMDvdDrive
+                Mock -CommandName Set-VMDvdDrive
+
+                It 'should not throw exception' {
+                    { Set-TargetResource @script:splatRemoveDvdDrive } | Should Not Throw
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
+                    Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 0
+                    Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 0
+                    Assert-MockCalled -CommandName Remove-VMDvdDrive -Exactly 1
+                }
+            }
+
+            Context 'DVD Drive does not exist and should not' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-TargetResource `
+                    -MockWith { $script:mockNoDvdDrive } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock -CommandName Add-VMDvdDrive
+                Mock -CommandName Set-VMDvdDrive
+                Mock -CommandName Remove-VMDvdDrive
+
+                It 'should not throw exception' {
+                    { Set-TargetResource @script:splatRemoveDvdDrive } | Should Not Throw
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
+                    Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 0
+                    Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 0
+                    Assert-MockCalled -CommandName Remove-VMDvdDrive -Exactly 0
+                }
+            }
         }
         #endregion
 
         #region Function Test-TargetResource
         Describe 'MSFT_xVMDvdDrive\Test-TargetResource' {
+            Context 'DVD Drive does not exist but should' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-TargetResource `
+                    -MockWith { $script:mockNoDvdDrive } `
+                    -Verifiable
+
+                It 'should return false' {
+                    Test-TargetResource @script:splatAddDvdDriveNoPath | Should Be $False
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
+                }
+            }
+
+            Context 'DVD Drive does exist and should, path matches' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-TargetResource `
+                    -MockWith { $script:mockDvdDriveWithPath } `
+                    -Verifiable
+
+                It 'should return true' {
+                    Test-TargetResource @script:splatAddDvdDrive | Should Be $True
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
+                }
+            }
+
+            Context 'DVD Drive does exist and should, path does not match' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-TargetResource `
+                    -MockWith { $script:mockDvdDriveWithDiffPath } `
+                    -Verifiable
+
+                It 'should return false' {
+                    Test-TargetResource @script:splatAddDvdDrive | Should Be $False
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
+                }
+            }
+
+            Context 'DVD Drive exists and should not' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-TargetResource `
+                    -MockWith { $script:mockDvdDriveWithPath } `
+                    -Verifiable
+
+                It 'should return false' {
+                    Test-TargetResource @script:splatRemoveDvdDrive | Should Be $False
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
+                }
+            }
+
+            Context 'DVD Drive does not exist and should not' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-TargetResource `
+                    -MockWith { $script:mockNoDvdDrive } `
+                    -Verifiable
+
+                It 'should return true' {
+                    Test-TargetResource @script:splatRemoveDvdDrive | Should Be $True
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
+                }
+            }
         }
         #endregion
 

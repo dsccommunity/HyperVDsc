@@ -269,7 +269,7 @@ function Test-TargetResource
                 # The current path assigned to the DVD drive is wrong. Change required.
                 Write-Verbose -Message ( @(
                     "$($MyInvocation.MyCommand): "
-                    $($LocalizedData.VMDVDDriveExistsAndShouldMessage) `
+                    $($LocalizedData.VMDVDDriveExistsAndShouldPathMismatchMessage) `
                         -f $VMName,$ControllerNumber,$ControllerLocation,$Path,$dvdDrive.Path `
                     ) -join '' )
 
