@@ -379,7 +379,7 @@ function Test-ParameterValid
         $Ensure = 'Present'
     )
 
-    # Does the VM exist?
+    # Does the VM exist? Hyper-V installed etc?
     $null = Get-VM -Name $VMName
 
     # Does the controller exist?
@@ -402,7 +402,7 @@ function Test-ParameterValid
         # Yes, so don't even try and touch this
         New-InvalidArgumentError `
             -ErrorId 'ControllerConflictError' `
-            -ErrorMessage ($LocalizedData.PathDoesNotExistError -f `
+            -ErrorMessage ($LocalizedData.ControllerConflictError -f `
                 $VMName,$ControllerNumber,$ControllerLocation)
     } # if
 
