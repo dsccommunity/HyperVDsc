@@ -1,9 +1,9 @@
 ﻿Configuration HostOSAdapter
 {
-    Import-DscResource -ModuleName cHyper-V -Name cVMNetworkAdapter
+    Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
-    cVMNetworkAdapter ManagementAdapter {
+    xVMNetworkAdapter ManagementAdapter {
         Id = 'Management-NIC'
         Name = 'Management-NIC'
         SwitchName = 'SETSwitch'
@@ -11,7 +11,7 @@
         Ensure = 'Present'
     }
 
-    cVMNetworkAdapter ClusterAdapter {
+    xVMNetworkAdapter ClusterAdapter {
         Id = 'Cluster-NIC'
         Name = 'Cluster-NIC'
         SwitchName = 'SETSwitch'
