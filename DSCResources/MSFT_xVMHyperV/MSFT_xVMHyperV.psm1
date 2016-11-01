@@ -497,7 +497,7 @@ function Test-TargetResource
     }
     
     # Check if $VhdPath exist
-    if(!(Test-Path $VhdPath))
+    if(($Ensure -eq "Present") -and (!(Test-Path -Path $VhdPath)))
     {
         Throw ($localizedData.VhdPathDoesNotExistError -f $VhdPath)
     }
