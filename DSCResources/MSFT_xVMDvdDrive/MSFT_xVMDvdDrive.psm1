@@ -379,7 +379,13 @@ function Test-ParameterValid
         $Ensure = 'Present'
     )
 
-    # Does the VM exist? Hyper-V installed etc?
+    # Check if Hyper-V module is present for Hyper-V cmdlets
+    if(!(Get-Module -ListAvailable -Name Hyper-V))
+    {
+        Throw ($localizedData.RoleMissingError -f 'Hyper-V')
+    } # if
+
+    # Does the VM exist?
     $null = Get-VM -Name $VMName
 
     # Does the controller exist?

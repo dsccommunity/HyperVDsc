@@ -13,6 +13,7 @@ ConvertFrom-StringData @'
     VMDVDDriveDoesExistButShouldNotMessage = VM '{0}' DVD Drive on controller number {1} location {2} exists but should not. Change required.
     VMDVDDriveDoesNotExistAndShouldNotMessage = VM '{0}' DVD Drive on controller number {1} location {2} does not exist and should not. Change not required.
 
+    RoleMissingError = Please ensure that '{0}' role is installed with its PowerShell module.
     VMControllerDoesNotExistError = The controller number {1} does not exist on VM '{0}'.
     PathDoesNotExistError = The path '{0}' does not exist.
     ControllerConflictError = The Controller number {1} location {2} already has a hard drive attached on VM '{0}'.

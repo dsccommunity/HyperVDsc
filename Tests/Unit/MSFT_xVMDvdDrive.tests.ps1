@@ -676,7 +676,7 @@ try
                 # Mocks that should not be called
                 Mock -CommandName Get-VMIdeController
 
-                It 'should not throw exception' {
+                It 'should throw exception' {
                     $errorRecord = Get-InvalidArguementError `
                         -ErrorId 'ControllerConflictError' `
                         -ErrorMessage ($LocalizedData.ControllerConflictError -f `
@@ -717,7 +717,7 @@ try
                 # Mocks that should not be called
                 Mock -CommandName Get-VMIdeController
 
-                It 'should not throw exception' {
+                It 'should throw exception' {
                     $errorRecord = Get-InvalidArguementError `
                         -ErrorId 'PathDoesNotExistError' `
                         -ErrorMessage ($LocalizedData.PathDoesNotExistError -f `
