@@ -380,9 +380,12 @@ function Test-ParameterValid
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
-    if(!(Get-Module -ListAvailable -Name Hyper-V))
+    if(-not (Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw ($localizedData.RoleMissingError -f 'Hyper-V')
+        New-InvalidArgumentError `
+            -ErrorId 'RoleMissingError' `
+            -ErrorMessage ($LocalizedData.RoleMissingError -f `
+                'Hyper-V')
     } # if
 
     # Does the VM exist?

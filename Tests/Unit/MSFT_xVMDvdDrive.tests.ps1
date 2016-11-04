@@ -81,6 +81,9 @@ try
             Ensure             = 'Absent'
             Verbose            = $True
         }
+        $script:mockGetModule = [pscustomobject] @{
+            Name               = 'Hyper-V'
+        }
         $script:mockGetVM = [pscustomobject] @{
             Name               = $VMName
         }
@@ -599,8 +602,40 @@ try
             }
             #endregion
 
+            Context 'Hyper-V Module is not available' {
+                # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-Module `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock -CommandName Get-VM
+                Mock -CommandName Get-VMScsiController
+                Mock -CommandName Get-VMIdeController
+                Mock -CommandName Get-VMHardDiskDrive
+
+                It 'should throw exception' {
+                    $errorRecord = Get-InvalidArguementError `
+                        -ErrorId 'RoleMissingError' `
+                        -ErrorMessage ($LocalizedData.RoleMissingError -f `
+                            'Hyper-V')
+
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should Throw $errorRecord
+                }
+
+                It 'all the get mocks should be called' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Module -Exactly 1
+                }
+            }
+
             Context 'VM does not exist' {
                 # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-Module `
+                    -MockWith { $script:mockGetModule } `
+                    -Verifiable
+
                 Mock `
                     -CommandName Get-VM `
                     -MockWith { Throw } `
@@ -617,12 +652,18 @@ try
 
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Module -Exactly 1
                     Assert-MockCalled -CommandName Get-VM -Exactly 1
                 }
             }
 
             Context 'VM exists, controller does not exist' {
                 # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-Module `
+                    -MockWith { $script:mockGetModule } `
+                    -Verifiable
+
                 Mock `
                     -CommandName Get-VM `
                     -MockWith { $script:mockGetVM } `
@@ -639,7 +680,7 @@ try
                 # Mocks that should not be called
                 Mock -CommandName Get-VMHardDiskDrive
 
-                It 'should not throw exception' {
+                It 'should throw exception' {
                     $errorRecord = Get-InvalidArguementError `
                         -ErrorId 'VMControllerDoesNotExistError' `
                         -ErrorMessage ($LocalizedData.VMControllerDoesNotExistError -f `
@@ -650,6 +691,7 @@ try
 
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Module -Exactly 1
                     Assert-MockCalled -CommandName Get-VM -Exactly 1
                     Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1
                     Assert-MockCalled -CommandName Get-VMIdeController -Exactly 1
@@ -658,6 +700,11 @@ try
 
             Context 'VM exists, SCSI contrller exists, HD assigned' {
                 # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-Module `
+                    -MockWith { $script:mockGetModule } `
+                    -Verifiable
+
                 Mock `
                     -CommandName Get-VM `
                     -MockWith { $script:mockGetVM } `
@@ -687,6 +734,7 @@ try
 
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Module -Exactly 1
                     Assert-MockCalled -CommandName Get-VM -Exactly 1
                     Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1
                     Assert-MockCalled -CommandName Get-VMHardDiskDrive -Exactly 1
@@ -695,6 +743,11 @@ try
 
             Context 'VM exists, SCSI contrller exists, HD not assigned, Path invalid' {
                 # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-Module `
+                    -MockWith { $script:mockGetModule } `
+                    -Verifiable
+
                 Mock `
                     -CommandName Get-VM `
                     -MockWith { $script:mockGetVM } `
@@ -728,6 +781,7 @@ try
 
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Module -Exactly 1
                     Assert-MockCalled -CommandName Get-VM -Exactly 1
                     Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1
                     Assert-MockCalled -CommandName Get-VMHardDiskDrive -Exactly 1
@@ -737,6 +791,11 @@ try
 
             Context 'VM exists, SCSI contrller exists, HD not assigned, Path Valid' {
                 # Verifiable (should be called) mocks
+                Mock `
+                    -CommandName Get-Module `
+                    -MockWith { $script:mockGetModule } `
+                    -Verifiable
+
                 Mock `
                     -CommandName Get-VM `
                     -MockWith { $script:mockGetVM } `
@@ -765,6 +824,7 @@ try
 
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Module -Exactly 1
                     Assert-MockCalled -CommandName Get-VM -Exactly 1
                     Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1
                     Assert-MockCalled -CommandName Get-VMHardDiskDrive -Exactly 1
