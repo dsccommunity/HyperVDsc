@@ -12,6 +12,23 @@ else
 }
 #endregion
 
+<#
+.SYNOPSIS
+    Gets MSFT_xVMNetworkAdapter resource current state.
+
+.PARAMETER Id
+    Specifies an unique identifier for the network adapter.
+
+.PARAMETER Name
+    Specifies a name for the network adapter that needs to be connected to a VM or management OS.
+
+.PARAMETER SwitchName
+    Specifies the name of the switch to which the new VM network adapter will be connected.
+
+.PARAMETER VMName
+    Specifies the name of the VM to which the network adapter will be connected.
+    Specify VMName as ManagementOS if you wish to connect the adapter to host OS.
+#>
 Function Get-TargetResource
 {
     [CmdletBinding()]
@@ -78,6 +95,30 @@ Function Get-TargetResource
     return $configuration
 }
 
+<#
+.SYNOPSIS
+    Sets MSFT_xVMNetworkAdapter resource state.
+
+.PARAMETER Id
+    Specifies an unique identifier for the network adapter.
+
+.PARAMETER Name
+    Specifies a name for the network adapter that needs to be connected to a VM or management OS.
+
+.PARAMETER SwitchName
+    Specifies the name of the switch to which the new VM network adapter will be connected.
+
+.PARAMETER VMName
+    Specifies the name of the VM to which the network adapter will be connected.
+    Specify VMName as ManagementOS if you wish to connect the adapter to host OS.
+
+.PARAMETER MacAddress
+    Specifies the MAC address for the network adapter. This is not applicable if VMName
+    is set to ManagementOS. Use this parameter to specify a static MAC address.
+
+.PARAMETER Ensure
+    Specifies if the network adapter should be Present or Absent.
+#>
 Function Set-TargetResource
 {
     [CmdletBinding()]
@@ -197,6 +238,30 @@ Function Set-TargetResource
     }
 }
 
+<#
+.SYNOPSIS
+    Tests if MSFT_xVMNetworkAdapter resource state is indeed desired state or not.
+
+.PARAMETER Id
+    Specifies an unique identifier for the network adapter.
+
+.PARAMETER Name
+    Specifies a name for the network adapter that needs to be connected to a VM or management OS.
+
+.PARAMETER SwitchName
+    Specifies the name of the switch to which the new VM network adapter will be connected.
+
+.PARAMETER VMName
+    Specifies the name of the VM to which the network adapter will be connected.
+    Specify VMName as ManagementOS if you wish to connect the adapter to host OS.
+
+.PARAMETER MacAddress
+    Specifies the MAC address for the network adapter. This is not applicable if VMName
+    is set to ManagementOS. Use this parameter to specify a static MAC address.
+
+.PARAMETER Ensure
+    Specifies if the network adapter should be Present or Absent.
+#>
 Function Test-TargetResource
 {
     [CmdletBinding()]
