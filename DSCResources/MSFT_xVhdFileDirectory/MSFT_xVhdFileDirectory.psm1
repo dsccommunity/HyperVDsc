@@ -21,7 +21,7 @@ ConvertFrom-StringData @'
     AttributeChangeFailed=Failed to change the attribute of the file {0} to value {1}
     RemoveItemSuccess=Successfully removed item {0}.
     RemoveItemFailed=Failed to  remove item {0}. Error: {1}.
-	MissingDrive=Failed to retrieve drive letter
+    MissingDrive=Failed to retrieve drive letter
 '@
 }
 
@@ -67,8 +67,8 @@ function Get-TargetResource {
     # Mount VHD.
     $mountVHD = EnsureVHDState -Mounted -vhdPath $vhdPath
     
-	# Retrieve the current drive letter for the VHD
-	$mountedDrive = MountedDrive -VhdPartitionNumber $VhdPartitionNumber
+    # Retrieve the current drive letter for the VHD
+    $mountedDrive = MountedDrive -VhdPartitionNumber $VhdPartitionNumber
     
     # Turn drive letter into a path
     $letterDrive  = "$($mountedDrive.DriveLetter):\"
@@ -93,9 +93,9 @@ function Get-TargetResource {
     
     # Return the result.
     Return @{
-		VhdPath = $VhdPath
-		VhdPartitionNumber = $VhdPartitionNumber
-		FileDirectory = $itemsFound
+        VhdPath = $VhdPath
+        VhdPartitionNumber = $VhdPartitionNumber
+        FileDirectory = $itemsFound
     }   
 }
 
@@ -129,8 +129,8 @@ function Set-TargetResource {
     # mount the VHD.
     $mountVHD = EnsureVHDState -Mounted -vhdPath $VhdPath
 
-	# Retrieve the current drive letter for the VHD
-	$mountedDrive = MountedDrive -VhdPartitionNumber $VhdPartitionNumber
+    # Retrieve the current drive letter for the VHD
+    $mountedDrive = MountedDrive -VhdPartitionNumber $VhdPartitionNumber
 
     try {
         # Turn drive letter into a path
@@ -208,8 +208,8 @@ function Test-TargetResource {
     # mount the vhd.
     $mountVHD = EnsureVHDState -Mounted -vhdPath $VhdPath
 
-	# Retrieve the current drive letter for the VHD
-	$mountedDrive = MountedDrive -VhdPartitionNumber $VhdPartitionNumber
+    # Retrieve the current drive letter for the VHD
+    $mountedDrive = MountedDrive -VhdPartitionNumber $VhdPartitionNumber
 
     try {
         # Check that we only have a single drive letter
@@ -332,38 +332,38 @@ function EnsureVHDState {
 
 # Determine drive letter
 function MountedDrive {
-	param (
-		[parameter(Mandatory = $false)]
-		[System.Uint32]
-		$VhdPartitionNumber
-	)
+    param (
+        [parameter(Mandatory = $false)]
+        [System.Uint32]
+        $VhdPartitionNumber
+    )
 
-	try {
-		if ($VhdPartitionNumber) {
-			$mountedDrive =  $mountVHD | Get-Disk | Get-Partition | Where-Object -FilterScript { $_.PartitionNumber -eq $VhdPartitionNumber } | Get-Volume
-		}
-		else {
-			$mountedDrive =  $mountVHD | Get-Disk | Get-Partition | Get-Volume
-		}
-	}
-	catch {
-		Write-Verbose $localizedData.MissingDrive
-		break;
-	}
+    try {
+        if ($VhdPartitionNumber) {
+            $mountedDrive =  $mountVHD | Get-Disk | Get-Partition | Where-Object -FilterScript { $_.PartitionNumber -eq $VhdPartitionNumber } | Get-Volume
+        }
+        else {
+            $mountedDrive =  $mountVHD | Get-Disk | Get-Partition | Get-Volume
+        }
+    }
+    catch {
+        Write-Verbose $localizedData.MissingDrive
+        break;
+    }
     
-	if (-not ($mountedDrive)) {
-		Write-Verbose $localizedData.MissingDrive
-		break;
-	}
+    if (-not ($mountedDrive)) {
+        Write-Verbose $localizedData.MissingDrive
+        break;
+    }
 
-	return $mountedDrive
+    return $mountedDrive
 }
 
 # Change the Cim Instance objects in to a hash table containing property value pair.
 function GetItemToCopy {
     param (
-		[Microsoft.Management.Infrastructure.CimInstance]$item
-	)
+        [Microsoft.Management.Infrastructure.CimInstance]$item
+    )
 
     $returnValue = @{
         SourcePath = $item.CimInstanceProperties["SourcePath"].Value
