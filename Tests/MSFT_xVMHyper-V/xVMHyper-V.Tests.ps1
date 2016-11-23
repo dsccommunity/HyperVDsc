@@ -155,16 +155,16 @@ Describe 'xVMHyper-V' {
                 Test-TargetResource -Name 'NonexistentVM' -Ensure Absent @testParams | Should Be $true;
             }
             
-            It 'Returns $true when VM is not present, "Ensure" = "Absent", and the VHD file path does not exist' {
-				$targetVHDPath = 'TestDrive:\TestVHDNotExist.vhdx'
-				
-				# Verify that the arbitrary VHD path doesn't exist
-				if (Test-Path -Path $targetVHDPath) { Remove-Item -Path $targetVHDPath }
-				
-				$testParamsLocal = @{
-					VhdPath = $targetVHDPath;
-				}
-				Test-TargetResource -Name 'NonexistentVM' -Ensure Absent $testParamsLocal | Should Be $true;
+            It 'Returns $true when VM is not present, "Ensure" = "Absent", and the VHD file path does not exist' {	    
+	    	$targetVHDPath = 'TestDrive:\TestVHDNotExist.vhdx'
+		
+		# Verify that the arbitrary VHD path doesn't exist
+		if (Test-Path -Path $targetVHDPath) { Remove-Item -Path $targetVHDPath }
+		
+		$testParamsLocal = @{
+			VhdPath = $targetVHDPath;
+		}
+		Test-TargetResource -Name 'NonexistentVM' -Ensure Absent $testParamsLocal | Should Be $true;
             }
 
             It 'Returns $false when VM is present and "Ensure" = "Absent"' {
