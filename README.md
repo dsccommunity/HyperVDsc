@@ -78,6 +78,8 @@ Please see the Examples section for more details.
 
 ### Unreleased
 
+* xVHD: Updated incorrect property name MaximumSize in error message
+
 ### 3.5.0.0
 * Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
 
