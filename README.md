@@ -87,6 +87,7 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 
 ### Unreleased
 
+* xVHD: Updated incorrect property name MaximumSize in error message
 * Fix Markdown rule violations in Readme.md identified by [markdownlint](https://github.com/mivok/markdownlint/blob/master/docs/RULES.md).
 * Created standard Unit/Integration test folder structure.
 * Moved unit tests into Unit test folder.
