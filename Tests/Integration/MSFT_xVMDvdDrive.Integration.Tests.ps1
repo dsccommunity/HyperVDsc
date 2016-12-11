@@ -32,7 +32,7 @@ if (-not (Test-HyperVInstalled))
 try
 {
     $VMName = 'HyperVIntTestsVM'
-    $VMPath = Join-Path -Path $TestEnvironment.WorkingFolder `
+    $VMPath = Join-Path -Path $TestDrive `
         -ChildPath $VMName
 
     # Make sure test VM does not exist
@@ -67,9 +67,9 @@ try
             It 'Should compile without throwing' {
                 {
                     & "$($script:DSCResourceName)_Add_Config" `
-                        -OutputPath $TestEnvironment.WorkingFolder `
+                        -OutputPath $TestDrive `
                         -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
+                    Start-DscConfiguration -Path $TestDrive `
                         -ComputerName localhost -Wait -Verbose -Force
                 } | Should not throw
             }
@@ -102,9 +102,9 @@ try
             It 'Should compile without throwing' {
                 {
                     & "$($script:DSCResourceName)_Remove_Config" `
-                        -OutputPath $TestEnvironment.WorkingFolder `
+                        -OutputPath $TestDrive `
                         -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
+                    Start-DscConfiguration -Path $TestDrive `
                         -ComputerName localhost -Wait -Verbose -Force
                 } | Should not throw
             }
