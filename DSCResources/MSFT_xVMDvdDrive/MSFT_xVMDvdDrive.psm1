@@ -356,7 +356,7 @@ function Test-TargetResource
 function Test-ParameterValid
 {
     [CmdletBinding()]
-    [OutputType([String[]])]
+    [OutputType([Boolean])]
     param
     (
         [parameter(Mandatory = $true)]
