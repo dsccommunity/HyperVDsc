@@ -54,7 +54,7 @@ configuration Sample_xVMHyperV_Complete
             SwitchName      = $SwitchName
             State           = $State
             Path            = $Path
-            Generation      = $VhdPath.Split('.')[-1]
+            Generation      = 2
             StartupMemory   = $StartupMemory
             MinimumMemory   = $MinimumMemory
             MaximumMemory   = $MaximumMemory
