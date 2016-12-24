@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '3.5.0.0'
+ModuleVersion = '3.6.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'f5a5f169-7026-4053-932a-19a7c37b1ca5'
@@ -47,9 +47,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
-
-* MSFT_xVMHyperV: Fixed bug in Test-TargetResource throwing when a Vhd"s ParentPath property was null.
+        ReleaseNotes = '* xVHD: Updated incorrect property name MaximumSize in error message
 
 '
 
@@ -57,6 +55,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 

@@ -83,9 +83,25 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **`[String]` Path** (_Write_): Specifies the full path to the virtual hard disk file or physical hard disk volume for the added DVD drive.
 * **`[String]` Ensure** (_Write_): Specifies if the DVD Drive should exist or not. { *Present* | Absent }. Defaults to Present.
 
+### xVMNetworkAdapter
+
+* **Id**: Unique string for identifying the resource instance. This is the key property for the instances of this resource.
+* **Name**: Name of the network adapter as it appears either in the management OS or attached to a VM.
+* **SwitchName**: Virtual Switch name to connect the adapter to.
+* **VMName**: Name of the VM to attach to. If you want to attach new VM Network adapter to the management OS, set this property to 'Management OS'.
+* **DynamicMacAddress**: Set this to $false if you want to specify a static MAC address.
+* **StaticMacAddress**: Specifies static MAC address for the Network adapter.
+* **Ensure**: Ensures that the VM Network Adapter is Present or Absent.
+* 
+Please see the Examples section for more details. 
+
 ## Versions
 
 ### Unreleased
+* Adding a new resource
+	* MSFT_xVMNetworkAdapter: Attaches a new VM network adapter to the management OS or VM.
+
+### 3.6.0.0
 
 * xVHD: Updated incorrect property name MaximumSize in error message
 * Fix Markdown rule violations in Readme.md identified by [markdownlint](https://github.com/mivok/markdownlint/blob/master/docs/RULES.md).
