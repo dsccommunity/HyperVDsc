@@ -408,7 +408,10 @@ function Set-TargetResource
 
             if ($EnableGuestService)
             {
-                Enable-VMIntegrationService -VMName $Name -Name 'Guest Service Interface'
+                Get-VMIntegrationService -VMName $Name | 
+                    Where-Object {$PSitem.Id -Match `
+                    "Microsoft:[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}\\6C09BB55-D683-4DA0-8931-C9BF705F6480"} | 
+                    Enable-VMIntegrationService 
             }
             
             Write-Verbose -Message ($localizedData.VMCreated -f $Name)
@@ -589,7 +592,10 @@ function Test-TargetResource
                     return $false
                 }
             }
-            if (($vmObj | Get-VMIntegrationService -Name 'Guest Service Interface').Enabled -ne $EnableGuestService) {return $false}
+            if (($vmObj | Get-VMIntegrationService | 
+                            Where-Object {$PSitem.Id -Match `
+                            "Microsoft:[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}\\6C09BB55-D683-4DA0-8931-C9BF705F6480"`
+                            }).Enabled -ne $EnableGuestService) {return $false}
             return $true
         }
         else
