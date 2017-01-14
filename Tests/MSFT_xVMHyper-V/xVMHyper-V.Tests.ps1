@@ -33,7 +33,7 @@ Describe 'xVMHyper-V' {
         function Set-VMFirmware { }
         function Get-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $Name)}
         function Enable-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $Name)}
-        function Disable-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $name)}
+        function Disable-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $Name)}
         function Get-VHD { param ( $Path ) }
 
         $stubVhdxDisk = New-Item -Path 'TestDrive:\TestVM.vhdx' -ItemType File;
@@ -64,6 +64,7 @@ Describe 'xVMHyper-V' {
             NetworkAdapters = @($stubNIC1,$stubNIC2);
             Notes = '';
         }
+        $stubGuestServiceInterfaceId = 'Microsoft:12E134B6-41DD-4C64-BADD-B48DF9CED6C9\6C09BB55-D683-4DA0-8931-C9BF705F6480'
 
         Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'RunningVM' } -MockWith {
             $runningVM = $stubVM.Clone();
@@ -96,9 +97,8 @@ Describe 'xVMHyper-V' {
             $gen2VM['Generation'] = 2;
             return [PSCustomObject] $gen2VM;
         }
-        Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$false}}
+        Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$false;Id=$stubGuestServiceInterfaceId}}
         Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { return $true; }
-
         Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhd') } -MockWith {
             ## Return single Vhd chain for .vhds
             return @($stubVhdDisk.FullName);   
@@ -254,7 +254,7 @@ Describe 'xVMHyper-V' {
             }
 
             It 'Returns $true when EnableGuestService is on and requested "EnableGuestService" = "$true"' {
-                Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true}}
+                Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true;Id=$stubGuestServiceInterfaceId}}
                 Test-TargetResource -Name 'RunningVM' -EnableGuestService $true @testParams | Should be $true;
             }
 
@@ -434,7 +434,7 @@ Describe 'xVMHyper-V' {
 
             It 'Does call "Disable-VMIntegrationService" when "Guest Service Interface" = "Enabled" and "EnableGuestService" = "$false" specified' {
                 Mock -CommandName Disable-VMIntegrationService -MockWith { }
-                Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true}}
+                Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true;Id=$stubGuestServiceInterfaceId}}
                 Set-TargetResource -Name 'RunningVM' -EnableGuestService $false @testParams
                 Assert-MockCalled -CommandName Disable-VMIntegrationService -Exactly -Times 1 -Scope It
             }
@@ -498,8 +498,8 @@ Describe 'xVMHyper-V' {
                 { Get-VhdHierarchy -VhdPath $fakeVhdPath } | Should Not Throw;
             }
 
-        } #end context validates Get-VhdHierarchy
 
+        } #end context validates Get-VhdHierarchy
 
     } #end inmodulescope
 } #end describe xVMHyper-V
