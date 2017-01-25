@@ -89,6 +89,8 @@ Please see the Examples section for more details.
 ## Versions
 
 ### Unreleased
+
+### 3.7.0.0
 * Adding a new resource
 	* MSFT_xVMNetworkAdapter: Attaches a new VM network adapter to the management OS or VM.
 
