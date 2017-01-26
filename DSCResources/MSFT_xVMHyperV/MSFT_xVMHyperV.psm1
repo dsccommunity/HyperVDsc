@@ -91,7 +91,11 @@ function Get-TargetResource
         CreationTime     = $vmobj.CreationTime
         HasDynamicMemory = $vmobj.DynamicMemoryEnabled
         NetworkAdapters  = $vmobj.NetworkAdapters.IPAddresses
-        EnableGuestService = ($vmobj | Get-VMIntegrationService -Name 'Guest Service Interface').Enabled
+        EnableGuestService = ($vmobj | 
+                                Get-VMIntegrationService | 
+                                Where-Object {$PSitem.Id -Match `
+                                "Microsoft:[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}\\6C09BB55-D683-4DA0-8931-C9BF705F6480"`
+                                }).Enabled
     }
 }
 
@@ -308,17 +312,19 @@ function Set-TargetResource
             }
 
             #If the VM doesn't have Guest Service Interface correctly configured, update it.
-            $GuestServiceStatus = $vmObj | Get-VMIntegrationService -Name 'Guest Service Interface'
-            if ($GuestServiceStatus.Enabled -eq $false -and $EnableGuestService)
+            $GuestService = $vmObj | Get-VMIntegrationService | 
+                                            Where-Object {$PSitem.Id -Match `
+                                            "Microsoft:[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}\\6C09BB55-D683-4DA0-8931-C9BF705F6480"}
+            if ($GuestService.Enabled -eq $false -and $EnableGuestService)
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $GuestServiceStatus.Enabled)
-                $vmObj | Enable-VMIntegrationService -Name 'Guest Service Interface'
+                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $GuestService.Enabled)
+                $GuestService | Enable-VMIntegrationService
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
             }
-            elseif ($GuestServiceStatus.Enabled -and -not $EnableGuestService)
+            elseif ($GuestService.Enabled -and -not $EnableGuestService)
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $GuestServiceStatus.Enabled)
-                $vmObj | Disable-VMIntegrationService -Name 'Guest Service Interface'
+                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $GuestService.Enabled)
+                $GuestService | Disable-VMIntegrationService
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
             }
         }
@@ -402,7 +408,10 @@ function Set-TargetResource
 
             if ($EnableGuestService)
             {
-                Enable-VMIntegrationService -VMName $Name -Name 'Guest Service Interface'
+                Get-VMIntegrationService -VMName $Name | 
+                    Where-Object {$PSitem.Id -Match `
+                    "Microsoft:[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}\\6C09BB55-D683-4DA0-8931-C9BF705F6480"} | 
+                    Enable-VMIntegrationService 
             }
             
             Write-Verbose -Message ($localizedData.VMCreated -f $Name)
@@ -583,7 +592,10 @@ function Test-TargetResource
                     return $false
                 }
             }
-            if (($vmObj | Get-VMIntegrationService -Name 'Guest Service Interface').Enabled -ne $EnableGuestService) {return $false}
+            if (($vmObj | Get-VMIntegrationService | 
+                            Where-Object {$PSitem.Id -Match `
+                            "Microsoft:[0-9A-Fa-f]{8}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{4}[-][0-9A-Fa-f]{12}\\6C09BB55-D683-4DA0-8931-C9BF705F6480"`
+                            }).Enabled -ne $EnableGuestService) {return $false}
             return $true
         }
         else
@@ -606,10 +618,10 @@ function Get-VhdHierarchy
         [Parameter(Mandatory)]
         [System.String] $VhdPath
     )
-    
+
     $vmVhdPath = Get-VHD -Path $VhdPath
     Write-Output -InputObject $vmVhdPath.Path
-    while(-not [System.String]::IsNullOrEmpty($vmVhdPath.ParentPath))
+    while($vmVhdPath.ParentPath -ne [String]::Empty)
     {
         $vmVhdPath.ParentPath
         $vmVhdPath = (Get-VHD -Path $vmVhdPath.ParentPath)
