@@ -134,22 +134,22 @@ function Test-TargetResource
         [System.Boolean] $ExposeVirtualizationExtensions,
 
         [Parameter()]
-        [System.Int64] $HwThreadCountPerCore,
+        [System.UInt64] $HwThreadCountPerCore,
 
         [Parameter()]
-        [System.Int64] $Maximum,
+        [System.UInt64] $Maximum,
 
         [Parameter()]
-        [System.Int32] $MaximumCountPerNumaNode,
+        [System.UInt32] $MaximumCountPerNumaNode,
 
         [Parameter()]
-        [System.Int32] $MaximumCountPerNumaSocket,
+        [System.UInt32] $MaximumCountPerNumaSocket,
 
         [Parameter()]
-        [System.Int32] $RelativeWeight,
+        [System.UInt32] $RelativeWeight,
 
         [Parameter()]
-        [System.Int64] $Reserve,
+        [System.UInt64] $Reserve,
 
         [Parameter()]
         [System.String] $ResourcePoolName,
@@ -262,23 +262,23 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean] $ExposeVirtualizationExtensions,
 
-        [Parameter()]
-        [System.Int64] $HwThreadCountPerCore,
+         [Parameter()]
+        [System.UInt64] $HwThreadCountPerCore,
 
         [Parameter()]
-        [System.Int64] $Maximum,
+        [System.UInt64] $Maximum,
 
         [Parameter()]
-        [System.Int32] $MaximumCountPerNumaNode,
+        [System.UInt32] $MaximumCountPerNumaNode,
 
         [Parameter()]
-        [System.Int32] $MaximumCountPerNumaSocket,
+        [System.UInt32] $MaximumCountPerNumaSocket,
 
         [Parameter()]
-        [System.Int32] $RelativeWeight,
+        [System.UInt32] $RelativeWeight,
 
         [Parameter()]
-        [System.Int64] $Reserve,
+        [System.UInt64] $Reserve,
 
         [Parameter()]
         [System.String] $ResourcePoolName,
@@ -385,7 +385,7 @@ function Assert-TargetResourceParameter
         [System.Boolean] $ExposeVirtualizationExtensions,
 
         [Parameter()]
-        [System.Int64] $HwThreadCountPerCore,
+        [System.UInt64] $HwThreadCountPerCore,
 
         [Parameter(ValueFromRemainingArguments)]
         [System.Object[]] $RemainingArguments
