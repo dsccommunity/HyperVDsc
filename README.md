@@ -20,6 +20,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
   You can use it to copy files/folders to the VHD, remove files/folders from a VHD, and change attributes of a file in a VHD (e.g. change a file attribute to 'ReadOnly' or 'Hidden').
   This resource is particularly useful when bootstrapping DSC Configurations into a VM.
 * **xVMDvdDrive** manages DVD drives attached to a Hyper-V virtual machine.
+* **xVMProcessor** manages Hyper-V virtual machine processor options.
 
 ### xVhd
 
@@ -92,12 +93,29 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **DynamicMacAddress**: Set this to $false if you want to specify a static MAC address.
 * **StaticMacAddress**: Specifies static MAC address for the Network adapter.
 * **Ensure**: Ensures that the VM Network Adapter is Present or Absent.
-* 
-Please see the Examples section for more details. 
+
+### xVMProcessor
+
+* **`[String]` VMName** (_Key_): Specifies the name of the virtual machine on which the processor is to be configured.
+* **`[Boolean]` EnableHostResourceProtection** (_Write)_: Specifies whether to enable host resource protection. NOTE: Only supported on Windows 10 and Server 2016.
+* **`[Boolean]` ExposeVirtualizationExtensions** (_Write)_: Specifies whether nested virtualization is enabled. NOTE: Only supported on Windows 10 and Server 2016.
+* **`[Uint64]` HwThreadCountPerCore** (_Write)_: Specifies the maximum thread core per processor core. NOTE: Only supported on Windows 10 and Server 2016.
+* **`[Uint64]` Maximum** (_Write)_: Specifies the maximum percentage of resources available to the virtual machine processor to be configured. Allowed values range from 0 to 100.
+* **`[Uint32]` MaximumCountPerNumaNode** (_Write)_: Specifies the maximum number of processors per NUMA node to be configured for the virtual machine.
+* **`[Uint32]` MaximumCountPerNumaSocket** (_Write)_: Specifies the maximum number of sockets per NUMA node to be configured for the virtual machine.
+* **`[Unit32]` RelativeWeight** (_Write)_: Specifies the priority for allocating the physical computer's processing power to this virtual machine relative to others. Allowed values range from 1 to 10000.
+* **`[Uint64]` Reserve** (_Write)_: Specifies the percentage of processor resources to be reserved for this virtual machine. Allowed values range from 0 to 100.
+* **`[String]` ResourcePoolName** (_Write)_: Specifies the name of the processor resource pool to be used.
+* **`[Boolean]` CompatibilityForMigrationEnabled** (_Write)_: Specifies whether the virtual processors features are to be limited for compatibility when migrating the virtual machine to another host.
+* **`[Boolean]` CompatibilityForOlderOperatingSystemsEnabled** (_Write)_: Specifies whether the virtual processor’s features are to be limited for compatibility with older operating systems.
+* **`[Boolean]` RestartIfNeeded** (_Write)_: If specified, shutdowns and restarts the VM if needed for property changes.
+
+Please see the Examples section for more details.
 
 ## Versions
 
 ### Unreleased
+* Adds new MSFT_xVMProcessor to manage virtual machine processor options
 
 ### 3.7.0.0
 * Adding a new resource
@@ -379,6 +397,63 @@ Configuration Sample_xVMHyperV_Simple
 }
 ```
 
+### Create a secure boot generation 2 VM for a given VHD with nested virtualisation enabled.
+
+This configuration will create a VM with fixed memory (using the given VHDX) and enable nested virtualisation.
+
+```powershell
+configuration Sample_xVMHyperV_SimpleWithNestedVirtualization
+{
+    param
+    (
+        [string[]]$NodeName = 'localhost',
+
+        [Parameter(Mandatory)]
+        [string]$VMName,
+
+        [Parameter(Mandatory)]
+        [string]$VhdPath,
+
+        [Parameter(Mandatory)]
+        [Uint64]$Memory
+    )
+
+    Import-DscResource -module xHyper-V
+
+    Node $NodeName
+    {
+        # Install HyperV feature, if not installed - Server SKU only
+        WindowsFeature HyperV
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V'
+        }
+
+        # Ensures a VM with default settings
+        xVMHyperV NewVM
+        {
+            Ensure        = 'Present'
+            Name          = $VMName
+            VhdPath       = $VhdPath
+            Generation    = 2
+            StartupMemory = $Memory
+            MinimumMemory = $Memory
+            MaximumMemory = $Memory
+            DependsOn     = '[WindowsFeature]HyperV'
+        }
+
+        # Set the VM options
+        xVMProcessor NestedVirtualization
+        {
+            VMName                         = $VMName
+            ExposeVirtualizationExtensions = $true
+            DependsOn                      = '[xVMHyperV]NewVM'
+        }
+    }
+}
+
+```
+
 ### Create a secure boot generation 2 VM for a given VHD with a DVD Drive and ISO
 
 This configuration will create a VM, given a VHDX and add a DVD Drive to it with an
@@ -425,7 +500,7 @@ configuration Sample_xVMHyperV_SimpleWithDvdDrive
         xVMDvdDrive NewVMDvdDriveISO
         {
             Ensure             = 'Present'
-            Name               = $VMName
+            VMName             = $VMName
             ControllerNumber   = 0
             ControllerLocation = 0
             Path               = $ISOPath
