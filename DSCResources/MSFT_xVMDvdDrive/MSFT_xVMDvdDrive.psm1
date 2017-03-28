@@ -392,8 +392,8 @@ function Test-ParameterValid
     $null = Get-VM -Name $VMName
 
     # Does the controller exist?
-    if (-not (Get-VMScsiController -VMName ADCSTest -ControllerNumber $ControllerNumber) `
-        -and -not (Get-VMIdeController -VMName ADCSTest -ControllerNumber $ControllerNumber))
+    if (-not (Get-VMScsiController -VMName $VMName -ControllerNumber $ControllerNumber) `
+        -and -not (Get-VMIdeController -VMName $VMName -ControllerNumber $ControllerNumber))
     {
         # No it does not
         New-InvalidArgumentError `
