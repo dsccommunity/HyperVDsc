@@ -11,7 +11,7 @@ class MSFT_xVMHost : OMI_BaseResource
     [Write, Description("Specifies the maximum number of storage migrations that can be performed at the same time on the Hyper-V host.")] Uint32 MaximumStorageMigrations;
     [Write, Description("Specifies the maximum number of live migrations that can be performed at the same time on the Hyper-V host.")] Uint32 MaximumVirtualMachineMigrations;
     [Write, Description("Specifies whether virtual machines on the Hyper-V host can use resources from more than one NUMA node.")] Boolean NumaSpanningEnabled;
-    [Write, Description("Specifies how often the Hyper-V host saves the data that tracks resource usage. The range is a minimum of 60 minutes to a maximum of 1440 (24 hours).")] String ResourceMeteringSaveIntervalMinute;
+    [Write, Description("Specifies how often the Hyper-V host saves the data that tracks resource usage. The range is a minimum of 60 minutes to a maximum of 1440 (24 hours).")] Uint32 ResourceMeteringSaveIntervalMinute;
     [Write, Description("Specifies how networks are selected for incoming live migration traffic.")] Boolean UseAnyNetworkForMigration;
     [Write, Description("Specifies the default folder to store virtual hard disks on the Hyper-V host.")] String VirtualHardDiskPath;
     [Write, Description("Specifies the type of authentication to be used for live migrations. The acceptable values for this parameter are 'Kerberos' and 'CredSSP'."), ValueMap{"CredSSP","Kerberos"}, Values{"CredSSP","Kerberos"}] String VirtualMachineMigrationAuthenticationType;
