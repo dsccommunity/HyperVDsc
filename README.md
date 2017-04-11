@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
 
-The **xHyper-V** DSC module configures and manages a Hyper-V host using the **xVhd**, **xVMHyperV**, **xVMSwitch**, **xVhdFileDirectory** resources.
+The **xHyper-V** DSC module configures and manages a Hyper-V host using the **xVhd**, **xVMHyperV**, **xVMSwitch**, **xVhdFileDirectory** and **xVMHost** resources.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
@@ -20,6 +20,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
   You can use it to copy files/folders to the VHD, remove files/folders from a VHD, and change attributes of a file in a VHD (e.g. change a file attribute to 'ReadOnly' or 'Hidden').
   This resource is particularly useful when bootstrapping DSC Configurations into a VM.
 * **xVMDvdDrive** manages DVD drives attached to a Hyper-V virtual machine.
+* **xVMHost** manages Hyper-V host settings.
 
 ### xVhd
 
@@ -92,12 +93,32 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **DynamicMacAddress**: Set this to $false if you want to specify a static MAC address.
 * **StaticMacAddress**: Specifies static MAC address for the Network adapter.
 * **Ensure**: Ensures that the VM Network Adapter is Present or Absent.
-* 
+
+### xVMHost
+
+* **`[String]` IsSingleInstance** (_Key_): Specifies the resource is a single instance, the value must be 'Yes'.
+* **`[Boolean]` EnableEnhancedSessionMode** (_Write_): Indicates whether users can use enhanced mode when they connect to virtual machines on this server by using Virtual Machine Connection. 
+* **`[String]` FibreChannelWwnn** (_Write_): Specifies the default value of the World Wide Node Name on the Hyper-V host.
+* **`[String]` FibreChannelWwpnMaximum** (_Write_): Specifies the maximum value that can be used to generate World Wide Port Names on the Hyper-V host. Use with the FibreChannelWwpnMinimum parameter to establish a range of WWPNs that the specified Hyper-V host can assign to virtual Fibre Channel adapters.
+* **`[String]` FibreChannelWwpnMinimum** (_Write_): Specifies the minimum value that can be used to generate the World Wide Port Names on the Hyper-V host. Use with the FibreChannelWwpnMaximum parameter to establish a range of WWPNs that the specified Hyper-V host can assign to virtual Fibre Channel adapters.
+* **`[String]` MacAddressMaximum** (_Write_): Specifies the maximum MAC address using a valid hexadecimal value. Use with the MacAddressMinimum parameter to establish a range of MAC addresses that the specified Hyper-V host can assign to virtual machines configured to receive dynamic MAC addresses.
+* **`[String]` MacAddressMinimum** (_Write_): Specifies the minimum MAC address using a valid hexadecimal value. Use with the MacAddressMaximum parameter to establish a range of MAC addresses that the specified Hyper-V host can assign to virtual machines configured to receive dynamic MAC addresses.
+* **`[Uint32]` MaximumStorageMigrations** (_Write_): Specifies the maximum number of storage migrations that can be performed at the same time on the Hyper-V host.
+* **`[Uint32]` MaximumVirtualMachineMigrations** (_Write_): Specifies the maximum number of live migrations that can be performed at the same time on the Hyper-V host.
+* **`[Boolean]` NumaSpanningEnabled** (_Write_): Specifies whether virtual machines on the Hyper-V host can use resources from more than one NUMA node.
+* **`[Uint32]` ResourceMeteringSaveIntervalMinute** (_Write_): Specifies how often the Hyper-V host saves the data that tracks resource usage. The range is a minimum of 60 minutes to a maximum 1440 minutes (24 hours).
+* **`[Boolean]` UseAnyNetworkForMigration** (_Write_): Specifies how networks are selected for incoming live migration traffic. If set to $True, any available network on the host can be used for this traffic. If set to $False, incoming live migration traffic is transmitted only on the networks specified in the MigrationNetworks property of the host.
+* **`[String]` VirtualHardDiskPath** (_Write_): Specifies the default folder to store virtual hard disks on the Hyper-V host.
+* **`[String]` VirtualMachineMigrationAuthenticationType** (_Write_): Specifies the type of authentication to be used for live migrations. { Kerberos | CredSSP }.
+* **`[String]` VirtualMachineMigrationPerformanceOption** (_Write_): Specifies the performance option to use for live migration. { TCPIP | Compression | SMB }.
+* **`[String]` VirtualMachinePath** (_Write_): Specifies the default folder to store virtual machine configuration files on the Hyper-V host.
+
 Please see the Examples section for more details. 
 
 ## Versions
 
 ### Unreleased
+* Adding a new xVMHost resource for managing Hyper-V host settings.
 
 ### 3.7.0.0
 * Adding a new resource
@@ -790,5 +811,31 @@ Configuration ChangeAttribute
                                }
 
         }
+}
+```
+
+### Change the Hyper-V Host VM file locations
+```powershell
+Configuration HyperVHostPaths
+{
+    param(
+        [Parameter(Mandatory=$true, Position=0)]
+        [ValidateScript({Test-Path $_})]
+        $VirtualHardDiskPath,
+
+        [Parameter(Mandatory=$true, Position=1)]
+        [ValidateScript({Test-Path $_})]
+        $VirtualMachinePath
+    )
+
+    Import-DscResource -moduleName xHyper-V
+    
+    xVMHost HyperVHostPaths
+    {
+        IsSingleInstance    = 'Yes'
+        VirtualHardDiskPath = $VirtualHardDiskPath
+        VirtualMachinePath  = $VirtualMachinePath
+    }
+
 }
 ```
