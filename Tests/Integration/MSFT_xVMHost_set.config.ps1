@@ -13,7 +13,7 @@ configuration MSFT_xVMHost_Set_Config {
         xVMHost Integration_Test {
             IsSingleInstance    = 'Yes'
             VirtualHardDiskPath = $VirtualHardDiskPath
-            VirtualMachinePath = $VirtualMachinePath
+            VirtualMachinePath  = $VirtualMachinePath
         }
     }
 

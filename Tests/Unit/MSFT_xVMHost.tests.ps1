@@ -252,37 +252,6 @@ try
 
         } # describe Set-TargetResource
 
-        <# Describe 'MSFT_xVMProcessor\Assert-TargetResourceParameter' {
-
-            ## Return Windows Server 2012 R2/Windows 8.1 Update 1
-            Mock Get-CimInstance { return @{ BuildNumber = '9600' } }
-
-            It "Should not throw when parameter 'ResourcePoolName' is specified on 2012 R2 host" {
-
-                { Assert-TargetResourceParameter -ResourcePoolName 'TestPool' } | Should Not Throw
-            }
-
-            $server2016OnlyParameters = @{
-                EnableHostResourceProtection = $true;
-                ExposeVirtualizationExtensions = $true;
-                HwThreadCountPerCore = 1;
-            }
-
-            foreach ($parameter in $server2016OnlyParameters.GetEnumerator()) {
-
-                $assertTargetResourceParameterParams = @{
-                    $parameter.Name = $parameter.Value;
-                }
-
-                It "Should throw when parameter '$($parameter.Name)' is specified on 2012 R2 host" {
-
-                    { Assert-TargetResourceParameter @assertTargetResourceParameterParams } | Should Throw '14393'
-                }
-
-            }
-
-        } # describe Assert-TargetResourceParameter
-        #>
     }
 }
 finally
