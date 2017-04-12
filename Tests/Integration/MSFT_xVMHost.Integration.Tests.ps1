@@ -28,7 +28,10 @@ if (-not (Test-HyperVInstalled))
     Return
 } # if
 
-$vmHost = Get-VMHost
+$currentVmHost = Get-VMHost
+# Set-VMHost appears to update $currentVmHost by reference?!
+$currentVirtualHardDiskPath = $currentVmHost.VirtualHardDiskPath
+$currentVirtualMachinePath = $currentVmHost.VirtualMachinePath
 
 # Using try/finally to always cleanup even if something awful happens.
 try
@@ -46,7 +49,7 @@ try
                     -ConfigurationData $ConfigData `
                     -VirtualHardDiskPath $TestDrive `
                     -VirtualMachinePath $TestDrive
-                
+
                 $startDscConfigurationParams = @{
                     Path = $TestDrive;
                     ComputerName = 'localhost';
@@ -73,15 +76,14 @@ try
             $current.VirtualMachinePath  | Should Be $TestDrive.FullName
         }
     }
-
 }
 finally
 {
     #region FOOTER
-    
-    ## Restore host settings
-    Set-VMHost -VirtualHardDiskPath $vmHost.VirtualHardDiskPath `
-                -VirtualMachinePath $vmHost.VirtualMachinePath -Verbose
+
+    # Restore current host settings
+    Set-VMHost -VirtualHardDiskPath $currentVirtualHardDiskPath `
+                -VirtualMachinePath $currentVirtualMachinePath -Verbose
 
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion

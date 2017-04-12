@@ -13,7 +13,6 @@ if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCR
 
 Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
 
-# TODO: Insert the correct <ModuleName> and <ResourceName> for your resource
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:DSCModuleName `
     -DSCResourceName $script:DSCResourceName `
@@ -22,13 +21,11 @@ $TestEnvironment = Initialize-TestEnvironment `
 #endregion HEADER
 
 function Invoke-TestSetup {
-    # TODO: Optional init code goes here...
+
 }
 
 function Invoke-TestCleanup {
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
-
-    # TODO: Other Optional Cleanup Code Goes Here...
 }
 
 # Begin Testing
@@ -46,7 +43,7 @@ try
                 ResourceMeteringSaveInterval = 60;
             }
 
-            ## Guard mocks
+            # Guard mocks
 
             function Get-VMHost { }
 
@@ -72,7 +69,7 @@ try
 
         Describe 'MSFT_xVMHost\Test-TargetResource' {
 
-            ## Guard mocks
+            # Guard mocks
             Mock Assert-Module { }
 
             function Get-VMHost { }
@@ -136,7 +133,7 @@ try
                 'VirtualMachinePath'
             )
 
-            ## Test each individual parameter value separately
+            # Test each individual parameter value separately
             foreach ($parameterName in $parameterNames)
             {
                 $parameterValue = $fakeTargetResource[$parameterName];
@@ -144,7 +141,7 @@ try
                     IsSingleInstance = 'Yes';
                 }
 
-                ## Pass value verbatim so it should always pass first
+                # Pass value verbatim so it should always pass first
                 It "Should pass when parameter '$parameterName' is correct" {
                     $testTargetResourceParams[$parameterName] = $parameterValue
 
@@ -155,17 +152,17 @@ try
 
                 if ($parameterValue -is [System.Boolean]) {
 
-                    ## Invert parameter value to cause a test failure
+                    # Invert parameter value to cause a test failure
                     $testTargetResourceParams[$parameterName] = -not $parameterValue
                 }
                 elseif ($parameterValue -is [System.String]) {
 
-                    ## Repeat string to cause a test failure
+                    # Repeat string to cause a test failure
                     $testTargetResourceParams[$parameterName] = "$parameterValue$parameterValue"
                 }
                 elseif ($parameterValue -is [System.Int32] -or $parameterValue -is [System.Int64]) {
 
-                    ## Add one to cause a test failure
+                    # Add one to cause a test failure
                     $testTargetResourceParams[$parameterName] = $parameterValue + 1
                 }
 
@@ -205,18 +202,19 @@ try
                     Value = 'Compression';
                     Expected = $false; }
             ) -Test {
-                param (
-                    [System.String] $Parameter,
-                    [System.Object] $Value,
-                    [System.Boolean] $Expected
+                    param
+                    (
+                        [System.String] $Parameter,
+                        [System.Object] $Value,
+                        [System.Boolean] $Expected
                     )
 
-                $testTargetResourceParams = @{
-                    IsSingleInstance = 'Yes';
-                    $Parameter = $Value;
+                    $testTargetResourceParams = @{
+                        IsSingleInstance = 'Yes';
+                        $Parameter = $Value;
+                    }
+                    $result = Test-TargetResource @testTargetResourceParams | Should Be $Expected;
                 }
-                $result = Test-TargetResource @testTargetResourceParams | Should Be $Expected;
-            }
 
         } # describe Test-TargetResource
 
@@ -225,7 +223,7 @@ try
             function Get-VMHost { }
             function Set-VMHost { param ($ResourceMeteringSaveInterval) }
 
-            ## Guard mocks
+            # Guard mocks
             Mock Assert-Module { }
             Mock Get-VMHost { }
             Mock Set-VMHost { }
@@ -252,7 +250,7 @@ try
 
         } # describe Set-TargetResource
 
-    }
+    } # InModuleScope
 }
 finally
 {

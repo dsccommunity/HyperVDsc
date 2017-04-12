@@ -84,7 +84,6 @@ function New-InvalidArgumentError
     throw $errorRecord
 } # end function New-InvalidArgumentError
 
-
 <#
     .SYNOPSIS
     Ensures that the specified PowerShell module(s) are installed.
@@ -97,7 +96,7 @@ function Assert-Module
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String[]] $Name
     )
 
@@ -108,7 +107,6 @@ function Assert-Module
     }
 
 } #end function
-
 
 <#
     .SYNOPSIS
@@ -126,18 +124,17 @@ function ConvertTo-TimeSpan
     [OutputType([System.TimeSpan])]
     param
     (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory = $true)]
         [System.UInt32]
         $TimeInterval,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Seconds','Minutes','Hours','Days')]
         [System.String]
         $TimeIntervalType
     )
 
-    $newTimeSpanParams = @{ };
+    $newTimeSpanParams = @{ }
     switch ($TimeIntervalType)
     {
         'Seconds' { $newTimeSpanParams['Seconds'] = $TimeInterval }
@@ -148,7 +145,6 @@ function ConvertTo-TimeSpan
     return (New-TimeSpan @newTimeSpanParams)
 
 } #end function ConvertTo-TimeSpan
-
 
 <#
     .SYNOPSIS
@@ -166,12 +162,11 @@ function ConvertFrom-TimeSpan
     [OutputType([System.Int32])]
     param
     (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory = $true)]
         [System.TimeSpan]
         $TimeSpan,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Seconds','Minutes','Hours','Days')]
         [System.String]
         $TimeSpanType

@@ -6,18 +6,16 @@ if (Test-Path "${PSScriptRoot}\${PSUICulture}")
 }
 else
 {
-    #fallback to en-US
+    # fallback to en-US
     Import-LocalizedData -BindingVariable localizedData -Filename MSFT_xVMHost.psd1 `
                          -BaseDirectory "${PSScriptRoot}\en-US"
 }
 #endregion
 
-
 # Import the common HyperV functions
 Import-Module -Name ( Join-Path `
     -Path (Split-Path -Path $PSScriptRoot -Parent) `
     -ChildPath '\HyperVCommon\HyperVCommon.psm1' )
-
 
 <#
 .SYNOPSIS
@@ -30,18 +28,20 @@ function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
-    param (
+    param
+    (
         [Parameter(Mandatory)]
         [ValidateSet('Yes')]
-        [System.String] $IsSingleInstance
+        [System.String]
+        $IsSingleInstance
     )
 
     Assert-Module -Name 'Hyper-V'
 
-    Write-Verbose -Message $localizedData.QueryingVMHost;
+    Write-Verbose -Message $localizedData.QueryingVMHost
     $vmHost = Get-VMHost
 
-    ## Convert the current TimeSpan into minutes
+    # Convert the current TimeSpan into minutes
     $convertFromTimeSpanParams = @{
         TimeSpan = $vmHost.ResourceMeteringSaveInterval;
         TimeSpanType = 'Minutes';
@@ -69,7 +69,6 @@ function Get-TargetResource
 
     return $configuration
 }
-
 
 <#
 .SYNOPSIS
@@ -145,57 +144,74 @@ function Test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    param (
+    param
+    (
         [Parameter(Mandatory)]
         [ValidateSet('Yes')]
-        [System.String] $IsSingleInstance,
+        [System.String]
+        $IsSingleInstance,
 
         [Parameter()]
-        [System.Boolean] $EnableEnhancedSessionMode,
+        [System.Boolean]
+        $EnableEnhancedSessionMode,
 
         [Parameter()]
-        [System.String] $FibreChannelWwnn,
+        [System.String]
+        $FibreChannelWwnn,
 
         [Parameter()]
-        [System.String] $FibreChannelWwpnMaximum,
+        [System.String]
+        $FibreChannelWwpnMaximum,
 
         [Parameter()]
-        [System.String] $FibreChannelWwpnMinimum,
+        [System.String]
+        $FibreChannelWwpnMinimum,
 
         [Parameter()]
-        [System.String] $MacAddressMaximum,
+        [System.String]
+        $MacAddressMaximum,
 
         [Parameter()]
-        [System.String] $MacAddressMinimum,
+        [System.String]
+        $MacAddressMinimum,
 
         [Parameter()]
-        [System.UInt32] $MaximumStorageMigrations,
+        [System.UInt32]
+        $MaximumStorageMigrations,
 
         [Parameter()]
-        [System.UInt32] $MaximumVirtualMachineMigrations,
+        [System.UInt32]
+        $MaximumVirtualMachineMigrations,
 
         [Parameter()]
-        [System.Boolean] $NumaSpanningEnabled,
+        [System.Boolean]
+        $NumaSpanningEnabled,
 
         [Parameter()]
-        [System.UInt32] $ResourceMeteringSaveIntervalMinute,
+        [System.UInt32]
+        $ResourceMeteringSaveIntervalMinute,
 
         [Parameter()]
-        [System.Boolean] $UseAnyNetworkForMigration,
+        [System.Boolean]
+        $UseAnyNetworkForMigration,
 
         [Parameter()]
-        [System.String] $VirtualHardDiskPath,
+        [System.String]
+        $VirtualHardDiskPath,
 
         [Parameter()]
         [ValidateSet('Kerberos','CredSSP')]
-        [System.String] $VirtualMachineMigrationAuthenticationType,
+        [System.String]
+        $VirtualMachineMigrationAuthenticationType,
 
         [Parameter()]
         [ValidateSet('TCPIP','Compression','SMB')]
-        [System.String] $VirtualMachineMigrationPerformanceOption,
+        [System.String]
+        $VirtualMachineMigrationPerformanceOption,
 
         [Parameter()]
-        [System.String] $VirtualMachinePath
+        [System.String]
+        $VirtualMachinePath
     )
 
     Assert-Module -Name 'Hyper-V'
@@ -224,9 +240,7 @@ function Test-TargetResource
     }
 
     return $isTargetResourceCompliant
-
 } #end function
-
 
 <#
 .SYNOPSIS
@@ -301,57 +315,74 @@ function Test-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory)]
         [ValidateSet('Yes')]
-        [System.String] $IsSingleInstance,
+        [System.String]
+        $IsSingleInstance,
 
         [Parameter()]
-        [System.Boolean] $EnableEnhancedSessionMode,
+        [System.Boolean]
+        $EnableEnhancedSessionMode,
 
         [Parameter()]
-        [System.String] $FibreChannelWwnn,
+        [System.String]
+        $FibreChannelWwnn,
 
         [Parameter()]
-        [System.String] $FibreChannelWwpnMaximum,
+        [System.String]
+        $FibreChannelWwpnMaximum,
 
         [Parameter()]
-        [System.String] $FibreChannelWwpnMinimum,
+        [System.String]
+        $FibreChannelWwpnMinimum,
 
         [Parameter()]
-        [System.String] $MacAddressMaximum,
+        [System.String]
+        $MacAddressMaximum,
 
         [Parameter()]
-        [System.String] $MacAddressMinimum,
+        [System.String]
+        $MacAddressMinimum,
 
         [Parameter()]
-        [System.UInt32] $MaximumStorageMigrations,
+        [System.UInt32]
+        $MaximumStorageMigrations,
 
         [Parameter()]
-        [System.UInt32] $MaximumVirtualMachineMigrations,
+        [System.UInt32]
+        $MaximumVirtualMachineMigrations,
 
         [Parameter()]
-        [System.Boolean] $NumaSpanningEnabled,
+        [System.Boolean]
+        $NumaSpanningEnabled,
 
         [Parameter()]
-        [System.Uint32] $ResourceMeteringSaveIntervalMinute,
+        [System.UInt32]
+        $ResourceMeteringSaveIntervalMinute,
 
         [Parameter()]
-        [System.Boolean] $UseAnyNetworkForMigration,
+        [System.Boolean]
+        $UseAnyNetworkForMigration,
 
         [Parameter()]
-        [System.String] $VirtualHardDiskPath,
+        [System.String]
+        $VirtualHardDiskPath,
 
         [Parameter()]
         [ValidateSet('Kerberos','CredSSP')]
-        [System.String] $VirtualMachineMigrationAuthenticationType,
+        [System.String]
+        $VirtualMachineMigrationAuthenticationType,
 
         [Parameter()]
         [ValidateSet('TCPIP','Compression','SMB')]
-        [System.String] $VirtualMachineMigrationPerformanceOption,
+        [System.String]
+        $VirtualMachineMigrationPerformanceOption,
 
         [Parameter()]
-        [System.String] $VirtualMachinePath
+        [System.String]
+        $VirtualMachinePath
     )
 
     Assert-Module -Name 'Hyper-V'
@@ -360,14 +391,14 @@ function Set-TargetResource
 
     if ($PSBoundParameters.ContainsKey('ResourceMeteringSaveIntervalMinute'))
     {
-        ## Need to convert the specified minutes into a TimeSpan object first
+        # Need to convert the specified minutes into a TimeSpan object first
         $convertToTimeSpanParams = @{
             TimeInterval = $PSBoundParameters['ResourceMeteringSaveIntervalMinute'];
             TimeIntervalType = 'Minutes';
         }
         $resourceMeteringSaveInterval = ConvertTo-TimeSpan @convertToTimeSpanParams
 
-        ## Remove the existing UInt32 explicit type and add the TimeSpan type parameter
+        # Remove the existing UInt32 explicit type and add the TimeSpan type parameter
         $null = $PSBoundParameters.Remove('ResourceMeteringSaveIntervalMinute')
         $PSBoundParameters['ResourceMeteringSaveInterval'] = $resourceMeteringSaveInterval
     }
@@ -375,5 +406,4 @@ function Set-TargetResource
     Write-Verbose -Message $localizedData.UpdatingVMHostProperties
     Set-VMHost @PSBoundParameters
     Write-Verbose -Message $localizedData.VMHostPropertiesUpdated
-
 } #end function

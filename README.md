@@ -97,7 +97,7 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 ### xVMHost
 
 * **`[String]` IsSingleInstance** (_Key_): Specifies the resource is a single instance, the value must be 'Yes'.
-* **`[Boolean]` EnableEnhancedSessionMode** (_Write_): Indicates whether users can use enhanced mode when they connect to virtual machines on this server by using Virtual Machine Connection. 
+* **`[Boolean]` EnableEnhancedSessionMode** (_Write_): Indicates whether users can use enhanced mode when they connect to virtual machines on this server by using Virtual Machine Connection.
 * **`[String]` FibreChannelWwnn** (_Write_): Specifies the default value of the World Wide Node Name on the Hyper-V host.
 * **`[String]` FibreChannelWwpnMaximum** (_Write_): Specifies the maximum value that can be used to generate World Wide Port Names on the Hyper-V host. Use with the FibreChannelWwpnMinimum parameter to establish a range of WWPNs that the specified Hyper-V host can assign to virtual Fibre Channel adapters.
 * **`[String]` FibreChannelWwpnMinimum** (_Write_): Specifies the minimum value that can be used to generate the World Wide Port Names on the Hyper-V host. Use with the FibreChannelWwpnMaximum parameter to establish a range of WWPNs that the specified Hyper-V host can assign to virtual Fibre Channel adapters.
@@ -113,7 +113,7 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **`[String]` VirtualMachineMigrationPerformanceOption** (_Write_): Specifies the performance option to use for live migration. { TCPIP | Compression | SMB }.
 * **`[String]` VirtualMachinePath** (_Write_): Specifies the default folder to store virtual machine configuration files on the Hyper-V host.
 
-Please see the Examples section for more details. 
+Please see the Examples section for more details.
 
 ## Versions
 
@@ -818,7 +818,8 @@ Configuration ChangeAttribute
 ```powershell
 Configuration HyperVHostPaths
 {
-    param(
+    param
+    (
         [Parameter(Mandatory=$true, Position=0)]
         [ValidateScript({Test-Path $_})]
         $VirtualHardDiskPath,
@@ -829,7 +830,7 @@ Configuration HyperVHostPaths
     )
 
     Import-DscResource -moduleName xHyper-V
-    
+
     xVMHost HyperVHostPaths
     {
         IsSingleInstance    = 'Yes'
