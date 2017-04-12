@@ -48,14 +48,15 @@ try
     $ConfigData = @{
         AllNodes = @(
             @{
-                NodeName           = 'localhost'
-                VMName             = $VMName
-                Path               = ''
+                NodeName                                     = 'localhost'
+                VMName                                       = $VMName
+                CompatibilityForMigrationEnabled             = $true
+                CompatibilityForOlderOperatingSystemsEnabled = $true
             }
         )
     }
 
-    # Add DVD Drive
+    # Set processor option(s)
     $ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DSCResourceName)_set.config.ps1"
     . $ConfigFile -Verbose -ErrorAction Stop
 

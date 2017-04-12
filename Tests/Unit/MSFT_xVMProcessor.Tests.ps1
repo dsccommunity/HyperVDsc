@@ -13,7 +13,6 @@ if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCR
 
 Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
 
-# TODO: Insert the correct <ModuleName> and <ResourceName> for your resource
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:DSCModuleName `
     -DSCResourceName $script:DSCResourceName `
@@ -22,13 +21,11 @@ $TestEnvironment = Initialize-TestEnvironment `
 #endregion HEADER
 
 function Invoke-TestSetup {
-    # TODO: Optional init code goes here...
+
 }
 
 function Invoke-TestCleanup {
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
-
-    # TODO: Other Optional Cleanup Code Goes Here...
 }
 
 # Begin Testing
@@ -47,7 +44,7 @@ try
                 EnableHostResourceProtection = $true
             }
 
-            ## Guard mocks
+            # Guard mocks
             Mock Assert-Module { }
 
             function Get-VMProcessor {
@@ -83,25 +80,28 @@ try
 
         Describe 'MSFT_xVMProcessor\Test-TargetResource' {
 
-            ## Guard mocks
+            # Guard mocks
             Mock Assert-Module { }
             Mock Assert-TargetResourceParameter { }
 
             function Get-VM {
                 param (
-                    [System.String] $Name
+                    [System.String]
+                    $Name
                 )
             }
 
             function Get-VMProcessor {
                 param (
-                    [System.String] $VMName
+                    [System.String]
+                    $VMName
                 )
             }
 
             function Set-VMProcessor {
                 param (
-                    [System.String] $VMName
+                    [System.String]
+                    $VMName
                 )
             }
 
@@ -158,7 +158,7 @@ try
                 'CompatibilityForOlderOperatingSystemsEnabled'
             )
 
-            ## Test each individual parameter value separately
+            # Test each individual parameter value separately
             foreach ($parameterName in $parameterNames)
             {
                 $parameterValue = $fakeTargetResource[$parameterName];
@@ -166,7 +166,7 @@ try
                     VMName = $testVMName
                 }
 
-                ## Pass value verbatim so it should always pass first
+                # Pass value verbatim so it should always pass first
                 It "Should pass when parameter '$parameterName' is correct" {
                     $testTargetResourceParams[$parameterName] = $parameterValue
 
@@ -177,17 +177,17 @@ try
 
                 if ($parameterValue -is [System.Boolean]) {
 
-                    ## Invert parameter value to cause a test failure
+                    # Invert parameter value to cause a test failure
                     $testTargetResourceParams[$parameterName] = -not $parameterValue
                 }
                 elseif ($parameterValue -is [System.String]) {
 
-                    ## Repeat string to cause a test failure
+                    # Repeat string to cause a test failure
                     $testTargetResourceParams[$parameterName] = "$parameterValue$parameterValue"
                 }
                 elseif ($parameterValue -is [System.Int32] -or $parameterValue -is [System.Int64]) {
 
-                    ## Add one to cause a test failure
+                    # Add one to cause a test failure
                     $testTargetResourceParams[$parameterName] = $parameterValue + 1
                 }
 
@@ -204,23 +204,26 @@ try
 
             function Get-VM {
                 param (
-                    [System.String] $Name
+                    [System.String]
+                    $Name
                 )
             }
 
             function Get-VMProcessor {
                 param (
-                    [System.String] $VMName
+                    [System.String]
+                    $VMName
                 )
             }
 
             function set-VMProcessor {
                 param (
-                    [System.String] $VMName
+                    [System.String]
+                    $VMName
                 )
             }
 
-            ## Guard mocks
+            # Guard mocks
             Mock Assert-Module { }
             Mock Assert-TargetResourceParameter { }
             Mock Get-VM { }
@@ -303,7 +306,7 @@ try
 
         Describe 'MSFT_xVMProcessor\Assert-TargetResourceParameter' {
 
-            ## Return Windows Server 2012 R2/Windows 8.1 Update 1
+            # Return Windows Server 2012 R2/Windows 8.1 Update 1
             Mock Get-CimInstance { return @{ BuildNumber = '9600' } }
 
             It "Should not throw when parameter 'ResourcePoolName' is specified on 2012 R2 host" {
@@ -331,7 +334,7 @@ try
             }
 
         } # describe Assert-TargetResourceParameter
-    }
+    } # InModuleScope
 }
 finally
 {

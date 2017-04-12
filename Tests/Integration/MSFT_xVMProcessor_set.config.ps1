@@ -5,8 +5,8 @@ configuration MSFT_xVMProcessor_Set_Config {
     node localhost {
         xVMProcessor Integration_Test {
             VMName                                       = $Node.VMName
-            CompatibilityForMigrationEnabled             = $true
-            CompatibilityForOlderOperatingSystemsEnabled = $true
+            CompatibilityForMigrationEnabled             = $Node.CompatibilityForMigrationEnabled
+            CompatibilityForOlderOperatingSystemsEnabled = $Node.CompatibilityForOlderOperatingSystemsEnabled
         }
     }
 }
