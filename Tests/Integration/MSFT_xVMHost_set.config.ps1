@@ -1,11 +1,12 @@
-configuration MSFT_xVMHost_Set_Config {
+configuration MSFT_xVMHost_Set_Config 
+{
     param
     (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory  = $true)]
         [System.String]
         $VirtualHardDiskPath,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VirtualMachinePath
     )
