@@ -31,24 +31,30 @@ try
         Describe 'HyperVCommon\Set-VMProperty' {
 
             function Get-VM {
-                param (
-                    [System.String] $Name
+                param
+                (
+                    [System.String]
+                    $Name
                 )
             }
 
             function Get-VMProcessor {
-                param (
-                    [System.String] $VMName
+                param
+                (
+                    [System.String]
+                    $VMName
                 )
             }
 
             function Set-VMProcessor {
-                param (
-                    [System.String] $VMName
+                param
+                (
+                    [System.String]
+                    $VMName
                 )
             }
 
-            ## Guard mocks
+            # Guard mocks
             Mock Get-VM { }
             Mock Set-VMState { }
             Mock Get-VMProcessor { }
@@ -85,35 +91,46 @@ try
         Describe 'HyperVCommon\Set-VMState' {
 
             function Get-VM {
-                param (
-                    [System.String] $Name
+                param
+                (
+                    [System.String]
+                    $Name
                 )
             }
 
             function Resume-VM {
-                param (
-                    [System.String] $Name
+                param
+                (
+                    [System.String]
+                    $Name
                 )
             }
 
             function Start-VM {
-                param (
-                    [System.String] $Name
+                param
+                (
+                    [System.String]
+                    $Name
                 )
             }
 
             function Stop-VM {
-                param (
-                    [System.String] $Name
+                param
+                (
+                    [System.String]
+                    $Name
                 )
             }
 
             function Suspend-VM {
-                param (
-                    [System.String] $Name
+                param
+                (
+                    [System.String]
+                    $Name
                 )
             }
 
+            # Guard mocks
             Mock Resume-VM  { }
             Mock Start-VM  { }
             Mock Stop-VM { }
@@ -179,19 +196,20 @@ try
 
                 Assert-MockCalled Stop-VM -Scope It
             }
-
         } # describe HyperVCommon\Set-VMState
     }
 
     Describe 'HyperVCommon\Wait-VMIPAddress' {
 
         function Get-VMNetworkAdapter {
-            param (
-                [System.String] $VMName
+            param
+            (
+                [System.String]
+                $VMName
             )
         }
 
-        ## Guard mocks
+        # Guard mocks
         Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName { }
 
         It 'Should return when VM network adapter reports 2 IP addresses' {
@@ -200,6 +218,12 @@ try
             $result = Wait-VMIPAddress -Name 'Test'
 
             $result | Should BeNullOrEmpty
+        }
+
+        It 'Should throw when after timeout is exceeded' {
+            Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName { return $null }
+
+            { Wait-VMIPAddress -Name 'Test' -Timeout 2 } | Should Throw 'timed out'
         }
     } # describe HyperVCommon\WaitVMIPAddress
 

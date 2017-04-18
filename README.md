@@ -406,16 +406,21 @@ configuration Sample_xVMHyperV_SimpleWithNestedVirtualization
 {
     param
     (
-        [string[]]$NodeName = 'localhost',
+        [Parameter()]
+        [string[]]
+        $NodeName = 'localhost',
 
-        [Parameter(Mandatory)]
-        [string]$VMName,
+        [Parameter(Mandatory = $true)]
+        [string]
+        $VMName,
 
-        [Parameter(Mandatory)]
-        [string]$VhdPath,
+        [Parameter(Mandatory = $true)]
+        [string]
+        $VhdPath,
 
-        [Parameter(Mandatory)]
-        [Uint64]$Memory
+        [Parameter(Mandatory = $true)]
+        [Uint64]
+        $Memory
     )
 
     Import-DscResource -module xHyper-V

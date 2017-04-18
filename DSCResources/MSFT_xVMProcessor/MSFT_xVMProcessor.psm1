@@ -36,16 +36,8 @@ function Get-TargetResource
     )
 
     Assert-Module -Name 'Hyper-V'
-
     Write-Verbose -Message ($localizedData.QueryingVMProcessor -f $VMName)
-    $vmProcessor = Get-VMProcessor -VMName $VMName -ErrorAction SilentlyContinue
-
-    if ($null -eq $vmProcessor)
-    {
-        $vmNotFoundErrorMessage = $localizedData.VMNotFoundError -f $VMName
-        New-InvalidArgumentError -ErrorId 'VMNotFound' -ErrorMessage $vmNotFoundErrorMessage
-    }
-
+    $vmProcessor = Get-VMProcessor -VMName $VMName -ErrorAction Stop
     $configuration = @{
         VMName = $VMName
         EnableHostResourceProtection = $vmProcessor.EnableHostResourceProtection
@@ -60,7 +52,6 @@ function Get-TargetResource
         CompatibilityForMigrationEnabled = $vmProcessor.CompatibilityForMigrationEnabled
         CompatibilityForOlderOperatingSystemsEnabled = $vmProcessor.CompatibilityForOlderOperatingSystemsEnabled
     }
-
     return $configuration
 }
 
@@ -379,7 +370,6 @@ function Set-TargetResource
         }
         Set-VMProperty @setVMPropertyParameters
     }
-
 } #end function
 
 <#
@@ -440,7 +430,6 @@ function Assert-TargetResourceParameter
             New-InvalidArgumentError -ErrorId SystemUnsupported -ErrorMessage $errorMessage
         }
     }
-
 } #end function
 
 Export-ModuleMember -Function *-TargetResource

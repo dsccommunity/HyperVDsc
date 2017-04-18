@@ -277,6 +277,9 @@ function Set-VMState
 
     .PARAMETER Name
     Name of the virtual machine to apply the changes to.
+
+    .PARAMETER Timeout
+    Number of seconds to wait before timing out. Defaults to 300 (5 minutes).
 #>
 function Wait-VMIPAddress
 {
@@ -286,13 +289,25 @@ function Wait-VMIPAddress
         [Parameter(Mandatory = $true)]
         [Alias('VMName')]
         [System.String]
-        $Name
+        $Name,
+
+        [Parameter()]
+        [System.Int32]
+        $Timeout = 300
     )
 
+    [System.Int32] $elapsedSeconds = 0
     while ((Get-VMNetworkAdapter -VMName $Name).IpAddresses.Count -lt 2)
     {
         Write-Verbose -Message ($localizedData.WaitingForVMIPAddress -f $Name)
         Start-Sleep -Seconds 3;
+
+        $elapsedSeconds += 3
+        if ($elapsedSeconds -gt $Timeout)
+        {
+            $errorMessage = $localizedData.WaitForVMIPAddressTimeoutError -f $Name, $Timeout
+            New-InvalidOperationError -ErrorId 'WaitVmTimeout' -ErrorMessage $errorMessage
+        }
     }
 } #end function
 
@@ -318,5 +333,4 @@ function Assert-Module
         $errorMessage = $localizedData.RoleMissingError -f $Name
         New-InvalidOperationError -ErrorId MissingRole -ErrorMessage $errorMessage
     }
-
 } #end function
