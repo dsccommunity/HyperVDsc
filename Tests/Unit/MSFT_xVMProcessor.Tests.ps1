@@ -76,7 +76,7 @@ try
             It 'Should throw when VM processor is not found' {
                 Mock Get-Module { return $true }
                 Mock Get-VMProcessor { Write-Error 'Not Found' }
-                { $result = Get-TargetResource -VMName $testVMName } | Should Throw 'not found'
+                { $result = Get-TargetResource -VMName $testVMName } | Should Throw 'Not Found'
             }
         } # descrive Get-TargetResource
 
