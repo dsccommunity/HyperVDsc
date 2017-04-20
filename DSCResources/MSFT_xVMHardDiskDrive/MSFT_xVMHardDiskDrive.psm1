@@ -141,7 +141,7 @@ function Test-TargetResource
         $result = $result -and ($PSBoundParameters[$key] -eq $resource[$key])
     }
 
-    return $result	
+    return $result    
 }
 
 <#
