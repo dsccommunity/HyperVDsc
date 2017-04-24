@@ -180,6 +180,7 @@ try
                 Mock `
                     -CommandName Get-VMDvdDrive `
                     -MockWith {} `
+                    -ParameterFilter { $VMName -eq $script:splatGetDvdDrive.VMName } `
                     -Verifiable
 
                 It 'should not throw exception' {
@@ -199,7 +200,8 @@ try
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-ParameterValid -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMDvdDrive -Exactly 1
+                    Assert-MockCalled -CommandName Get-VMDvdDrive -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatGetDvdDrive.VMName }
                 }
             }
 
@@ -212,6 +214,7 @@ try
                 Mock `
                     -CommandName Get-VMDvdDrive `
                     -MockWith { $script:splatAddDvdDriveNoPath } `
+                    -ParameterFilter { $VMName -eq $script:splatGetDvdDrive.VMName } `
                     -Verifiable
 
                 It 'should not throw exception' {
@@ -231,7 +234,8 @@ try
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-ParameterValid -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMDvdDrive -Exactly 1
+                    Assert-MockCalled -CommandName Get-VMDvdDrive -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatGetDvdDrive.VMName }
                 }
             }
 
@@ -244,6 +248,7 @@ try
                 Mock `
                     -CommandName Get-VMDvdDrive `
                     -MockWith { $script:splatAddDvdDrive } `
+                    -ParameterFilter { $VMName -eq $script:splatGetDvdDrive.VMName } `
                     -Verifiable
 
                 It 'should not throw exception' {
@@ -263,7 +268,8 @@ try
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-ParameterValid -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMDvdDrive -Exactly 1
+                    Assert-MockCalled -CommandName Get-VMDvdDrive -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatGetDvdDrive.VMName }
                 }
             }
         }
@@ -330,6 +336,7 @@ try
 
                 Mock `
                     -CommandName Add-VMDvdDrive `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName } `
                     -Verifiable
 
                 # Mocks that should not be called
@@ -343,7 +350,8 @@ try
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
-                    Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 1
+                    Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
                     Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 0
                     Assert-MockCalled -CommandName Remove-VMDvdDrive -Exactly 0
                 }
@@ -383,6 +391,7 @@ try
 
                 Mock `
                     -CommandName Set-VMDvdDrive `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName } `
                     -Verifiable
 
                 # Mocks that should not be called
@@ -397,7 +406,8 @@ try
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                     Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 0
-                    Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 1
+                    Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName }
                     Assert-MockCalled -CommandName Remove-VMDvdDrive -Exactly 0
                 }
             }
@@ -411,6 +421,7 @@ try
 
                 Mock `
                     -CommandName Remove-VMDvdDrive `
+                    -ParameterFilter { $VMName -eq $script:splatRemoveDvdDrive.VMName } `
                     -Verifiable
 
                 # Mocks that should not be called
@@ -426,7 +437,8 @@ try
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                     Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 0
                     Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 0
-                    Assert-MockCalled -CommandName Remove-VMDvdDrive -Exactly 1
+                    Assert-MockCalled -CommandName Remove-VMDvdDrive -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatRemoveDvdDrive.VMName }
                 }
             }
 
@@ -639,6 +651,7 @@ try
                 Mock `
                     -CommandName Get-VM `
                     -MockWith { Throw } `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName } `
                     -Verifiable
 
                 # Mocks that should not be called
@@ -653,7 +666,8 @@ try
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
-                    Assert-MockCalled -CommandName Get-VM -Exactly 1
+                    Assert-MockCalled -CommandName Get-VM -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
                 }
             }
 
@@ -667,14 +681,17 @@ try
                 Mock `
                     -CommandName Get-VM `
                     -MockWith { $script:mockGetVM } `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName } `
                     -Verifiable
 
                 Mock `
                     -CommandName Get-VMScsiController `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName } `
                     -Verifiable
 
                 Mock `
                     -CommandName Get-VMIdeController `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName } `
                     -Verifiable
 
                 # Mocks that should not be called
@@ -692,9 +709,12 @@ try
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
-                    Assert-MockCalled -CommandName Get-VM -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMIdeController -Exactly 1
+                    Assert-MockCalled -CommandName Get-VM -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
+                    Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
+                    Assert-MockCalled -CommandName Get-VMIdeController -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
                 }
             }
 
@@ -708,16 +728,19 @@ try
                 Mock `
                     -CommandName Get-VM `
                     -MockWith { $script:mockGetVM } `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName } `
                     -Verifiable
 
                 Mock `
                     -CommandName Get-VMScsiController `
                     -MockWith { $script:mockGetVMScsiController } `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName } `
                     -Verifiable
 
                 Mock `
                     -CommandName Get-VMHardDiskDrive `
                     -MockWith { $script:mockGetVMHardDiskDrive } `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName } `
                     -Verifiable
 
                 # Mocks that should not be called
@@ -735,9 +758,12 @@ try
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
-                    Assert-MockCalled -CommandName Get-VM -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMHardDiskDrive -Exactly 1
+                    Assert-MockCalled -CommandName Get-VM -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
+                    Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
+                    Assert-MockCalled -CommandName Get-VMHardDiskDrive -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
                 }
             }
 
@@ -751,15 +777,18 @@ try
                 Mock `
                     -CommandName Get-VM `
                     -MockWith { $script:mockGetVM } `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName } `
                     -Verifiable
 
                 Mock `
                     -CommandName Get-VMScsiController `
                     -MockWith { $script:mockGetVMScsiController } `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName } `
                     -Verifiable
 
                 Mock `
                     -CommandName Get-VMHardDiskDrive `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName } `
                     -Verifiable
 
                 Mock `
@@ -782,9 +811,12 @@ try
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
-                    Assert-MockCalled -CommandName Get-VM -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMHardDiskDrive -Exactly 1
+                    Assert-MockCalled -CommandName Get-VM -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName }
+                    Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName }
+                    Assert-MockCalled -CommandName Get-VMHardDiskDrive -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName }
                     Assert-MockCalled -CommandName Test-Path -Exactly 1
                 }
             }
@@ -799,15 +831,18 @@ try
                 Mock `
                     -CommandName Get-VM `
                     -MockWith { $script:mockGetVM } `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName } `
                     -Verifiable
 
                 Mock `
                     -CommandName Get-VMScsiController `
                     -MockWith { $script:mockGetVMScsiController } `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName } `
                     -Verifiable
 
                 Mock `
                     -CommandName Get-VMHardDiskDrive `
+                    -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName } `
                     -Verifiable
 
                 Mock `
@@ -825,9 +860,12 @@ try
                 It 'all the get mocks should be called' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
-                    Assert-MockCalled -CommandName Get-VM -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1
-                    Assert-MockCalled -CommandName Get-VMHardDiskDrive -Exactly 1
+                    Assert-MockCalled -CommandName Get-VM -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName }
+                    Assert-MockCalled -CommandName Get-VMScsiController -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName }
+                    Assert-MockCalled -CommandName Get-VMHardDiskDrive -Exactly 1 `
+                        -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName }
                     Assert-MockCalled -CommandName Test-Path -Exactly 1
                 }
             }
