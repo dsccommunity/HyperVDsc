@@ -101,6 +101,8 @@ Please see the Examples section for more details.
 
 * Fix bug in xVMDvdDrive with hardcoded VM Name.
 * Corrected Markdown rule violations in Readme.md.
+* MSFT_xVMHyperV
+    - EnableGuestService works on localized OS (language independent) 
 
 ### 3.7.0.0
 
