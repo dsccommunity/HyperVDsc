@@ -94,6 +94,7 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **StaticMacAddress**: Specifies static MAC address for the Network adapter.
 * **Ensure**: Ensures that the VM Network Adapter is Present or Absent.
 
+<<<<<<< HEAD
 ### xVMHost
 
 * **`[String]` IsSingleInstance** (_Key_): Specifies the resource is a single instance, the value must be 'Yes'.
@@ -113,6 +114,8 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **`[String]` VirtualMachineMigrationPerformanceOption** (_Write_): Specifies the performance option to use for live migration. { TCPIP | Compression | SMB }.
 * **`[String]` VirtualMachinePath** (_Write_): Specifies the default folder to store virtual machine configuration files on the Hyper-V host.
 
+=======
+>>>>>>> upstream/dev
 Please see the Examples section for more details.
 
 ## Versions
@@ -120,9 +123,13 @@ Please see the Examples section for more details.
 ### Unreleased
 * Adding a new xVMHost resource for managing Hyper-V host settings.
 
+* Fix bug in xVMDvdDrive with hardcoded VM Name.
+* Corrected Markdown rule violations in Readme.md.
+
 ### 3.7.0.0
+
 * Adding a new resource
-    * MSFT_xVMNetworkAdapter: Attaches a new VM network adapter to the management OS or VM.
+  * MSFT_xVMNetworkAdapter: Attaches a new VM network adapter to the management OS or VM.
 
 ### 3.6.0.0
 
