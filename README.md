@@ -116,10 +116,13 @@ Please see the Examples section for more details.
 
 ### Unreleased
 * Adds new MSFT_xVMProcessor to manage virtual machine processor options
+* Fix bug in xVMDvdDrive with hardcoded VM Name.
+* Corrected Markdown rule violations in Readme.md.
 
 ### 3.7.0.0
+
 * Adding a new resource
-    * MSFT_xVMNetworkAdapter: Attaches a new VM network adapter to the management OS or VM.
+  * MSFT_xVMNetworkAdapter: Attaches a new VM network adapter to the management OS or VM.
 
 ### 3.6.0.0
 
