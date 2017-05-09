@@ -101,6 +101,7 @@ Please see the Examples section for more details.
 
 * Fix bug in xVMDvdDrive with hardcoded VM Name.
 * Corrected Markdown rule violations in Readme.md.
+* Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
 
 ### 3.7.0.0
 
