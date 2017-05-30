@@ -20,15 +20,25 @@ function Get-TargetResource
 
     $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue
 
+    if ($switch.NetAdapterInterfaceDescription)
+    {
+        $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription -ErrorAction SilentlyContinue).Name
+        $description = $switch.NetAdapterInterfaceDescription
+    }
+    if ($null -eq $netAdapterName -and $null -ne $switch.NetAdapterInterfaceDescriptions)
+    {
+        $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions).Name
+        $description = $switch.NetAdapterInterfaceDescriptions
+    }
     $returnValue = @{
-        Name              = $switch.Name
-        Type              = $switch.SwitchType
-        NetAdapterName    = $( if($switch.NetAdapterInterfaceDescription){
-                              (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription).Name})
-        AllowManagementOS = $switch.AllowManagementOS
-        Ensure            = if($switch){'Present'}else{'Absent'}
-        Id                = $switch.Id
-        NetAdapterInterfaceDescription = $switch.NetAdapterInterfaceDescription
+        Name                  = $switch.Name
+        Type                  = $switch.SwitchType
+        NetAdapterName        = $netAdapterName
+        AllowManagementOS     = $switch.AllowManagementOS
+        EnableEmbeddedTeaming = $switch.EmbeddedTeamingEnabled
+        Ensure                = if($switch){'Present'}else{'Absent'}
+        Id                    = $switch.Id
+        NetAdapterInterfaceDescription = $description
     }
 
     if($switch.BandwidthReservationMode -ne $null)
@@ -53,9 +63,11 @@ function Set-TargetResource
         [String]$Type,
 
         [ValidateNotNullOrEmpty()]
-        [String]$NetAdapterName,
+        [String[]]$NetAdapterName,
 
         [Boolean]$AllowManagementOS,
+
+        [Boolean]$EnableEmbeddedTeaming = $false,
 
         [ValidateSet("Default","Weight","Absolute","None","NA")]
         [String]$BandwidthReservationMode = "NA",
@@ -74,6 +86,11 @@ function Set-TargetResource
         Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
     }
 
+    if ($EnableEmbeddedTeaming -eq $true -and [System.Environment]::OSVersion.Version.Major -lt 10)
+    {
+        throw "Embedded teaming is only supported on Windows Server 2016"
+    }
+
     if($Ensure -eq 'Present')
     {
         $switch = (Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue)
@@ -84,14 +101,34 @@ function Set-TargetResource
             $removeReaddSwitch = $false
 
             Write-Verbose -Message "Checking switch $Name NetAdapterInterface and BandwidthReservationMode ..."
-            if((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+            if ($switch.EmbeddedTeamingEnabled -eq $false -or $null -eq $switch.EmbeddedTeamingEnabled)
             {
-                Write-Verbose -Message "The switch $Name NetAdapterInterface is incorrect ..."
-                $removeReaddSwitch = $true
+                if((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+                {
+                    Write-Verbose -Message "The switch $Name NetAdapterInterface is incorrect ..."
+                    $removeReaddSwitch = $true
+                }
             }
-            elseif(($BandwidthReservationMode -ne "NA") -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
+            else 
+            {
+                $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction SilentlyContinue).Name
+                if ((Compare-Object -ReferenceObject $adapters -DifferenceObject $NetAdapterName) -ne $null)
+                {
+                    Write-Verbose -Message "Switch $Name has an incorrect list of network adapters..."
+                    $removeReaddSwitch = $true
+                }
+            }
+            
+            if(($BandwidthReservationMode -ne "NA") -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
             {
                 Write-Verbose -Message "The switch $Name BandwidthReservationMode is incorrect ..."
+                $removeReaddSwitch = $true
+            }
+
+            if ($null -ne $switch.EmbeddedTeamingEnabled `
+                -and $switch.EmbeddedTeamingEnabled -ne $EnableEmbeddedTeaming)
+            {
+                Write-Verbose -Message "The switch $Name EnableEmbeddedTeaming is incorrect ..."
                 $removeReaddSwitch = $true
             }
 
@@ -102,8 +139,18 @@ function Set-TargetResource
                 $parameters = @{}
                 $parameters["Name"] = $Name
                 $parameters["NetAdapterName"] = $NetAdapterName
-                $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
-                if($PSBoundParameters.ContainsKey("AllowManagementOS")){$parameters["AllowManagementOS"]=$AllowManagementOS}
+                if($BandwidthReservationMode -ne "NA")
+                {
+                    $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
+                }
+                if($PSBoundParameters.ContainsKey("AllowManagementOS"))
+                {
+                    $parameters["AllowManagementOS"] = $AllowManagementOS
+                }
+                if($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming"))
+                {
+                    $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
+                }
                 $null = New-VMSwitch @parameters
                 Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
                 # Since the switch is recreated, the $switch variable is stale and needs to be reassigned
@@ -152,6 +199,11 @@ function Set-TargetResource
             { 
                 $parameters["SwitchType"] = $Type
             }
+
+            if($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming"))
+            {
+                $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
+            }
             
             $null = New-VMSwitch @parameters
             Write-Verbose -Message "Switch $Name is now $Ensure."
@@ -179,9 +231,11 @@ function Test-TargetResource
         [String]$Type,
 
         [ValidateNotNullOrEmpty()]
-        [String]$NetAdapterName,
+        [String[]]$NetAdapterName,
 
         [Boolean]$AllowManagementOS,
+
+        [Boolean]$EnableEmbeddedTeaming = $false,
 
         [ValidateSet("Default","Weight","Absolute","None","NA")]
         [String]$BandwidthReservationMode = "NA",
@@ -212,6 +266,11 @@ function Test-TargetResource
     if(($BandwidthReservationMode -ne "NA") -and ([version](Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt [version]'6.2.0'))
     {
         Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
+    }
+
+    if ($EnableEmbeddedTeaming -eq $true -and [System.Environment]::OSVersion.Version.Major -lt 10)
+    {
+        throw "Embedded teaming is only supported on Windows Server 2016"
     }
     #endregion
 
@@ -247,15 +306,40 @@ function Test-TargetResource
                 # If switch is the external type, check additional propeties
                 if($switch.SwitchType -eq 'External')
                 {
-                    Write-Verbose -Message "Checking if Switch $Name has correct NetAdapterInterface ..."
-                    if((Get-NetAdapter -Name $NetAdapterName -ErrorAction SilentlyContinue).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+                    if ($EnableEmbeddedTeaming -eq $false)
                     {
-                        return $false
+                        Write-Verbose -Message "Checking if Switch $Name has correct NetAdapterInterface ..."
+                        if((Get-NetAdapter -Name $NetAdapterName -ErrorAction SilentlyContinue).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+                        {
+                            return $false
+                        }
+                        else
+                        {
+                            Write-Verbose -Message "Switch $Name has correct NetAdapterInterface"
+                        }
                     }
-                    else
+                    else 
                     {
-                        Write-Verbose -Message "Switch $Name has correct NetAdapterInterface"
-                    }
+                        Write-Verbose -Message "Checking if Switch $Name has correct NetAdapterInterfaces ..."
+                        if ($null -ne $switch.NetAdapterInterfaceDescriptions)
+                        {
+                            $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction SilentlyContinue).Name
+                            if ((Compare-Object -ReferenceObject $adapters -DifferenceObject $NetAdapterName) -ne $null)
+                            {
+                                Write-Verbose -Message "Switch $Name has an incorrect list of network adapters"
+                                return $false
+                            }
+                            else 
+                            {
+                                Write-Verbose -Message "Switch $Name has a correct list of network adapters"
+                            }
+                        }
+                        else 
+                        {
+                            Write-Verbose -Message "Switch $Name has a correct list of network adapters"    
+                            return $false
+                        }
+                    }  
                 
                     if($PSBoundParameters.ContainsKey("AllowManagementOS"))
                     {
@@ -274,6 +358,21 @@ function Test-TargetResource
                 else
                 {
                     return $true
+                }
+
+                # Only check embedded teaming if specified
+                if ($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming") -eq $true)
+                {
+                    Write-Verbose -Message "Checking if Switch $Name has correct EnableEmbeddedTeaming ..."
+                    if($switch.EmbeddedTeamingEnabled -eq $EnableEmbeddedTeaming -or $null -eq $switch.EmbeddedTeamingEnabled)
+                    {
+                        Write-Verbose -Message "Switch $Name has correct EnableEmbeddedTeaming or it does not apply to this OS"
+                    }
+                    else
+                    {
+                        Write-Verbose -Message "Switch $Name does not have correct EnableEmbeddedTeaming "
+                        return $false
+                    }
                 }
                 
             }

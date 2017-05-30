@@ -64,8 +64,9 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 
 * **Name**: The desired VM Switch name
 * **Type**: The desired type of switch: { External | Internal | Private }
-* **NetAdapterName**: Network adapter name for external switch type
+* **NetAdapterName**: Network adapter name/s for external switch type
 * **AllowManagementOS**: Specify if the VM host has access to the physical NIC
+* **EnableEmbeddedTeaming**: Should embedded NIC teaming be used (Windows Server 2016 only)
 * **BandwidthReservationMode**: Specify the QoS mode used (options other than NA are only supported on Hyper-V 2012+): { Default | Weight | Absolute | None | NA }.
 * **Ensure**: Ensures that the VM Switch is Present or Absent
 
@@ -101,6 +102,7 @@ Please see the Examples section for more details.
 
 * Fix bug in xVMDvdDrive with hardcoded VM Name.
 * Corrected Markdown rule violations in Readme.md.
+* Added support for Embedded NIC teaming in Server 2016 to xVMSwitch
 
 ### 3.7.0.0
 
@@ -733,6 +735,50 @@ Configuration Sample_xVMSwitch_External
             Type           = 'External'
             NetAdapterName = $NetAdapterName
             DependsOn      = '[WindowsFeature]HyperV'
+        }
+    }
+}
+```
+
+### Create an external VM Switch that uses NIC teaming
+
+This configuration will create an external VM Switch that uses multiple NICs
+and embedded teaming, on Hyper-V host that runs Server 2016
+
+```powershell
+Configuration Sample_xVMSwitch_External
+{
+    param
+    (
+        [string[]]$NodeName = 'localhost',
+
+        [Parameter(Mandatory)]
+        [string]$SwitchName,
+
+        [Parameter(Mandatory)]
+        [string[]]$NetAdapterNames
+    )
+
+    Import-DscResource -module xHyper-V
+
+    Node $NodeName
+    {
+        # Install HyperV feature, if not installed - Server SKU only
+        WindowsFeature HyperV
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V'
+        }
+
+        # Ensures a VM with default settings
+        xVMSwitch ExternalSwitch
+        {
+            Ensure                = 'Present'
+            Name                  = $SwitchName
+            Type                  = 'External'
+            NetAdapterName        = $NetAdapterNames
+            EnableEmbeddedTeaming = $true
+            DependsOn             = '[WindowsFeature]HyperV'
         }
     }
 }
