@@ -99,6 +99,8 @@ Please see the Examples section for more details.
 
 ### Unreleased
 
+### 3.8.0.0
+
 * Fix bug in xVMDvdDrive with hardcoded VM Name.
 * Corrected Markdown rule violations in Readme.md.
 
