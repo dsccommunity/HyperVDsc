@@ -106,6 +106,12 @@ Describe 'xVMSwitch' {
             return $global:mockedVMSwitch
         }
 
+        Mock -CommandName Get-OSVersion -MockWith {
+            return @{
+                Major = 10
+            }
+        }
+
         # Mocks Set-VMSwitch and will modify $global:mockedVMSwitch which is
         # a variable that is created during most It statements to mock a VMSwitch
         Mock -CommandName Set-VMSwitch -MockWith {

@@ -86,7 +86,7 @@ function Set-TargetResource
         Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
     }
 
-    if ($EnableEmbeddedTeaming -eq $true -and [System.Environment]::OSVersion.Version.Major -lt 10)
+    if ($EnableEmbeddedTeaming -eq $true -and (Get-OSVersion).Major -lt 10)
     {
         throw "Embedded teaming is only supported on Windows Server 2016"
     }
@@ -268,7 +268,7 @@ function Test-TargetResource
         Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
     }
 
-    if ($EnableEmbeddedTeaming -eq $true -and [System.Environment]::OSVersion.Version.Major -lt 10)
+    if ($EnableEmbeddedTeaming -eq $true -and (Get-OSVersion).Major -lt 10)
     {
         throw "Embedded teaming is only supported on Windows Server 2016"
     }
@@ -390,6 +390,15 @@ function Test-TargetResource
         Write-Verbose -Message "Switch $Name is not Present"
         return ($Ensure -eq 'Absent')
     }
+}
+
+<#
+.SYNOPSIS
+Returns the OS version, it is put here so we can mock it for tests only though
+#>
+function Get-OSVersion
+{
+    return (Get-OSVersion)
 }
 
 Export-ModuleMember -Function *-TargetResource
