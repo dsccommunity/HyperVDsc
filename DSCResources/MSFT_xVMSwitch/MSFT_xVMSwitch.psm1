@@ -304,7 +304,7 @@ function Test-TargetResource
                 }
 
                 # If switch is the external type, check additional propeties
-                if($switch.SwitchType -eq 'External')
+                if($Type -eq 'External')
                 {
                     if ($EnableEmbeddedTeaming -eq $false)
                     {
