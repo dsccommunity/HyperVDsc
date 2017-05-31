@@ -63,7 +63,7 @@ Describe 'xVMSwitch' {
             Param(
                 [string]$Name,
                 [string]$MinimumBandwidthMode,
-                [string]$NetAdapterName,
+                [string[]]$NetAdapterName,
                 [bool]$AllowManagementOS = $false
             )
         }

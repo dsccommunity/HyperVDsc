@@ -65,7 +65,7 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [String[]]$NetAdapterName,
 
-        [Boolean]$AllowManagementOS,
+        [Boolean]$AllowManagementOS = $false,
 
         [Boolean]$EnableEmbeddedTeaming = $false,
 
@@ -233,7 +233,7 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [String[]]$NetAdapterName,
 
-        [Boolean]$AllowManagementOS,
+        [Boolean]$AllowManagementOS = $false,
 
         [Boolean]$EnableEmbeddedTeaming = $false,
 
@@ -309,7 +309,14 @@ function Test-TargetResource
                     if ($EnableEmbeddedTeaming -eq $false)
                     {
                         Write-Verbose -Message "Checking if Switch $Name has correct NetAdapterInterface ..."
-                        if((Get-NetAdapter -Name $NetAdapterName -ErrorAction SilentlyContinue).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+                        $adapter = $null
+                        try
+                        {
+                            $adapter = Get-NetAdapter -Name $NetAdapterName -ErrorAction SilentlyContinue
+                        }
+                        catch{}
+
+                        if($adapter.InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
                         {
                             return $false
                         }
