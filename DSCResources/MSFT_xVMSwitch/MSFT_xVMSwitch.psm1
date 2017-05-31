@@ -405,7 +405,7 @@ Returns the OS version, it is put here so we can mock it for tests only though
 #>
 function Get-OSVersion
 {
-    return (Get-OSVersion)
+    return [Environment]::OSVersion.Version
 }
 
 Export-ModuleMember -Function *-TargetResource
