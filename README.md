@@ -118,7 +118,11 @@ Please see the Examples section for more details.
 ## Versions
 
 ### Unreleased
+
 * Adding a new xVMHost resource for managing Hyper-V host settings.
+
+### 3.8.0.0
+
 * Fix bug in xVMDvdDrive with hardcoded VM Name.
 * Corrected Markdown rule violations in Readme.md.
 
