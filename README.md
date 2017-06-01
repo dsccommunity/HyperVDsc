@@ -115,7 +115,11 @@ Please see the Examples section for more details.
 ## Versions
 
 ### Unreleased
+
 * Adds new MSFT_xVMProcessor to manage virtual machine processor options
+
+### 3.8.0.0
+
 * Fix bug in xVMDvdDrive with hardcoded VM Name.
 * Corrected Markdown rule violations in Readme.md.
 
