@@ -8,16 +8,21 @@ configuration MSFT_xVMHost_Set_Config
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $VirtualMachinePath
+        $VirtualMachinePath,
+
+        [Parameter()]
+        [System.Boolean]
+        $EnableEnhancedSessionMode
     )
 
     Import-DscResource -ModuleName xHyper-V
 
     node localhost {
         xVMHost Integration_Test {
-            IsSingleInstance    = 'Yes'
-            VirtualHardDiskPath = $VirtualHardDiskPath
-            VirtualMachinePath  = $VirtualMachinePath
+            IsSingleInstance          = 'Yes'
+            VirtualHardDiskPath       = $VirtualHardDiskPath
+            VirtualMachinePath        = $VirtualMachinePath
+            EnableEnhancedSessionMode = $EnableEnhancedSessionMode
         }
     }
 

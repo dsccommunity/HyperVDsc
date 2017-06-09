@@ -65,7 +65,7 @@ try
                 Assert-MockCalled Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
             }
 
-        } # descrive Get-TargetResource
+        } # describe Get-TargetResource
 
         Describe 'MSFT_xVMHost\Test-TargetResource' {
 
@@ -185,7 +185,7 @@ try
                     [System.String] $Parameter,
                     [System.Object] $Value,
                     [System.Boolean] $Expected
-                    )
+                )
 
                 $testTargetResourceParams = @{
                     IsSingleInstance = 'Yes';

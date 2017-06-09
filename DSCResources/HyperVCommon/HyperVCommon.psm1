@@ -110,10 +110,10 @@ function Assert-Module
 
 <#
     .SYNOPSIS
-    Converts a number of seconds, mintutes, hours or days into a System.TimeSpan object.
+    Converts a number of seconds, minutes, hours or days into a System.TimeSpan object.
 
     .PARAMETER TimeInterval
-    The total number of seconds, mintues, hours or days to convert.
+    The total number of seconds, minutes, hours or days to convert.
 
     .PARAMETER TimeSpanType
     Convert using specified interval type.
@@ -148,7 +148,7 @@ function ConvertTo-TimeSpan
 
 <#
     .SYNOPSIS
-    Converts a System.TimeSpan into the number of seconds, mintutes, hours or days.
+    Converts a System.TimeSpan into the number of seconds, minutes, hours or days.
 
     .PARAMETER TimeSpan
     TimeSpan to convert into an integer

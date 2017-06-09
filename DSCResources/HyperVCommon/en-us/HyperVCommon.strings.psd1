@@ -1,3 +1,3 @@
 ConvertFrom-StringData @'
-    RoleMissingError = Required role '{0}' is missing/not installed.
+    RoleMissingError = Please ensure that '{0}' role is installed with its PowerShell module.
 '@

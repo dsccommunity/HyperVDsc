@@ -32,6 +32,7 @@ $currentVmHost = Get-VMHost
 # Set-VMHost appears to update $currentVmHost by reference?!
 $currentVirtualHardDiskPath = $currentVmHost.VirtualHardDiskPath
 $currentVirtualMachinePath = $currentVmHost.VirtualMachinePath
+$currentEnableEnhancedSessionMode = $currentVmHost.EnableEnhancedSessionMode
 
 # Using try/finally to always cleanup even if something awful happens.
 try
@@ -48,7 +49,8 @@ try
                     -OutputPath $TestDrive `
                     -ConfigurationData $ConfigData `
                     -VirtualHardDiskPath $TestDrive `
-                    -VirtualMachinePath $TestDrive
+                    -VirtualMachinePath $TestDrive `
+                    -EnableEnhancedSessionMode (-not $currentEnableEnhancedSessionMode)
 
                 $startDscConfigurationParams = @{
                     Path = $TestDrive;
@@ -74,6 +76,7 @@ try
 
             $current.VirtualHardDiskPath | Should Be $TestDrive.FullName
             $current.VirtualMachinePath  | Should Be $TestDrive.FullName
+            $current.EnableEnhancedSessionMode | Should Be (-not $currentEnableEnhancedSessionMode)
         }
     }
 }
@@ -83,7 +86,8 @@ finally
 
     # Restore current host settings
     Set-VMHost -VirtualHardDiskPath $currentVirtualHardDiskPath `
-                -VirtualMachinePath $currentVirtualMachinePath -Verbose
+                -VirtualMachinePath $currentVirtualMachinePath `
+                -EnableEnhancedSessionMode $currentEnableEnhancedSessionMode -Verbose
 
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
     #endregion
