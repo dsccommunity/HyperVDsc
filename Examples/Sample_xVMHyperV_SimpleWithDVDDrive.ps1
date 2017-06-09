@@ -1,4 +1,4 @@
-configuration Sample_xVMHyperV_Simple
+configuration Sample_xVMHyperV_SimpleWithDvdDrive
 {
     param
     (
@@ -6,9 +6,11 @@ configuration Sample_xVMHyperV_Simple
 
         [Parameter(Mandatory)]
         [string]$VMName,
-        
+
         [Parameter(Mandatory)]
-        [string]$VhdPath        
+        [string]$VhdPath,
+
+        [string]$ISOPath
     )
 
     Import-DscResource -module xHyper-V
@@ -28,8 +30,19 @@ configuration Sample_xVMHyperV_Simple
             Ensure    = 'Present'
             Name      = $VMName
             VhdPath   = $VhdPath
-            Generation = 2
+            Generation = $VhdPath.Split('.')[-1]
             DependsOn = '[WindowsFeature]HyperV'
+        }
+
+        # Adds DVD Drive with ISO
+        xVMDvdDrive NewVMDvdDriveISO
+        {
+            Ensure             = 'Present'
+            Name               = $VMName
+            ControllerNumber   = 0
+            ControllerLocation = 0
+            Path               = $ISOPath
+            DependsOn          = '[xVMHyperV]NewVM'
         }
     }
 }
