@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
 
-The **xHyper-V** DSC module configures and manages a Hyper-V host using the **xVhd**, **xVMHyperV**, **xVMSwitch**, **xVhdFileDirectory** and **xVMHost** resources.
+The **xHyper-V** DSC module configures and manages a Hyper-V host using the **xVhd**, **xVMHyperV**, **xVMSwitch**, **xVhdFile** and **xVMHost** resources.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
@@ -16,7 +16,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xVhd** manages VHDs in a Hyper-V host.
 * **xVMHyperV** manages VMs in a Hyper-V host.
 * **xVMSwitch** manages virtual switches in a Hyper-V host.
-* **xVhdFileDirectory** manages files or directories in a VHD.
+* **xVhdFile** manages files or directories in a VHD.
   You can use it to copy files/folders to the VHD, remove files/folders from a VHD, and change attributes of a file in a VHD (e.g. change a file attribute to 'ReadOnly' or 'Hidden').
   This resource is particularly useful when bootstrapping DSC Configurations into a VM.
 * **xVMDvdDrive** manages DVD drives attached to a Hyper-V virtual machine.
