@@ -68,34 +68,34 @@ function Get-TargetResource
        $vmSecureBootState = ($vmobj | Get-VMFirmware).SecureBoot -eq 'On'
     } 
 
-    $VMId = ($vmobj).Id
-    $GuestServiceId = "Microsoft:$VMId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
+    $vmId = ($vmobj).Id
+    $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
 
     
     @{
-        Name             = $Name
+        Name               = $Name
         ## Return the Vhd specified if it exists in the Vhd chain
-        VhdPath          = if ($vhdChain -contains $VhdPath) { $VhdPath };
-        SwitchName       = $vmObj.NetworkAdapters.SwitchName
-        State            = $vmobj.State
-        Path             = $vmobj.Path
-        Generation       = $vmobj.Generation
-        SecureBoot       = $vmSecureBootState
-        StartupMemory    = $vmobj.MemoryStartup
-        MinimumMemory    = $vmobj.MemoryMinimum
-        MaximumMemory    = $vmobj.MemoryMaximum
-        MACAddress       = $vmObj.NetWorkAdapters.MacAddress
-        ProcessorCount   = $vmobj.ProcessorCount
-        Ensure           = if($vmobj){"Present"}else{"Absent"}
-        ID               = $vmobj.Id
-        Status           = $vmobj.Status
-        CPUUsage         = $vmobj.CPUUsage
-        MemoryAssigned   = $vmobj.MemoryAssigned
-        Uptime           = $vmobj.Uptime
-        CreationTime     = $vmobj.CreationTime
-        HasDynamicMemory = $vmobj.DynamicMemoryEnabled
-        NetworkAdapters  = $vmobj.NetworkAdapters.IPAddresses
-        EnableGuestService = ($vmobj | Get-VMIntegrationService | Where-Object {$_.Id -eq $GuestServiceId}).Enabled
+        VhdPath            = if ($vhdChain -contains $VhdPath) { $VhdPath };
+        SwitchName         = $vmObj.NetworkAdapters.SwitchName
+        State              = $vmobj.State
+        Path               = $vmobj.Path
+        Generation         = $vmobj.Generation
+        SecureBoot         = $vmSecureBootState
+        StartupMemory      = $vmobj.MemoryStartup
+        MinimumMemory      = $vmobj.MemoryMinimum
+        MaximumMemory      = $vmobj.MemoryMaximum
+        MACAddress         = $vmObj.NetWorkAdapters.MacAddress
+        ProcessorCount     = $vmobj.ProcessorCount
+        Ensure             = if($vmobj){"Present"}else{"Absent"}
+        ID                 = $vmobj.Id
+        Status             = $vmobj.Status
+        CPUUsage           = $vmobj.CPUUsage
+        MemoryAssigned     = $vmobj.MemoryAssigned
+        Uptime             = $vmobj.Uptime
+        CreationTime       = $vmobj.CreationTime
+        HasDynamicMemory   = $vmobj.DynamicMemoryEnabled
+        NetworkAdapters    = $vmobj.NetworkAdapters.IPAddresses
+        EnableGuestService = ($vmobj | Get-VMIntegrationService | Where-Object {$_.Id -eq $guestServiceId}).Enabled
     }
 }
 
@@ -312,10 +312,10 @@ function Set-TargetResource
             }
 
             #If the VM doesn't have Guest Service Interface correctly configured, update it.
-            $VMId = ($vmobj).Id
-            $GuestServiceId = "Microsoft:$VMId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
+            $vmId = ($vmobj).Id
+            $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
 
-            $GuestService = $vmObj | Get-VMIntegrationService | Where-Object {$_.Id -eq $GuestServiceId}
+            $GuestService = $vmObj | Get-VMIntegrationService | Where-Object {$_.Id -eq $guestServiceId}
             if ($GuestService.Enabled -eq $false -and $EnableGuestService)
             {
                 Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $GuestService.Enabled)
@@ -409,9 +409,9 @@ function Set-TargetResource
 
             if ($EnableGuestService)
             {
-                $VMId = (Get-VM -Name $Name).Id
-                $GuestServiceId = "Microsoft:$VMId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
-                Get-VMIntegrationService -VMName $Name | Where-Object {$_.Id -eq $GuestServiceId} | Enable-VMIntegrationService
+                $vmId = (Get-VM -Name $Name).Id
+                $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
+                Get-VMIntegrationService -VMName $Name | Where-Object {$_.Id -eq $guestServiceId} | Enable-VMIntegrationService
             }
             
             Write-Verbose -Message ($localizedData.VMCreated -f $Name)
@@ -592,9 +592,12 @@ function Test-TargetResource
                     return $false
                 }
             }
-            $VMId = $vmObj.Id
-            $GuestServiceId = "Microsoft:$VMId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
-            if (($vmObj | Get-VMIntegrationService | Where-Object {$_.Id -eq $GuestServiceId}).Enabled -ne $EnableGuestService) {return $false}
+            $vmId = $vmObj.Id
+            $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
+            if (($vmObj | Get-VMIntegrationService | Where-Object {$_.Id -eq $guestServiceId}).Enabled -ne $EnableGuestService)
+            {
+                return $false
+            }
             return $true
         }
         else
