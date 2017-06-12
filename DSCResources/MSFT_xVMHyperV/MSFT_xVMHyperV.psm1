@@ -312,6 +312,9 @@ function Set-TargetResource
             }
 
             #If the VM doesn't have Guest Service Interface correctly configured, update it.
+            $VMId = ($vmobj).Id
+            $GuestServiceId = "Microsoft:$VMId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
+
             $GuestService = $vmObj | Get-VMIntegrationService | Where-Object {$_.Id -eq $GuestServiceId}
             if ($GuestService.Enabled -eq $false -and $EnableGuestService)
             {
@@ -406,7 +409,9 @@ function Set-TargetResource
 
             if ($EnableGuestService)
             {
-                $vmObj | Get-VMIntegrationService | Where-Object {$_.Id -eq $GuestServiceId} | Enable-VMIntegrationService
+                $VMId = (Get-VM -Name $Name).Id
+                $GuestServiceId = "Microsoft:$VMId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
+                Get-VMIntegrationService -VMName $Name | Where-Object {$_.Id -eq $GuestServiceId} | Enable-VMIntegrationService
             }
             
             Write-Verbose -Message ($localizedData.VMCreated -f $Name)
@@ -587,6 +592,8 @@ function Test-TargetResource
                     return $false
                 }
             }
+            $VMId = $vmObj.Id
+            $GuestServiceId = "Microsoft:$VMId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
             if (($vmObj | Get-VMIntegrationService | Where-Object {$_.Id -eq $GuestServiceId}).Enabled -ne $EnableGuestService) {return $false}
             return $true
         }
