@@ -138,6 +138,8 @@ Please see the Examples section for more details.
 
 * Adding a new xVMHost resource for managing Hyper-V host settings.
 * Adds new MSFT_xVMProcessor to manage virtual machine processor options.
+* MSFT_xVMHyperV
+    - EnableGuestService works on localized OS (language independent) 
 
 ### 3.8.0.0
 
@@ -889,7 +891,7 @@ Configuration ChangeAttribute
     )
 
     Import-DscResource -moduleName xHyper-V
-      xVhdFile Change-Attribute
+        xVhdFile Change-Attribute
         {
             VhdPath =  $vhdPath
             FileDirectory =  MSFT_xFileDirectory {
