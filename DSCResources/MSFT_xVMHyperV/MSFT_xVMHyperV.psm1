@@ -95,7 +95,7 @@ function Get-TargetResource
         CreationTime       = $vmobj.CreationTime
         HasDynamicMemory   = $vmobj.DynamicMemoryEnabled
         NetworkAdapters    = $vmobj.NetworkAdapters.IPAddresses
-        EnableGuestService = ($vmobj | Get-VMIntegrationService | Where-Object {$_.Id -eq $guestServiceId}).Enabled
+        EnableGuestService = ($vmobj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}).Enabled
     }
 }
 
@@ -311,11 +311,11 @@ function Set-TargetResource
                 }
             }
 
-            #If the VM doesn't have Guest Service Interface correctly configured, update it.
+            # If the VM doesn't have Guest Service Interface correctly configured, update it.
             $vmId = ($vmobj).Id
             $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
 
-            $GuestService = $vmObj | Get-VMIntegrationService | Where-Object {$_.Id -eq $guestServiceId}
+            $GuestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
             if ($GuestService.Enabled -eq $false -and $EnableGuestService)
             {
                 Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $GuestService.Enabled)
@@ -411,7 +411,7 @@ function Set-TargetResource
             {
                 $vmId = (Get-VM -Name $Name).Id
                 $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
-                Get-VMIntegrationService -VMName $Name | Where-Object {$_.Id -eq $guestServiceId} | Enable-VMIntegrationService
+                Get-VMIntegrationService -VMName $Name | Where-Object -FilterScript {$_.Id -eq $guestServiceId} | Enable-VMIntegrationService
             }
             
             Write-Verbose -Message ($localizedData.VMCreated -f $Name)
@@ -594,7 +594,7 @@ function Test-TargetResource
             }
             $vmId = $vmObj.Id
             $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
-            if (($vmObj | Get-VMIntegrationService | Where-Object {$_.Id -eq $guestServiceId}).Enabled -ne $EnableGuestService)
+            if (($vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}).Enabled -ne $EnableGuestService)
             {
                 return $false
             }

@@ -64,7 +64,7 @@ Describe 'xVMHyper-V' {
             NetworkAdapters = @($stubNIC1,$stubNIC2);
             Notes = '';
         }
-        $stubGuestServiceInterfaceId = 'Microsoft:' + $stubVM.ID + '\6C09BB55-D683-4DA0-8931-C9BF705F6480'
+        $stubGuestServiceInterfaceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $stubVM.ID
 
         Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'RunningVM' } -MockWith {
             $runningVM = $stubVM.Clone();
