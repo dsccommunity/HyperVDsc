@@ -68,8 +68,7 @@ function Get-TargetResource
        $vmSecureBootState = ($vmobj | Get-VMFirmware).SecureBoot -eq 'On'
     } 
 
-    $vmId = ($vmobj).Id
-    $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
+    $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
 
     
     @{
@@ -312,20 +311,19 @@ function Set-TargetResource
             }
 
             # If the VM doesn't have Guest Service Interface correctly configured, update it.
-            $vmId = ($vmobj).Id
-            $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
+            $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
 
-            $GuestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
-            if ($GuestService.Enabled -eq $false -and $EnableGuestService)
+            $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
+            if ($guestService.Enabled -eq $false -and $EnableGuestService)
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $GuestService.Enabled)
-                $GuestService | Enable-VMIntegrationService
+                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
+                $guestService | Enable-VMIntegrationService
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
             }
-            elseif ($GuestService.Enabled -and -not $EnableGuestService)
+            elseif ($guestService.Enabled -and -not $EnableGuestService)
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $GuestService.Enabled)
-                $GuestService | Disable-VMIntegrationService
+                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
+                $guestService | Disable-VMIntegrationService
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
             }
         }
@@ -409,8 +407,7 @@ function Set-TargetResource
 
             if ($EnableGuestService)
             {
-                $vmId = (Get-VM -Name $Name).Id
-                $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
+                $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f (Get-VM -Name $Name).Id
                 Get-VMIntegrationService -VMName $Name | Where-Object -FilterScript {$_.Id -eq $guestServiceId} | Enable-VMIntegrationService
             }
             
@@ -592,10 +589,11 @@ function Test-TargetResource
                     return $false
                 }
             }
-            $vmId = $vmObj.Id
-            $guestServiceId = "Microsoft:$vmId\6C09BB55-D683-4DA0-8931-C9BF705F6480"
-            if (($vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}).Enabled -ne $EnableGuestService)
+            $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
+            $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
+            if ($guestService.Enabled  -ne $EnableGuestService)
             {
+                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
                 return $false
             }
             return $true
