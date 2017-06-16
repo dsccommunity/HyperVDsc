@@ -68,7 +68,7 @@ try
                 Mock Assert-Module { }
                 Mock Get-VMProcessor { return $fakeVMProcessor }
 
-                $result = Get-TargetResource -VMName $testVMName
+                $null = Get-TargetResource -VMName $testVMName
 
                 Assert-MockCalled Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
             }
@@ -76,7 +76,7 @@ try
             It 'Should throw when VM processor is not found' {
                 Mock Get-Module { return $true }
                 Mock Get-VMProcessor { Write-Error 'Not Found' }
-                { $result = Get-TargetResource -VMName $testVMName } | Should Throw 'Not Found'
+                { $null = Get-TargetResource -VMName $testVMName } | Should Throw 'Not Found'
             }
         } # descrive Get-TargetResource
 
@@ -112,10 +112,10 @@ try
                 EnableHostResourceProtection = $true
                 ExposeVirtualizationExtensions = $true
                 HwThreadCountPerCore = 1
-                Maximum = 100
+                Maximum = 99
                 MaximumCountPerNumaNode = 4
                 MaximumCountPerNumaSocket = 1
-                RelativeWeight = 100
+                RelativeWeight = 99
                 Reserve = 0
                 ResourcePoolName = $testResourcePoolName
                 CompatibilityForMigrationEnabled = $false
@@ -133,7 +133,7 @@ try
             It 'Should assert Hyper-V module is installed' {
                 Mock Get-VMProcessor { return $fakeVMProcessor }
 
-                $result = Test-TargetResource -VMName $testVMName
+                $null = Test-TargetResource -VMName $testVMName
 
                 Assert-MockCalled Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
             }
@@ -141,7 +141,7 @@ try
             It 'Should assert parameter values are valid' {
                 Mock Get-VMProcessor { return $fakeVMProcessor }
 
-                $result = Test-TargetResource -VMName $testVMName
+                $null = Test-TargetResource -VMName $testVMName
 
                 Assert-MockCalled Assert-TargetResourceParameter -Scope It
             }
@@ -235,13 +235,13 @@ try
             Mock Set-VMProperty { }
 
             It 'Should assert Hyper-V module is installed' {
-                $result = Set-TargetResource -VMName $testVMName
+                $null = Set-TargetResource -VMName $testVMName
 
                 Assert-MockCalled Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
             }
 
             It 'Should assert parameter values are valid' {
-                $result = Set-TargetResource -VMName $testVMName
+                $null = Set-TargetResource -VMName $testVMName
 
                 Assert-MockCalled Assert-TargetResourceParameter -Scope It
             }

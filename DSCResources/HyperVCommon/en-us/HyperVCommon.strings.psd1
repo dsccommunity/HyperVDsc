@@ -1,5 +1,5 @@
 ConvertFrom-StringData @'
-    UpdatingVMProperties              = Updating VM '{0}' properties..
+    UpdatingVMProperties              = Updating VM '{0}' properties.
     VMPropertiesUpdated               = VM '{0}' properties have been updated.
     WaitingForVMIPAddress             = Waiting for IP Address for VM '{0}' ...
     StoppingVM                        = Stopping VM '{0}'.

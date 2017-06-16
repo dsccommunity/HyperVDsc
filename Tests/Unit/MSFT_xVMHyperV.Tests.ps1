@@ -120,12 +120,12 @@ Describe 'xVMHyper-V' {
             }
             It 'Does not call Get-VMFirmware if a generation 1 VM' {
                 Mock -CommandName Get-VMFirmware -MockWith { throw; }
-                $targetResource = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
+                $null = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
                 Assert-MockCalled -CommandName Get-VMFirmware -Scope It -Exactly 0;
             }
             It 'Calls Get-VMFirmware if a generation 2 VM' {
                 Mock -CommandName Get-VMFirmware -MockWith { return $true; }
-                $targetResource = Get-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk.FullName;
+                $null = Get-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk.FullName;
                 Assert-MockCalled -CommandName Get-VMFirmware -Scope It -Exactly 1;
             }
             It 'Hash table contains key EnableGuestService' {
@@ -400,7 +400,7 @@ Describe 'xVMHyper-V' {
                 Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It;
             }
 
-            It 'Does call "Change-VMSecureBoot" when creating a generation 2 VM' {
+            It 'Does call "Set-VMProperty" when creating a generation 2 VM' {
                 Mock Test-VMSecureBoot -MockWith { return $true; }
                 Mock Set-VMProperty -MockWith { }
 

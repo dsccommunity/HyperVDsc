@@ -67,7 +67,7 @@ function Get-TargetResource
     # Fixes #28
     $vhdChain = @(Get-VhdHierarchy -VhdPath ($vmObj.HardDrives[0].Path))
 
-    $vmSecureBootState = $false;
+    $vmSecureBootState = $false
     if ($vmobj.Generation -eq 2)
     {
        # Retrieve secure boot status (can only be enabled on Generation 2 VMs) and convert to a boolean.
@@ -125,8 +125,7 @@ function Set-TargetResource
 
         # State of the VM
         [Parameter()]
-        [AllowNull()]
-        [ValidateSet("Running","Paused","Off")]
+        [ValidateSet('Running','Paused','Off')]
         [String]
         $State,
 
@@ -277,15 +276,15 @@ function Set-TargetResource
             }
 
             # Stop the VM, set the right properties, start the VM only if there are properties to change
-            if ($changeProperty.Count -gt 0) {
-                Change-VMProperty -Name $Name -VMCommand "Set-VM" -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
+            if ($changeProperty.Count -gt 0)
+            {
+                Set-VMProperty -Name $Name -VMCommand "Set-VM" -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
                 Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
             }
 
             ## Set VM network switches. This can be done while the VM is running.
             for ($i = 0; $i -lt $SwitchName.Count; $i++)
             {
-                ### Change-VMProperty -Name $Name -VMCommand "Set-VMNetworkAdapter" -ChangeProperty @{StaticMacAddress=$MACAddress} -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
                 $switch = $SwitchName[$i]
                 $nic = $vmObj.NetworkAdapters[$i]
                 if ($nic) {
@@ -343,10 +342,10 @@ function Set-TargetResource
                     }
                     # Cannot change the secure boot state whilst the VM is powered on.
                     $setVMPropertyParams = @{
-                        VMName = $Name;
-                        VMCommand = 'Set-VMFirmware';
+                        VMName = $Name
+                        VMCommand = 'Set-VMFirmware'
                         ChangeProperty = @{ EnableSecureBoot = $enableSecureBoot }
-                        RestartIfNeeded = $RestartIfNeeded;
+                        RestartIfNeeded = $RestartIfNeeded
                     }
                     Set-VMProperty @setVMPropertyParams
                     Write-Verbose -Message ($localizedData.VMPropertySet -f 'SecureBoot', $SecureBoot)
@@ -438,11 +437,11 @@ function Set-TargetResource
             {
                 $addVMNetworkAdapterParams = @{
                     VMName = $Name;
-                    SwitchName = $SwitchName[$i];
+                    SwitchName = $SwitchName[$i]
                 }
                 if ($MACAddress -and (-not [System.String]::IsNullOrEmpty($MACAddress[$i])))
                 {
-                    $addVMNetworkAdapterParams['StaticMacAddress'] = $MACAddress[$i];
+                    $addVMNetworkAdapterParams['StaticMacAddress'] = $MACAddress[$i]
                 }
                 Add-VMNetworkAdapter @addVMNetworkAdapterParams
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'NIC', $SwitchName[$i])
@@ -498,8 +497,7 @@ function Test-TargetResource
 
         # State of the VM
         [Parameter()]
-        [AllowNull()]
-        [ValidateSet("Running","Paused","Off")]
+        [ValidateSet('Running','Paused','Off')]
         [String]
         $State,
 
@@ -714,7 +712,7 @@ function Get-VhdHierarchy
     }
 }
 
-# The 'Change-VMProperty' method cannot be used as it cannot deal with piped
+# The 'Set-VMProperty' method cannot be used as it cannot deal with piped
 # command in it's current implementation
 function Set-VMMACAddress
 {
@@ -770,7 +768,6 @@ function Set-VMMACAddress
     }
 }
 
-
 function Test-VMSecureBoot
 {
     param
@@ -779,8 +776,8 @@ function Test-VMSecureBoot
         [string]
         $Name
     )
-    $vm = Get-VM -Name $Name;
-    return (Get-VMFirmware -VM $vm).SecureBoot -eq 'On';
+    $vm = Get-VM -Name $Name
+    return (Get-VMFirmware -VM $vm).SecureBoot -eq 'On'
 }
 
 #endregion

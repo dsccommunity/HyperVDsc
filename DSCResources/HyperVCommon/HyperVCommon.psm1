@@ -98,7 +98,7 @@ function New-InvalidArgumentError
     The collection of cmdlet parameter names and values to pass to the command.
 
     .PARAMETER WaitForIP
-    Waits for the virtual machine to be report an IP address when transitioning
+    Waits for the virtual machine to report an IP address when transitioning
     into a running state.
 
     .PARAMETER RestartIfNeeded
@@ -191,7 +191,6 @@ function Set-VMProperty
         $errorMessage = $localizedData.CannotUpdatePropertiesOnlineError -f $Name, $vmOriginalState
         New-InvalidOperationError -ErrorId RestartRequired -ErrorMessage $errorMessage
     }
-    
 } #end function
 
 <#
@@ -236,7 +235,7 @@ function Set-VMState
     {
         'Running' {
             $vmCurrentState = (Get-VM -Name $Name).State
-            if ($vmCurrentState -eq "Paused")
+            if ($vmCurrentState -eq 'Paused')
             {
                 # If VM is in paused state, use resume-vm to make it running
                 Write-Verbose -Message ($localizedData.ResumingVM -f $Name)
@@ -370,7 +369,6 @@ function ConvertTo-TimeSpan
         'Days' { $newTimeSpanParams['Days'] = $TimeInterval }
     }
     return (New-TimeSpan @newTimeSpanParams)
-
 } #end function ConvertTo-TimeSpan
 
 <#
@@ -406,5 +404,4 @@ function ConvertFrom-TimeSpan
         'Hours' { return $TimeSpan.TotalHours -as [System.UInt32] }
         'Days' { return $TimeSpan.TotalDays -as [System.UInt32] }
     }
-
 } #end function ConvertFrom-TimeSpan
