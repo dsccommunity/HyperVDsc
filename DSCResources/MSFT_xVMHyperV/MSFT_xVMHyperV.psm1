@@ -127,11 +127,11 @@ function Set-TargetResource
         [UInt32]$Generation = 1,
 
         # Startup RAM for the VM
-        [ValidateRange(32MB,17342MB)]
+        [ValidateRange(32MB,65536MB)]
         [UInt64]$StartupMemory,
 
         # Minimum RAM for the VM. This enables dynamic memory
-        [ValidateRange(32MB,17342MB)]
+        [ValidateRange(32MB,65536MB)]
         [UInt64]$MinimumMemory,
 
         # Maximum RAM for the VM. This enables dynamic memory
@@ -453,11 +453,11 @@ function Test-TargetResource
         [UInt32]$Generation = 1,
 
         # Startup RAM for the VM
-        [ValidateRange(32MB,17342MB)]
+        [ValidateRange(32MB,65536MB)]
         [UInt64]$StartupMemory,
 
         # Minimum RAM for the VM. This enables dynamic memory
-        [ValidateRange(32MB,17342MB)]
+        [ValidateRange(32MB,65536MB)]
         [UInt64]$MinimumMemory,
 
         # Maximum RAM for the VM. This enables dynamic memory
