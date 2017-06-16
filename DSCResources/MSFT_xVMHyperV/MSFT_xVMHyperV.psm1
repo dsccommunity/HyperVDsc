@@ -71,32 +71,34 @@ function Get-TargetResource
     if ($vmobj.Generation -eq 2) {
        # Retrieve secure boot status (can only be enabled on Generation 2 VMs) and convert to a boolean.
        $vmSecureBootState = ($vmobj | Get-VMFirmware).SecureBoot -eq 'On'
-    }
+    } 
 
+    $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
+    
     @{
-        Name             = $Name
-        # Return the Vhd specified if it exists in the Vhd chain
-        VhdPath          = if ($vhdChain -contains $VhdPath) { $VhdPath };
-        SwitchName       = $vmObj.NetworkAdapters.SwitchName
-        State            = $vmobj.State
-        Path             = $vmobj.Path
-        Generation       = $vmobj.Generation
-        SecureBoot       = $vmSecureBootState
-        StartupMemory    = $vmobj.MemoryStartup
-        MinimumMemory    = $vmobj.MemoryMinimum
-        MaximumMemory    = $vmobj.MemoryMaximum
-        MACAddress       = $vmObj.NetWorkAdapters.MacAddress
-        ProcessorCount   = $vmobj.ProcessorCount
-        Ensure           = if($vmobj){"Present"}else{"Absent"}
-        ID               = $vmobj.Id
-        Status           = $vmobj.Status
-        CPUUsage         = $vmobj.CPUUsage
-        MemoryAssigned   = $vmobj.MemoryAssigned
-        Uptime           = $vmobj.Uptime
-        CreationTime     = $vmobj.CreationTime
-        HasDynamicMemory = $vmobj.DynamicMemoryEnabled
-        NetworkAdapters  = $vmobj.NetworkAdapters.IPAddresses
-        EnableGuestService = ($vmobj | Get-VMIntegrationService -Name 'Guest Service Interface').Enabled
+        Name               = $Name
+        ## Return the Vhd specified if it exists in the Vhd chain
+        VhdPath            = if ($vhdChain -contains $VhdPath) { $VhdPath };
+        SwitchName         = $vmObj.NetworkAdapters.SwitchName
+        State              = $vmobj.State
+        Path               = $vmobj.Path
+        Generation         = $vmobj.Generation
+        SecureBoot         = $vmSecureBootState
+        StartupMemory      = $vmobj.MemoryStartup
+        MinimumMemory      = $vmobj.MemoryMinimum
+        MaximumMemory      = $vmobj.MemoryMaximum
+        MACAddress         = $vmObj.NetWorkAdapters.MacAddress
+        ProcessorCount     = $vmobj.ProcessorCount
+        Ensure             = if($vmobj){"Present"}else{"Absent"}
+        ID                 = $vmobj.Id
+        Status             = $vmobj.Status
+        CPUUsage           = $vmobj.CPUUsage
+        MemoryAssigned     = $vmobj.MemoryAssigned
+        Uptime             = $vmobj.Uptime
+        CreationTime       = $vmobj.CreationTime
+        HasDynamicMemory   = $vmobj.DynamicMemoryEnabled
+        NetworkAdapters    = $vmobj.NetworkAdapters.IPAddresses
+        EnableGuestService = ($vmobj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}).Enabled
     }
 }
 
@@ -140,13 +142,13 @@ function Set-TargetResource
 
         # Startup RAM for the VM
         [Parameter()]
-        [ValidateRange(32MB,17342MB)]
+        [ValidateRange(32MB,65536MB)]
         [UInt64]
         $StartupMemory,
 
         # Minimum RAM for the VM. This enables dynamic memory
         [Parameter()]
-        [ValidateRange(32MB,17342MB)]
+        [ValidateRange(32MB,65536MB)]
         [UInt64]
         $MinimumMemory,
 
@@ -359,18 +361,20 @@ function Set-TargetResource
                 }
             }
 
-            #If the VM doesn't have Guest Service Interface correctly configured, update it.
-            $GuestServiceStatus = $vmObj | Get-VMIntegrationService -Name 'Guest Service Interface'
-            if ($GuestServiceStatus.Enabled -eq $false -and $EnableGuestService)
+            # If the VM doesn't have Guest Service Interface correctly configured, update it.
+            $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
+
+            $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
+            if ($guestService.Enabled -eq $false -and $EnableGuestService)
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $GuestServiceStatus.Enabled)
-                $vmObj | Enable-VMIntegrationService -Name 'Guest Service Interface'
+                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
+                $guestService | Enable-VMIntegrationService
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
             }
-            elseif ($GuestServiceStatus.Enabled -and -not $EnableGuestService)
+            elseif ($guestService.Enabled -and -not $EnableGuestService)
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $GuestServiceStatus.Enabled)
-                $vmObj | Disable-VMIntegrationService -Name 'Guest Service Interface'
+                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
+                $guestService | Disable-VMIntegrationService
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
             }
         }
@@ -454,7 +458,8 @@ function Set-TargetResource
 
             if ($EnableGuestService)
             {
-                Enable-VMIntegrationService -VMName $Name -Name 'Guest Service Interface'
+                $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f (Get-VM -Name $Name).Id
+                Get-VMIntegrationService -VMName $Name | Where-Object -FilterScript {$_.Id -eq $guestServiceId} | Enable-VMIntegrationService
             }
 
             Write-Verbose -Message ($localizedData.VMCreated -f $Name)
@@ -510,13 +515,13 @@ function Test-TargetResource
 
         # Startup RAM for the VM
         [Parameter()]
-        [ValidateRange(32MB,17342MB)]
+        [ValidateRange(32MB,65536MB)]
         [UInt64]
         $StartupMemory,
 
         # Minimum RAM for the VM. This enables dynamic memory
         [Parameter()]
-        [ValidateRange(32MB,17342MB)]
+        [ValidateRange(32MB,65536MB)]
         [UInt64]
         $MinimumMemory,
 
@@ -667,7 +672,13 @@ function Test-TargetResource
                     return $false
                 }
             }
-            if (($vmObj | Get-VMIntegrationService -Name 'Guest Service Interface').Enabled -ne $EnableGuestService) {return $false}
+            $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
+            $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
+            if ($guestService.Enabled  -ne $EnableGuestService)
+            {
+                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
+                return $false
+            }
             return $true
         }
         else

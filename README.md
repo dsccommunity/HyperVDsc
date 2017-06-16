@@ -137,6 +137,8 @@ Please see the Examples section for more details.
 ### Unreleased
 
 * Adding a new xVMHost resource for managing Hyper-V host settings.
+* MSFT_xVMHyperV: EnableGuestService works on localized OS (language independent) 
+* Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
 * Adds new MSFT_xVMProcessor to manage virtual machine processor options.
 
 ### 3.8.0.0
