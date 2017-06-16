@@ -891,7 +891,7 @@ Configuration ChangeAttribute
     )
 
     Import-DscResource -moduleName xHyper-V
-      xVhdFile Change-Attribute
+        xVhdFile Change-Attribute
         {
             VhdPath =  $vhdPath
             FileDirectory =  MSFT_xFileDirectory {

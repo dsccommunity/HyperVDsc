@@ -68,10 +68,11 @@ function Get-TargetResource
     $vhdChain = @(Get-VhdHierarchy -VhdPath ($vmObj.HardDrives[0].Path))
 
     $vmSecureBootState = $false;
-    if ($vmobj.Generation -eq 2) {
+    if ($vmobj.Generation -eq 2)
+    {
        # Retrieve secure boot status (can only be enabled on Generation 2 VMs) and convert to a boolean.
        $vmSecureBootState = ($vmobj | Get-VMFirmware).SecureBoot -eq 'On'
-    } 
+    }
 
     $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
     
