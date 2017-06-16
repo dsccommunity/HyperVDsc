@@ -14,8 +14,6 @@ $RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
 $ModuleName = 'MSFT_xVMHyperV'
 Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") -Force;
 
-$GuestServiceInterfaceId = 'Microsoft:12E134B6-41DD-4C64-BADD-B48DF9CED6C9\6C09BB55-D683-4DA0-8931-C9BF705F6480'
-
 Describe 'xVMHyper-V' {
     InModuleScope $ModuleName {
 
@@ -66,6 +64,7 @@ Describe 'xVMHyper-V' {
             NetworkAdapters = @($stubNIC1,$stubNIC2);
             Notes = '';
         }
+        $stubGuestServiceInterfaceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $stubVM.ID
 
         Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'RunningVM' } -MockWith {
             $runningVM = $stubVM.Clone();
@@ -98,7 +97,7 @@ Describe 'xVMHyper-V' {
             $gen2VM['Generation'] = 2;
             return [PSCustomObject] $gen2VM;
         }
-        Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$false;Id=$GuestServiceInterfaceId}}
+        Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$false;Id=$stubGuestServiceInterfaceId}}
         Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { return $true; }
 
         Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhd') } -MockWith {
@@ -256,7 +255,7 @@ Describe 'xVMHyper-V' {
             }
 
             It 'Returns $true when EnableGuestService is on and requested "EnableGuestService" = "$true"' {
-                Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true}}
+                Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true;Id=$stubGuestServiceInterfaceId}}
                 Test-TargetResource -Name 'RunningVM' -EnableGuestService $true @testParams | Should be $true;
             }
 
@@ -436,7 +435,7 @@ Describe 'xVMHyper-V' {
 
             It 'Does call "Disable-VMIntegrationService" when "Guest Service Interface" = "Enabled" and "EnableGuestService" = "$false" specified' {
                 Mock -CommandName Disable-VMIntegrationService -MockWith { }
-                Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true;Id=$GuestServiceInterfaceId}}
+                Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true;Id=$stubGuestServiceInterfaceId}}
                 Set-TargetResource -Name 'RunningVM' -EnableGuestService $false @testParams
                 Assert-MockCalled -CommandName Disable-VMIntegrationService -Exactly -Times 1 -Scope It
             }
