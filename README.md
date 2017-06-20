@@ -856,7 +856,8 @@ Configuration HostOSAdapter
     Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
-    xVMNetworkAdapter HostOSAdapter {
+    xVMNetworkAdapter HostOSAdapter
+    {
         Id = 'Management-NIC'
         Name = 'Management-NIC'
         SwitchName = 'SETSwitch'
@@ -873,7 +874,8 @@ Configuration VMAdapter
     Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
-    xVMNetworkAdapter MyVM01NIC {
+    xVMNetworkAdapter MyVM01NIC
+    {
         Id = 'MyVM01-NIC'
         Name = 'MyVM01-NIC'
         SwitchName = 'SETSwitch'
@@ -881,7 +883,8 @@ Configuration VMAdapter
         Ensure = 'Present'
     }
 
-    xVMNetworkAdapter MyVM02NIC {
+    xVMNetworkAdapter MyVM02NIC
+    {
         Id = 'MyVM02-NIC'
         Name = 'NetAdapter'
         SwitchName = 'SETSwitch'
@@ -889,13 +892,14 @@ Configuration VMAdapter
         Ensure = 'Present'
     }
 
-    xVMNetworkAdapter MyVM03NIC {
+    xVMNetworkAdapter MyVM03NIC
+    {
         Id = 'MyVM03-NIC'
         Name = 'NetAdapter'
         SwitchName = 'SETSwitch'
         VMName = 'MyVM03'
         Ensure = 'Present'
-    }    
+    }
 }
 ```
 
