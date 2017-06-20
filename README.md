@@ -87,11 +87,11 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 ### xVMNetworkAdapter
 
 * **`[String]` Id** (_Key_): Unique string for identifying the resource instance. This is the key property for the instances of this resource.
-* **`[String]` Name**: Name of the network adapter as it appears either in the management OS or attached to a VM.
-* **`[String]` SwitchName**: Virtual Switch name to connect the adapter to.
-* **`[String]` VMName**: Name of the VM to attach to. If you want to attach new VM Network adapter to the management OS, set this property to 'Management OS'.
-* **`[String]` MacAddress**: Use this to specify a Static MAC Address. If this parameter is not specified, dynamic MAC Address will be set.
-* **`[String]` Ensure**: Ensures that the VM Network Adapter is Present or Absent.
+* **`[String]` Name** (_Write_): Name of the network adapter as it appears either in the management OS or attached to a VM.
+* **`[String]` SwitchName** (_Write_): Virtual Switch name to connect the adapter to.
+* **`[String]` VMName** (_Write_): Name of the VM to attach to. If you want to attach new VM Network adapter to the management OS, set this property to 'Management OS'.
+* **`[String]` MacAddress** (_Write_): Use this to specify a Static MAC Address. If this parameter is not specified, dynamic MAC Address will be set.
+* **`[String]` Ensure** (_Write_): Ensures that the VM Network Adapter is Present or Absent.
 
 ### xVMHost
 
