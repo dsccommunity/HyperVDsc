@@ -289,7 +289,7 @@ Describe 'xVMSwitch' {
             # Test Test-TargetResource when the version of Windows doesn't support BandwidthReservationMode
             It 'Invalid Operating System Exception' {
                 
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArguementError `
                                 -ErrorId 'BandwidthReservationModeError' `
                                 -ErrorMessage $LocalizedData.BandwidthReservationModeError
                 {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
@@ -365,7 +365,7 @@ Describe 'xVMSwitch' {
                     return [Version]::Parse('6.1.7601')
                 }
 
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArguementError `
                                 -ErrorId 'BandwidthReservationModeError' `
                                 -ErrorMessage $LocalizedData.BandwidthReservationModeError
                 {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
