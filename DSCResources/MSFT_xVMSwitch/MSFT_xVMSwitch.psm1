@@ -1,3 +1,8 @@
+# Import the common HyperV functions
+Import-Module -Name ( Join-Path `
+    -Path (Split-Path -Path $PSScriptRoot -Parent) `
+    -ChildPath '\HyperVCommon\HyperVCommon.psm1' )
+    
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -20,12 +25,12 @@ function Get-TargetResource
 
     $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue
 
-    if ($switch.NetAdapterInterfaceDescription)
+    if ($switch.EmbeddedTeamingEnabled -eq $false)
     {
         $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription -ErrorAction SilentlyContinue).Name
         $description = $switch.NetAdapterInterfaceDescription
     }
-    if ($null -eq $netAdapterName -and $null -ne $switch.NetAdapterInterfaceDescriptions)
+    else
     {
         $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions).Name
         $description = $switch.NetAdapterInterfaceDescriptions
@@ -44,6 +49,10 @@ function Get-TargetResource
     if($switch.BandwidthReservationMode -ne $null)
     {
         $returnValue['BandwidthReservationMode'] = $switch.BandwidthReservationMode
+    }
+    else 
+    {
+        $returnValue['BandwidthReservationMode'] = 'NA'   
     }
 
     return $returnValue
@@ -81,14 +90,17 @@ function Set-TargetResource
         Throw "Please ensure that the Hyper-V role is installed with its PowerShell module"
     }
     # Check to see if the BandwidthReservationMode chosen is supported in the OS
-    elseif(($BandwidthReservationMode -ne "NA") -and ([version](Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt [version]'6.2.0'))
+    elseif(($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
     {
         Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
     }
 
     if ($EnableEmbeddedTeaming -eq $true -and (Get-OSVersion).Major -lt 10)
     {
-        throw "Embedded teaming is only supported on Windows Server 2016"
+        New-InvalidArgumentError `
+            -ErrorId 'SETServer2016Error' `
+            -ErrorMessage ($LocalizedData.SETServer2016Error -f `
+                'Hyper-V')
     }
 
     if($Ensure -eq 'Present')
@@ -109,7 +121,7 @@ function Set-TargetResource
                     $removeReaddSwitch = $true
                 }
             }
-            else 
+            else
             {
                 $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction SilentlyContinue).Name
                 if ((Compare-Object -ReferenceObject $adapters -DifferenceObject $NetAdapterName) -ne $null)
@@ -263,14 +275,17 @@ function Test-TargetResource
         Throw "For Internal or Private switch type, NetAdapterName should not be specified"
     }
 
-    if(($BandwidthReservationMode -ne "NA") -and ([version](Get-WmiObject -Class 'Win32_OperatingSystem').Version -lt [version]'6.2.0'))
+    if(($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
     {
         Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
     }
 
     if ($EnableEmbeddedTeaming -eq $true -and (Get-OSVersion).Major -lt 10)
     {
-        throw "Embedded teaming is only supported on Windows Server 2016"
+        New-InvalidArgumentError `
+            -ErrorId 'SETServer2016Error' `
+            -ErrorMessage ($LocalizedData.SETServer2016Error -f `
+                'Hyper-V')
     }
     #endregion
 
@@ -343,7 +358,7 @@ function Test-TargetResource
                         }
                         else 
                         {
-                            Write-Verbose -Message "Switch $Name has a correct list of network adapters"    
+                            Write-Verbose -Message "Switch $Name has an incorrect list of network adapters"    
                             return $false
                         }
                     }  
@@ -360,11 +375,6 @@ function Test-TargetResource
                             Write-Verbose -Message "Switch $Name has AllowManagementOS set correctly"
                         }
                     }
-                    return $true
-                }
-                else
-                {
-                    return $true
                 }
 
                 # Only check embedded teaming if specified
@@ -381,7 +391,8 @@ function Test-TargetResource
                         return $false
                     }
                 }
-                
+
+                return $true                
             }
             # If switch should be absent, but is there, return $false
             else

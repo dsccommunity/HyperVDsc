@@ -62,13 +62,13 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 
 ### xVMSwitch
 
-* **Name**: The desired VM Switch name
-* **Type**: The desired type of switch: { External | Internal | Private }
-* **NetAdapterName**: Network adapter name/s for external switch type
-* **AllowManagementOS**: Specify if the VM host has access to the physical NIC
-* **EnableEmbeddedTeaming**: Should embedded NIC teaming be used (Windows Server 2016 only)
-* **BandwidthReservationMode**: Specify the QoS mode used (options other than NA are only supported on Hyper-V 2012+): { Default | Weight | Absolute | None | NA }.
-* **Ensure**: Ensures that the VM Switch is Present or Absent
+* **`[String]` Name** (_Key_): The desired VM Switch name
+* **`[String]` Type** (_Key_): The desired type of switch: { External | Internal | Private }
+* **`[String[]]` NetAdapterName** (_Write_): Network adapter name(s) for external switch type
+* **`[Boolean]` AllowManagementOS** (_Write_): Specify if the VM host has access to the physical NIC
+* **`[Boolean]` EnableEmbeddedTeaming** (_Write_): Should embedded NIC teaming be used (Windows Server 2016 only)
+* **`[String]` BandwidthReservationMode** (_Write_): Specify the QoS mode used (options other than NA are only supported on Hyper-V 2012+): { Default | Weight | Absolute | None | NA }.
+* **`[String]` Ensure** (_Write_): Ensures that the VM Switch is Present or Absent
 
 ### xVhdFile
 
@@ -102,7 +102,7 @@ Please see the Examples section for more details.
 
 * Fix bug in xVMDvdDrive with hardcoded VM Name.
 * Corrected Markdown rule violations in Readme.md.
-* Added support for Embedded NIC teaming in Server 2016 to xVMSwitch
+* MSFT_xVMHyperV: Added support for Switch Embedded Teaming (SET) in Server 2016
 
 ### 3.7.0.0
 
@@ -770,6 +770,13 @@ Configuration Sample_xVMSwitch_External
             Name   = 'Hyper-V'
         }
 
+        WindowsFeature HyperVTools
+        {
+            Ensure    = 'Present'
+            Name      = 'RSAT-Hyper-V-Tools'
+            DependsOn = '[WindowsFeature]HyperV'
+        }
+
         # Ensures a VM with default settings
         xVMSwitch ExternalSwitch
         {
@@ -778,7 +785,7 @@ Configuration Sample_xVMSwitch_External
             Type                  = 'External'
             NetAdapterName        = $NetAdapterNames
             EnableEmbeddedTeaming = $true
-            DependsOn             = '[WindowsFeature]HyperV'
+            DependsOn             = '[WindowsFeature]HyperVTools'
         }
     }
 }
