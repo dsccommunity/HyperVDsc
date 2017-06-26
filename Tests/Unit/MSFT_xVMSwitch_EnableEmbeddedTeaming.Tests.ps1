@@ -179,13 +179,6 @@ try
                 return $true
             }
 
-            # Mock "Get-WmiObject -Class -eq 'Win32_OperatingSystem'" to output a valid Windows version that supports BandwidthReservationMode
-            Mock -CommandName Get-WmiObject -ParameterFilter { $Class -eq 'Win32_OperatingSystem' } -MockWith {
-                return [PSCustomObject]@{
-                    Version = '6.3.9600'
-                }
-            }
-
             Context "A virtual switch with embedded teaming does not exist but should" {
                 $global:mockedVMSwitch = $null
 
@@ -384,6 +377,10 @@ try
                     EnableEmbeddedTeaming = $true
                     BandwidthReservationMode = "NA"
                     Ensure = "Present"
+                }
+
+                Mock -CommandName Get-OSVersion -MockWith {
+                    return [Version]::Parse('6.3.9600')
                 }
 
                 It "Should return absent in the get method" {
