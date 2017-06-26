@@ -1,22 +1,52 @@
-[CmdletBinding()]
-Param (
+$script:DSCModuleName      = 'xHyper-V'
+$script:DSCResourceName    = 'MSFT_xVMSwitch'
 
-)
-
-if (!$PSScriptRoot) {
-$PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
+#region HEADER
+# Unit Test Template Version: 1.1.0
+[String] $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+{
+    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
 }
 
-$ErrorActionPreference = 'Stop'
-Set-StrictMode -Version latest
+Import-Module (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+$TestEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:DSCModuleName `
+    -DSCResourceName $script:DSCResourceName `
+    -TestType Unit
+#endregion HEADER
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+# Begin Testing
+try
+{
+    #region Pester Tests
+    InModuleScope $script:DSCResourceName {
+        # Function to create a exception object for testing output exceptions
+        function Get-InvalidArguementError
+        {
+            [CmdletBinding()]
+            param
+            (
+                [Parameter(Mandatory)]
+                [ValidateNotNullOrEmpty()]
+                [System.String]
+                $ErrorId,
 
-$ModuleName = 'MSFT_xVMSwitch'
-Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") -Force;
+                [Parameter(Mandatory)]
+                [ValidateNotNullOrEmpty()]
+                [System.String]
+                $ErrorMessage
+            )
 
-Describe 'xVMSwitch' {
-    InModuleScope $ModuleName {
+            $exception = New-Object -TypeName System.ArgumentException `
+                -ArgumentList $ErrorMessage
+            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
+            $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
+                -ArgumentList $exception, $ErrorId, $errorCategory, $null
+            return $errorRecord
+        } # end function Get-InvalidArguementError
+
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch {
             Param (
@@ -337,4 +367,10 @@ Describe 'xVMSwitch' {
             }
         }
     }
+}
+finally
+{
+    #region FOOTER
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+    #endregion
 }
