@@ -9,16 +9,16 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory)]
+        [parameter(Mandatory = $true)]
         [String]$Name,
 
-        [parameter(Mandatory)]
+        [parameter(Mandatory = $true)]
         [ValidateSet("External","Internal","Private")]
         [String]$Type
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
-    if(!(Get-Module -ListAvailable -Name Hyper-V))
+    if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
         Throw "Please ensure that Hyper-V role is installed with its PowerShell module"
     }
@@ -35,18 +35,28 @@ function Get-TargetResource
         $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions).Name
         $description = $switch.NetAdapterInterfaceDescriptions
     }
+
+    if ($switch)
+    {
+        $ensure = 'Present'
+    }
+    else
+    {
+        $ensure = 'Absent'
+    }
+
     $returnValue = @{
         Name                  = $switch.Name
         Type                  = $switch.SwitchType
         NetAdapterName        = $netAdapterName
         AllowManagementOS     = $switch.AllowManagementOS
         EnableEmbeddedTeaming = $switch.EmbeddedTeamingEnabled
-        Ensure                = if($switch){'Present'}else{'Absent'}
+        Ensure                = $ensure
         Id                    = $switch.Id
         NetAdapterInterfaceDescription = $description
     }
 
-    if($switch.BandwidthReservationMode -ne $null)
+    if ($null -ne $switch.BandwidthReservationMode)
     {
         $returnValue['BandwidthReservationMode'] = $switch.BandwidthReservationMode
     }
@@ -64,58 +74,73 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory)]
-        [String]$Name,
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Name,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("External","Internal","Private")]
-        [String]$Type,
+        [String]
+        $Type,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String[]]$NetAdapterName,
+        [String[]]
+        $NetAdapterName,
 
-        [Boolean]$AllowManagementOS = $false,
+        [Parameter()]
+        [Boolean]
+        $AllowManagementOS = $false,
 
-        [Boolean]$EnableEmbeddedTeaming = $false,
+        [Parameter()]
+        [Boolean]
+        $EnableEmbeddedTeaming = $false,
 
+        [Parameter()]
         [ValidateSet("Default","Weight","Absolute","None","NA")]
-        [String]$BandwidthReservationMode = "NA",
+        [String]
+        $BandwidthReservationMode = "NA",
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
-        [String]$Ensure = "Present"
+        [String]
+        $Ensure = "Present"
     )
     # Check if Hyper-V module is present for Hyper-V cmdlets
-    if(!(Get-Module -ListAvailable -Name Hyper-V))
+    if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw "Please ensure that the Hyper-V role is installed with its PowerShell module"
+        New-InvalidOperationError `
+            -ErrorId 'HyperVNotInstalledError' `
+            -ErrorMessage $LocalizedData.HyperVNotInstalledError
     }
     # Check to see if the BandwidthReservationMode chosen is supported in the OS
-    elseif(($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
+    elseif (($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
     {
-        Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
+        New-InvalidArgumentError `
+            -ErrorId 'BandwidthReservationModeError' `
+            -ErrorMessage $LocalizedData.BandwidthReservationModeError
     }
 
     if ($EnableEmbeddedTeaming -eq $true -and (Get-OSVersion).Major -lt 10)
     {
         New-InvalidArgumentError `
             -ErrorId 'SETServer2016Error' `
-            -ErrorMessage ($LocalizedData.SETServer2016Error -f `
-                'Hyper-V')
+            -ErrorMessage $LocalizedData.SETServer2016Error
     }
 
-    if($Ensure -eq 'Present')
+    if ($Ensure -eq 'Present')
     {
         $switch = (Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue)
 
         # If switch is present and it is external type, that means it doesn't have right properties (TEST code ensures that)
-        if($switch -and ($switch.SwitchType -eq 'External'))
+        if ($switch -and ($switch.SwitchType -eq 'External'))
         {
             $removeReaddSwitch = $false
 
             Write-Verbose -Message "Checking switch $Name NetAdapterInterface and BandwidthReservationMode ..."
             if ($switch.EmbeddedTeamingEnabled -eq $false -or $null -eq $switch.EmbeddedTeamingEnabled)
             {
-                if((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+                if ((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
                 {
                     Write-Verbose -Message "The switch $Name NetAdapterInterface is incorrect ..."
                     $removeReaddSwitch = $true
@@ -131,7 +156,7 @@ function Set-TargetResource
                 }
             }
             
-            if(($BandwidthReservationMode -ne "NA") -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
+            if (($BandwidthReservationMode -ne "NA") -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
             {
                 Write-Verbose -Message "The switch $Name BandwidthReservationMode is incorrect ..."
                 $removeReaddSwitch = $true
@@ -144,25 +169,29 @@ function Set-TargetResource
                 $removeReaddSwitch = $true
             }
 
-            if($removeReaddSwitch)
+            if ($removeReaddSwitch)
             {
                 Write-Verbose -Message "Removing switch $Name and creating with the correct properties ..."
                 $switch | Remove-VMSwitch -Force
                 $parameters = @{}
                 $parameters["Name"] = $Name
                 $parameters["NetAdapterName"] = $NetAdapterName
-                if($BandwidthReservationMode -ne "NA")
+
+                if ($BandwidthReservationMode -ne "NA")
                 {
                     $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
                 }
-                if($PSBoundParameters.ContainsKey("AllowManagementOS"))
+
+                if ($PSBoundParameters.ContainsKey("AllowManagementOS"))
                 {
                     $parameters["AllowManagementOS"] = $AllowManagementOS
                 }
-                if($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming"))
+
+                if ($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming"))
                 {
                     $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
                 }
+
                 $null = New-VMSwitch @parameters
                 Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
                 # Since the switch is recreated, the $switch variable is stale and needs to be reassigned
@@ -174,7 +203,7 @@ function Set-TargetResource
             }
 
             Write-Verbose -Message "Checking switch $Name AllowManagementOS ..."
-            if($PSBoundParameters.ContainsKey("AllowManagementOS") -and ($switch.AllowManagementOS -ne $AllowManagementOS))
+            if ($PSBoundParameters.ContainsKey("AllowManagementOS") -and ($switch.AllowManagementOS -ne $AllowManagementOS))
             {
                 Write-Verbose -Message "Switch $Name AllowManagementOS property is not correct"
                 $switch | Set-VMSwitch -AllowManagementOS $AllowManagementOS
@@ -194,15 +223,15 @@ function Set-TargetResource
             $parameters = @{}
             $parameters["Name"] = $Name
 
-            if($BandwidthReservationMode -ne "NA")
+            if ($BandwidthReservationMode -ne "NA")
             {
                 $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
             }
 
-            if($NetAdapterName)
+            if ($NetAdapterName)
             {
                 $parameters["NetAdapterName"] = $NetAdapterName
-                if($PSBoundParameters.ContainsKey("AllowManagementOS"))
+                if ($PSBoundParameters.ContainsKey("AllowManagementOS"))
                 {
                     $parameters["AllowManagementOS"] = $AllowManagementOS
                 }
@@ -212,7 +241,7 @@ function Set-TargetResource
                 $parameters["SwitchType"] = $Type
             }
 
-            if($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming"))
+            if ($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming"))
             {
                 $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
             }
@@ -235,57 +264,76 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory)]
-        [String]$Name,
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Name,
 
-        [parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet("External","Internal","Private")]
-        [String]$Type,
+        [String]
+        $Type,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String[]]$NetAdapterName,
+        [String[]]
+        $NetAdapterName,
 
-        [Boolean]$AllowManagementOS = $false,
+        [Parameter()]
+        [Boolean]
+        $AllowManagementOS = $false,
 
-        [Boolean]$EnableEmbeddedTeaming = $false,
+        [Parameter()]
+        [Boolean]
+        $EnableEmbeddedTeaming = $false,
 
+        [Parameter()]
         [ValidateSet("Default","Weight","Absolute","None","NA")]
-        [String]$BandwidthReservationMode = "NA",
+        [String]
+        $BandwidthReservationMode = "NA",
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
-        [String]$Ensure = "Present"
+        [String]
+        $Ensure = "Present"
     )
 
     #region input validation
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
-    if(!(Get-Module -ListAvailable -Name Hyper-V))
+    if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw "Please ensure that Hyper-V role is installed with its PowerShell module"
+        New-InvalidOperationError `
+            -ErrorId 'HyperVNotInstalledError' `
+            -ErrorMessage $LocalizedData.HyperVNotInstalledError
     }
 
-    if($Type -eq 'External' -and !($NetAdapterName))
+    if ($Type -eq 'External' -and !($NetAdapterName))
     {
-        Throw "For external switch type, NetAdapterName must be specified"
+        New-InvalidArgumentError `
+            -ErrorId 'NetAdapterNameRequiredError' `
+            -ErrorMessage $LocalizedData.NetAdapterNameRequiredError
     }
     
     
-    if($Type -ne 'External' -and $NetAdapterName)
+    if ($Type -ne 'External' -and $NetAdapterName)
     {
-        Throw "For Internal or Private switch type, NetAdapterName should not be specified"
+        New-InvalidArgumentError `
+            -ErrorId 'NetAdapterNameNotRequiredError' `
+            -ErrorMessage $LocalizedData.NetAdapterNameNotRequiredError
     }
 
-    if(($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
+    if (($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
     {
-        Throw "The BandwidthReservationMode cannot be set on a Hyper-V version lower than 2012"
+        New-InvalidArgumentError `
+            -ErrorId 'BandwidthReservationModeError' `
+            -ErrorMessage $LocalizedData.BandwidthReservationModeError
     }
 
     if ($EnableEmbeddedTeaming -eq $true -and (Get-OSVersion).Major -lt 10)
     {
         New-InvalidArgumentError `
             -ErrorId 'SETServer2016Error' `
-            -ErrorMessage ($LocalizedData.SETServer2016Error -f `
-                'Hyper-V')
+            -ErrorMessage $LocalizedData.SETServer2016Error
     }
     #endregion
 
@@ -296,18 +344,18 @@ function Test-TargetResource
         $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction Stop
 
         # If switch exists
-        if($switch)
+        if ($switch)
         {
             Write-Verbose -Message "Switch $Name is Present"
             # If switch should be present, check the switch type
-            if($Ensure -eq 'Present')
+            if ($Ensure -eq 'Present')
             {
                 ## Only check the BandwidthReservationMode if specified
-                if($PSBoundParameters.ContainsKey('BandwidthReservationMode'))
+                if ($PSBoundParameters.ContainsKey('BandwidthReservationMode'))
                 {
                     # If the BandwidthReservationMode is correct, or if $switch.BandwidthReservationMode is $null which means it isn't supported on the OS
                     Write-Verbose -Message "Checking if Switch $Name has correct BandwidthReservationMode ..."
-                    if($switch.BandwidthReservationMode -eq $BandwidthReservationMode -or $switch.BandwidthReservationMode -eq $null)
+                    if ($switch.BandwidthReservationMode -eq $BandwidthReservationMode -or $switch.BandwidthReservationMode -eq $null)
                     {
                         Write-Verbose -Message "Switch $Name has correct BandwidthReservationMode or it does not apply to this OS"
                     }
@@ -319,7 +367,7 @@ function Test-TargetResource
                 }
 
                 # If switch is the external type, check additional propeties
-                if($Type -eq 'External')
+                if ($Type -eq 'External')
                 {
                     if ($EnableEmbeddedTeaming -eq $false)
                     {
@@ -331,7 +379,7 @@ function Test-TargetResource
                         }
                         catch{}
 
-                        if($adapter.InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
+                        if ($adapter.InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
                         {
                             return $false
                         }
@@ -363,10 +411,10 @@ function Test-TargetResource
                         }
                     }  
                 
-                    if($PSBoundParameters.ContainsKey("AllowManagementOS"))
+                    if ($PSBoundParameters.ContainsKey("AllowManagementOS"))
                     {
                         Write-Verbose -Message "Checking if Switch $Name has AllowManagementOS set correctly..."
-                        if(($switch.AllowManagementOS -ne $AllowManagementOS))
+                        if (($switch.AllowManagementOS -ne $AllowManagementOS))
                         {
                             return $false
                         }
@@ -381,7 +429,7 @@ function Test-TargetResource
                 if ($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming") -eq $true)
                 {
                     Write-Verbose -Message "Checking if Switch $Name has correct EnableEmbeddedTeaming ..."
-                    if($switch.EmbeddedTeamingEnabled -eq $EnableEmbeddedTeaming -or $null -eq $switch.EmbeddedTeamingEnabled)
+                    if ($switch.EmbeddedTeamingEnabled -eq $EnableEmbeddedTeaming -or $null -eq $switch.EmbeddedTeamingEnabled)
                     {
                         Write-Verbose -Message "Switch $Name has correct EnableEmbeddedTeaming or it does not apply to this OS"
                     }

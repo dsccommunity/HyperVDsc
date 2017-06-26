@@ -743,20 +743,24 @@ Configuration Sample_xVMSwitch_External
 ### Create an external VM Switch that uses NIC teaming
 
 This configuration will create an external VM Switch that uses multiple NICs
-and embedded teaming, on Hyper-V host that runs Server 2016
+and embedded teaming, on a Hyper-V host that runs Server 2016
 
 ```powershell
 Configuration Sample_xVMSwitch_External
 {
     param
     (
-        [string[]]$NodeName = 'localhost',
+        [Parameter()]
+        [string[]]
+        $NodeName = 'localhost',
 
-        [Parameter(Mandatory)]
-        [string]$SwitchName,
+        [Parameter(Mandatory = $true)]
+        [string]
+        $SwitchName,
 
-        [Parameter(Mandatory)]
-        [string[]]$NetAdapterNames
+        [Parameter(Mandatory = $true)]
+        [string[]]
+        $NetAdapterNames
     )
 
     Import-DscResource -module xHyper-V
