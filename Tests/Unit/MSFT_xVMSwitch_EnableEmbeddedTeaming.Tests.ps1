@@ -199,16 +199,17 @@ try
                     Ensure = "Present"
                 }
 
-                it "Should return absent in the get method" {
+                It "Should return absent in the get method" {
                     (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Absent"
                 }
 
-                it "Should return false in the test method" {
+                It "Should return false in the test method" {
                     Test-TargetResource @testParams | Should Be $false
                 }
 
-                it "Should run the set method without exceptions" {
+                It "Should run the set method without exceptions" {
                     Set-TargetResource @testParams
+                    Assert-MockCalled -CommandName "New-VMSwitch" -Times 1
                 }
             }
 
@@ -232,11 +233,11 @@ try
                     Ensure = "Present"
                 }
 
-                it "Should return present in the get method" {
+                It "Should return present in the get method" {
                     (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Present"
                 }
 
-                it "Should return true in the test method" {
+                It "Should return true in the test method" {
                     Test-TargetResource @testParams | Should Be $true
                 }
             }
@@ -274,16 +275,18 @@ try
                     Ensure = "Present"
                 }
 
-                it "Should return present in the get method" {
+                It "Should return present in the get method" {
                     (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Present"
                 }
 
-                it "Should return false in the test method" {
+                It "Should return false in the test method" {
                     Test-TargetResource @testParams | Should Be $false
                 }
 
-                it "Should run the set method without exceptions" {
+                It "Should run the set method without exceptions" {
                     Set-TargetResource @testParams
+                    Assert-MockCalled -CommandName "Remove-VMSwitch" -Times 1
+                    Assert-MockCalled -CommandName "New-VMSwitch" -Times 1
                 }
             }
 
@@ -307,16 +310,18 @@ try
                     Ensure = "Present"
                 }
 
-                it "Should return present in the get method" {
+                It "Should return present in the get method" {
                     (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Present"
                 }
 
-                it "Should return false in the test method" {
+                It "Should return false in the test method" {
                     Test-TargetResource @testParams | Should Be $false
                 }
 
-                it "Should run the set method without exceptions" {
+                It "Should run the set method without exceptions" {
                     Set-TargetResource @testParams
+                    Assert-MockCalled -CommandName "Remove-VMSwitch" -Times 1
+                    Assert-MockCalled -CommandName "New-VMSwitch" -Times 1
                 }
             }
 
@@ -336,16 +341,17 @@ try
                     Ensure = "Absent"
                 }
 
-                it "Should return present in the get method" {
+                It "Should return present in the get method" {
                     (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Present"
                 }
 
-                it "Should return false in the test method" {
+                It "Should return false in the test method" {
                     Test-TargetResource @testParams | Should Be $false
                 }
 
-                it "Should run the set method without exceptions" {
+                It "Should run the set method without exceptions" {
                     Set-TargetResource @testParams
+                    Assert-MockCalled -CommandName "Remove-VMSwitch" -Times 1
                 }
             }
 
@@ -358,12 +364,46 @@ try
                     Ensure = "Absent"
                 }
 
-                it "Should return absent in the get method" {
+                It "Should return absent in the get method" {
                     (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Absent"
                 }
 
-                it "Should return true in the test method" {
+                It "Should return true in the test method" {
                     Test-TargetResource @testParams | Should Be $true
+                }
+            }
+
+            Context "A server is not running Server 2016 and attempts to use embedded teaming" {
+                $global:mockedVMSwitch = $null
+
+                $testParams = @{
+                    Name = "TestSwitch"
+                    Type = "External"
+                    NetAdapterName = @("NIC1", "NIC2")
+                    AllowManagementOS = $true
+                    EnableEmbeddedTeaming = $true
+                    BandwidthReservationMode = "NA"
+                    Ensure = "Present"
+                }
+
+                It "Should return absent in the get method" {
+                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Absent"
+                }
+
+                It "Should throw an error in the test method" {
+                    $errorRecord = Get-InvalidArguementError `
+                        -ErrorId 'SETServer2016Error' `
+                        -ErrorMessage $LocalizedData.SETServer2016Error
+
+                    {Test-TargetResource @testParams} | Should Throw $errorRecord
+                }
+
+                It "Should throw an error in the set method" {
+                    $errorRecord = Get-InvalidArguementError `
+                        -ErrorId 'SETServer2016Error' `
+                        -ErrorMessage $LocalizedData.SETServer2016Error
+
+                    {Set-TargetResource @testParams} | Should Throw $errorRecord
                 }
             }
         }
