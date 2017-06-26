@@ -1,3 +1,21 @@
+#region localizeddata
+if (Test-Path "${PSScriptRoot}\${PSUICulture}")
+{
+    Import-LocalizedData `
+        -BindingVariable LocalizedData `
+        -Filename MSFT_xVMSwitch.strings.psd1 `
+        -BaseDirectory "${PSScriptRoot}\${PSUICulture}"
+}
+else
+{
+    #fallback to en-US
+    Import-LocalizedData `
+        -BindingVariable LocalizedData `
+        -Filename MSFT_xVMSwitch.strings.psd1 `
+        -BaseDirectory "${PSScriptRoot}\en-US"
+}
+#endregion
+
 # Import the common HyperV functions
 Import-Module -Name ( Join-Path `
     -Path (Split-Path -Path $PSScriptRoot -Parent) `
