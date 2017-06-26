@@ -38,30 +38,33 @@ function Get-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw "Please ensure that Hyper-V role is installed with its PowerShell module"
+        New-InvalidOperationError `
+            -ErrorId 'HyperVNotInstalledError' `
+            -ErrorMessage $LocalizedData.HyperVNotInstalledError
     }
 
     $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue
 
-    if ($switch.EmbeddedTeamingEnabled -eq $false)
-    {
-        $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription -ErrorAction SilentlyContinue).Name
-        $description = $switch.NetAdapterInterfaceDescription
-    }
-    else
-    {
-        $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions).Name
-        $description = $switch.NetAdapterInterfaceDescriptions
-    }
-
-    if ($switch)
+    if ($null -ne $switch)
     {
         $ensure = 'Present'
+        if ($switch.EmbeddedTeamingEnabled -eq $false)
+        {
+            $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription -ErrorAction SilentlyContinue).Name
+            $description = $switch.NetAdapterInterfaceDescription
+        }
+        else
+        {
+            $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions).Name
+            $description = $switch.NetAdapterInterfaceDescriptions
+        }
     }
     else
     {
         $ensure = 'Absent'
     }
+
+    
 
     $returnValue = @{
         Name                  = $switch.Name
@@ -74,7 +77,7 @@ function Get-TargetResource
         NetAdapterInterfaceDescription = $description
     }
 
-    if ($null -ne $switch.BandwidthReservationMode)
+    if ($switch.BandwidthReservationMode -ne $null)
     {
         $returnValue['BandwidthReservationMode'] = $switch.BandwidthReservationMode
     }
@@ -156,7 +159,7 @@ function Set-TargetResource
             $removeReaddSwitch = $false
 
             Write-Verbose -Message "Checking switch $Name NetAdapterInterface and BandwidthReservationMode ..."
-            if ($switch.EmbeddedTeamingEnabled -eq $false -or $null -eq $switch.EmbeddedTeamingEnabled)
+            if ($switch.EmbeddedTeamingEnabled -eq $false -or $switch.EmbeddedTeamingEnabled -eq $null)
             {
                 if ((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
                 {
@@ -180,7 +183,7 @@ function Set-TargetResource
                 $removeReaddSwitch = $true
             }
 
-            if ($null -ne $switch.EmbeddedTeamingEnabled `
+            if ($switch.EmbeddedTeamingEnabled -ne $null `
                 -and $switch.EmbeddedTeamingEnabled -ne $EnableEmbeddedTeaming)
             {
                 Write-Verbose -Message "The switch $Name EnableEmbeddedTeaming is incorrect ..."
@@ -210,7 +213,7 @@ function Set-TargetResource
                     $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
                 }
 
-                $null = New-VMSwitch @parameters
+                New-VMSwitch @parameters | Out-Null
                 Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
                 # Since the switch is recreated, the $switch variable is stale and needs to be reassigned
                 $switch = (Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue)
@@ -264,7 +267,7 @@ function Set-TargetResource
                 $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
             }
             
-            $null = New-VMSwitch @parameters
+            New-VMSwitch @parameters | Out-Null
             Write-Verbose -Message "Switch $Name is now $Ensure."
         }
     }
@@ -362,7 +365,7 @@ function Test-TargetResource
         $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction Stop
 
         # If switch exists
-        if ($switch)
+        if ($null -ne $switch)
         {
             Write-Verbose -Message "Switch $Name is Present"
             # If switch should be present, check the switch type
@@ -409,7 +412,7 @@ function Test-TargetResource
                     else 
                     {
                         Write-Verbose -Message "Checking if Switch $Name has correct NetAdapterInterfaces ..."
-                        if ($null -ne $switch.NetAdapterInterfaceDescriptions)
+                        if ($switch.NetAdapterInterfaceDescriptions -ne $null)
                         {
                             $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction SilentlyContinue).Name
                             if ((Compare-Object -ReferenceObject $adapters -DifferenceObject $NetAdapterName) -ne $null)
@@ -447,7 +450,7 @@ function Test-TargetResource
                 if ($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming") -eq $true)
                 {
                     Write-Verbose -Message "Checking if Switch $Name has correct EnableEmbeddedTeaming ..."
-                    if ($switch.EmbeddedTeamingEnabled -eq $EnableEmbeddedTeaming -or $null -eq $switch.EmbeddedTeamingEnabled)
+                    if ($switch.EmbeddedTeamingEnabled -eq $EnableEmbeddedTeaming -or $switch.EmbeddedTeamingEnabled -eq $null)
                     {
                         Write-Verbose -Message "Switch $Name has correct EnableEmbeddedTeaming or it does not apply to this OS"
                     }

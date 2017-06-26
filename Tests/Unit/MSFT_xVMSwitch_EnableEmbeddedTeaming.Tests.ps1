@@ -115,7 +115,8 @@ try
                 [string]$ErrorAction
             )
 
-            if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null) {
+            if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null) 
+            {
                 throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
             }
 
