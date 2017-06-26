@@ -52,7 +52,7 @@ function Get-TargetResource
     if ($null -ne $switch)
     {
         $ensure = 'Present'
-        if ($switch.EmbeddedTeamingEnabled -eq $false)
+        if ($switch.EmbeddedTeamingEnabled -ne $true)
         {
             $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription -ErrorAction SilentlyContinue).Name
             $description = $switch.NetAdapterInterfaceDescription
