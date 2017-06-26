@@ -23,6 +23,31 @@ Describe 'xVMSwitch' {
         # for foreach loops later on
         New-Variable -Name 'BANDWIDTH_RESERVATION_MODES' -Option 'Constant' -Value @('Default','Weight','Absolute','None')
 
+        # Function to create a exception object for testing output exceptions
+        function Get-InvalidArguementError
+        {
+            [CmdletBinding()]
+            param
+            (
+                [Parameter(Mandatory)]
+                [ValidateNotNullOrEmpty()]
+                [System.String]
+                $ErrorId,
+
+                [Parameter(Mandatory)]
+                [ValidateNotNullOrEmpty()]
+                [System.String]
+                $ErrorMessage
+            )
+
+            $exception = New-Object -TypeName System.ArgumentException `
+                -ArgumentList $ErrorMessage
+            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
+            $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
+                -ArgumentList $exception, $ErrorId, $errorCategory, $null
+            return $errorRecord
+        } # end function Get-InvalidArguementError
+        
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch {
             Param (
@@ -186,7 +211,7 @@ Describe 'xVMSwitch' {
 
                 $targetResource = Get-TargetResource -Name 'NaBRM' -Type 'External'
                 $targetResource -is [System.Collections.Hashtable] | Should Be $true
-                $targetResource['BandwidthReservationMode'] | Should Be $null
+                $targetResource['BandwidthReservationMode'] | Should Be "NA"
 
                 Remove-Variable -Scope 'Global' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
             }
@@ -264,7 +289,7 @@ Describe 'xVMSwitch' {
             # Test Test-TargetResource when the version of Windows doesn't support BandwidthReservationMode
             It 'Invalid Operating System Exception' {
                 
-                $errorRecord = New-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentError `
                                 -ErrorId 'BandwidthReservationModeError' `
                                 -ErrorMessage $LocalizedData.BandwidthReservationModeError
                 {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
@@ -340,7 +365,7 @@ Describe 'xVMSwitch' {
                     return [Version]::Parse('6.1.7601')
                 }
 
-                $errorRecord = New-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentError `
                                 -ErrorId 'BandwidthReservationModeError' `
                                 -ErrorMessage $LocalizedData.BandwidthReservationModeError
                 {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
