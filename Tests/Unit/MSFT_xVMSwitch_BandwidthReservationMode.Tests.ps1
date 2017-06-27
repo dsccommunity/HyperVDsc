@@ -24,7 +24,7 @@ Describe 'xVMSwitch' {
         New-Variable -Name 'BANDWIDTH_RESERVATION_MODES' -Option 'Constant' -Value @('Default','Weight','Absolute','None')
 
         # Function to create a exception object for testing output exceptions
-        function Get-InvalidArguementError
+        function Get-InvalidArgumentError
         {
             [CmdletBinding()]
             param
@@ -46,7 +46,7 @@ Describe 'xVMSwitch' {
             $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
                 -ArgumentList $exception, $ErrorId, $errorCategory, $null
             return $errorRecord
-        } # end function Get-InvalidArguementError
+        } # end function Get-InvalidArgumentError
         
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch {
@@ -289,7 +289,7 @@ Describe 'xVMSwitch' {
             # Test Test-TargetResource when the version of Windows doesn't support BandwidthReservationMode
             It 'Invalid Operating System Exception' {
                 
-                $errorRecord = Get-InvalidArguementError `
+                $errorRecord = Get-InvalidArgumentError `
                                 -ErrorId 'BandwidthReservationModeError' `
                                 -ErrorMessage $LocalizedData.BandwidthReservationModeError
                 {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
@@ -365,7 +365,7 @@ Describe 'xVMSwitch' {
                     return [Version]::Parse('6.1.7601')
                 }
 
-                $errorRecord = Get-InvalidArguementError `
+                $errorRecord = Get-InvalidArgumentError `
                                 -ErrorId 'BandwidthReservationModeError' `
                                 -ErrorMessage $LocalizedData.BandwidthReservationModeError
                 {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord

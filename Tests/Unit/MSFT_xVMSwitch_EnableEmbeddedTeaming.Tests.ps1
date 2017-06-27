@@ -23,7 +23,7 @@ try
     #region Pester Tests
     InModuleScope $script:DSCResourceName {
         # Function to create a exception object for testing output exceptions
-        function Get-InvalidArguementError
+        function Get-InvalidArgumentError
         {
             [CmdletBinding()]
             param
@@ -45,7 +45,7 @@ try
             $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
                 -ArgumentList $exception, $ErrorId, $errorCategory, $null
             return $errorRecord
-        } # end function Get-InvalidArguementError
+        } # end function Get-InvalidArgumentError
 
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch {
@@ -388,7 +388,7 @@ try
                 }
 
                 It "Should throw an error in the test method" {
-                    $errorRecord = Get-InvalidArguementError `
+                    $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'SETServer2016Error' `
                         -ErrorMessage $LocalizedData.SETServer2016Error
 
@@ -396,7 +396,7 @@ try
                 }
 
                 It "Should throw an error in the set method" {
-                    $errorRecord = Get-InvalidArguementError `
+                    $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'SETServer2016Error' `
                         -ErrorMessage $LocalizedData.SETServer2016Error
 

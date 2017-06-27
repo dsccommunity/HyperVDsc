@@ -20,7 +20,7 @@ else
 Import-Module -Name ( Join-Path `
     -Path (Split-Path -Path $PSScriptRoot -Parent) `
     -ChildPath '\HyperVCommon\HyperVCommon.psm1' )
-    
+
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -68,12 +68,10 @@ function Get-TargetResource
         $ensure = 'Absent'
     }
 
-    
-
     $returnValue = @{
         Name                  = $switch.Name
         Type                  = $switch.SwitchType
-        NetAdapterName        = $netAdapterName
+        NetAdapterName        = [string[]]$netAdapterName
         AllowManagementOS     = $switch.AllowManagementOS
         EnableEmbeddedTeaming = $switch.EmbeddedTeamingEnabled
         Ensure                = $ensure
@@ -87,7 +85,7 @@ function Get-TargetResource
     }
     else 
     {
-        $returnValue['BandwidthReservationMode'] = 'NA'   
+        $returnValue['BandwidthReservationMode'] = 'NA'
     }
 
     return $returnValue
@@ -162,12 +160,12 @@ function Set-TargetResource
         {
             $removeReaddSwitch = $false
 
-            Write-Verbose -Message "Checking switch $Name NetAdapterInterface and BandwidthReservationMode ..."
+            Write-Verbose -Message ($LocalizedData.CheckingSwitchMessage -f $Name)
             if ($switch.EmbeddedTeamingEnabled -eq $false -or $null -eq $switch.EmbeddedTeamingEnabled)
             {
                 if ((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
                 {
-                    Write-Verbose -Message "The switch $Name NetAdapterInterface is incorrect ..."
+                    Write-Verbose -Message ($LocalizedData.NetAdapterInterfaceIncorrectMessage -f $Name)
                     $removeReaddSwitch = $true
                 }
             }
@@ -176,27 +174,27 @@ function Set-TargetResource
                 $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction SilentlyContinue).Name
                 if ($null -ne (Compare-Object -ReferenceObject $adapters -DifferenceObject $NetAdapterName))
                 {
-                    Write-Verbose -Message "Switch $Name has an incorrect list of network adapters..."
+                    Write-Verbose -Message ($LocalizedData.SwitchIncorrectNetworkAdapters -f $Name)
                     $removeReaddSwitch = $true
                 }
             }
             
             if (($BandwidthReservationMode -ne "NA") -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
             {
-                Write-Verbose -Message "The switch $Name BandwidthReservationMode is incorrect ..."
+                Write-Verbose -Message ($LocalizedData.BandwidthReservationModeIncorrect -f $Name)
                 $removeReaddSwitch = $true
             }
 
             if ($null -ne $switch.EmbeddedTeamingEnabled `
                 -and $switch.EmbeddedTeamingEnabled -ne $EnableEmbeddedTeaming)
             {
-                Write-Verbose -Message "The switch $Name EnableEmbeddedTeaming is incorrect ..."
+                Write-Verbose -Message ($LocalizedData.EnableEmbeddedTeamingIncorrect -f $Name)
                 $removeReaddSwitch = $true
             }
 
             if ($removeReaddSwitch)
             {
-                Write-Verbose -Message "Removing switch $Name and creating with the correct properties ..."
+                Write-Verbose -Message ($LocalizedData.RemoveAndReaddSwitchMessage -f $Name)
                 $switch | Remove-VMSwitch -Force
                 $parameters = @{}
                 $parameters["Name"] = $Name
@@ -224,27 +222,27 @@ function Set-TargetResource
             }
             else
             {
-                Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName and BandwidthReservationMode $BandwidthReservationMode"
+                Write-Verbose -Message ($LocalizedData.SwitchCorrectNetAdapterAndBandwidthMode -f $Name, $NetAdapterName, $BandwidthReservationMode)
             }
 
-            Write-Verbose -Message "Checking switch $Name AllowManagementOS ..."
+            Write-Verbose -Message ($LocalizedData.CheckAllowManagementOS -f $Name)
             if ($PSBoundParameters.ContainsKey("AllowManagementOS") -and ($switch.AllowManagementOS -ne $AllowManagementOS))
             {
-                Write-Verbose -Message "Switch $Name AllowManagementOS property is not correct"
+                Write-Verbose -Message ($LocalizedData.AllowManagementOSIncorrect -f $Name)
                 $switch | Set-VMSwitch -AllowManagementOS $AllowManagementOS
-                Write-Verbose -Message "Switch $Name AllowManagementOS property is set to $AllowManagementOS"
+                Write-Verbose -Message ($LocalizedData.AllowManagementOSUpdated -f $Name, $AllowManagementOS)
             }
             else
             {
-                Write-Verbose -Message "Switch $Name AllowManagementOS is correctly set"
+                Write-Verbose -Message ($LocalizedData.AllowManagementOSCorrect -f $Name)
             }
         }
 
         # If the switch is not present, create one
         else
         {
-            Write-Verbose -Message "Switch $Name is not $Ensure."
-            Write-Verbose -Message "Creating Switch ..."
+            Write-Verbose -Message ($LocalizedData.PresentNotCorrect -f $Name, $Ensure)
+            Write-Verbose -Message $LocalizedData.CreatingSwitch
             $parameters = @{}
             $parameters["Name"] = $Name
 
@@ -272,7 +270,7 @@ function Set-TargetResource
             }
             
             New-VMSwitch @parameters | Out-Null
-            Write-Verbose -Message "Switch $Name is now $Ensure."
+            Write-Verbose -Message ($LocalizedData.PresentCorrect -f $Name, $Ensure)
         }
     }
     # Ensure is set to "Absent", remove the switch
@@ -338,8 +336,7 @@ function Test-TargetResource
             -ErrorId 'NetAdapterNameRequiredError' `
             -ErrorMessage $LocalizedData.NetAdapterNameRequiredError
     }
-    
-    
+
     if ($Type -ne 'External' -and $NetAdapterName)
     {
         New-InvalidArgumentError `
@@ -365,13 +362,13 @@ function Test-TargetResource
     try
     {
         # Check if switch exists
-        Write-Verbose -Message "Checking if Switch $Name is $Ensure ..."
+        Write-Verbose -Message ($LocalizedData.PresentChecking -f $Name, $Ensure)
         $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction Stop
 
         # If switch exists
         if ($null -ne $switch)
         {
-            Write-Verbose -Message "Switch $Name is Present"
+            Write-Verbose -Message ($LocalizedData.SwitchPresent -f $Name)
             # If switch should be present, check the switch type
             if ($Ensure -eq 'Present')
             {
@@ -379,14 +376,14 @@ function Test-TargetResource
                 if ($PSBoundParameters.ContainsKey('BandwidthReservationMode'))
                 {
                     # If the BandwidthReservationMode is correct, or if $switch.BandwidthReservationMode is $null which means it isn't supported on the OS
-                    Write-Verbose -Message "Checking if Switch $Name has correct BandwidthReservationMode ..."
+                    Write-Verbose -Message ($LocalizedData.CheckingBandwidthReservationMode -f $Name)
                     if ($switch.BandwidthReservationMode -eq $BandwidthReservationMode -or $null -eq $switch.BandwidthReservationMode)
                     {
-                        Write-Verbose -Message "Switch $Name has correct BandwidthReservationMode or it does not apply to this OS"
+                        Write-Verbose -Message ($LocalizedData.BandwidthReservationModeCorrect -f $Name)
                     }
                     else
                     {
-                        Write-Verbose -Message "Switch $Name does not have correct BandwidthReservationMode "
+                        Write-Verbose -Message ($LocalizedData.BandwidthReservationModeIncorrect -f $Name)
                         return $false
                     }
                 }
@@ -396,7 +393,7 @@ function Test-TargetResource
                 {
                     if ($EnableEmbeddedTeaming -eq $false)
                     {
-                        Write-Verbose -Message "Checking if Switch $Name has correct NetAdapterInterface ..."
+                        Write-Verbose -Message ($LocalizedData.CheckingNetAdapterInterface -f $Name)
                         $adapter = $null
                         try
                         {
@@ -404,7 +401,11 @@ function Test-TargetResource
                         }
                         catch 
                         {
-                            Write-Verbose -Message "Network adapter not found"
+                            # There are scenarios where the SilentlyContinue error action is not honoured,
+                            # so this block serves to handle those and the write-verbose message is here
+                            # to ensure that script analyser doesn't see an empty catch block to throw an
+                            # error
+                            Write-Verbose -Message $LocalizedData.NetAdapterNotFound
                         }
 
                         if ($adapter.InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
@@ -413,42 +414,42 @@ function Test-TargetResource
                         }
                         else
                         {
-                            Write-Verbose -Message "Switch $Name has correct NetAdapterInterface"
+                            Write-Verbose -Message ($LocalizedData.NetAdapterInterfaceCorrect -f $Name)
                         }
                     }
                     else 
                     {
-                        Write-Verbose -Message "Checking if Switch $Name has correct NetAdapterInterfaces ..."
+                        Write-Verbose -Message ($LocalizedData.CheckingNetAdapterInterfaces -f $Name)
                         if ($null -ne $switch.NetAdapterInterfaceDescriptions)
                         {
                             $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction SilentlyContinue).Name
                             if ($null -ne (Compare-Object -ReferenceObject $adapters -DifferenceObject $NetAdapterName))
                             {
-                                Write-Verbose -Message "Switch $Name has an incorrect list of network adapters"
+                                Write-Verbose -Message ($LocalizedData.IncorrectNetAdapterInterfaces -f $Name)
                                 return $false
                             }
                             else 
                             {
-                                Write-Verbose -Message "Switch $Name has a correct list of network adapters"
+                                Write-Verbose -Message ($LocalizedData.CorrectNetAdapterInterfaces -f $Name)
                             }
                         }
                         else 
                         {
-                            Write-Verbose -Message "Switch $Name has an incorrect list of network adapters"    
+                            Write-Verbose -Message ($LocalizedData.IncorrectNetAdapterInterfaces -f $Name)  
                             return $false
                         }
                     }  
                 
                     if ($PSBoundParameters.ContainsKey("AllowManagementOS"))
                     {
-                        Write-Verbose -Message "Checking if Switch $Name has AllowManagementOS set correctly..."
+                        Write-Verbose -Message ($LocalizedData.CheckAllowManagementOS -f $Name)
                         if (($switch.AllowManagementOS -ne $AllowManagementOS))
                         {
                             return $false
                         }
                         else
                         {
-                            Write-Verbose -Message "Switch $Name has AllowManagementOS set correctly"
+                            Write-Verbose -Message ($LocalizedData.AllowManagementOSCorrect -f $Name)
                         }
                     }
                 }
@@ -456,19 +457,19 @@ function Test-TargetResource
                 # Only check embedded teaming if specified
                 if ($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming") -eq $true)
                 {
-                    Write-Verbose -Message "Checking if Switch $Name has correct EnableEmbeddedTeaming ..."
+                    Write-Verbose -Message ($LocalizedData.CheckEnableEmbeddedTeaming -f $Name)
                     if ($switch.EmbeddedTeamingEnabled -eq $EnableEmbeddedTeaming -or $null -eq $switch.EmbeddedTeamingEnabled)
                     {
-                        Write-Verbose -Message "Switch $Name has correct EnableEmbeddedTeaming or it does not apply to this OS"
+                        Write-Verbose -Message ($LocalizedData.EnableEmbeddedTeamingCorrect -f $Name)
                     }
                     else
                     {
-                        Write-Verbose -Message "Switch $Name does not have correct EnableEmbeddedTeaming "
+                        Write-Verbose -Message ($LocalizedData.EnableEmbeddedTeamingIncorrect -f $Name)
                         return $false
                     }
                 }
 
-                return $true                
+                return $true
             }
             # If switch should be absent, but is there, return $false
             else
@@ -481,14 +482,14 @@ function Test-TargetResource
     # If no switch was present
     catch [System.Management.Automation.ActionPreferenceStopException]
     {
-        Write-Verbose -Message "Switch $Name is not Present"
+        Write-Verbose -Message ($LocalizedData.SwitchNotPresent -f $Name)
         return ($Ensure -eq 'Absent')
     }
 }
 
 <#
 .SYNOPSIS
-Returns the OS version, it is put here so we can mock it for tests only though
+Returns the OS version
 #>
 function Get-OSVersion
 {
