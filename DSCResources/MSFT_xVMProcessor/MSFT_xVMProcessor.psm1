@@ -177,11 +177,13 @@ function Test-TargetResource
     Assert-TargetResourceParameter @PSBoundParameters
 
     $targetResource = Get-TargetResource -VMName $VMName
+    $excludedTestParameters = @('RestartIfNeeded')
     $isTargetResourceCompliant = $true
 
     foreach ($parameter in $PSBoundParameters.GetEnumerator())
     {
         if (($targetResource.ContainsKey($parameter.Key)) -and
+            ($parameter.Key -notin $excludedTestParameters) -and
             ($parameter.Value -ne $targetResource[$parameter.Key]))
         {
             $isTargetResourceCompliant = $false

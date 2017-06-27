@@ -140,6 +140,7 @@ Please see the Examples section for more details.
 * MSFT_xVMHyperV: EnableGuestService works on localized OS (language independent) 
 * Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
 * Adds new MSFT_xVMProcessor to manage virtual machine processor options.
+* Adds missing Hyper-V-PowerShell feature in examples.
 
 ### 3.8.0.0
 
@@ -584,11 +585,17 @@ Configuration Sample_xVMHyperV_DynamicMemory
 
     Node $NodeName
     {
-        # Install HyperV feature, if not installed - Server SKU only
+        # Install HyperV features, if not installed - Server SKU only
         WindowsFeature HyperV
         {
             Ensure = 'Present'
             Name   = 'Hyper-V'
+        }
+
+        WindowsFeature HyperVPowerShell
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V-PowerShell'
         }
 
         # Ensures a VM with dynamic memory
@@ -602,7 +609,7 @@ Configuration Sample_xVMHyperV_DynamicMemory
             StartupMemory = $StartupMemory
             MinimumMemory = $MinimumMemory
             MaximumMemory = $MaximumMemory
-            DependsOn     = '[WindowsFeature]HyperV'
+            DependsOn     = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
         }
     }
 }
@@ -660,11 +667,17 @@ Configuration Sample_xVMHyperV_Complete
 
     Node $NodeName
     {
-        # Install HyperV feature, if not installed - Server SKU only
+        # Install HyperV features, if not installed - Server SKU only
         WindowsFeature HyperV
         {
             Ensure = 'Present'
             Name   = 'Hyper-V'
+        }
+
+        WindowsFeature HyperVPowerShell
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V-PowerShell'
         }
 
         # Ensures a VM with all the properties
@@ -685,7 +698,7 @@ Configuration Sample_xVMHyperV_Complete
             MACAddress      = $MACAddress
             RestartIfNeeded = $true
             WaitForIP       = $WaitForIP
-            DependsOn       = '[WindowsFeature]HyperV'
+            DependsOn       = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
         }
     }
 }
@@ -719,16 +732,22 @@ Configuration Sample_xVMHyperV_MultipleNICs
 
     Node $NodeName
     {
-        # Install HyperV feature, if not installed - Server SKU only
+        # Install HyperV features, if not installed - Server SKU only
         WindowsFeature HyperV
         {
             Ensure = 'Present'
             Name   = 'Hyper-V'
         }
 
+        WindowsFeature HyperVPowerShell
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V-PowerShell'
+        }
+
         # Dynamically build the 'DependsOn' array for the 'xVMHyperV' feature
         # based on the number of virtual switches specified
-        $xVMHyperVDependsOn = @('[WindowsFeature]HyperV')
+        $xVMHyperVDependsOn = @('[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell')
 
         # Create each virtual switch
         foreach ($vmSwitch in $SwitchName)
@@ -743,7 +762,7 @@ Configuration Sample_xVMHyperV_MultipleNICs
                 Ensure         = 'Present'
                 Name           = $vmSwitch
                 Type           = 'Internal'
-                DependsOn      = '[WindowsFeature]HyperV'
+                DependsOn      = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
             }
         }
 
@@ -783,11 +802,17 @@ Configuration Sample_xVMSwitch_Internal
 
     Node $NodeName
     {
-        # Install HyperV feature, if not installed - Server SKU only
+        # Install HyperV features, if not installed - Server SKU only
         WindowsFeature HyperV
         {
             Ensure = 'Present'
             Name   = 'Hyper-V'
+        }
+
+        WindowsFeature HyperVPowerShell
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V-PowerShell'
         }
 
         # Ensures a VM with default settings
@@ -796,7 +821,7 @@ Configuration Sample_xVMSwitch_Internal
             Ensure         = 'Present'
             Name           = $SwitchName
             Type           = 'Internal'
-            DependsOn      = '[WindowsFeature]HyperV'
+            DependsOn      = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
         }
     }
 }
@@ -824,11 +849,17 @@ Configuration Sample_xVMSwitch_External
 
     Node $NodeName
     {
-        # Install HyperV feature, if not installed - Server SKU only
+        # Install HyperV features, if not installed - Server SKU only
         WindowsFeature HyperV
         {
             Ensure = 'Present'
             Name   = 'Hyper-V'
+        }
+
+        WindowsFeature HyperVPowerShell
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V-PowerShell'
         }
 
         # Ensures a VM with default settings
@@ -838,7 +869,7 @@ Configuration Sample_xVMSwitch_External
             Name           = $SwitchName
             Type           = 'External'
             NetAdapterName = $NetAdapterName
-            DependsOn      = '[WindowsFeature]HyperV'
+            DependsOn      = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
         }
     }
 }

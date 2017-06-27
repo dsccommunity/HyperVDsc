@@ -183,7 +183,7 @@ function Set-TargetResource
         [ValidateSet('Present','Absent')]
         [String]
         $Ensure = 'Present',
-        
+
         [Parameter()]
         [System.String]
         $Notes,
@@ -555,7 +555,7 @@ function Test-TargetResource
         [ValidateSet('Present','Absent')]
         [String]
         $Ensure = 'Present',
-        
+
         [Parameter()]
         [System.String]
         $Notes,
