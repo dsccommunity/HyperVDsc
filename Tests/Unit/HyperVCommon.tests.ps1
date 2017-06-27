@@ -26,53 +26,207 @@ try
         $LocalizedData
     }
 
-    function Get-InvalidOperationError
-    {
-        [CmdletBinding()]
-        param
-        (
-            [Parameter(Mandatory)]
-            [ValidateNotNullOrEmpty()]
-            [System.String]
-            $ErrorId,
+    InModuleScope $script:DSCResourceName {
 
-            [Parameter(Mandatory)]
-            [ValidateNotNullOrEmpty()]
-            [System.String]
-            $ErrorMessage
-        )
+        Describe 'HyperVCommon\Set-VMProperty' {
 
-        $exception = New-Object -TypeName System.InvalidOperationException `
-            -ArgumentList $ErrorMessage
-        $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-        $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
-            -ArgumentList $exception, $ErrorId, $errorCategory, $null
-        return $errorRecord
-    } # end function Get-InvalidOperationError
+            function Get-VM {
+                param
+                (
+                    [System.String]
+                    $Name
+                )
+            }
 
-    function Get-InvalidArgumentError
-    {
-        [CmdletBinding()]
-        param
-        (
-            [Parameter(Mandatory)]
-            [ValidateNotNullOrEmpty()]
-            [System.String]
-            $ErrorId,
+            function Get-VMProcessor {
+                param
+                (
+                    [System.String]
+                    $VMName
+                )
+            }
 
-            [Parameter(Mandatory)]
-            [ValidateNotNullOrEmpty()]
-            [System.String]
-            $ErrorMessage
-        )
+            function Set-VMProcessor {
+                param
+                (
+                    [System.String]
+                    $VMName
+                )
+            }
 
-        $exception = New-Object -TypeName System.ArgumentException `
-            -ArgumentList $ErrorMessage
-        $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
-        $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
-            -ArgumentList $exception, $ErrorId, $errorCategory, $null
-        return $errorRecord
-    } # end function Get-InvalidArgumentError
+            # Guard mocks
+            Mock Get-VM { }
+            Mock Set-VMState { }
+            Mock Get-VMProcessor { }
+            Mock Set-VMProcessor { }
+
+            It "Should throw if VM is running and 'RestartIfNeeded' is False" {
+                Mock Get-VM { return @{ State = 'Running' } }
+
+                $setVMPropertyParams = @{
+                    VMName = 'Test';
+                    VMCommand = 'Set-VMProcessor';
+                    ChangeProperty = @{ ResourcePoolName = 'Dummy' }
+                }
+                { Set-VMProperty @setVMPropertyParams } | Should Throw 'RestartIfNeeded'
+            }
+
+            It "Should stop and restart VM when running and 'RestartIfNeeded' is True" {
+                Mock Get-VM { return @{ State = 'Running' } }
+
+                $setVMPropertyParams = @{
+                    VMName = 'Test';
+                    VMCommand = 'Set-VMProcessor';
+                    ChangeProperty = @{ ResourcePoolName = 'Dummy' }
+                    RestartIfNeeded = $true;
+                }
+                Set-VMProperty @setVMPropertyParams
+
+                Assert-MockCalled Set-VMState -ParameterFilter { $State -eq 'Off' } -Scope It
+                Assert-MockCalled Set-VMState -ParameterFilter { $State -eq 'Running' } -Scope It
+            }
+
+        }
+
+        Describe 'HyperVCommon\Set-VMState' {
+
+            function Get-VM {
+                param
+                (
+                    [System.String]
+                    $Name
+                )
+            }
+
+            function Resume-VM {
+                param
+                (
+                    [System.String]
+                    $Name
+                )
+            }
+
+            function Start-VM {
+                param
+                (
+                    [System.String]
+                    $Name
+                )
+            }
+
+            function Stop-VM {
+                param
+                (
+                    [System.String]
+                    $Name
+                )
+            }
+
+            function Suspend-VM {
+                param
+                (
+                    [System.String]
+                    $Name
+                )
+            }
+
+            # Guard mocks
+            Mock Resume-VM  { }
+            Mock Start-VM  { }
+            Mock Stop-VM { }
+            Mock Suspend-VM { }
+            Mock Wait-VMIPAddress { }
+
+            It 'Should resume VM when current "State" is "Paused" and target state is "Running"' {
+                Mock Get-VM { return @{ State = 'Paused' } }
+
+                Set-VMState -Name 'TestVM' -State 'Running'
+
+                Assert-MockCalled Resume-VM -Scope It
+                Assert-MockCalled Wait-VMIPAddress -Scope It -Exactly 0
+            }
+
+            It 'Should resume VM and wait when current "State" is "Paused" and target state is "Running"' {
+                Mock Get-VM { return @{ State = 'Paused' } }
+
+                Set-VMState -Name 'TestVM' -State 'Running' -WaitForIP $true
+
+                Assert-MockCalled Resume-VM -Scope It
+                Assert-MockCalled Wait-VMIPAddress -Scope It
+            }
+
+            It 'Should start VM when current "State" is "Off" and target state is "Running"' {
+                Mock Get-VM { return @{ State = 'Off' } }
+
+                Set-VMState -Name 'TestVM' -State 'Running'
+
+                Assert-MockCalled Start-VM -Scope It
+                Assert-MockCalled Wait-VMIPAddress -Scope It -Exactly 0
+            }
+
+            It 'Should start VM and wait when current "State" is "Off" and target state is "Running"' {
+                Mock Get-VM { return @{ State = 'Off' } }
+
+                Set-VMState -Name 'TestVM' -State 'Running' -WaitForIP $true
+
+                Assert-MockCalled Start-VM -Scope It
+                Assert-MockCalled Wait-VMIPAddress -Scope It
+            }
+
+            It 'Should suspend VM when current "State" is "Running" and target state is "Paused"' {
+                Mock Get-VM { return @{ State = 'Running' } }
+
+                Set-VMState -Name 'TestVM' -State 'Paused'
+
+                Assert-MockCalled Suspend-VM -Scope It
+            }
+
+            It 'Should stop VM when current "State" is "Running" and target state is "Off"' {
+                Mock Get-VM { return @{ State = 'Running' } }
+
+                Set-VMState -Name 'TestVM' -State 'Off'
+
+                Assert-MockCalled Stop-VM -Scope It
+            }
+
+            It 'Should stop VM when current "State" is "Paused" and target state is "Off"' {
+                Mock Get-VM { return @{ State = 'Paused' } }
+
+                Set-VMState -Name 'TestVM' -State 'Off'
+
+                Assert-MockCalled Stop-VM -Scope It
+            }
+        } # describe HyperVCommon\Set-VMState
+    }
+
+    Describe 'HyperVCommon\Wait-VMIPAddress' {
+
+        function Get-VMNetworkAdapter {
+            param
+            (
+                [System.String]
+                $VMName
+            )
+        }
+
+        # Guard mocks
+        Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName { }
+
+        It 'Should return when VM network adapter reports 2 IP addresses' {
+            Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName { return @{ IpAddresses = @('192.168.0.1','172.16.0.1') } }
+
+            $result = Wait-VMIPAddress -Name 'Test'
+
+            $result | Should BeNullOrEmpty
+        }
+
+        It 'Should throw when after timeout is exceeded' {
+            Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName { return $null }
+
+            { Wait-VMIPAddress -Name 'Test' -Timeout 2 } | Should Throw 'timed out'
+        }
+    } # describe HyperVCommon\WaitVMIPAddress
+
 }
 finally
 {
