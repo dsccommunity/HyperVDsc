@@ -12,11 +12,11 @@ DATA localizedData
         StartUpMemGreaterThanMaxMemError = StartupMemory '{0}' should not be greater than MaximumMemory '{1}'.
         VhdUnsupportedOnGen2VMError = Generation 2 virtual machines do not support the .VHD virtual disk extension.
         CannotUpdatePropertiesOnlineError = Can not change properties for VM '{0}' in '{1}' state unless 'RestartIfNeeded' is set to true.
-        
+
         AdjustingGreaterThanMemoryWarning = VM {0} '{1}' is greater than {2} '{3}'. Adjusting {0} to be '{3}'.
         AdjustingLessThanMemoryWarning = VM {0} '{1}' is less than {2} '{3}'. Adjusting {0} to be '{3}'.
         VMStateWillBeOffWarning = VM '{0}' state will be 'OFF' and not 'Paused'.
-        
+
         CheckingVMExists = Checking if VM '{0}' exists ...
         VMExists = VM '{0}' exists.
         VMDoesNotExist = VM '{0}' does not exist.
@@ -29,17 +29,22 @@ DATA localizedData
 '@
 }
 
+# Import the common HyperV functions
+Import-Module -Name ( Join-Path `
+    -Path (Split-Path -Path $PSScriptRoot -Parent) `
+    -ChildPath '\HyperVCommon\HyperVCommon.psm1' )
+
 function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VhdPath
     )
@@ -51,25 +56,25 @@ function Get-TargetResource
     }
 
     $vmobj = Get-VM -Name $Name -ErrorAction SilentlyContinue
-    
+
     # Check if 1 or 0 VM with name = $name exist
     if($vmobj.count -gt 1)
     {
-       Throw ($localizedData.MoreThanOneVMExistsError -f $Name) 
+       Throw ($localizedData.MoreThanOneVMExistsError -f $Name)
     }
-    
-    ## Retrieve the Vhd hierarchy to ensure we enumerate snapshots/differencing disks
-    ## Fixes #28
+
+    # Retrieve the Vhd hierarchy to ensure we enumerate snapshots/differencing disks
+    # Fixes #28
     $vhdChain = @(Get-VhdHierarchy -VhdPath ($vmObj.HardDrives[0].Path))
-    
-    $vmSecureBootState = $false;
-    if ($vmobj.Generation -eq 2) {
+
+    $vmSecureBootState = $false
+    if ($vmobj.Generation -eq 2)
+    {
        # Retrieve secure boot status (can only be enabled on Generation 2 VMs) and convert to a boolean.
        $vmSecureBootState = ($vmobj | Get-VMFirmware).SecureBoot -eq 'On'
-    } 
+    }
 
     $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
-
     
     @{
         Name               = $Name
@@ -104,63 +109,94 @@ function Set-TargetResource
     param
     (
         # Name of the VM
-        [parameter(Mandatory)]
-        [String]$Name,
-        
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Name,
+
         # VHD associated with the VM
-        [parameter(Mandatory)]
-        [String]$VhdPath,
-        
+        [Parameter(Mandatory = $true)]
+        [String]
+        $VhdPath,
+
         # Virtual switch associated with the VM
-        [String[]]$SwitchName,
+        [Parameter()]
+        [String[]]
+        $SwitchName,
 
         # State of the VM
-        [AllowNull()]
-        [ValidateSet("Running","Paused","Off")]
-        [String]$State,
+        [Parameter()]
+        [ValidateSet('Running','Paused','Off')]
+        [String]
+        $State,
 
         # Folder where the VM data will be stored
-        [String]$Path,
+        [Parameter()]
+        [String]
+        $Path,
 
         # Virtual machine generation
+        [Parameter()]
         [ValidateRange(1,2)]
-        [UInt32]$Generation = 1,
+        [UInt32]
+        $Generation = 1,
 
         # Startup RAM for the VM
+        [Parameter()]
         [ValidateRange(32MB,65536MB)]
-        [UInt64]$StartupMemory,
+        [UInt64]
+        $StartupMemory,
 
         # Minimum RAM for the VM. This enables dynamic memory
+        [Parameter()]
         [ValidateRange(32MB,65536MB)]
-        [UInt64]$MinimumMemory,
+        [UInt64]
+        $MinimumMemory,
 
         # Maximum RAM for the VM. This enables dynamic memory
+        [Parameter()]
         [ValidateRange(32MB,1048576MB)]
-        [UInt64]$MaximumMemory,
+        [UInt64]
+        $MaximumMemory,
 
         # MAC address of the VM
-        [String[]]$MACAddress,
+        [Parameter()]
+        [String[]]
+        $MACAddress,
 
         # Processor count for the VM
-        [UInt32]$ProcessorCount,
+        [Parameter()]
+        [UInt32]
+        $ProcessorCount,
 
         # Waits for VM to get valid IP address
-        [Boolean]$WaitForIP,
+        [Parameter()]
+        [Boolean]
+        $WaitForIP,
 
         # If specified, shutdowns and restarts the VM as needed for property changes
-        [Boolean]$RestartIfNeeded,
+        [Parameter()]
+        [Boolean]
+        $RestartIfNeeded,
 
         # Should the VM be created or deleted
-        [ValidateSet("Present","Absent")]
-        [String]$Ensure = "Present",
+        [Parameter()]
+        [ValidateSet('Present','Absent')]
+        [String]
+        $Ensure = 'Present',
+
+        [Parameter()]
         [System.String]
         $Notes,
 
         # Enable secure boot for Generation 2 VMs
-        [Boolean]$SecureBoot = $true,
+        [Parameter()]
+        [Boolean]
+        $SecureBoot = $true,
 
         # Enable Guest Services
-        [Boolean]$EnableGuestService = $false
+        [Parameter()]
+        [Boolean]
+        $EnableGuestService = $false
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
@@ -186,7 +222,7 @@ function Set-TargetResource
         }
 
         # If VM is present, check its state, startup memory, minimum memory, maximum memory,processor countand mac address
-        # One cannot set the VM's vhdpath, path, generation and switchName after creation 
+        # One cannot set the VM's vhdpath, path, generation and switchName after creation
         else
         {
             # If state has been specified and the VM is not in right state, set it to right state
@@ -214,7 +250,7 @@ function Set-TargetResource
                 Write-Verbose -Message ($localizedData.AdjustingGreaterThanMemoryWarning -f 'StartupMemory', $vmObj.MemoryStartup, 'MaximumMemory', $MaximumMemory)
                 $changeProperty["MemoryStartup"]=$MaximumMemory
             }
-            
+
             # If the VM does not have the right minimum or maximum memory, stop the VM, set the right memory, start the VM
             if($MinimumMemory -or $MaximumMemory)
             {
@@ -240,15 +276,15 @@ function Set-TargetResource
             }
 
             # Stop the VM, set the right properties, start the VM only if there are properties to change
-            if ($changeProperty.Count -gt 0) {
-                Change-VMProperty -Name $Name -VMCommand "Set-VM" -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
+            if ($changeProperty.Count -gt 0)
+            {
+                Set-VMProperty -Name $Name -VMCommand "Set-VM" -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
                 Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
             }
 
             ## Set VM network switches. This can be done while the VM is running.
             for ($i = 0; $i -lt $SwitchName.Count; $i++)
             {
-                ### Change-VMProperty -Name $Name -VMCommand "Set-VMNetworkAdapter" -ChangeProperty @{StaticMacAddress=$MACAddress} -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
                 $switch = $SwitchName[$i]
                 $nic = $vmObj.NetworkAdapters[$i]
                 if ($nic) {
@@ -275,28 +311,43 @@ function Set-TargetResource
                     $vmObj = Get-VM -Name $Name -ErrorAction SilentlyContinue
                 }
             }
-            
+
             # If the VM does not have the right MACAddress, stop the VM, set the right MACAddress, start the VM
             for ($i = 0; $i -lt $MACAddress.Count; $i++)
-            { 
+            {
                 $address = $MACAddress[$i]
                 $nic = $vmObj.NetworkAdapters[$i]
                 if ($nic.MacAddress -ne $address)
                 {
                     Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MACAddress', $address, $nic.MacAddress)
-                    Change-VMMACAddress -Name $Name -NICIndex $i -MACAddress $address -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
+                    Set-VMMACAddress -Name $Name -NICIndex $i -MACAddress $address -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
                 }
             }
 
             if ($Generation -eq 2)
             {
-                ## Retrive the current secure boot state
+                # Retrive the current secure boot state
                 $vmSecureBoot = Test-VMSecureBoot -Name $Name
                 if ($SecureBoot -ne $vmSecureBoot)
                 {
                     Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'SecureBoot', $SecureBoot, $vmSecureBoot)
-                    ## Cannot change the secure boot state whilst the VM is powered on.
-                    Change-VMSecureBoot -Name $Name -SecureBoot $SecureBoot -RestartIfNeeded $RestartIfNeeded
+
+                    if (-not $SecureBoot)
+                    {
+                        $enableSecureBoot = 'On'
+                    }
+                    else
+                    {
+                        $enableSecureBoot = 'Off'
+                    }
+                    # Cannot change the secure boot state whilst the VM is powered on.
+                    $setVMPropertyParams = @{
+                        VMName = $Name
+                        VMCommand = 'Set-VMFirmware'
+                        ChangeProperty = @{ EnableSecureBoot = $enableSecureBoot }
+                        RestartIfNeeded = $RestartIfNeeded
+                    }
+                    Set-VMProperty @setVMPropertyParams
                     Write-Verbose -Message ($localizedData.VMPropertySet -f 'SecureBoot', $SecureBoot)
                 }
             }
@@ -336,7 +387,7 @@ function Set-TargetResource
         if($Ensure -eq "Present")
         {
             Write-Verbose -Message ($localizedData.CreatingVM -f $Name)
-            
+
             $parameters = @{}
             $parameters["Name"] = $Name
             $parameters["VHDPath"] = $VhdPath
@@ -386,11 +437,11 @@ function Set-TargetResource
             {
                 $addVMNetworkAdapterParams = @{
                     VMName = $Name;
-                    SwitchName = $SwitchName[$i];
+                    SwitchName = $SwitchName[$i]
                 }
                 if ($MACAddress -and (-not [System.String]::IsNullOrEmpty($MACAddress[$i])))
                 {
-                    $addVMNetworkAdapterParams['StaticMacAddress'] = $MACAddress[$i];
+                    $addVMNetworkAdapterParams['StaticMacAddress'] = $MACAddress[$i]
                 }
                 Add-VMNetworkAdapter @addVMNetworkAdapterParams
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'NIC', $SwitchName[$i])
@@ -410,7 +461,7 @@ function Set-TargetResource
                 $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f (Get-VM -Name $Name).Id
                 Get-VMIntegrationService -VMName $Name | Where-Object -FilterScript {$_.Id -eq $guestServiceId} | Enable-VMIntegrationService
             }
-            
+
             Write-Verbose -Message ($localizedData.VMCreated -f $Name)
 
             if ($State)
@@ -418,7 +469,7 @@ function Set-TargetResource
                 Set-VMState -Name $Name -State $State -WaitForIP $WaitForIP
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'State', $State)
             }
-            
+
         }
     }
 }
@@ -430,66 +481,97 @@ function Test-TargetResource
     param
     (
         # Name of the VM
-        [parameter(Mandatory)]
-        [String]$Name,
-        
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Name,
+
         # VHD associated with the VM
-        [parameter(Mandatory)]
-        [String]$VhdPath,
-        
+        [Parameter(Mandatory = $true)]
+        [String]
+        $VhdPath,
+
         # Virtual switch associated with the VM
-        [String[]]$SwitchName,
+        [Parameter()]
+        [String[]]
+        $SwitchName,
 
         # State of the VM
-        [AllowNull()]
-        [ValidateSet("Running","Paused","Off")]
-        [String]$State,
+        [Parameter()]
+        [ValidateSet('Running','Paused','Off')]
+        [String]
+        $State,
 
         # Folder where the VM data will be stored
-        [String]$Path,
+        [Parameter()]
+        [String]
+        $Path,
 
         # Virtual machine generation
+        [Parameter()]
         [ValidateRange(1,2)]
-        [UInt32]$Generation = 1,
+        [UInt32]
+        $Generation = 1,
 
         # Startup RAM for the VM
+        [Parameter()]
         [ValidateRange(32MB,65536MB)]
-        [UInt64]$StartupMemory,
+        [UInt64]
+        $StartupMemory,
 
         # Minimum RAM for the VM. This enables dynamic memory
+        [Parameter()]
         [ValidateRange(32MB,65536MB)]
-        [UInt64]$MinimumMemory,
+        [UInt64]
+        $MinimumMemory,
 
         # Maximum RAM for the VM. This enables dynamic memory
+        [Parameter()]
         [ValidateRange(32MB,1048576MB)]
-        [UInt64]$MaximumMemory,
+        [UInt64]
+        $MaximumMemory,
 
         # MAC address of the VM
-        [String[]]$MACAddress,
+        [Parameter()]
+        [String[]]
+        $MACAddress,
 
         # Processor count for the VM
-        [UInt32]$ProcessorCount,
+        [Parameter()]
+        [UInt32]
+        $ProcessorCount,
 
         # Waits for VM to get valid IP address
-        [Boolean]$WaitForIP,
+        [Parameter()]
+        [Boolean]
+        $WaitForIP,
 
         # If specified, shutdowns and restarts the VM as needed for property changes
-        [Boolean]$RestartIfNeeded,
+        [Parameter()]
+        [Boolean]
+        $RestartIfNeeded,
 
         # Should the VM be created or deleted
-        [ValidateSet("Present","Absent")]
-        [String]$Ensure = "Present",
+        [Parameter()]
+        [ValidateSet('Present','Absent')]
+        [String]
+        $Ensure = 'Present',
+
+        [Parameter()]
         [System.String]
         $Notes,
 
         # Enable secure boot for Generation 2 VMs
-        [Boolean]$SecureBoot = $true,
+        [Parameter()]
+        [Boolean]
+        $SecureBoot = $true,
 
-        [Boolean]$EnableGuestService = $false
+        [Parameter()]
+        [Boolean]
+        $EnableGuestService = $false
     )
 
     #region input validation
-    
+
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if(!(Get-Module -ListAvailable -Name Hyper-V))
     {
@@ -501,7 +583,7 @@ function Test-TargetResource
     {
        Throw ($localizedData.MoreThanOneVMExistsError -f $Name)
     }
-    
+
     # Check if $VhdPath exist
     if(!(Test-Path $VhdPath))
     {
@@ -513,18 +595,18 @@ function Test-TargetResource
     {
         Throw ($localizedData.MinMemGreaterThanStartupMemError -f $MinimumMemory, $StartupMemory)
     }
-    
+
     # Check if Minimum memory is greater than Maximummemory
     if($MaximumMemory -and $MinimumMemory -and ($MinimumMemory -gt $MaximumMemory))
     {
         Throw ($localizedData.MinMemGreaterThanMaxMemError -f $MinimumMemory, $MaximumMemory)
     }
-    
+
     # Check if Startup memory is greater than Maximummemory
     if($MaximumMemory -and $StartupMemory -and ($StartupMemory -gt $MaximumMemory))
     {
         Throw ($localizedData.StartUpMemGreaterThanMaxMemError -f $StartupMemory, $MaximumMemory)
-    }        
+    }
 
     <#  VM Generation has no direct relation to the virtual hard disk format and cannot be changed
         after the virtual machine has been created. Generation 2 VMs do not support .VHD files.  #>
@@ -566,7 +648,7 @@ function Test-TargetResource
             if($state -and ($vmObj.State -ne $State)){return $false}
             if($StartupMemory -and ($vmObj.MemoryStartup -ne $StartupMemory)){return $false}
             for ($i = 0; $i -lt $MACAddress.Count; $i++)
-            { 
+            {
                 if ($vmObj.NetworkAdapters[$i].MACAddress -ne $MACAddress[$i])
                 {
                     Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MACAddress', $MACAddress[$i], $vmObj.NetworkAdapters[$i].MACAddress)
@@ -614,11 +696,13 @@ function Test-TargetResource
 <# Returns VM VHDs, including snapshots and differencing disks #>
 function Get-VhdHierarchy
 {
-    param(
-        [Parameter(Mandatory)]
-        [System.String] $VhdPath
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $VhdPath
     )
-    
+
     $vmVhdPath = Get-VHD -Path $VhdPath
     Write-Output -InputObject $vmVhdPath.Path
     while(-not [System.String]::IsNullOrEmpty($vmVhdPath.ParentPath))
@@ -628,57 +712,36 @@ function Get-VhdHierarchy
     }
 }
 
-function Set-VMState
+# The 'Set-VMProperty' method cannot be used as it cannot deal with piped
+# command in it's current implementation
+function Set-VMMACAddress
 {
     param
     (
-        [Parameter(Mandatory)]
-        [String]$Name,
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Name,
 
-        [Parameter(Mandatory)]
-        [ValidateSet("Running","Paused","Off")]
-        [String]$State,
+        [Parameter(Mandatory = $true)]
+        [String]
+        $MACAddress,
 
-        [Boolean]$WaitForIP
-    )
+        [Parameter(Mandatory = $true)]
+        [Int]
+        $NICIndex,
 
-    switch ($State)
-    {
-        'Running' {
-            $oldState = (Get-VM -Name $Name).State
-            # If VM is in paused state, use resume-vm to make it running
-            if($oldState -eq "Paused"){Resume-VM -Name $Name}
-            # If VM is Off, use start-vm to make it running
-            elseif ($oldState -eq "Off"){Start-VM -Name $Name}
-            
-            if($WaitForIP) { Get-VMIPAddress -Name $Name -Verbose }
-        }
-        'Paused' {if($oldState -ne 'Off'){Suspend-VM -Name $Name}}
-        'Off' {Stop-VM -Name $Name -Force -WarningAction SilentlyContinue}
-    }
-}
+        [Parameter()]
+        [Boolean]
+        $WaitForIP,
 
-function Change-VMMACAddress
-{
-    param
-    (
-        [Parameter(Mandatory)]
-        [String]$Name,
-
-        [Parameter(Mandatory)]
-        [String]$MACAddress,
-
-        [Parameter(Mandatory)]
-        [Int]$NICIndex,
-
-        [Boolean]$WaitForIP,
-
-        [Boolean]$RestartIfNeeded
+        [Parameter()]
+        [Boolean]
+        $RestartIfNeeded
     )
     $vmObj = Get-VM -Name $Name
     $originalState = $vmObj.state
     if($originalState -ne "Off" -and $RestartIfNeeded)
-    { 
+    {
         Set-VMState -Name $Name -State Off
         $vmObj.NetworkAdapters[$NICIndex] | Set-VMNetworkAdapter -StaticMacAddress $MACAddress
 
@@ -687,7 +750,7 @@ function Change-VMMACAddress
         {
             Set-VMState -Name $Name -State Running -WaitForIP $WaitForIP
         }
-        
+
         # Cannot make a paused VM to go back to Paused state after turning Off
         if($originalState -eq "Paused")
         {
@@ -705,136 +768,16 @@ function Change-VMMACAddress
     }
 }
 
-function Change-VMProperty
-{
-    param
-    (
-        [Parameter(Mandatory)]
-        [String]$Name,
-
-        [Parameter(Mandatory)]
-        [String]$VMCommand,
-
-        [Parameter(Mandatory)]
-        [Hashtable]$ChangeProperty,
-
-        [Boolean]$WaitForIP,
-
-        [Boolean]$RestartIfNeeded
-    )
-
-    $vmObj = Get-VM -Name $Name
-    $originalState = $vmObj.state
-    if($originalState -ne "Off" -and $RestartIfNeeded)
-    { 
-        Set-VMState -Name $Name -State Off
-        &$VMCommand -Name $Name @ChangeProperty
-
-        # Can not move a off VM to paused, but only to running state
-        if($originalState -eq "Running")
-        {
-            Set-VMState -Name $Name -State Running -WaitForIP $WaitForIP
-        }
-
-        Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
-
-        # Cannot make a paused VM to go back to Paused state after turning Off
-        if($originalState -eq "Paused")
-        {
-            Write-Warning -Message ($localizedData.VMStateWillBeOffWarning -f $Name)
-        }
-    }
-    elseif($originalState -eq "Off")
-    {
-        &$VMCommand -Name $Name @ChangeProperty 
-        Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
-    }
-    else
-    {
-        Write-Error -Message ($localizedData.CannotUpdatePropertiesOnlineError -f $Name, $vmObj.State)
-    }
-}
-
-# The 'Change-VMProperty' method cannot be used as it's hard-coded to use the -Name
-# parameter and unfortunately, the Set-VMFirmware cmdlet uses the -VMName parameter instead!
-function Change-VMSecureBoot
-{
-    param
-    (
-        [Parameter(Mandatory)]
-        [String]$Name,
-
-        [Boolean]$SecureBoot,
-
-        [Boolean]$RestartIfNeeded
-    )
-
-    $vmObj = Get-VM -Name $Name
-    $originalState = $vmObj.state
-    if($originalState -ne "Off" -and $RestartIfNeeded)
-    { 
-        Set-VMState -Name $Name -State Off
-        if ($SecureBoot)
-        {
-            Set-VMFirmware -VMName $Name -EnableSecureBoot On
-        }
-        else {
-            Set-VMFirmware -VMName $Name -EnableSecureBoot Off
-        }
-
-        # Can not move a off VM to paused, but only to running state
-        if($originalState -eq "Running")
-        {
-            Set-VMState -Name $Name -State Running -WaitForIP $true
-        }
-
-        Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
-
-        # Cannot make a paused VM to go back to Paused state after turning Off
-        if($originalState -eq "Paused")
-        {
-            Write-Warning -Message ($localizedData.VMStateWillBeOffWarning -f $Name)
-        }
-    }
-    elseif($originalState -eq "Off")
-    {
-        if ($SecureBoot)
-        {
-            Set-VMFirmware -VMName $Name -EnableSecureBoot On
-        }
-        else {
-            Set-VMFirmware -VMName $Name -EnableSecureBoot Off
-        }
-    }
-    else
-    {
-        Write-Error -Message ($localizedData.CannotUpdatePropertiesOnlineError -f $Name, $vmObjState)
-    }
-}
-
 function Test-VMSecureBoot
 {
-    param (
-        [Parameter(Mandatory)]
-        [string]$Name
-    )
-    $vm = Get-VM -Name $Name;
-    return (Get-VMFirmware -VM $vm).SecureBoot -eq 'On';
-}
-
-function Get-VMIPAddress
-{
     param
     (
-        [Parameter(Mandatory)]
-        [string]$Name
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Name
     )
-
-    while((Get-VMNetworkAdapter -VMName $Name).ipaddresses.count -lt 2)
-    {
-        Write-Verbose -Message ($localizedData.WaitingForVMIPAddress -f $Name)
-        Start-Sleep -Seconds 3;
-    }
+    $vm = Get-VM -Name $Name
+    return (Get-VMFirmware -VM $vm).SecureBoot -eq 'On'
 }
 
 #endregion

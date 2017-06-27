@@ -102,13 +102,13 @@ Describe 'xVMHyper-V' {
 
         Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhd') } -MockWith {
             ## Return single Vhd chain for .vhds
-            return @($stubVhdDisk.FullName);   
+            return @($stubVhdDisk.FullName);
         }
         Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhdx') } -MockWith {
             ## Return snapshot hierarchy for .vhdxs
             return @($stubVhdxDiskSnapshot.FullName, $stubVhdxDisk.FullName);
         }
-        
+
         Context 'Validates Get-TargetResource Method' {
 
             It 'Returns a hashtable' {
@@ -120,12 +120,12 @@ Describe 'xVMHyper-V' {
             }
             It 'Does not call Get-VMFirmware if a generation 1 VM' {
                 Mock -CommandName Get-VMFirmware -MockWith { throw; }
-                $targetResource = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
+                $null = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
                 Assert-MockCalled -CommandName Get-VMFirmware -Scope It -Exactly 0;
             }
             It 'Calls Get-VMFirmware if a generation 2 VM' {
                 Mock -CommandName Get-VMFirmware -MockWith { return $true; }
-                $targetResource = Get-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk.FullName;
+                $null = Get-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk.FullName;
                 Assert-MockCalled -CommandName Get-VMFirmware -Scope It -Exactly 1;
             }
             It 'Hash table contains key EnableGuestService' {
@@ -151,7 +151,7 @@ Describe 'xVMHyper-V' {
             It 'Returns $false when VM is not present and "Ensure" = "Present"' {
                 Test-TargetResource -Name 'NonexistentVM' @testParams | Should Be $false;
             }
-            
+
             It 'Returns $true when VM is not present and "Ensure" = "Absent"' {
                 Test-TargetResource -Name 'NonexistentVM' -Ensure Absent @testParams | Should Be $true;
             }
@@ -206,7 +206,7 @@ Describe 'xVMHyper-V' {
             }
 
             It 'Throws when a VM .vhd file is specified with a generation 2 VM' {
-                { Test-TargetResource -Name 'Gen2VM' -VhdPath $stubVhdDisk -Generation 2 } | Should Throw;    
+                { Test-TargetResource -Name 'Gen2VM' -VhdPath $stubVhdDisk -Generation 2 } | Should Throw;
             }
 
             It 'Returns $true when multiple NICs are assigned in the correct order' {
@@ -234,12 +234,12 @@ Describe 'xVMHyper-V' {
                 Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
                 Test-TargetResource -Name 'Generation2VM' -Generation 2 @testParams | Should Be $true;
             }
-            
+
             It 'Returns $false when SecureBoot is On and requested "SecureBoot" = "$false"' {
                 Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
                 Test-TargetResource -Name 'Generation2VM' -SecureBoot $false -Generation 2 @testParams | Should be $false;
             }
-            
+
             It 'Returns $true when VM has snapshot chain' {
                 Mock -CommandName Get-VhdHierarchy -MockWith { Write-Host $VhdPath; return @($studVhdxDiskSnapshot, $stubVhdxDisk); }
 
@@ -264,9 +264,9 @@ Describe 'xVMHyper-V' {
                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { }
                 { Test-TargetResource -Name 'RunningVM' @testParams } | Should Throw;
             }
-            
+
         } #end context Validates Test-TargetResource Method
-        
+
         Context 'Validates Set-TargetResource Method' {
             $testParams = @{
                 VhdPath = $stubVhdxDisk.FullName;
@@ -391,40 +391,50 @@ Describe 'xVMHyper-V' {
                 ## The first NIC is assigned during the VM creation
                 Assert-MockCalled -CommandName Set-VMNetworkAdapter -Exactly 2 -Scope It;
             }
-       
-            It 'Does not change Secure Boot call "Change-VMSecureBoot" when creating a generation 1 VM' {
-                Mock -CommandName Change-VMSecureBoot -MockWith { return $true; }
+
+            It 'Does not change Secure Boot call "Set-VMProperty" when creating a generation 1 VM' {
+                Mock Set-VMProperty -MockWith { }
+
                 Set-TargetResource -Name 'RunningVM' @testParams;
-                Assert-MockCalled -CommandName Change-VMSecureBoot -Exactly 0 -Scope It;
+
+                Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It;
             }
 
-            It 'Does call "Change-VMSecureBoot" when creating a generation 2 VM' {
-                Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
-                Mock -CommandName Change-VMSecureBoot -MockWith { }
+            It 'Does call "Set-VMProperty" when creating a generation 2 VM' {
+                Mock Test-VMSecureBoot -MockWith { return $true; }
+                Mock Set-VMProperty -MockWith { }
+
                 Set-TargetResource -Name 'RunningVM' -Generation 2 -SecureBoot $false @testParams;
-                Assert-MockCalled -CommandName Change-VMSecureBoot -Exactly 1 -Scope It;
+
+                Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 1 -Scope It;
             }
 
             It 'Does not change Secure Boot for generation 1 VM' {
-                Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
-                Mock -CommandName Change-VMSecureBoot -MockWith { }
+                Mock Test-VMSecureBoot -MockWith { return $true; }
+                Mock Set-VMProperty -MockWith { }
+
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $true @testParams;
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $false @testParams;
-                Assert-MockCalled -CommandName Change-VMSecureBoot -Exactly -Times 0 -Scope It;
+
+                Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It;
             }
 
             It 'Does not change Secure Boot for generation 2 VM with VM "SecureBoot" match' {
-                Mock -CommandName Test-VMSecureBoot -MockWith { return $true; }
-                Mock -CommandName Change-VMSecureBoot -MockWith { }
+                Mock Test-VMSecureBoot -MockWith { return $true; }
+                Mock Set-VMProperty -MockWith { }
+
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $true -Generation 2 @testParams;
-                Assert-MockCalled -CommandName Change-VMSecureBoot -Exactly -Times 0 -Scope It;
+
+                Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It;
             }
 
             It 'Does change Secure Boot for generation 2 VM with VM "SecureBoot" mismatch' {
-                Mock -CommandName Test-VMSecureBoot -MockWith { return $false; }
-                Mock -CommandName Change-VMSecureBoot -MockWith { }
+                Mock Test-VMSecureBoot -MockWith { return $false; }
+                Mock Set-VMProperty -MockWith { }
+
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $true -Generation 2 @testParams;
-                Assert-MockCalled -CommandName Change-VMSecureBoot -Exactly -Times 1 -Scope It;
+
+                Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 1 -Scope It;
             }
 
             It 'Does call "Enable-VMIntegrationService" when "EnableGuestService" = "$true"' {
@@ -444,49 +454,29 @@ Describe 'xVMHyper-V' {
                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { }
                 { Set-TargetResource -Name 'RunningVM' @testParams } | Should Throw;
             }
-        
+
         } #end context Validates Set-TargetResource Method
-        
+
         Context 'Validates Test-VMSecureBoot Method' {
-        
+
             It 'Returns $true when "SecureBoot" = "On"' {
                 Mock -CommandName Get-VM -MockWith { }
                 Mock -CommandName Get-VMFirmware -MockWith { return [PSCustomObject] @{ SecureBoot = 'On' }; }
                 Test-VMSecureBoot -Name 'TestVM' | Should Be $true;
             }
-        
+
             It 'Returns $false when "SecureBoot" = "Off"' {
                 Mock -CommandName Get-VM -MockWith { }
                 Mock -CommandName Get-VMFirmware -MockWith { return [PSCustomObject] @{ SecureBoot = 'Off' }; }
                 Test-VMSecureBoot -Name 'TestVM' | Should Be $false;
             }
-        
+
         } #end context Validates Test-VMSecureBoot Method
-        
-        Context 'Validates Change-VMSecureBoot Method' {
-        
-            It 'Throws if "State" = "Running" and "RestartIfNeeded" = "$false"' {
-                { Change-VMSecureBoot -Name 'RunningVM' -SecureBoot $true -RestartIfNeeded $false -ErrorAction Stop } | Should Throw;
-            }
-        
-            It 'Calls Set-VMFirmware when "State" = "Off" and "RestartIfNeeded" = "$false"' {
-                Mock -CommandName Set-VMFirmware -MockWith { }
-                Change-VMSecureBoot -Name 'StoppedVM' -SecureBoot $true -RestartIfNeeded $false;
-                Assert-MockCalled -CommandName Set-VMFirmware -Exactly 1 -Scope It;
-            }
-        
-            It 'Calls Set-VMFirmware when "State" = "Running" and "RestartIfNeeded" = "$true"' {
-                Mock -CommandName Set-VMState -MockWith { }
-                Mock -CommandName Set-VMFirmware -MockWith { }
-                Change-VMSecureBoot -Name 'RunningVM' -SecureBoot $true -RestartIfNeeded $true;
-                Assert-MockCalled -CommandName Set-VMFirmware -Scope It;
-            }
-        } #end context Validates Change-VMSecureBoot Method
 
         Context 'Validates Get-VhdHierarchy Method' {
 
             It 'Does not throw with null parent path (#52)' {
-                
+
                 ## Must use a different file extension to ensure existing mocks Get-VhdHierarchy or not called
                 $fakeVhdPath = 'BaseVhd.avhdx';
                 Mock -CommandName Get-VHD -ParameterFilter { $Path -eq $fakeVhdPath } -MockWith {
