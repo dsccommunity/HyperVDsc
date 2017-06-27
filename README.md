@@ -87,13 +87,12 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 
 ### xVMNetworkAdapter
 
-* **Id**: Unique string for identifying the resource instance. This is the key property for the instances of this resource.
-* **Name**: Name of the network adapter as it appears either in the management OS or attached to a VM.
-* **SwitchName**: Virtual Switch name to connect the adapter to.
-* **VMName**: Name of the VM to attach to. If you want to attach new VM Network adapter to the management OS, set this property to 'Management OS'.
-* **DynamicMacAddress**: Set this to $false if you want to specify a static MAC address.
-* **StaticMacAddress**: Specifies static MAC address for the Network adapter.
-* **Ensure**: Ensures that the VM Network Adapter is Present or Absent.
+* **`[String]` Id** (_Key_): Unique string for identifying the resource instance. This is the key property for the instances of this resource.
+* **`[String]` Name** (_Write_): Name of the network adapter as it appears either in the management OS or attached to a VM.
+* **`[String]` SwitchName** (_Write_): Virtual Switch name to connect the adapter to.
+* **`[String]` VMName** (_Write_): Name of the VM to attach to. If you want to attach new VM Network adapter to the management OS, set this property to 'Management OS'.
+* **`[String]` MacAddress** (_Write_): Use this to specify a Static MAC Address. If this parameter is not specified, dynamic MAC Address will be set.
+* **`[String]` Ensure** (_Write_): Ensures that the VM Network Adapter is Present or Absent.
 
 ### xVMHost
 
@@ -960,3 +959,58 @@ Configuration HyperVHostPaths
 
 }
 ```
+
+### Add a new VM Network adapter in the management OS
+```powershell
+Configuration HostOSAdapter
+{
+    Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
+
+    xVMNetworkAdapter HostOSAdapter
+    {
+        Id = 'Management-NIC'
+        Name = 'Management-NIC'
+        SwitchName = 'SETSwitch'
+        VMName = 'ManagementOS'
+        Ensure = 'Present'
+    }
+}
+```
+
+### Add multiple network adapters to a VM
+```powershell
+Configuration VMAdapter
+{
+    Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
+
+    xVMNetworkAdapter MyVM01NIC
+    {
+        Id = 'MyVM01-NIC'
+        Name = 'MyVM01-NIC'
+        SwitchName = 'SETSwitch'
+        VMName = 'MyVM01'
+        Ensure = 'Present'
+    }
+
+    xVMNetworkAdapter MyVM02NIC
+    {
+        Id = 'MyVM02-NIC'
+        Name = 'NetAdapter'
+        SwitchName = 'SETSwitch'
+        VMName = 'MyVM02'
+        Ensure = 'Present'
+    }
+
+    xVMNetworkAdapter MyVM03NIC
+    {
+        Id = 'MyVM03-NIC'
+        Name = 'NetAdapter'
+        SwitchName = 'SETSwitch'
+        VMName = 'MyVM03'
+        Ensure = 'Present'
+    }
+}
+```
+
