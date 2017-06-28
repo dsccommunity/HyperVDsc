@@ -136,17 +136,20 @@ Please see the Examples section for more details.
 
 ### Unreleased
 
-* Adding a new xVMHost resource for managing Hyper-V host settings.
-* MSFT_xVMHyperV: EnableGuestService works on localized OS (language independent) 
-* Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
-* Adds new MSFT_xVMProcessor to manage virtual machine processor options.
-* Adds missing Hyper-V-PowerShell feature in examples.
+* MSFT_xVMHyperV: 
+  - Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
+  - EnableGuestService works on localized OS (language independent).
+  - Adds missing Hyper-V-PowerShell feature in examples.
+* Added the following resources:
+  - MSFT_xVMProcessor to manage virtual machine processor options.
+  - MSFT_xVMHost to managing Hyper-V host settings.
+* MSFT_xVMSwitch: 
+  - Added support for Switch Embedded Teaming (SET) in Server 2016.
 
 ### 3.8.0.0
 
 * Fix bug in xVMDvdDrive with hardcoded VM Name.
 * Corrected Markdown rule violations in Readme.md.
-* MSFT_xVMHyperV: Added support for Switch Embedded Teaming (SET) in Server 2016
 
 ### 3.7.0.0
 
