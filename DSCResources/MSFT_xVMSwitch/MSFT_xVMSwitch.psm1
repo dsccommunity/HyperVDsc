@@ -215,7 +215,7 @@ function Set-TargetResource
                     $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
                 }
 
-                New-VMSwitch @parameters | Out-Null
+                $null = New-VMSwitch @parameters
                 Write-Verbose -Message "Switch $Name has right netadapter $NetAdapterName"
                 # Since the switch is recreated, the $switch variable is stale and needs to be reassigned
                 $switch = (Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue)
@@ -269,7 +269,7 @@ function Set-TargetResource
                 $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
             }
             
-            New-VMSwitch @parameters | Out-Null
+            $null = New-VMSwitch @parameters 
             Write-Verbose -Message ($LocalizedData.PresentCorrect -f $Name, $Ensure)
         }
     }
@@ -493,7 +493,7 @@ Returns the OS version
 #>
 function Get-OSVersion
 {
-    return [Environment]::OSVersion.Version
+    [Environment]::OSVersion.Version
 }
 
 Export-ModuleMember -Function *-TargetResource
