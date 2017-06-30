@@ -69,9 +69,9 @@ try {
             )
 
             $mockedVMSwitch = @{
-                Name                           = $Name
-                SwitchType                     = 'External'
-                AllowManagementOS              = $AllowManagementOS
+                Name = $Name
+                SwitchType = 'External'
+                AllowManagementOS = $AllowManagementOS
                 NetAdapterInterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
             }
 
@@ -164,7 +164,7 @@ try {
         # Mocks Get-NetAdapter which returns a simplified network adapter
         Mock -CommandName Get-NetAdapter -MockWith {
             return [PSCustomObject]@{
-                Name                 = 'SomeNIC'
+                Name = 'SomeNIC'
                 InterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
             }
         }
@@ -182,7 +182,7 @@ try {
         $getTestCases = @()
         foreach ($brmMode in $BANDWIDTH_RESERVATION_MODES) {
             $getTestCases += @{
-                CurrentName                     = $brmMode + 'BRM'
+                CurrentName = $brmMode + 'BRM'
                 CurrentBandwidthReservationMode = $brmMode
             }
         }
@@ -229,12 +229,12 @@ try {
 
                 foreach ($ensureOption in @('Present', 'Absent')) {
                     $case = @{
-                        CurrentName                     = $currentBrmMode + 'BRM'
+                        CurrentName = $currentBrmMode + 'BRM'
                         CurrentBandwidthReservationMode = $currentBrmMode
-                        DesiredName                     = $desiredBrmMode + 'BRM'
+                        DesiredName = $desiredBrmMode + 'BRM'
                         DesiredBandwidthReservationMode = $desiredBrmMode
-                        Ensure                          = $ensureOption
-                        ExpectedResult                  = $ensureOption -eq 'Present' -and $currentBrmMode -eq $desiredBrmMode
+                        Ensure = $ensureOption
+                        ExpectedResult = $ensureOption -eq 'Present' -and $currentBrmMode -eq $desiredBrmMode
                     }
                     $testSetTestCases += $case
                 }
@@ -247,12 +247,12 @@ try {
             foreach ($ensureOption in @('Present', 'Absent')) {
 
                 $case = @{
-                    CurrentName                     = $null
+                    CurrentName = $null
                     CurrentBandwidthReservationMode = $null
-                    DesiredName                     = $desiredBrmMode + 'BRM'
+                    DesiredName = $desiredBrmMode + 'BRM'
                     DesiredBandwidthReservationMode = $desiredBrmMode
-                    Ensure                          = $ensureOption
-                    ExpectedResult                  = $ensureOption -eq 'Absent'
+                    Ensure = $ensureOption
+                    ExpectedResult = $ensureOption -eq 'Absent'
                 }
 
                 $testSetTestCases += $case

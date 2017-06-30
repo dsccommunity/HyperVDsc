@@ -65,9 +65,9 @@ try {
             )
 
             $mockedVMSwitch = @{
-                Name                           = $Name
-                SwitchType                     = 'External'
-                AllowManagementOS              = $AllowManagementOS
+                Name = $Name
+                SwitchType = 'External'
+                AllowManagementOS = $AllowManagementOS
                 NetAdapterInterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
             }
 
@@ -169,11 +169,11 @@ try {
             Mock -CommandName Get-NetAdapter -MockWith {
                 return @(
                     [PSCustomObject]@{
-                        Name                 = 'NIC1'
+                        Name = 'NIC1'
                         InterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver #1'
                     }
                     [PSCustomObject]@{
-                        Name                 = 'NIC2'
+                        Name = 'NIC2'
                         InterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver #2'
                     }
                 )
@@ -188,13 +188,13 @@ try {
                 $global:mockedVMSwitch = $null
 
                 $testParams = @{
-                    Name                     = "TestSwitch"
-                    Type                     = "External"
-                    NetAdapterName           = @("NIC1", "NIC2")
-                    AllowManagementOS        = $true
-                    EnableEmbeddedTeaming    = $true
+                    Name = "TestSwitch"
+                    Type = "External"
+                    NetAdapterName = @("NIC1", "NIC2")
+                    AllowManagementOS = $true
+                    EnableEmbeddedTeaming = $true
                     BandwidthReservationMode = "NA"
-                    Ensure                   = "Present"
+                    Ensure = "Present"
                 }
 
                 It "Should return absent in the get method" {
@@ -213,22 +213,22 @@ try {
 
             Context "A virtual switch with embedded teaming exists and should" {
                 $global:mockedVMSwitch = @{
-                    Name                            = "TestSwitch"
-                    SwitchType                      = "External"
-                    AllowManagementOS               = $true
-                    EmbeddedTeamingEnabled          = $true
-                    Id                              = [Guid]::NewGuid()
+                    Name = "TestSwitch"
+                    SwitchType = "External"
+                    AllowManagementOS = $true
+                    EmbeddedTeamingEnabled = $true
+                    Id = [Guid]::NewGuid()
                     NetAdapterInterfaceDescriptions = @("Microsoft Network Adapter Multiplexor Driver #1", "Microsoft Network Adapter Multiplexor Driver #2")
                 }
 
                 $testParams = @{
-                    Name                     = "TestSwitch"
-                    Type                     = "External"
-                    NetAdapterName           = @("NIC1", "NIC2")
-                    AllowManagementOS        = $true
-                    EnableEmbeddedTeaming    = $true
+                    Name = "TestSwitch"
+                    Type = "External"
+                    NetAdapterName = @("NIC1", "NIC2")
+                    AllowManagementOS = $true
+                    EnableEmbeddedTeaming = $true
                     BandwidthReservationMode = "NA"
-                    Ensure                   = "Present"
+                    Ensure = "Present"
                 }
 
                 It "Should return present in the get method" {
@@ -242,35 +242,35 @@ try {
 
             Context "A virtual switch with embedded teaming exists but does not refer to the correct adapters" {
                 $global:mockedVMSwitch = @{
-                    Name                            = "TestSwitch"
-                    SwitchType                      = "External"
-                    AllowManagementOS               = $true
-                    EmbeddedTeamingEnabled          = $true
-                    Id                              = [Guid]::NewGuid()
+                    Name = "TestSwitch"
+                    SwitchType = "External"
+                    AllowManagementOS = $true
+                    EmbeddedTeamingEnabled = $true
+                    Id = [Guid]::NewGuid()
                     NetAdapterInterfaceDescriptions = @("Wrong adapter", "Microsoft Network Adapter Multiplexor Driver #2")
                 }
 
                 Mock -CommandName Get-NetAdapter -MockWith {
                     return @(
                         [PSCustomObject]@{
-                            Name                 = 'WrongNic'
+                            Name = 'WrongNic'
                             InterfaceDescription = 'Wrong adapter'
                         }
                         [PSCustomObject]@{
-                            Name                 = 'NIC2'
+                            Name = 'NIC2'
                             InterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver #2'
                         }
                     )
                 }
 
                 $testParams = @{
-                    Name                     = "TestSwitch"
-                    Type                     = "External"
-                    NetAdapterName           = @("NIC1", "NIC2")
-                    AllowManagementOS        = $true
-                    EnableEmbeddedTeaming    = $true
+                    Name = "TestSwitch"
+                    Type = "External"
+                    NetAdapterName = @("NIC1", "NIC2")
+                    AllowManagementOS = $true
+                    EnableEmbeddedTeaming = $true
                     BandwidthReservationMode = "NA"
-                    Ensure                   = "Present"
+                    Ensure = "Present"
                 }
 
                 It "Should return present in the get method" {
@@ -290,22 +290,22 @@ try {
 
             Context "A virtual switch without embedded teaming exists but should use embedded teaming" {
                 $global:mockedVMSwitch = @{
-                    Name                           = "TestSwitch"
-                    SwitchType                     = "External"
-                    AllowManagementOS              = $true
-                    EmbeddedTeamingEnabled         = $false
-                    Id                             = [Guid]::NewGuid()
+                    Name = "TestSwitch"
+                    SwitchType = "External"
+                    AllowManagementOS = $true
+                    EmbeddedTeamingEnabled = $false
+                    Id = [Guid]::NewGuid()
                     NetAdapterInterfaceDescription = "Microsoft Network Adapter Multiplexor Driver #1"
                 }
 
                 $testParams = @{
-                    Name                     = "TestSwitch"
-                    Type                     = "External"
-                    NetAdapterName           = @("NIC1", "NIC2")
-                    AllowManagementOS        = $true
-                    EnableEmbeddedTeaming    = $true
+                    Name = "TestSwitch"
+                    Type = "External"
+                    NetAdapterName = @("NIC1", "NIC2")
+                    AllowManagementOS = $true
+                    EnableEmbeddedTeaming = $true
                     BandwidthReservationMode = "NA"
-                    Ensure                   = "Present"
+                    Ensure = "Present"
                 }
 
                 It "Should return present in the get method" {
@@ -325,17 +325,17 @@ try {
 
             Context "A virtual switch with embedded teaming exists but shouldn't" {
                 $global:mockedVMSwitch = @{
-                    Name                            = "TestSwitch"
-                    SwitchType                      = "External"
-                    AllowManagementOS               = $true
-                    EmbeddedTeamingEnabled          = $true
-                    Id                              = [Guid]::NewGuid()
+                    Name = "TestSwitch"
+                    SwitchType = "External"
+                    AllowManagementOS = $true
+                    EmbeddedTeamingEnabled = $true
+                    Id = [Guid]::NewGuid()
                     NetAdapterInterfaceDescriptions = @("Microsoft Network Adapter Multiplexor Driver #1", "Microsoft Network Adapter Multiplexor Driver #2")
                 }
 
                 $testParams = @{
-                    Name   = "TestSwitch"
-                    Type   = "Internal"
+                    Name = "TestSwitch"
+                    Type = "Internal"
                     Ensure = "Absent"
                 }
 
@@ -357,8 +357,8 @@ try {
                 $global:mockedVMSwitch = $null
 
                 $testParams = @{
-                    Name   = "TestSwitch"
-                    Type   = "Internal"
+                    Name = "TestSwitch"
+                    Type = "Internal"
                     Ensure = "Absent"
                 }
 
@@ -375,13 +375,13 @@ try {
                 $global:mockedVMSwitch = $null
 
                 $testParams = @{
-                    Name                     = "TestSwitch"
-                    Type                     = "External"
-                    NetAdapterName           = @("NIC1", "NIC2")
-                    AllowManagementOS        = $true
-                    EnableEmbeddedTeaming    = $true
+                    Name = "TestSwitch"
+                    Type = "External"
+                    NetAdapterName = @("NIC1", "NIC2")
+                    AllowManagementOS = $true
+                    EnableEmbeddedTeaming = $true
                     BandwidthReservationMode = "NA"
-                    Ensure                   = "Present"
+                    Ensure = "Present"
                 }
 
                 Mock -CommandName Get-OSVersion -MockWith {
