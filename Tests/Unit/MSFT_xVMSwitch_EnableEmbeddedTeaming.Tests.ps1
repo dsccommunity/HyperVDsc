@@ -1,30 +1,36 @@
-$script:DSCModuleName      = 'xHyper-V'
-$script:DSCResourceName    = 'MSFT_xVMSwitch'
-
 #region HEADER
-# Unit Test Template Version: 1.1.0
-[String] $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+
+# Unit Test Template Version: 1.2.0
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
-{
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) ) {
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
 }
 
-Import-Module (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:DSCModuleName `
-    -DSCResourceName $script:DSCResourceName `
+    -DSCModuleName 'xHyper-V' `
+    -DSCResourceName 'MSFT_xVMSwitch' `
     -TestType Unit
+
 #endregion HEADER
 
+function Invoke-TestSetup {
+}
+
+function Invoke-TestCleanup {
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
+
 # Begin Testing
-try
-{
-    #region Pester Tests
-    InModuleScope $script:DSCResourceName {
+try {
+    Invoke-TestSetup
+
+    InModuleScope 'MSFT_xVMSwitch' {
+
         # Function to create a exception object for testing output exceptions
-        function Get-InvalidArgumentError
-        {
+        function Get-InvalidArgumentError {
             [CmdletBinding()]
             param
             (
@@ -95,7 +101,7 @@ try
 
         # Create an empty function to be able to mock the missing Hyper-V cmdlet
         function Remove-VMSwitch {
-        
+
         }
 
         # Create an empty function to be able to mock the missing Hyper-V cmdlet
@@ -114,8 +120,7 @@ try
                     [string]$ErrorAction
                 )
 
-                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null) 
-                {
+                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null) {
                     throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
                 }
 
@@ -131,7 +136,7 @@ try
                     [string]$MinimumBandwidthMode = 'NA',
                     [bool]$AllowManagementOS
                 )
-                
+
                 $global:mockedVMSwitch = New-MockedVMSwitch -Name $Name -BandwidthReservationMode $MinimumBandwidthMode -AllowManagementOS $AllowManagementOS
                 return $global:mockedVMSwitch
             }
@@ -148,7 +153,7 @@ try
                 Param (
                     [bool]$AllowManagementOS
                 )
-                
+
                 if ($AllowManagementOS) {
                     $global:mockedVMSwitch['AllowManagementOS'] = $AllowManagementOS
                 }
@@ -183,13 +188,13 @@ try
                 $global:mockedVMSwitch = $null
 
                 $testParams = @{
-                    Name = "TestSwitch"
-                    Type = "External"
-                    NetAdapterName = @("NIC1", "NIC2")
-                    AllowManagementOS = $true
-                    EnableEmbeddedTeaming = $true
+                    Name                     = "TestSwitch"
+                    Type                     = "External"
+                    NetAdapterName           = @("NIC1", "NIC2")
+                    AllowManagementOS        = $true
+                    EnableEmbeddedTeaming    = $true
                     BandwidthReservationMode = "NA"
-                    Ensure = "Present"
+                    Ensure                   = "Present"
                 }
 
                 It "Should return absent in the get method" {
@@ -217,13 +222,13 @@ try
                 }
 
                 $testParams = @{
-                    Name = "TestSwitch"
-                    Type = "External"
-                    NetAdapterName = @("NIC1", "NIC2")
-                    AllowManagementOS = $true
-                    EnableEmbeddedTeaming = $true
+                    Name                     = "TestSwitch"
+                    Type                     = "External"
+                    NetAdapterName           = @("NIC1", "NIC2")
+                    AllowManagementOS        = $true
+                    EnableEmbeddedTeaming    = $true
                     BandwidthReservationMode = "NA"
-                    Ensure = "Present"
+                    Ensure                   = "Present"
                 }
 
                 It "Should return present in the get method" {
@@ -259,13 +264,13 @@ try
                 }
 
                 $testParams = @{
-                    Name = "TestSwitch"
-                    Type = "External"
-                    NetAdapterName = @("NIC1", "NIC2")
-                    AllowManagementOS = $true
-                    EnableEmbeddedTeaming = $true
+                    Name                     = "TestSwitch"
+                    Type                     = "External"
+                    NetAdapterName           = @("NIC1", "NIC2")
+                    AllowManagementOS        = $true
+                    EnableEmbeddedTeaming    = $true
                     BandwidthReservationMode = "NA"
-                    Ensure = "Present"
+                    Ensure                   = "Present"
                 }
 
                 It "Should return present in the get method" {
@@ -294,13 +299,13 @@ try
                 }
 
                 $testParams = @{
-                    Name = "TestSwitch"
-                    Type = "External"
-                    NetAdapterName = @("NIC1", "NIC2")
-                    AllowManagementOS = $true
-                    EnableEmbeddedTeaming = $true
+                    Name                     = "TestSwitch"
+                    Type                     = "External"
+                    NetAdapterName           = @("NIC1", "NIC2")
+                    AllowManagementOS        = $true
+                    EnableEmbeddedTeaming    = $true
                     BandwidthReservationMode = "NA"
-                    Ensure = "Present"
+                    Ensure                   = "Present"
                 }
 
                 It "Should return present in the get method" {
@@ -329,8 +334,8 @@ try
                 }
 
                 $testParams = @{
-                    Name = "TestSwitch"
-                    Type = "Internal"
+                    Name   = "TestSwitch"
+                    Type   = "Internal"
                     Ensure = "Absent"
                 }
 
@@ -352,8 +357,8 @@ try
                 $global:mockedVMSwitch = $null
 
                 $testParams = @{
-                    Name = "TestSwitch"
-                    Type = "Internal"
+                    Name   = "TestSwitch"
+                    Type   = "Internal"
                     Ensure = "Absent"
                 }
 
@@ -370,13 +375,13 @@ try
                 $global:mockedVMSwitch = $null
 
                 $testParams = @{
-                    Name = "TestSwitch"
-                    Type = "External"
-                    NetAdapterName = @("NIC1", "NIC2")
-                    AllowManagementOS = $true
-                    EnableEmbeddedTeaming = $true
+                    Name                     = "TestSwitch"
+                    Type                     = "External"
+                    NetAdapterName           = @("NIC1", "NIC2")
+                    AllowManagementOS        = $true
+                    EnableEmbeddedTeaming    = $true
                     BandwidthReservationMode = "NA"
-                    Ensure = "Present"
+                    Ensure                   = "Present"
                 }
 
                 Mock -CommandName Get-OSVersion -MockWith {
@@ -405,10 +410,6 @@ try
             }
         }
     }
-}
-finally
-{
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+} finally {
+    Invoke-TestCleanup
 }
