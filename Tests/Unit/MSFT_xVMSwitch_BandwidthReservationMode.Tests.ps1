@@ -82,112 +82,47 @@ try {
             return [PsObject]$mockedVMSwitch
         }
 
-        # Create an empty function to be able to mock the missing Hyper-V cmdlet
-        function Get-VMSwitch {
-            [CmdletBinding()]
-            Param(
-                [string]$Name,
-                [string]$SwitchType
-            )
-        }
 
-        # Create an empty function to be able to mock the missing Hyper-V cmdlet
-        function New-VMSwitch {
-            [CmdletBinding()]
-            Param(
-                [string]$Name,
-                [string]$MinimumBandwidthMode,
-                [string[]]$NetAdapterName,
-                [bool]$AllowManagementOS = $false
-            )
-        }
+        Describe 'Validates Get-TargetResource Function' {
 
-        # Create an empty function to be able to mock the missing Hyper-V cmdlet
-        function Remove-VMSwitch {
+            # Create an empty function to be able to mock the missing Hyper-V cmdlet
+            function Get-VMSwitch { }
 
-        }
+            # Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
+            # a variable that is created during most It statements to mock a VMSwitch
+            Mock -CommandName Get-VMSwitch -MockWith {
+                Param (
+                    [string]$ErrorAction
+                )
 
-        # Create an empty function to be able to mock the missing Hyper-V cmdlet
-        function Set-VMSwitch {
-            [CmdletBinding()]
-            Param (
-                [bool]$AllowManagementOS
-            )
-        }
+                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null) {
+                    throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
+                }
 
-        # Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
-        # a variable that is created during most It statements to mock a VMSwitch
-        Mock -CommandName Get-VMSwitch -MockWith {
-            Param (
-                [string]$ErrorAction
-            )
-
-            if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null) {
-                throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
+                return $global:mockedVMSwitch
             }
 
-            return $global:mockedVMSwitch
-        }
-
-        # Mocks New-VMSwitch and will assign a mocked switch to $global:mockedVMSwitch. This returns $global:mockedVMSwitch
-        # which is a variable that is created during most It statements to mock a VMSwitch
-        Mock -CommandName New-VMSwitch -MockWith {
-            Param (
-                [string]$Name,
-                [string]$NetAdapterName,
-                [string]$MinimumBandwidthMode,
-                [bool]$AllowManagementOS
-            )
-
-            $global:mockedVMSwitch = New-MockedVMSwitch -Name $Name -BandwidthReservationMode $MinimumBandwidthMode -AllowManagementOS $AllowManagementOS
-            return $global:mockedVMSwitch
-        }
-
-        # Mocks Set-VMSwitch and will modify $global:mockedVMSwitch which is
-        # a variable that is created during most It statements to mock a VMSwitch
-        Mock -CommandName Set-VMSwitch -MockWith {
-            Param (
-                [bool]$AllowManagementOS
-            )
-
-            if ($AllowManagementOS) {
-                $global:mockedVMSwitch['AllowManagementOS'] = $AllowManagementOS
+            # Mocks Get-NetAdapter which returns a simplified network adapter
+            Mock -CommandName Get-NetAdapter -MockWith {
+                return [PSCustomObject]@{
+                    Name = 'SomeNIC'
+                    InterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
+                }
             }
-        }
 
-        # Mocks Remove-VMSwitch and will remove the variable $global:mockedVMSwitch which is
-        # a variable that is created during most It statements to mock a VMSwitch
-        Mock -CommandName Remove-VMSwitch -MockWith {
-            $global:mockedVMSwitch = $null
-        }
-
-        # Mocks Get-NetAdapter which returns a simplified network adapter
-        Mock -CommandName Get-NetAdapter -MockWith {
-            return [PSCustomObject]@{
-                Name = 'SomeNIC'
-                InterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
+            # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
+            Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
+                return $true
             }
-        }
 
-        # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
-        Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
-            return $true
-        }
-
-        Mock -CommandName Get-OSVersion -MockWith {
-            return [Version]::Parse('6.3.9600')
-        }
-
-        # Create all the test cases for Get-TargetResource
-        $getTestCases = @()
-        foreach ($brmMode in $BANDWIDTH_RESERVATION_MODES) {
-            $getTestCases += @{
-                CurrentName = $brmMode + 'BRM'
-                CurrentBandwidthReservationMode = $brmMode
+            # Create all the test cases for Get-TargetResource
+            $getTestCases = @()
+            foreach ($brmMode in $BANDWIDTH_RESERVATION_MODES) {
+                $getTestCases += @{
+                    CurrentName = $brmMode + 'BRM'
+                    CurrentBandwidthReservationMode = $brmMode
+                }
             }
-        }
-
-        Context 'Validates Get-TargetResource Function' {
 
             # Test Get-TargetResource with the test cases created above 
             It 'Current switch''s BandwidthReservationMode is set to <CurrentBandwidthReservationMode>' -TestCases $getTestCases {
@@ -259,7 +194,50 @@ try {
             }
         }
 
-        Context 'Validates Test-TargetResource Function' {
+        Describe 'Validates Test-TargetResource Function' {
+
+            # Create an empty function to be able to mock the missing Hyper-V cmdlet
+            function Get-VMSwitch { }
+
+            # Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
+            # a variable that is created during most It statements to mock a VMSwitch
+            Mock -CommandName Get-VMSwitch -MockWith {
+                Param (
+                    [string]$ErrorAction
+                )
+
+                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null) {
+                    throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
+                }
+
+                return $global:mockedVMSwitch
+            }
+
+            # Mocks Get-NetAdapter which returns a simplified network adapter
+            Mock -CommandName Get-NetAdapter -MockWith {
+                return [PSCustomObject]@{
+                    Name = 'SomeNIC'
+                    InterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
+                }
+            }
+
+            # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
+            Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-OSVersion -MockWith {
+                return [Version]::Parse('6.3.9600')
+            }
+
+            # Create all the test cases for Get-TargetResource
+            $getTestCases = @()
+            foreach ($brmMode in $BANDWIDTH_RESERVATION_MODES) {
+                $getTestCases += @{
+                    CurrentName = $brmMode + 'BRM'
+                    CurrentBandwidthReservationMode = $brmMode
+                }
+            }
 
             # Test Test-TargetResource with the test cases created above 
             It 'Current Name "<CurrentName>" | Current BandwidthReservationMode set to "<CurrentBandwidthReservationMode>" | Desired BandwidthReservationMode set to "<DesiredBandwidthReservationMode>" | Ensure "<Ensure>"' -TestCases $testSetTestCases {
@@ -311,7 +289,87 @@ try {
             }
         }
 
-        Context 'Validates Set-TargetResource Function' {
+        Describe 'Validates Set-TargetResource Function' {
+
+            # Create empty functions to be able to mock the missing Hyper-V cmdlet
+            function Get-VMSwitch { }
+            function New-VMSwitch { }
+            function Remove-VMSwitch { }
+            function Set-VMSwitch { }
+
+            # Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
+            # a variable that is created during most It statements to mock a VMSwitch
+            Mock -CommandName Get-VMSwitch -MockWith {
+                Param (
+                    [string]$Name,
+                    [string]$SwitchType,
+                    [string]$ErrorAction
+                )
+
+                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null) {
+                    throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
+                }
+
+                return $global:mockedVMSwitch
+            }
+
+            # Mocks New-VMSwitch and will assign a mocked switch to $global:mockedVMSwitch. This returns $global:mockedVMSwitch
+            # which is a variable that is created during most It statements to mock a VMSwitch
+            Mock -CommandName New-VMSwitch -MockWith {
+                Param (
+                    [string]$Name,
+                    [string]$NetAdapterName,
+                    [string]$MinimumBandwidthMode,
+                    [bool]$AllowManagementOS
+                )
+
+                $global:mockedVMSwitch = New-MockedVMSwitch -Name $Name -BandwidthReservationMode $MinimumBandwidthMode -AllowManagementOS $AllowManagementOS
+                return $global:mockedVMSwitch
+            }
+
+            # Mocks Set-VMSwitch and will modify $global:mockedVMSwitch which is
+            # a variable that is created during most It statements to mock a VMSwitch
+            Mock -CommandName Set-VMSwitch -MockWith {
+                Param (
+                    [bool]$AllowManagementOS
+                )
+
+                if ($AllowManagementOS) {
+                    $global:mockedVMSwitch['AllowManagementOS'] = $AllowManagementOS
+                }
+            }
+
+            # Mocks Remove-VMSwitch and will remove the variable $global:mockedVMSwitch which is
+            # a variable that is created during most It statements to mock a VMSwitch
+            Mock -CommandName Remove-VMSwitch -MockWith {
+                $global:mockedVMSwitch = $null
+            }
+
+            # Mocks Get-NetAdapter which returns a simplified network adapter
+            Mock -CommandName Get-NetAdapter -MockWith {
+                return [PSCustomObject]@{
+                    Name = 'SomeNIC'
+                    InterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
+                }
+            }
+
+            # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
+            Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
+                return $true
+            }
+
+            Mock -CommandName Get-OSVersion -MockWith {
+                return [Version]::Parse('6.3.9600')
+            }
+
+            # Create all the test cases for Get-TargetResource
+            $getTestCases = @()
+            foreach ($brmMode in $BANDWIDTH_RESERVATION_MODES) {
+                $getTestCases += @{
+                    CurrentName = $brmMode + 'BRM'
+                    CurrentBandwidthReservationMode = $brmMode
+                }
+            }
 
             It 'Current Name "<CurrentName>" | Current BandwidthReservationMode set to "<CurrentBandwidthReservationMode>" | Desired BandwidthReservationMode set to "<DesiredBandwidthReservationMode>" | Ensure "<Ensure>"' -TestCases $testSetTestCases {
                 Param (
