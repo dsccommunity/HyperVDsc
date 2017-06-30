@@ -3,7 +3,8 @@
 # Unit Test Template Version: 1.2.0
 $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) ) {
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+{
     & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
 }
 
@@ -16,30 +17,35 @@ $TestEnvironment = Initialize-TestEnvironment `
 
 #endregion HEADER
 
-function Invoke-TestSetup {
+function Invoke-TestSetup
+{
+
 }
 
-function Invoke-TestCleanup {
+function Invoke-TestCleanup
+{
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
 }
 
 # Begin Testing
-try {
+try
+{
     Invoke-TestSetup
 
     InModuleScope 'MSFT_xVMSwitch' {
 
         # Function to create a exception object for testing output exceptions
-        function Get-InvalidArgumentError {
+        function Get-InvalidArgumentError
+        {
             [CmdletBinding()]
             param
             (
-                [Parameter(Mandatory)]
+                [Parameter(Mandatory = $true)]
                 [ValidateNotNullOrEmpty()]
                 [System.String]
                 $ErrorId,
 
-                [Parameter(Mandatory)]
+                [Parameter(Mandatory = $true)]
                 [ValidateNotNullOrEmpty()]
                 [System.String]
                 $ErrorMessage
@@ -54,14 +60,21 @@ try {
         } # end function Get-InvalidArgumentError
 
         # A helper function to mock a VMSwitch
-        function New-MockedVMSwitch {
-            Param (
+        function New-MockedVMSwitch
+        {
+            param (
                 [Parameter(Mandatory = $true)]
-                [string]$Name,
+                [string]
+                $Name,
+
                 [Parameter(Mandatory = $true)]
                 [ValidateSet('Default', 'Weight', 'Absolute', 'None', 'NA')]
-                [string]$BandwidthReservationMode,
-                [bool]$AllowManagementOS = $false
+                [string]
+                $BandwidthReservationMode,
+
+                [Parameter()]
+                [bool]
+                $AllowManagementOS = $false
             )
 
             $mockedVMSwitch = @{
@@ -71,70 +84,81 @@ try {
                 NetAdapterInterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
             }
 
-            if ($BandwidthReservationMode -ne 'NA') {
+            if ($BandwidthReservationMode -ne 'NA')
+            {
                 $mockedVMSwitch['BandwidthReservationMode'] = $BandwidthReservationMode
             }
 
             return [PsObject]$mockedVMSwitch
         }
 
-        # Create an empty function to be able to mock the missing Hyper-V cmdlet
-        function Get-VMSwitch {
-            [CmdletBinding()]
-            Param(
-                [string]$Name,
-                [string]$SwitchType
-            )
-        }
-
-        # Create an empty function to be able to mock the missing Hyper-V cmdlet
-        function New-VMSwitch {
-            [CmdletBinding()]
-            Param(
-                [string]$Name,
-                [string]$MinimumBandwidthMode,
-                [string[]]$NetAdapterName,
-                [bool]$EnableEmbeddedTeaming,
-                [bool]$AllowManagementOS = $false
-            )
-        }
-
-        # Create an empty function to be able to mock the missing Hyper-V cmdlet
-        function Remove-VMSwitch {
-
-        }
-
-        # Create an empty function to be able to mock the missing Hyper-V cmdlet
-        function Set-VMSwitch {
-            [CmdletBinding()]
-            Param (
-                [bool]$AllowManagementOS
-            )
-        }
-
         Describe "MSFT_xVMSwitch" {
-            # Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
-            # a variable that is created during most It statements to mock a VMSwitch
+
+            # Create empty functions to be able to mock the missing Hyper-V cmdlet
+            function Get-VMSwitch
+            {
+
+            }
+
+            function New-VMSwitch
+            {
+
+            }
+
+            function Set-VMSwitch {
+
+            }
+
+            function Remove-VMSwitch {
+
+            }
+
+            <#
+                Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
+                a variable that is created during most It statements to mock a VMSwitch
+            #>
             Mock -CommandName Get-VMSwitch -MockWith {
-                Param (
-                    [string]$ErrorAction
+                param
+                (
+                    [string]
+                    $Name,
+
+                    [string]
+                    $SwitchType,
+
+                    [string]
+                    $ErrorAction
                 )
 
-                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null) {
+                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null)
+                {
                     throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
                 }
 
                 return $global:mockedVMSwitch
             }
 
-            # Mocks New-VMSwitch and will assign a mocked switch to $global:mockedVMSwitch. This returns $global:mockedVMSwitch
-            # which is a variable that is created during most It statements to mock a VMSwitch
+            <#
+                Mocks New-VMSwitch and will assign a mocked switch to $global:mockedVMSwitch. This returns $global:mockedVMSwitch
+                which is a variable that is created during most It statements to mock a VMSwitch
+            #>
             Mock -CommandName New-VMSwitch -MockWith {
-                Param (
-                    [string]$Name,
-                    [string]$NetAdapterName,
-                    [string]$MinimumBandwidthMode = 'NA',
-                    [bool]$AllowManagementOS
+                param
+                (
+                    [string]
+                    $Name,
+
+                    [string[]]
+                    $NetAdapterName,
+
+                    [string]
+                    $MinimumBandwidthMode = 'NA',
+
+                    [bool]
+                    $EnableEmbeddedTeaming,
+
+                    [bool]
+                    $AllowManagementOS
                 )
 
                 $global:mockedVMSwitch = New-MockedVMSwitch -Name $Name -BandwidthReservationMode $MinimumBandwidthMode -AllowManagementOS $AllowManagementOS
@@ -147,20 +171,27 @@ try {
                 }
             }
 
-            # Mocks Set-VMSwitch and will modify $global:mockedVMSwitch which is
-            # a variable that is created during most It statements to mock a VMSwitch
+            <#
+                Mocks Set-VMSwitch and will modify $global:mockedVMSwitch which is
+                a variable that is created during most It statements to mock a VMSwitch
+            #>
             Mock -CommandName Set-VMSwitch -MockWith {
-                Param (
-                    [bool]$AllowManagementOS
+                param
+                (
+                    [bool]
+                    $AllowManagementOS
                 )
 
-                if ($AllowManagementOS) {
+                if ($AllowManagementOS)
+                {
                     $global:mockedVMSwitch['AllowManagementOS'] = $AllowManagementOS
                 }
             }
 
-            # Mocks Remove-VMSwitch and will remove the variable $global:mockedVMSwitch which is
-            # a variable that is created during most It statements to mock a VMSwitch
+            <#
+                Mocks Remove-VMSwitch and will remove the variable $global:mockedVMSwitch which is
+                a variable that is created during most It statements to mock a VMSwitch
+            #>
             Mock -CommandName Remove-VMSwitch -MockWith {
                 $global:mockedVMSwitch = $null
             }
@@ -410,6 +441,7 @@ try {
             }
         }
     }
-} finally {
+}
+finally {
     Invoke-TestCleanup
 }
