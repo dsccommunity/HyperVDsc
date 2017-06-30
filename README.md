@@ -145,6 +145,8 @@ Please see the Examples section for more details.
   - MSFT_xVMHost to managing Hyper-V host settings.
 * MSFT_xVMSwitch: 
   - Added support for Switch Embedded Teaming (SET) in Server 2016.
+  - Fixed a bug where Get-TargetResource threw an error if a non External switch is used.
+  - Updated unit tests to use template version 1.2.0
 
 ### 3.8.0.0
 
