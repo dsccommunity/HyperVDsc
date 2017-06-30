@@ -1,31 +1,40 @@
-[CmdletBinding()]
-Param (
+#region HEADER
 
-)
-
-if (!$PSScriptRoot) # $PSScriptRoot is not defined in 2.0
-{
-    $PSScriptRoot = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Path)
+# Unit Test Template Version: 1.2.0
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) ) {
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
 }
 
-$ErrorActionPreference = 'Stop'
-Set-StrictMode -Version latest
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
 
-$RepoRoot = (Resolve-Path $PSScriptRoot\..\..).Path
+$TestEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName 'xHyper-V' `
+    -DSCResourceName 'MSFT_xVMSwitch' `
+    -TestType Unit
 
-$ModuleName = 'MSFT_xVMSwitch'
-Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") -Force;
+#endregion HEADER
 
-Describe 'xVMSwitch' {
-    InModuleScope $ModuleName {
+function Invoke-TestSetup {
+}
+
+function Invoke-TestCleanup {
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
+
+# Begin Testing
+try {
+    Invoke-TestSetup
+
+    InModuleScope 'MSFT_xVMSwitch' {
 
         # Defines a variable that contains all the possible Bandwidth Reservation Modes which will be used
         # for foreach loops later on
-        New-Variable -Name 'BANDWIDTH_RESERVATION_MODES' -Option 'Constant' -Value @('Default','Weight','Absolute','None')
+        New-Variable -Name 'BANDWIDTH_RESERVATION_MODES' -Option 'Constant' -Value @('Default', 'Weight', 'Absolute', 'None')
 
         # Function to create a exception object for testing output exceptions
-        function Get-InvalidArgumentError
-        {
+        function Get-InvalidArgumentError {
             [CmdletBinding()]
             param
             (
@@ -47,22 +56,22 @@ Describe 'xVMSwitch' {
                 -ArgumentList $exception, $ErrorId, $errorCategory, $null
             return $errorRecord
         } # end function Get-InvalidArgumentError
-        
+
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch {
             Param (
-                [Parameter(Mandatory=$true)]
+                [Parameter(Mandatory = $true)]
                 [string]$Name,
-                [Parameter(Mandatory=$true)]
-                [ValidateSet('Default','Weight','Absolute','None','NA')]
+                [Parameter(Mandatory = $true)]
+                [ValidateSet('Default', 'Weight', 'Absolute', 'None', 'NA')]
                 [string]$BandwidthReservationMode,
                 [bool]$AllowManagementOS = $false
             )
 
             $mockedVMSwitch = @{
-                Name = $Name
-                SwitchType = 'External'
-                AllowManagementOS = $AllowManagementOS
+                Name                           = $Name
+                SwitchType                     = 'External'
+                AllowManagementOS              = $AllowManagementOS
                 NetAdapterInterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
             }
 
@@ -95,7 +104,7 @@ Describe 'xVMSwitch' {
 
         # Create an empty function to be able to mock the missing Hyper-V cmdlet
         function Remove-VMSwitch {
-        
+
         }
 
         # Create an empty function to be able to mock the missing Hyper-V cmdlet
@@ -105,8 +114,6 @@ Describe 'xVMSwitch' {
                 [bool]$AllowManagementOS
             )
         }
-
-
 
         # Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
         # a variable that is created during most It statements to mock a VMSwitch
@@ -131,7 +138,7 @@ Describe 'xVMSwitch' {
                 [string]$MinimumBandwidthMode,
                 [bool]$AllowManagementOS
             )
-            
+
             $global:mockedVMSwitch = New-MockedVMSwitch -Name $Name -BandwidthReservationMode $MinimumBandwidthMode -AllowManagementOS $AllowManagementOS
             return $global:mockedVMSwitch
         }
@@ -142,7 +149,7 @@ Describe 'xVMSwitch' {
             Param (
                 [bool]$AllowManagementOS
             )
-            
+
             if ($AllowManagementOS) {
                 $global:mockedVMSwitch['AllowManagementOS'] = $AllowManagementOS
             }
@@ -157,7 +164,7 @@ Describe 'xVMSwitch' {
         # Mocks Get-NetAdapter which returns a simplified network adapter
         Mock -CommandName Get-NetAdapter -MockWith {
             return [PSCustomObject]@{
-                Name = 'SomeNIC'
+                Name                 = 'SomeNIC'
                 InterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
             }
         }
@@ -167,22 +174,19 @@ Describe 'xVMSwitch' {
             return $true
         }
 
-
         Mock -CommandName Get-OSVersion -MockWith {
             return [Version]::Parse('6.3.9600')
         }
-
-
 
         # Create all the test cases for Get-TargetResource
         $getTestCases = @()
         foreach ($brmMode in $BANDWIDTH_RESERVATION_MODES) {
             $getTestCases += @{
-                CurrentName = $brmMode + 'BRM'
+                CurrentName                     = $brmMode + 'BRM'
                 CurrentBandwidthReservationMode = $brmMode
             }
         }
-        
+
         Context 'Validates Get-TargetResource Function' {
 
             # Test Get-TargetResource with the test cases created above 
@@ -217,8 +221,6 @@ Describe 'xVMSwitch' {
             }
         }
 
-
-
         # Create all the test cases for Test-TargetResource and Set-TargetResource when the switch already exists
         $testSetTestCases = @()
         foreach ($currentBrmMode in $BANDWIDTH_RESERVATION_MODES) {
@@ -227,14 +229,13 @@ Describe 'xVMSwitch' {
 
                 foreach ($ensureOption in @('Present', 'Absent')) {
                     $case = @{
-                        CurrentName = $currentBrmMode + 'BRM'
+                        CurrentName                     = $currentBrmMode + 'BRM'
                         CurrentBandwidthReservationMode = $currentBrmMode
-                        DesiredName = $desiredBrmMode + 'BRM'
+                        DesiredName                     = $desiredBrmMode + 'BRM'
                         DesiredBandwidthReservationMode = $desiredBrmMode
-                        Ensure = $ensureOption
-                        ExpectedResult = $ensureOption -eq 'Present' -and $currentBrmMode -eq $desiredBrmMode
+                        Ensure                          = $ensureOption
+                        ExpectedResult                  = $ensureOption -eq 'Present' -and $currentBrmMode -eq $desiredBrmMode
                     }
-
                     $testSetTestCases += $case
                 }
             }
@@ -243,19 +244,19 @@ Describe 'xVMSwitch' {
         # Create all the test cases for Test-TargetResource and Set-TargetResource when the switch does not exists
         foreach ($desiredBrmMode in $BANDWIDTH_RESERVATION_MODES) {
 
-                foreach ($ensureOption in @('Present', 'Absent')) {
-                    
-                    $case = @{
-                        CurrentName = $null
-                        CurrentBandwidthReservationMode = $null
-                        DesiredName = $desiredBrmMode + 'BRM'
-                        DesiredBandwidthReservationMode = $desiredBrmMode
-                        Ensure = $ensureOption
-                        ExpectedResult = $ensureOption -eq 'Absent'
-                    }
+            foreach ($ensureOption in @('Present', 'Absent')) {
 
-                    $testSetTestCases += $case
+                $case = @{
+                    CurrentName                     = $null
+                    CurrentBandwidthReservationMode = $null
+                    DesiredName                     = $desiredBrmMode + 'BRM'
+                    DesiredBandwidthReservationMode = $desiredBrmMode
+                    Ensure                          = $ensureOption
+                    ExpectedResult                  = $ensureOption -eq 'Absent'
                 }
+
+                $testSetTestCases += $case
+            }
         }
 
         Context 'Validates Test-TargetResource Function' {
@@ -288,29 +289,27 @@ Describe 'xVMSwitch' {
 
             # Test Test-TargetResource when the version of Windows doesn't support BandwidthReservationMode
             It 'Invalid Operating System Exception' {
-                
+
                 $errorRecord = Get-InvalidArgumentError `
-                                -ErrorId 'BandwidthReservationModeError' `
-                                -ErrorMessage $LocalizedData.BandwidthReservationModeError
+                    -ErrorId 'BandwidthReservationModeError' `
+                    -ErrorMessage $LocalizedData.BandwidthReservationModeError
                 {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
             }
 
             # Test Test-TargetResource when the version of Windows doesn't support BandwidthReservationMode and specifies NA for BandwidthReservationMode
-            It 'Simulates Windows Server 2008 R2 | Desired BandwidthReservationMode set to "NA" | Ensure Present | Expected Result is True'  {
+            It 'Simulates Windows Server 2008 R2 | Desired BandwidthReservationMode set to "NA" | Ensure Present | Expected Result is True' {
 
                 $global:mockedVMSwitch = New-MockedVMSwitch -Name 'SomeSwitch' -BandwidthReservationMode 'NA' -AllowManagementOS $true
                 $targetResource = Test-TargetResource -Name 'SomeSwitch' -BandwidthReservationMode 'NA' -Type 'External' -NetAdapterName 'SomeNIC' -Ensure 'Present' -AllowManagementOS $true
                 $targetResource | Should Be $true
             }
-            
+
             It 'Passes when "BandwidthReservationMode" does not match but is not specified (#48)' {
                 $global:mockedVMSwitch = New-MockedVMSwitch -Name 'SomeSwitch' -BandwidthReservationMode 'Absolute'
                 $targetResource = Test-TargetResource -Name 'SomeSwitch' -Type 'Internal' -Ensure 'Present'
                 $targetResource | Should Be $true
             }
         }
-
-
 
         Context 'Validates Set-TargetResource Function' {
 
@@ -333,31 +332,24 @@ Describe 'xVMSwitch' {
                 $targetResource | Should Be $null
 
                 if ($CurrentName -and $Ensure -eq 'Present') {
-
                     if ($DesiredBandwidthReservationMode -ne $CurrentBandwidthReservationMode) {
                         Assert-MockCalled -CommandName Get-VMSwitch -Times 2 -Scope 'It'
                         Assert-MockCalled -CommandName Remove-VMSwitch -Times 1 -Scope 'It'
                         Assert-MockCalled -CommandName New-VMSwitch -Times 1 -Scope 'It'
                         Assert-MockCalled -CommandName Set-VMSwitch -Times 0 -Scope 'It'
-                    }
-                    else {
+                    } else {
                         Assert-MockCalled -CommandName Get-VMSwitch -Times 1 -Scope 'It'
                     }
-                }
-                elseif ($Ensure -eq 'Present') {
+                } elseif ($Ensure -eq 'Present') {
                     Assert-MockCalled -CommandName Get-VMSwitch -Times 1 -Scope 'It'
                     Assert-MockCalled -CommandName New-VMSwitch -Times 1 -Scope 'It'
-
-                }
-                else {
+                } else {
                     Assert-MockCalled -CommandName Get-VMSwitch -Times 1 -Scope 'It'
                     Assert-MockCalled -CommandName Remove-VMSwitch -Times 1 -Scope 'It'
                 }
-
                 Remove-Variable -Scope 'Global' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
             }
 
-            
             # Test Set-TargetResource when the version of Windows doesn't support BandwidthReservationMode
             It 'Invalid Operating System Exception' {
 
@@ -366,10 +358,12 @@ Describe 'xVMSwitch' {
                 }
 
                 $errorRecord = Get-InvalidArgumentError `
-                                -ErrorId 'BandwidthReservationModeError' `
-                                -ErrorMessage $LocalizedData.BandwidthReservationModeError
+                    -ErrorId 'BandwidthReservationModeError' `
+                    -ErrorMessage $LocalizedData.BandwidthReservationModeError
                 {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
             }
         }
     }
+} finally {
+    Invoke-TestCleanup
 }
