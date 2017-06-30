@@ -21,6 +21,16 @@ Import-Module -Name ( Join-Path `
     -Path (Split-Path -Path $PSScriptRoot -Parent) `
     -ChildPath '\HyperVCommon\HyperVCommon.psm1' )
 
+<#
+.SYNOPSIS
+    Gets MSFT_xVMSwitch resource current state.
+
+.PARAMETER Name
+    Name of the VM Switch.
+
+.PARAMETER Type
+    Type of switch.
+#>
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -52,15 +62,23 @@ function Get-TargetResource
     if ($null -ne $switch)
     {
         $ensure = 'Present'
-        if ($switch.EmbeddedTeamingEnabled -ne $true)
+        if ($switch.SwitchType -eq 'External')
         {
-            $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription -ErrorAction SilentlyContinue).Name
-            $description = $switch.NetAdapterInterfaceDescription
+            if ($switch.EmbeddedTeamingEnabled -ne $true)
+            {
+                $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription -ErrorAction SilentlyContinue).Name
+                $description = $switch.NetAdapterInterfaceDescription
+            }
+            else
+            {
+                $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions).Name
+                $description = $switch.NetAdapterInterfaceDescriptions
+            }
         }
         else
         {
-            $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions).Name
-            $description = $switch.NetAdapterInterfaceDescriptions
+            $netAdapterName = $null
+            $description = $null
         }
     }
     else
@@ -91,7 +109,31 @@ function Get-TargetResource
     return $returnValue
 }
 
+<#
+.SYNOPSIS
+    Configures MSFT_xVMSwitch resource state.
 
+.PARAMETER Name
+    Name of the VM Switch.
+
+.PARAMETER Type
+    Type of switch.
+
+.PARAMETER NetAdapterName
+    Network adapter name(s) for external switch type.
+
+.PARAMETER AllowManagementOS
+    Specify if the VM host has access to the physical NIC.
+
+.PARAMETER EnableEmbeddedTeaming
+    Should embedded NIC teaming be used (Windows Server 2016 only).
+
+.PARAMETER BandwidthReservationMode
+    Type of Bandwidth Reservation Mode to use for the switch.
+
+.PARAMETER Ensure
+    Whether switch should be present or absent.
+#>
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -129,6 +171,7 @@ function Set-TargetResource
         [String]
         $Ensure = "Present"
     )
+
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
@@ -136,6 +179,7 @@ function Set-TargetResource
             -ErrorId 'HyperVNotInstalledError' `
             -ErrorMessage $LocalizedData.HyperVNotInstalledError
     }
+
     # Check to see if the BandwidthReservationMode chosen is supported in the OS
     elseif (($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
     {
@@ -185,8 +229,8 @@ function Set-TargetResource
                 $removeReaddSwitch = $true
             }
 
-            if ($null -ne $switch.EmbeddedTeamingEnabled `
-                -and $switch.EmbeddedTeamingEnabled -ne $EnableEmbeddedTeaming)
+            if ($null -ne $switch.EmbeddedTeamingEnabled -and
+                $switch.EmbeddedTeamingEnabled -ne $EnableEmbeddedTeaming)
             {
                 Write-Verbose -Message ($LocalizedData.EnableEmbeddedTeamingIncorrect -f $Name)
                 $removeReaddSwitch = $true
@@ -280,7 +324,31 @@ function Set-TargetResource
     }
 }
 
+<#
+.SYNOPSIS
+    Tests if MSFT_xVMSwitch resource state is in the desired state or not.
 
+.PARAMETER Name
+    Name of the VM Switch.
+
+.PARAMETER Type
+    Type of switch.
+
+.PARAMETER NetAdapterName
+    Network adapter name(s) for external switch type.
+
+.PARAMETER AllowManagementOS
+    Specify if the VM host has access to the physical NIC.
+
+.PARAMETER EnableEmbeddedTeaming
+    Should embedded NIC teaming be used (Windows Server 2016 only).
+
+.PARAMETER BandwidthReservationMode
+    Type of Bandwidth Reservation Mode to use for the switch.
+
+.PARAMETER Ensure
+    Whether switch should be present or absent.
+#>
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -320,8 +388,6 @@ function Test-TargetResource
         $Ensure = "Present"
     )
 
-    #region input validation
-
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
@@ -330,6 +396,7 @@ function Test-TargetResource
             -ErrorMessage $LocalizedData.HyperVNotInstalledError
     }
 
+    #region input validation
     if ($Type -eq 'External' -and !($NetAdapterName))
     {
         New-InvalidArgumentError `
