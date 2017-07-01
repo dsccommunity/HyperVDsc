@@ -136,15 +136,19 @@ Please see the Examples section for more details.
 
 ### Unreleased
 
-* MSFT_xVMHyperV: 
+* MSFT_xVMHyperV:
   - Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
   - EnableGuestService works on localized OS (language independent).
   - Adds missing Hyper-V-PowerShell feature in examples.
 * Added the following resources:
   - MSFT_xVMProcessor to manage virtual machine processor options.
   - MSFT_xVMHost to managing Hyper-V host settings.
-* MSFT_xVMSwitch: 
+* MSFT_xVMSwitch:
   - Added support for Switch Embedded Teaming (SET) in Server 2016.
+  - Fixed a bug where Get-TargetResource threw an error if a non External switch is used.
+  - Updated unit tests to use template version 1.2.0.
+  - Style fixes.
+  - Added support for Localization.
 
 ### 3.8.0.0
 
