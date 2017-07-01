@@ -149,6 +149,8 @@ Please see the Examples section for more details.
   - Updated unit tests to use template version 1.2.0.
   - Style fixes.
   - Added support for Localization.
+* xHyper-V module:
+  - Added vs code formatting rule settings.
 
 ### 3.8.0.0
 
