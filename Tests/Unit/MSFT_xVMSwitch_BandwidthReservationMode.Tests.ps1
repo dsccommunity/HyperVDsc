@@ -99,7 +99,6 @@ try
         }
 
         Describe 'Validates Get-TargetResource Function' {
-
             # Create an empty function to be able to mock the missing Hyper-V cmdlet
             function Get-VMSwitch
             {
@@ -175,7 +174,6 @@ try
                 set which simulates older versions of Windows that don't support it
             #>
             It 'BandwidthReservationMode is set to null' {
-
                 # Set the mocked VMSwitch to be returned from Get-VMSwitch
                 $global:mockedVMSwitch = New-MockedVMSwitch -Name 'NaBRM' -BandwidthReservationMode 'NA'
 
@@ -226,7 +224,6 @@ try
         }
 
         Describe 'Validates Test-TargetResource Function' {
-
             # Create an empty function to be able to mock the missing Hyper-V cmdlet
             function Get-VMSwitch
             {
@@ -346,7 +343,6 @@ try
         }
 
         Describe 'Validates Set-TargetResource Function' {
-
             # Create empty functions to be able to mock the missing Hyper-V cmdlet
             function Get-VMSwitch
             {
@@ -535,7 +531,6 @@ try
 
             # Test Set-TargetResource when the version of Windows doesn't support BandwidthReservationMode
             It 'Invalid Operating System Exception' {
-
                 Mock -CommandName Get-OSVersion -MockWith {
                     return [Version]::Parse('6.1.7601')
                 }

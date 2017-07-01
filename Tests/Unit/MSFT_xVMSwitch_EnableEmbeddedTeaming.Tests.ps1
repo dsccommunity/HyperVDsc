@@ -33,7 +33,6 @@ try
     Invoke-TestSetup
 
     InModuleScope 'MSFT_xVMSwitch' {
-
         # Function to create a exception object for testing output exceptions
         function Get-InvalidArgumentError
         {
@@ -93,7 +92,6 @@ try
         }
 
         Describe "MSFT_xVMSwitch" {
-
             # Create empty functions to be able to mock the missing Hyper-V cmdlet
             function Get-VMSwitch
             {
@@ -105,11 +103,13 @@ try
 
             }
 
-            function Set-VMSwitch {
+            function Set-VMSwitch
+            {
 
             }
 
-            function Remove-VMSwitch {
+            function Remove-VMSwitch
+            {
 
             }
 
