@@ -228,7 +228,8 @@ Please see the Examples section for more details.
   * Added support for Localization.
 * xHyper-V module:
   * Added vs code formatting rule settings.
-  * Fixed Markdown lint rule violations.
+  * Fix Markdown rule violations in Readme.md.
+  * Added .MetaTestOptIn.json for Markdown common test to be included.
 
 ### 3.8.0.0
 
@@ -455,7 +456,8 @@ Configuration Sample_xVHD_NewVHD
 
 ### Create a differencing VHD
 
-This configuration will create a differencing VHD, given a parent VHD, on a Hyper-V host.
+This configuration will create a differencing VHD, given a parent VHD,
+ on a Hyper-V host.
 
 ```powershell
 Configuration Sample_xVhd_DiffVHD
@@ -463,8 +465,8 @@ Configuration Sample_xVhd_DiffVHD
     param
     (
         [Parameter(Mandatory = $true)]
-        [string
-        ]$Name,
+        [string]
+        $Name,
 
         [Parameter(Mandatory = $true)]
         [string]
