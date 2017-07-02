@@ -1,7 +1,5 @@
 # xHyper-V
 
-[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
-
 The **xHyper-V** DSC module configures and manages a Hyper-V host using the
  **xVhd**, **xVMHyperV**, **xVMSwitch**, **xVhdFile**, **xVMDvdDrive**,
  **xVMNetworkAdapter**, **xVMProcessor** and **xVMHost** resources.
@@ -11,61 +9,79 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
  or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any
  additional questions or comments.
 
-## Contributing
+## Branches
 
-Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
+### master
+
+[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
+
+This is the branch containing the latest release - no contributions should be
+made directly to this branch.
+
+### dev
+
+[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/dev)
+
+This is the development branch to which contributions should be proposed by
+contributors as pull requests. This development branch will periodically be
+merged to the master branch, and be released to [PowerShell Gallery](https://www.powershellgallery.com/).
 
 ## Resources
 
-* **xVhd** manages VHDs in a Hyper-V host.
-* **xVMHyperV** manages VMs in a Hyper-V host.
-* **xVMSwitch** manages virtual switches in a Hyper-V host.
-* **xVhdFile** manages files or directories in a VHD.
+* [**xVhd**](#xVhd) manages VHDs in a Hyper-V host.
+* [**xVMHyperV**](#xVMHyperV) manages VMs in a Hyper-V host.
+* [**xVMSwitch**](#xVMSwitch) manages virtual switches in a Hyper-V host.
+* [**xVhdFile**](#xVhdFile) manages files or directories in a VHD.
  You can use it to copy files/folders to the VHD, remove files/folders from a VHD,
  and change attributes of a file in a VHD (e.g. change a file attribute to
  'ReadOnly' or 'Hidden').
  This resource is particularly useful when bootstrapping DSC Configurations
  into a VM.
-* **xVMDvdDrive** manages DVD drives attached to a Hyper-V virtual machine.
-* **xVMHost** manages Hyper-V host settings.
-* **xVMProcessor** manages Hyper-V virtual machine processor options.
-* **xVMNetworkAdapter** manages VMNetadapters attached to a Hyper-V
- virtual machine or to the management OS.
+* [**xVMDvdDrive**](#xVMDvdDrive) manages DVD drives attached to a Hyper-V
+ virtual machine.
+* [**xVMHost**](#xVMHost) manages Hyper-V host settings.
+* [**xVMProcessor**](#xVMProcessor) manages Hyper-V virtual machine processor options.
+* [**xVMNetworkAdapter**](#xVMNetworkAdapter) manages VMNetadapters attached to
+ a Hyper-V virtual machine or to the management OS.
 
 ### xVhd
 
-* **Name**: The desired VHD file name
-* **Path**: The desired Path where the VHD will be created
-* **ParentPath**: Parent VHD file path, for differencing disk
-* **MaximumSizeBytes**: Maximum size of VHD to be created
-* **Generation**: Virtual disk format: { Vhd | VHDx }
-* **Ensure**: Ensures that the VHD is Present or Absent
+* **`[String]` Name** (_Key_): The desired VHD file name
+* **`[String]` Path** (_Key_): The desired Path where the VHD will be created
+* **`[String]` ParentPath** (_Write_): Parent VHD file path, for differencing disk
+* **`[Uint64]` MaximumSizeBytes** (_Write_): Maximum size of VHD to be created
+* **`[String]` Generation** (_Write_): Virtual disk format: { Vhd | VHDx }
+* **`[String]` Ensure** (_Write_): Ensures that the VHD is Present or Absent
 
 ### xVMHyperV
 
-* **Name**: The desired VM name
-* **VhdPath**: The desired VHD associated with the VM
-* **SwitchName**: Virtual switch(es) associated with the VM.
+* **`[String]` Name** (_Key_): The desired VM name.
+* **`[String]` VhdPath** (_Required_): The desired VHD associated with the VM.
+* **`[String]` SwitchName** (_Write_): Virtual switch(es) associated with the VM.
   Multiple NICs can now be assigned.
-* **State**: State of the VM: { Running | Paused | Off }
-* **Path**: Folder where the VM data will be stored
-* **Generation**: Virtual machine generation { 1 | 2 }.
+* **`[String]` State** (_Write_): State of the VM: { Running | Paused | Off }.
+* **`[String]` Path** (_Write_): Folder where the VM data will be stored.
+* **`[Uint32]` Generation** (_Write_): Virtual machine generation { 1 | 2 }.
   Generation 2 virtual machines __only__ support VHDX files.
-* **SecureBoot**: Enables or disables secure boot
+* **`[Boolean]` SecureBoot** (_Write_): Enables or disables secure boot
  __only on generation 2 virtual machines__.
  If not specified, it defaults to True.
-* **StartupMemory**: Startup RAM for the VM
-* **MinimumMemory**: Minimum RAM for the VM.
+* **`[Uint64]` StartupMemory** (_Write_): Startup RAM for the VM.
+* **`[Uint64]` MinimumMemory** (_Write_): Minimum RAM for the VM.
   Setting this property enables dynamic memory.
-* **MaximumMemory**: Maximum RAM for the VM.
+* **`[Uint64]` MaximumMemory** (_Write_): Maximum RAM for the VM.
   Setting this property enables dynamic memory.
-* **MACAddress**: MAC address(es) of the VM.
+* **`[String[]]` MACAddress** (_Write_): MAC address(es) of the VM.
   Multiple MAC addresses can now be assigned.
-* **ProcessorCount**: Processor count for the VM
-* **WaitForIP**: If specified, waits for the VM to get valid IP address
-* **RestartIfNeeded**: If specified, will shutdown and restart the VM as needed
- for property changes
-* **Ensure**: Ensures that the VM is Present or Absent
+* **`[Uint32]` ProcessorCount** (_Write_): Processor count for the VM.
+* **`[Boolean]` WaitForIP** (_Write_): If specified, waits for the VM to get
+ valid IP address.
+* **`[Boolean]` RestartIfNeeded** (_Write_): If specified, will shutdown and
+ restart the VM as needed for property changes.
+* **`[String]` Ensure** (_Write_): Ensures that the VM is Present or Absent.
+* **`[String]` Notes** (_Write_): Notes about the VM.
+* **`[Boolean]` EnableGuestService** (_Write_): Enable Guest Service Interface
+ for the VM.
 
 The following xVMHyper-V properties **cannot** be changed after VM creation:
 
@@ -91,9 +107,9 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 
 ### xVhdFile
 
-* **VhdPath**: Path to the VHD
-* **FileDirectory**: The FileDirectory objects to copy to the VHD
- (as used in the "File" resource).
+* **`[String]` VhdPath** (_Key_): Path to the VHD
+* **`[MSFT_xFileDirectory]` FileDirectory** (_Required_): The FileDirectory objects
+ to copy to the VHD (as used in the "File" resource).
  Please see the Examples section for more details.
 
 ### xVMDvdDrive
@@ -112,10 +128,10 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 ### xVMNetworkAdapter
 
 * **`[String]` Id** (_Key_): Unique string for identifying the resource instance.
-* **`[String]` Name** (_Write_): Name of the network adapter as it appears either
+* **`[String]` Name** (_Required_): Name of the network adapter as it appears either
  in the management OS or attached to a VM.
-* **`[String]` SwitchName** (_Write_): Virtual Switch name to connect to.
-* **`[String]` VMName** (_Write_): Name of the VM to attach to.
+* **`[String]` SwitchName** (_Required_): Virtual Switch name to connect to.
+* **`[String]` VMName** (_Required_): Name of the VM to attach to.
  If you want to attach new VM Network adapter to the management OS,
  set this property to 'Management OS'.
 * **`[String]` MacAddress** (_Write_): Use this to specify a Static MAC Address.
@@ -230,6 +246,9 @@ Please see the Examples section for more details.
   * Added vs code formatting rule settings.
   * Fix Markdown rule violations in Readme.md.
   * Added .MetaTestOptIn.json for Markdown common test to be included.
+  * Added Appveyor badge for Dev branch in Readme.md and moved to Branches section.
+  * Added missing properties for xVMHost in Readme.md.
+  * Added and corrected missing / wrong DataTypes and Dsc attributes in Readme.md.
 
 ### 3.8.0.0
 
