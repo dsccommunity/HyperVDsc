@@ -1,4 +1,4 @@
-# xHyper-V
+﻿# xHyper-V
 
 [![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
 
@@ -44,11 +44,14 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
   Generation 2 virtual machines __only__ support VHDX files.
 * **SecureBoot**: Enables or disables secure boot __only on generation 2 virtual machines__.
   If not specified, it defaults to True.
-* **StartupMemory**: Startup RAM for the VM
+* **StartupMemory**: Startup RAM for the VM.
+  If neither MinimumMemory nor MaximumMemory is specified dynamic memory will be disabled. 
 * **MinimumMemory**: Minimum RAM for the VM.
-  Setting this property enables dynamic memory.
+  Setting this property enables dynamic memory. Exception:
+  If MinimumMemory, MaximumMemory and StartupMemory is equal dynamic memory will be disabled.
 * **MaximumMemory**: Maximum RAM for the VM.
-  Setting this property enables dynamic memory.
+  Setting this property enables dynamic memory. Exception:
+  If MinimumMemory, MaximumMemory and StartupMemory is equal dynamic memory will be disabled.
 * **MACAddress**: MAC address(es) of the VM.
   Multiple MAC addresses can now be assigned.
 * **ProcessorCount**: Processor count for the VM
@@ -137,6 +140,7 @@ Please see the Examples section for more details.
 ### Unreleased
 
 * MSFT_xVMHyperV: 
+  - Dynamic memory will be disabled if neither MinimumMemory nor MaximumMemory is specified or if StartupMemory, MinimumMemory and MaximumMemory are equal (e.g. for nested virtualization)
   - Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
   - EnableGuestService works on localized OS (language independent).
   - Adds missing Hyper-V-PowerShell feature in examples.
