@@ -2,7 +2,7 @@
 Your feedback and support is greatly appreciated, thanks for contributing!
 
 Please prefix the issue title with the resource name, i.e. 'xVMSwitch - Short description of my issue'
-If the issue is module wide, prefix using the module name, i.e. 'xHyper-V - Shor description of my issue'
+If the issue is module wide, prefix using the module name, i.e. 'xHyper-V - Short description of my issue'
 Please provide the following information regarding your issue (place N/A if the fields that don't apply to your issue):
 -->
 **Details of the scenario you tried and the problem that is occurring:**
