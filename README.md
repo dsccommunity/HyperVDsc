@@ -13,6 +13,7 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 ### master
 
 [![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
+[![codecov](https://codecov.io/gh/PowerShell/xHyper-V/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/xHyper-V/branch/master)
 
 This is the branch containing the latest release - no contributions should be
 made directly to this branch.
@@ -20,6 +21,7 @@ made directly to this branch.
 ### dev
 
 [![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/dev)
+[![codecov](https://codecov.io/gh/PowerShell/xHyper-V/branch/dev/graph/badge.svg)](https://codecov.io/gh/PowerShell/xHyper-V/branch/dev)
 
 This is the development branch to which contributions should be proposed by
 contributors as pull requests. This development branch will periodically be
