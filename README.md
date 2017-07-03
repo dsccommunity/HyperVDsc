@@ -1,8 +1,7 @@
 # xHyper-V
 
-The **xHyper-V** DSC module configures and manages a Hyper-V host using the
- **xVhd**, **xVMHyperV**, **xVMSwitch**, **xVhdFile**, **xVMDvdDrive**,
- **xVMNetworkAdapter**, **xVMProcessor** and **xVMHost** resources.
+The **xHyper-V** module contains DSC resources for deployment and configuration of
+ Hyper-V hosts, virtual machines and related resources.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
@@ -26,11 +25,17 @@ This is the development branch to which contributions should be proposed by
 contributors as pull requests. This development branch will periodically be
 merged to the master branch, and be released to [PowerShell Gallery](https://www.powershellgallery.com/).
 
+## Contributing
+
+Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
+
+## Change log
+
+A full list of changes in each version can be found in the [change log](CHANGELOG.md).
+
 ## Resources
 
-* [**xVhd**](#xvhd) manages VHDs in a Hyper-V host.
-* [**xVMHyperV**](#xvmhyperv) manages VMs in a Hyper-V host.
-* [**xVMSwitch**](#xvmswitch) manages virtual switches in a Hyper-V host.
+* [**xVHD**](#xvhd) manages VHDs in a Hyper-V host.
 * [**xVhdFile**](#xvhdfile) manages files or directories in a VHD.
  You can use it to copy files/folders to the VHD, remove files/folders from a VHD,
  and change attributes of a file in a VHD (e.g. change a file attribute to
@@ -40,1255 +45,382 @@ merged to the master branch, and be released to [PowerShell Gallery](https://www
 * [**xVMDvdDrive**](#xvmdvddrive) manages DVD drives attached to a Hyper-V
  virtual machine.
 * [**xVMHost**](#xvmhost) manages Hyper-V host settings.
-* [**xVMProcessor**](#xvmprocessor) manages Hyper-V virtual machine processor options.
+* [**xVMHyperV**](#xvmhyperv) manages VMs in a Hyper-V host.
 * [**xVMNetworkAdapter**](#xvmnetworkadapter) manages VMNetadapters attached to
- a Hyper-V virtual machine or to the management OS.
+ a Hyper-V virtual machine or the management OS.
+* [**xVMProcessor**](#xvmprocessor) manages Hyper-V virtual machine processor options.
+* [**xVMSwitch**](#xvmswitch) manages virtual switches in a Hyper-V host.
 
-### xVhd
+### xVHD
 
-* **`[String]` Name** (_Key_): The desired VHD file name
-* **`[String]` Path** (_Key_): The desired Path where the VHD will be created
-* **`[String]` ParentPath** (_Write_): Parent VHD file path, for differencing disk
-* **`[Uint64]` MaximumSizeBytes** (_Write_): Maximum size of VHD to be created
-* **`[String]` Generation** (_Write_): Virtual disk format: { Vhd | VHDx }
-* **`[String]` Ensure** (_Write_): Ensures that the VHD is Present or Absent
+Manages VHDs in a Hyper-V host.
+
+#### Requirements for xVHD
+
+* The Hyper-V Role has to be installed on the machine.
+* The Hyper-V PowerShell module has to be installed on the machine.
+
+#### Parameters for xVHD
+
+* **`[String]` Name** _(Key)_: The desired VHD file name.
+* **`[String]` Path** _(Key)_: The desired Path where the VHD will be created.
+* **`[String]` ParentPath** _(Write)_: Parent VHD file path, for differencing disk.
+* **`[Uint64]` MaximumSizeBytes** _(Write)_: Maximum size of VHD to be created.
+* **`[String]` Generation** _(Write)_: Virtual disk format.
+ The default value is Vhd. { *Vhd* | Vhdx }.
+* **`[String]` Ensure** _(Write)_: Ensures that the VHD is Present or Absent.
+ The default value is Present. { *Present* | Absent }.
+
+#### Read-Only Properties from Get-TargetResource for xVHD
+
+* **`[String]` ID** _(Read)_: Virtual Disk Identifier.
+* **`[String]` Type** _(Read)_: Type of Vhd - Dynamic, Fixed, Differencing.
+* **`[Uint64]` FileSizeBytes** _(Read)_: Current size of the VHD.
+* **`[Boolean]` IsAttached** _(Read)_: Is the VHD attached to a VM or not.
+
+#### Examples xVHD
+
+* [Create a new VHD](/Examples/Sample_xVHD_NewVHD.ps1)
+* [Create a differencing VHD](/Examples/Sample_xVHD_DiffVHD.ps1)
+
+### xVhdFile
+
+Manages files or directories in a VHD.
+ You can use it to copy files/folders to the VHD, remove files/folders from a VHD,
+ and change attributes of a file in a VHD (e.g. change a file attribute to
+ 'ReadOnly' or 'Hidden').
+ This resource is particularly useful when bootstrapping DSC Configurations
+ into a VM.
+
+#### Requirements for xVhdFile
+
+* The Hyper-V Role has to be installed on the machine.
+* The Hyper-V PowerShell module has to be installed on the machine.
+
+#### Parameters for xVhdFile
+
+* **`[String]` VhdPath** _(Key)_: Path to the VHD.
+* **`[MSFT_xFileDirectory[]]` FileDirectory** _(Required)_: The FileDirectory objects
+ to copy to the VHD (as used in the "File" resource).
+ Please see the Examples section for more details.
+* **`[String]` CheckSum** _(Write)_: Indicates the checksum type to use when determining
+ whether two files are the same. The default value is ModifiedDate.
+ { *ModifiedDate* | SHA-1 | SHA-256 | SHA-512 }.
+
+##### MSFT_xFileDirectory Class
+
+* **`[String]` DestinationPath** _(Required)_: Indicates the location where you want
+ to ensure the state for a file or directory.
+* **`[String]` SourcePath** _(Write)_: Indicates the path from which to copy the
+ file or folder resource.
+* **`[String]` Ensure** _(Write)_: Indicates if the file or directory exists.
+ Set this property to "Absent" to ensure that the file or directory does not exist.
+ Set it to "Present" to ensure that the file or directory does exist.
+ { Present | Absent }.
+* **`[String]` Type** _(Write)_: Indicates if the resource being configured is a
+ directory or a file. Set this property to "Directory" to indicate that the resource
+ is a directory. Set it to "File" to indicate that the resource is a file.
+ { File | Directory }.
+* **`[Boolean]` Recurse** _(Write)_: Indicates if subdirectories are included.
+ Set this property to $true to indicate that you want subdirectories to be included.
+* **`[Boolean]` Force** _(Write)_: Certain file operations (such as overwriting a
+ file or deleting a directory that is not empty) will result in an error. Using the
+ Force property overrides such errors.
+* **`[String]` Content** _(Write)_: Specifies the contents of a file, such as a
+ particular string.
+* **`[String[]]` Attributes** _(Write)_: Specifies the desired state of the attributes
+ for the targeted file or directory. { ReadOnly | Hidden | System | Archive }.
+
+#### Read-Only Properties from Get-TargetResource for xVhdFile
+
+None
+
+#### Examples xVhdFile
+
+* [Multiple examples](/Examples/Sample_xVhdFileExamples.ps1)
+
+### xVMDvdDrive
+
+Manages DVD drives attached to a Hyper-V virtual machine.
+
+#### Requirements for xVMDvdDrive
+
+* The Hyper-V Role has to be installed on the machine.
+* The Hyper-V PowerShell module has to be installed on the machine.
+
+#### Parameters for xVMDvdDrive
+
+* **`[String]` VMName** _(Key)_: Specifies the name of the virtual machine
+ to which the DVD drive is to be added.
+* **`[Uint32]` ControllerNumber** _(Key)_: Specifies the number of the controller
+ to which the DVD drive is to be added.
+* **`[Uint32]` ControllerLocation** _(Key)_: Specifies the number of the location
+ on the controller at which the DVD drive is to be added.
+* **`[String]` Path** _(Write)_: Specifies the full path to the virtual hard disk
+ file or physical hard disk volume for the added DVD drive.
+* **`[String]` Ensure** _(Write)_: Specifies if the DVD Drive should exist or not.
+  The default value is Present. { *Present* | Absent }.
+
+#### Read-Only Properties from Get-TargetResource for xVMDvdDrive
+
+None
+
+#### Examples xVMDvdDrive
+
+* [Create a VM, given a VHDX and add a DVD Drives](/Examples/Sample_xVMHyperV_SimpleWithDVDDrive.ps1)
+
+### xVMHost
+
+Manages Hyper-V host settings.
+
+#### Requirements for xVMHost
+
+* The Hyper-V Role has to be installed on the machine.
+* The Hyper-V PowerShell module has to be installed on the machine.
+
+#### Parameters for xVMHost
+
+* **`[String]` IsSingleInstance** _(Key)_: Specifies the resource is a single instance,
+ the value must be 'Yes'. { *Yes* }.
+* **`[Boolean]` EnableEnhancedSessionMode** _(Write)_: Indicates whether users
+ can use enhanced mode when they connect to virtual machines on this server
+ by using Virtual Machine Connection.
+* **`[String]` FibreChannelWwnn** _(Write)_: Specifies the default value of
+ the World Wide Node Name on the Hyper-V host.
+* **`[String]` FibreChannelWwpnMaximum** _(Write)_: Specifies the maximum value
+ that can be used to generate World Wide Port Names on the Hyper-V host.
+ Use with the FibreChannelWwpnMinimum parameter to establish a range of WWPNs
+ that the specified Hyper-V host can assign to virtual Fibre Channel adapters.
+* **`[String]` FibreChannelWwpnMinimum** _(Write)_: Specifies the minimum value
+ that can be used to generate the World Wide Port Names on the Hyper-V host.
+ Use with the FibreChannelWwpnMaximum parameter to establish a range of WWPNs
+ that the specified Hyper-V host can assign to virtual Fibre Channel adapters.
+* **`[String]` MacAddressMaximum** _(Write)_: Specifies the maximum MAC address
+ using a valid hexadecimal value. Use with the MacAddressMinimum parameter
+ to establish a range of MAC addresses that the specified Hyper-V host can assign
+ to virtual machines configured to receive dynamic MAC addresses.
+* **`[String]` MacAddressMinimum** _(Write)_: Specifies the minimum MAC address
+ using a valid hexadecimal value. Use with the MacAddressMaximum parameter to
+ establish a range of MAC addresses that the specified Hyper-V host can assign
+ to virtual machines configured to receive dynamic MAC addresses.
+* **`[Uint32]` MaximumStorageMigrations** _(Write)_: Specifies the maximum number
+ of storage migrations that can be performed at the same time on the Hyper-V host.
+* **`[Uint32]` MaximumVirtualMachineMigrations** _(Write)_: Specifies the maximum
+ number of live migrations that can be performed at the same time
+ on the Hyper-V host.
+* **`[Boolean]` NumaSpanningEnabled** _(Write)_: Specifies whether virtual machines
+ on the Hyper-V host can use resources from more than one NUMA node.
+* **`[Uint32]` ResourceMeteringSaveIntervalMinute** _(Write)_: Specifies how often
+ the Hyper-V host saves the data that tracks resource usage. The range is a minimum
+ of 60 minutes to a maximum 1440 minutes (24 hours).
+* **`[Boolean]` UseAnyNetworkForMigration** _(Write)_: Specifies how networks are
+ selected for incoming live migration traffic. If set to $True, any available network
+ on the host can be used for this traffic. If set to $False, incoming live migration
+ traffic is transmitted only on the networks specified in the MigrationNetworks
+ property of the host.
+* **`[String]` VirtualHardDiskPath** _(Write)_: Specifies the default folder to
+ store virtual hard disks on the Hyper-V host.
+* **`[String]` VirtualMachineMigrationAuthenticationType** _(Write)_: Specifies the
+ type of authentication to be used for live migrations. { Kerberos | CredSSP }.
+* **`[String]` VirtualMachineMigrationPerformanceOption** _(Write)_: Specifies the
+ performance option to use for live migration. { TCPIP | Compression | SMB }.
+* **`[String]` VirtualMachinePath** _(Write)_: Specifies the default folder
+ to store virtual machine configuration files on the Hyper-V host.
+
+#### Read-Only Properties from Get-TargetResource for xVMHost
+
+None
+
+#### Examples xVMHost
+
+* [Change VM Host paths](/Examples/Sample_xVMHost_Paths.ps1)
 
 ### xVMHyperV
 
-* **`[String]` Name** (_Key_): The desired VM name.
-* **`[String]` VhdPath** (_Required_): The desired VHD associated with the VM.
-* **`[String]` SwitchName** (_Write_): Virtual switch(es) associated with the VM.
-  Multiple NICs can now be assigned.
-* **`[String]` State** (_Write_): State of the VM: { Running | Paused | Off }.
-* **`[String]` Path** (_Write_): Folder where the VM data will be stored.
-* **`[Uint32]` Generation** (_Write_): Virtual machine generation { 1 | 2 }.
-  Generation 2 virtual machines __only__ support VHDX files.
-* **`[Boolean]` SecureBoot** (_Write_): Enables or disables secure boot
- __only on generation 2 virtual machines__.
- If not specified, it defaults to True.
-* **`[Uint64]` StartupMemory** (_Write_): Startup RAM for the VM.
-* **`[Uint64]` MinimumMemory** (_Write_): Minimum RAM for the VM.
-  Setting this property enables dynamic memory.
-* **`[Uint64]` MaximumMemory** (_Write_): Maximum RAM for the VM.
-  Setting this property enables dynamic memory.
-* **`[String[]]` MACAddress** (_Write_): MAC address(es) of the VM.
-  Multiple MAC addresses can now be assigned.
-* **`[Uint32]` ProcessorCount** (_Write_): Processor count for the VM.
-* **`[Boolean]` WaitForIP** (_Write_): If specified, waits for the VM to get
- valid IP address.
-* **`[Boolean]` RestartIfNeeded** (_Write_): If specified, will shutdown and
- restart the VM as needed for property changes.
-* **`[String]` Ensure** (_Write_): Ensures that the VM is Present or Absent.
-* **`[String]` Notes** (_Write_): Notes about the VM.
-* **`[Boolean]` EnableGuestService** (_Write_): Enable Guest Service Interface
- for the VM.
+Manages VMs in a Hyper-V host.
 
-The following xVMHyper-V properties **cannot** be changed after VM creation:
+The following properties **cannot** be changed after VM creation:
 
 * VhdPath
 * Path
 * Generation
 
-### xVMSwitch
+#### Requirements for xVMHyperV
 
-* **`[String]` Name** (_Key_): The desired VM Switch name
-* **`[String]` Type** (_Key_): The desired type of switch:
- { External | Internal | Private }
-* **`[String[]]` NetAdapterName** (_Write_): Network adapter name(s)
- for external switch type
-* **`[Boolean]` AllowManagementOS** (_Write_): Specify if the VM host
- has access to the physical NIC
-* **`[Boolean]` EnableEmbeddedTeaming** (_Write_): Should embedded NIC teaming
- be used (Windows Server 2016 only)
-* **`[String]` BandwidthReservationMode** (_Write_): Specify the QoS mode used
- (options other than NA are only supported on Hyper-V 2012+):
- { Default | Weight | Absolute | None | NA }.
-* **`[String]` Ensure** (_Write_): Ensures that the VM Switch is Present or Absent
+* The Hyper-V Role has to be installed on the machine.
+* The Hyper-V PowerShell module has to be installed on the machine.
 
-### xVhdFile
+#### Parameters for xVMHyperV
 
-* **`[String]` VhdPath** (_Key_): Path to the VHD
-* **`[MSFT_xFileDirectory]` FileDirectory** (_Required_): The FileDirectory objects
- to copy to the VHD (as used in the "File" resource).
- Please see the Examples section for more details.
+* **`[String]` Name** _(Key)_: The desired VM name.
+* **`[String]` VhdPath** _(Required)_: The desired VHD associated with the VM.
+* **`[String[]]` SwitchName** _(Write)_: Virtual switch(es) associated with the VM.
+  Multiple NICs can now be assigned.
+* **`[String]` State** _(Write)_: State of the VM: { Running | Paused | Off }.
+* **`[String]` Path** _(Write)_: Folder where the VM data will be stored.
+* **`[Uint32]` Generation** _(Write)_: Virtual machine generation.
+  Generation 2 virtual machines __only__ support VHDX files.
+  The default value is 1. { *1* | 2 }.
+* **`[Boolean]` SecureBoot** _(Write)_: Enables or disables secure boot
+ __only on generation 2 virtual machines__.
+ The default value is $true.
+* **`[Uint64]` StartupMemory** _(Write)_: Startup RAM for the VM.
+* **`[Uint64]` MinimumMemory** _(Write)_: Minimum RAM for the VM.
+  Setting this property enables dynamic memory.
+* **`[Uint64]` MaximumMemory** _(Write)_: Maximum RAM for the VM.
+  Setting this property enables dynamic memory.
+* **`[String[]]` MACAddress** _(Write)_: MAC address(es) of the VM.
+  Multiple MAC addresses can now be assigned.
+* **`[Uint32]` ProcessorCount** _(Write)_: Processor count for the VM.
+* **`[Boolean]` WaitForIP** _(Write)_: If specified, waits for the VM to get
+ valid IP address.
+* **`[Boolean]` RestartIfNeeded** _(Write)_: If specified, will shutdown and
+ restart the VM as needed for property changes.
+* **`[String]` Ensure** _(Write)_: Ensures that the VM is Present or Absent.
+ The default value is Present. { *Present* | Absent }.
+* **`[String]` Notes** _(Write)_: Notes about the VM.
+* **`[Boolean]` EnableGuestService** _(Write)_: Enable Guest Service Interface
+ for the VM. The default value is $false.
 
-### xVMDvdDrive
+#### Read-Only Properties from Get-TargetResource for xVMHyperV
 
-* **`[String]` VMName** (_Key_): Specifies the name of the virtual machine
- to which the DVD drive is to be added.
-* **`[Uint32]` ControllerNumber** (_Key_): Specifies the number of the controller
- to which the DVD drive is to be added.
-* **`[Uint32]` ControllerLocation** (_Key_): Specifies the number of the location
- on the controller at which the DVD drive is to be added.
-* **`[String]` Path** (_Write_): Specifies the full path to the virtual hard disk
- file or physical hard disk volume for the added DVD drive.
-* **`[String]` Ensure** (_Write_): Specifies if the DVD Drive should exist or not.
- { *Present* | Absent }. Defaults to Present.
+* **`[String]` ID** _(Read)_: VM unique ID.
+* **`[String]` Status** _(Read)_: Status of the VM.
+* **`[Uint32]` CPUUsage** _(Read)_: CPU Usage of the VM.
+* **`[Uint64]` MemoryAssigned** _(Read)_: Memory assigned to the VM.
+* **`[String]` Uptime** _(Read)_: Uptime of the VM.
+* **`[DateTime]` CreationTime** _(Read)_: Creation time of the VM.
+* **`[Boolean]` HasDynamicMemory** _(Read)_: Does VM has dynamic memory enabled.
+* **`[String[]]` NetworkAdapters** _(Read)_: Network adapters' IP addresses of
+ the VM".
+
+#### Examples xVMHyperV
+
+* [Create a VM (Simple)](/Examples/Sample_xVMHyperV_Simple.ps1)
+* [Create a VM with dynamic memory](/Examples/Sample_xVMHyperV_DynamicMemory.ps1)
+* [Create a VM (Complete)](/Examples/Sample_xVMHyperV_Complete.ps1)
+* [Create a VM with multiple NICs attached to multiple switches](/Examples/Sample_xVMHyperV_MultipleNICs.ps1)
 
 ### xVMNetworkAdapter
 
-* **`[String]` Id** (_Key_): Unique string for identifying the resource instance.
-* **`[String]` Name** (_Required_): Name of the network adapter as it appears either
+Manages VMNetadapters attached to a Hyper-V virtual machine or the management OS.
+
+#### Requirements for xVMNetworkAdapter
+
+* The Hyper-V Role has to be installed on the machine.
+* The Hyper-V PowerShell module has to be installed on the machine.
+
+#### Parameters for xVMNetworkAdapter
+
+* **`[String]` Id** _(Key)_: Unique string for identifying the resource instance.
+* **`[String]` Name** _(Required)_: Name of the network adapter as it appears either
  in the management OS or attached to a VM.
-* **`[String]` SwitchName** (_Required_): Virtual Switch name to connect to.
-* **`[String]` VMName** (_Required_): Name of the VM to attach to.
+* **`[String]` SwitchName** _(Required)_: Virtual Switch name to connect to.
+* **`[String]` VMName** _(Required)_: Name of the VM to attach to.
  If you want to attach new VM Network adapter to the management OS,
  set this property to 'Management OS'.
-* **`[String]` MacAddress** (_Write_): Use this to specify a Static MAC Address.
+* **`[String]` MacAddress** _(Write)_: Use this to specify a Static MAC Address.
  If this parameter is not specified, dynamic MAC Address will be set.
-* **`[String]` Ensure** (_Write_): Ensures that the VM Network Adapter is
- Present or Absent.
+* **`[String]` Ensure** _(Write)_: Ensures that the VM Network Adapter is
+ Present or Absent. The default value is Present. { *Present* | Absent }.
 
-### xVMHost
+#### Read-Only Properties from Get-TargetResource for xVMNetworkAdapter
 
-* **`[String]` IsSingleInstance** (_Key_): Specifies the resource is a single instance,
- the value must be 'Yes'.
-* **`[Boolean]` EnableEnhancedSessionMode** (_Write_): Indicates whether users
- can use enhanced mode when they connect to virtual machines on this server
- by using Virtual Machine Connection.
-* **`[String]` FibreChannelWwnn** (_Write_): Specifies the default value of
- the World Wide Node Name on the Hyper-V host.
-* **`[String]` FibreChannelWwpnMaximum** (_Write_): Specifies the maximum value
- that can be used to generate World Wide Port Names on the Hyper-V host.
- Use with the FibreChannelWwpnMinimum parameter to establish a range of WWPNs
- that the specified Hyper-V host can assign to virtual Fibre Channel adapters.
-* **`[String]` FibreChannelWwpnMinimum** (_Write_): Specifies the minimum value
- that can be used to generate the World Wide Port Names on the Hyper-V host.
- Use with the FibreChannelWwpnMaximum parameter to establish a range of WWPNs
- that the specified Hyper-V host can assign to virtual Fibre Channel adapters.
-* **`[String]` MacAddressMaximum** (_Write_): Specifies the maximum MAC address
- using a valid hexadecimal value. Use with the MacAddressMinimum parameter
- to establish a range of MAC addresses that the specified Hyper-V host can assign
- to virtual machines configured to receive dynamic MAC addresses.
-* **`[String]` MacAddressMinimum** (_Write_): Specifies the minimum MAC address
- using a valid hexadecimal value. Use with the MacAddressMaximum parameter to
- establish a range of MAC addresses that the specified Hyper-V host can assign
- to virtual machines configured to receive dynamic MAC addresses.
-* **`[Uint32]` MaximumStorageMigrations** (_Write_): Specifies the maximum number
- of storage migrations that can be performed at the same time on the Hyper-V host.
-* **`[Uint32]` MaximumVirtualMachineMigrations** (_Write_): Specifies the maximum
- number of live migrations that can be performed at the same time
- on the Hyper-V host.
-* **`[Boolean]` NumaSpanningEnabled** (_Write_): Specifies whether virtual machines
- on the Hyper-V host can use resources from more than one NUMA node.
-* **`[Uint32]` ResourceMeteringSaveIntervalMinute** (_Write_): Specifies how often
- the Hyper-V host saves the data that tracks resource usage. The range is a minimum
- of 60 minutes to a maximum 1440 minutes (24 hours).
-* **`[Boolean]` UseAnyNetworkForMigration** (_Write_): Specifies how networks are
- selected for incoming live migration traffic. If set to $True, any available network
- on the host can be used for this traffic. If set to $False, incoming live migration
- traffic is transmitted only on the networks specified in the MigrationNetworks
- property of the host.
-* **`[String]` VirtualHardDiskPath** (_Write_): Specifies the default folder to
- store virtual hard disks on the Hyper-V host.
-* **`[String]` VirtualMachineMigrationAuthenticationType** (_Write_): Specifies the
- type of authentication to be used for live migrations. { Kerberos | CredSSP }.
-* **`[String]` VirtualMachineMigrationPerformanceOption** (_Write_): Specifies the
- performance option to use for live migration. { TCPIP | Compression | SMB }.
-* **`[String]` VirtualMachinePath** (_Write_): Specifies the default folder
- to store virtual machine configuration files on the Hyper-V host.
+* **`[Boolean]` DynamicMacAddress** _(Read)_: Does the VMNetworkAdapter use a
+ Dynamic MAC Address.
+
+#### Examples xVMNetworkAdapter
+
+* [Add a new VM Network adapter in the management OS](/Examples/Sample_xVMNetworkAdapter_ManagementOS.ps1)
+* [Add multiple VM Network adapters to a VM](/Examples/Sample_xVMNetworkAdapter_MultipleVM.ps1)
+* [Add a couple of VM Network adapters in the management OS](/Examples/Sample_xVMNetworkAdapter_MultipleManagementOS.ps1)
+* [Add multiple VM Network adapters to a VM using status MAC addresses](/Examples/Sample_xVMNetworkAdapter_MultipleVMMACAddress.ps1)
 
 ### xVMProcessor
 
-* **`[String]` VMName** (_Key_): Specifies the name of the virtual machine
+Manages Hyper-V virtual machine processor options.
+
+#### Requirements for xVMProcessor
+
+* The Hyper-V Role has to be installed on the machine.
+* The Hyper-V PowerShell module has to be installed on the machine.
+
+#### Parameters for xVMProcessor
+
+* **`[String]` VMName** _(Key)_: Specifies the name of the virtual machine
  on which the processor is to be configured.
-* **`[Boolean]` EnableHostResourceProtection** (_Write)_: Specifies whether to
+* **`[Boolean]` EnableHostResourceProtection** _(Write)_: Specifies whether to
  enable host resource protection. NOTE: Only supported on Windows 10 and Server 2016.
-* **`[Boolean]` ExposeVirtualizationExtensions** (_Write)_: Specifies whether
+* **`[Boolean]` ExposeVirtualizationExtensions** _(Write)_: Specifies whether
  nested virtualization is enabled. NOTE: Only supported on
  Windows 10 and Server 2016.
-* **`[Uint64]` HwThreadCountPerCore** (_Write)_: Specifies the maximum thread core
+* **`[Uint64]` HwThreadCountPerCore** _(Write)_: Specifies the maximum thread core
  per processor core. NOTE: Only supported on Windows 10 and Server 2016.
-* **`[Uint64]` Maximum** (_Write)_: Specifies the maximum percentage of resources
+* **`[Uint64]` Maximum** _(Write)_: Specifies the maximum percentage of resources
  available to the virtual machine processor to be configured.
  Allowed values range from 0 to 100.
-* **`[Uint32]` MaximumCountPerNumaNode** (_Write)_: Specifies the maximum number
+* **`[Uint32]` MaximumCountPerNumaNode** _(Write)_: Specifies the maximum number
  of processors per NUMA node to be configured for the virtual machine.
-* **`[Uint32]` MaximumCountPerNumaSocket** (_Write)_: Specifies the maximum number
+* **`[Uint32]` MaximumCountPerNumaSocket** _(Write)_: Specifies the maximum number
  of sockets per NUMA node to be configured for the virtual machine.
-* **`[Unit32]` RelativeWeight** (_Write)_: Specifies the priority for allocating
+* **`[Unit32]` RelativeWeight** _(Write)_: Specifies the priority for allocating
  the physical computer's processing power to this virtual machine relative to others.
  Allowed values range from 1 to 10000.
-* **`[Uint64]` Reserve** (_Write)_: Specifies the percentage of processor resources
+* **`[Uint64]` Reserve** _(Write)_: Specifies the percentage of processor resources
  to be reserved for this virtual machine. Allowed values range from 0 to 100.
-* **`[String]` ResourcePoolName** (_Write)_: Specifies the name of the processor
+* **`[String]` ResourcePoolName** _(Write)_: Specifies the name of the processor
  resource pool to be used.
-* **`[Boolean]` CompatibilityForMigrationEnabled** (_Write)_: Specifies whether
+* **`[Boolean]` CompatibilityForMigrationEnabled** _(Write)_: Specifies whether
  the virtual processors features are to be limited for compatibility when migrating
  the virtual machine to another host.
-* **`[Boolean]` CompatibilityForOlderOperatingSystemsEnabled** (_Write)_: Specifies
+* **`[Boolean]` CompatibilityForOlderOperatingSystemsEnabled** _(Write)_: Specifies
  whether the virtual processor’s features are to be limited for compatibility
  with older operating systems.
-* **`[Boolean]` RestartIfNeeded** (_Write)_: If specified, shutdowns and restarts
+* **`[Boolean]` RestartIfNeeded** _(Write)_: If specified, shutdowns and restarts
  the VM if needed for property changes.
 
-Please see the Examples section for more details.
+#### Read-Only Properties from Get-TargetResource for xVMProcessor
 
-## Versions
+None
 
-### Unreleased
+#### Examples xVMProcessor
 
-* MSFT_xVMHyperV:
-  * Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
-  * EnableGuestService works on localized OS (language independent).
-  * Adds missing Hyper-V-PowerShell feature in examples.
-* Added the following resources:
-  * MSFT_xVMProcessor to manage virtual machine processor options.
-  * MSFT_xVMHost to managing Hyper-V host settings.
-* MSFT_xVMSwitch:
-  * Added support for Switch Embedded Teaming (SET) in Server 2016.
-  * Fixed a bug where Get-TargetResource threw an error if a non External switch
- is used.
-  * Updated unit tests to use template version 1.2.0.
-  * Style fixes.
-  * Added support for Localization.
-* xHyper-V module:
-  * Added vs code formatting rule settings.
-  * Fix Markdown rule violations in Readme.md.
-  * Added .MetaTestOptIn.json for Markdown common test to be included.
-  * Added Appveyor badge for Dev branch in Readme.md and moved to Branches section.
-  * Added missing properties for xVMHost in Readme.md.
-  * Added and corrected missing / wrong DataTypes and Dsc attributes in Readme.md.
+* [Create a secure boot gen 2 VM for a given VHD with nested virtualisation enabled](/Examples/Sample_xVMHyperV_SimpleWithNestedVirtualization.ps1)
 
-### 3.8.0.0
+### xVMSwitch
 
-* Fix bug in xVMDvdDrive with hardcoded VM Name.
-* Corrected Markdown rule violations in Readme.md.
+Manages virtual switches in a Hyper-V host.
 
-### 3.7.0.0
+#### Requirements for xVMSwitch
 
-* Adding a new resource
-  * MSFT_xVMNetworkAdapter: Attaches a new VM network adapter to the management
- OS or VM.
+* The Hyper-V Role has to be installed on the machine.
+* The Hyper-V PowerShell module has to be installed on the machine.
 
-### 3.6.0.0
+#### Parameters for xVMSwitch
 
-* xVHD: Updated incorrect property name MaximumSize in error message
-* Fix Markdown rule violations in Readme.md identified by [markdownlint](https://github.com/mivok/markdownlint/blob/master/docs/RULES.md).
-* Created standard Unit/Integration test folder structure.
-* Moved unit tests into Unit test folder.
-* Renamed the unit tests to meet standards.
-* Added the following resources:
-  * xVMDvdDrive to manage DVD drives attached to a Hyper-V virtual machine.
+* **`[String]` Name** _(Key)_: The desired VM Switch name.
+* **`[String]` Type** _(Key)_: The desired type of switch.
+ { External | Internal | Private }
+* **`[String[]]` NetAdapterName** _(Write)_: Network adapter name(s)
+ for external switch type.
+* **`[Boolean]` AllowManagementOS** _(Write)_: Specify if the VM host
+ has access to the physical NIC. The default value is $false.
+* **`[Boolean]` EnableEmbeddedTeaming** _(Write)_: Should embedded NIC teaming
+ be used (Windows Server 2016 only). The default value is $false.
+* **`[String]` BandwidthReservationMode** _(Write)_: Specify the QoS mode used
+ (options other than NA are only supported on Hyper-V 2012+).
+ The default value is NA. { Default | Weight | Absolute | None | *NA* }.
+* **`[String]` Ensure** _(Write)_: Ensures that the VM Switch is Present or Absent.
+ The default value is Present. { *Present* | Absent }.
 
-### 3.5.0.0
+#### Read-Only Properties from Get-TargetResource for xVMSwitch
 
-* Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
-* MSFT_xVMHyperV: Fixed bug in Test-TargetResource throwing when a Vhd's ParentPath
- property was null.
+* **`[String]` Id** _(Read)_: Unique ID for the switch.
+* **`[String]` NetAdapterInterfaceDescription** _(Read)_: Description of the
+ network interface.
 
-### 3.4.0.0
+#### Examples xVMSwitch
 
-* MSFT_xVMHyperV: Fixed bug causing Test-TargetResource to fail when VM had snapshots.
-* MSFT_xVMHyperV: Adds localization support.
-* MSFT_xVMSwitch: Fixes bug where virtual switches are duplicated when
- BandwidthReservationMode is not specified.
-
-### 3.3.0.0
-
-* xHyperV: Added SecureBoot parameter to enable control of the secure boot BIOS
- setting on generation 2 VMs.
-  * Fixed drive letter when mounting VHD when calling resource xVhdFile. Fixes #20.
-* MSFT_xVMHyperV: Changed the SwitchName parameter to string[] to support
- assigning multiple NICs to virtual machines.
-* MSFT_xVMHyperV: Changed the MACAddress parameter to string[] to support
- assigning multiple MAC addresses to virtual machines.
-* MSFT_xVMHyperV: Added enabling of Guest Service Interface.
-* MSFT_xVMSwitch: Added the BandwidthReservationMode parameter which specifies
- how minimum bandwidth is to be configured on a virtual switch
-
-### 3.2.0.0
-
-* Added data type System.String to CheckSum parameter of Get/Set/Test-TargetResource
- functions and aligned indentation.
-* Minor fixes
-
-### 3.1.0.0
-
-* xVMHyperV: Fixed bug in mof schema (Generation property had two types)
-* xVhdFileDirectory: Fixed typo in type comparison
-* Readme updates
-
-### 3.0.0.0
-
-* Decoupled VM generation from underlying VHD format in xVMHyperV resource.
-  * __Breaking change:__ xVMHyperV resource: Generation property type changed
- from a String to an Integer.
-  * The initial generation property was tied to the virtual disk format which was
- incorrect and has been rectified.
-  * This change will only impact configurations that have previously explicitly
- specified the VM generation is either "vhd" or "vhdx".
-
-### 2.4.0.0
-
-* Fixed VM power state issue in xVMHyperV resource
-
-### 2.3.0
-
-* Fixed check for presence of param AllowManagementOS.
-
-### 2.2.1
-
-### 2.1
-
-* Added logic to automatically adjust VM's startup memory when only minimum and
- maximum memory is specified in configuration
-* Fixed the issue that a manually stopped VM cannot be brought back to running
- state with DSC
-
-### 2.0
-
-* Added xVhdFileDirectory Resource
-* Allowed name to be specified with the extension in xVhd (e.g. the Vhd name could
- either be "sample" or "sample.vhd")
-* When a VHD cannot be removed because it is already being used by another process,
- an error will be thrown.
-
-### 1.0.0.0
-
-* Initial release with the following resources
-  * xVhd
-  * xVMHyperV
-  * xVMSwitch
-
-## Examples
-
-### End-to-End Example
-
-In this example, we ensure that an internal VM Switch and a VM made from VHD
- with an unattended.xml file are present.
-
-```powershell
-# End to end sample for x-Hyper-v
-Configuration Sample_EndToEndXHyperV_RunningVM
-{
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [string]
-        $BaseVhdPath,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Name,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateScript({Test-Path -Path $_})]
-        [string]
-        $UnattendedFilePathToCopy
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    # Create a switch to be used by the VM
-    xVMSwitch switch
-    {
-        Name = "Test-Switch"
-        Ensure = "Present"
-        Type = "Internal"
-    }
-
-    # Create new VHD file.
-    xVHD NewVHD1
-    {
-        Ensure = "Present"
-        Name = $Name
-        Path = (Split-Path -Path $BaseVhdPath)
-        Generation = "vhd"
-        ParentPath = $BaseVhdPath
-    }
-
-    # Customize VHD by copying a folders/files to the VHD before a VM can be created
-    # Example below shows copying unattended.xml before a VM can be created
-    xVhdFile CopyUnattendxml
-    {
-        VhdPath = $vhdPath
-        FileDirectory = MSFT_xFileDirectory {
-            SourcePath = $UnattendedFilePathToCopy
-            DestinationPath = "unattended.xml"
-        }
-    }
-
-    # create the generation 1 testVM out of the vhd.
-    xVMHyperV testvm
-    {
-        Name = "$($Name)_vm"
-        SwitchName = "Test-Switch"
-        VhdPath = Join-Path -Path (Split-Path $BaseVhdPath) -ChildPath "$Name.vhd"
-        ProcessorCount = 2
-        MaximumMemory  = 1GB
-        MinimumMemory = 512MB
-        RestartIfNeeded =  $true
-        DependsOn = "[xVHD]NewVHD1","[xVMSwitch]switch","[xVhdFile]CopyUnattendxml"
-        State = "Running"
-    }
-}
-```
-
-### Create a new VHD
-
-This configuration will create a new VHD on Hyper-V host.
-
-```powershell
-Configuration Sample_xVHD_NewVHD
-{
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Name,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Path,
-
-        [Parameter(Mandatory = $true)]
-        [Uint64]
-        $MaximumSizeBytes,
-
-        [Parameter()]
-        [ValidateSet("Vhd","Vhdx")]
-        [string]
-        $Generation = "Vhd",
-
-        [Parameter()]
-        [ValidateSet("Present","Absent")]
-        [string]
-        $Ensure = "Present"
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node localhost
-    {
-        xVHD NewVHD
-        {
-            Ensure           = $Ensure
-            Name             = $Name
-            Path             = $Path
-            Generation       = $Generation
-            MaximumSizeBytes = $MaximumSizeBytes
-        }
-    }
-}
-```
-
-### Create a differencing VHD
-
-This configuration will create a differencing VHD, given a parent VHD,
- on a Hyper-V host.
-
-```powershell
-Configuration Sample_xVhd_DiffVHD
-{
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Name,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Path,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $ParentPath,
-
-        [Parameter()]
-        [ValidateSet("Vhd","Vhdx")]
-        [string]
-        $Generation = "Vhd",
-
-        [Parameter()]
-        [ValidateSet("Present","Absent")]
-        [string]
-        $Ensure = "Present"
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node localhost
-    {
-        xVHD DiffVHD
-        {
-            Ensure     = $Ensure
-            Name       = $Name
-            Path       = $Path
-            ParentPath = $ParentPath
-            Generation = $Generation
-        }
-    }
-}
-```
-
-### Create a secure boot generation 2 VM for a given VHD
-
-This configuration will create a VM, given a VHDX, on Hyper-V host.
-
-```powershell
-Configuration Sample_xVMHyperV_Simple
-{
-    param
-    (
-        [Parameter()]
-        [string[]]
-        $NodeName = 'localhost',
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VMName,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VhdxPath
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node $NodeName
-    {
-        # Install HyperV features, if not installed - Server SKU only
-        WindowsFeature HyperV
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V'
-        }
-
-        WindowsFeature HyperVPowerShell
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V-PowerShell'
-        }
-
-        # Ensures a VM with default settings
-        xVMHyperV NewVM
-        {
-            Ensure     = 'Present'
-            Name       = $VMName
-            VhdPath    = $VhdxPath
-            Generation = 2
-            DependsOn  = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
-        }
-    }
-}
-```
-
-### Create a secure boot gen 2 VM for a given VHD with nested virtualisation enabled
-
-This configuration will create a VM with fixed memory (using the given VHDX) and
- enable nested virtualisation.
-
-```powershell
-configuration Sample_xVMHyperV_SimpleWithNestedVirtualization
-{
-    param
-    (
-        [Parameter()]
-        [string[]]
-        $NodeName = 'localhost',
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VMName,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VhdPath,
-
-        [Parameter(Mandatory = $true)]
-        [Uint64]
-        $Memory
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node $NodeName
-    {
-        # Install HyperV features, if not installed - Server SKU only
-        WindowsFeature HyperV
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V'
-        }
-
-        WindowsFeature HyperVPowerShell
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V-PowerShell'
-        }
-
-        # Ensures a VM with default settings
-        xVMHyperV NewVM
-        {
-            Ensure        = 'Present'
-            Name          = $VMName
-            VhdPath       = $VhdPath
-            Generation    = 2
-            StartupMemory = $Memory
-            MinimumMemory = $Memory
-            MaximumMemory = $Memory
-            DependsOn     = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
-        }
-
-        # Set the VM options
-        xVMProcessor NestedVirtualization
-        {
-            VMName                         = $VMName
-            ExposeVirtualizationExtensions = $true
-            DependsOn                      = '[xVMHyperV]NewVM'
-        }
-    }
-}
-```
-
-### Create a secure boot generation 2 VM for a given VHD with a DVD Drive and ISO
-
-This configuration will create a VM, given a VHDX and add a DVD Drive to it with
- an ISO mounted to it.
-
-```powershell
-configuration Sample_xVMHyperV_SimpleWithDvdDrive
-{
-    param
-    (
-        [Parameter()]
-        [string[]]
-        $NodeName = 'localhost',
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VMName,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VhdPath,
-
-        [Parameter()]
-        [string]
-        $ISOPath
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node $NodeName
-    {
-        # Install HyperV features, if not installed - Server SKU only
-        WindowsFeature HyperV
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V'
-        }
-
-        WindowsFeature HyperVPowerShell
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V-PowerShell'
-        }
-
-        # Ensures a VM with default settings
-        xVMHyperV NewVM
-        {
-            Ensure     = 'Present'
-            Name       = $VMName
-            VhdPath    = $VhdPath
-            Generation = $VhdPath.Split('.')[-1]
-            DependsOn  = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
-        }
-
-        # Adds DVD Drive with ISO
-        xVMDvdDrive NewVMDvdDriveISO
-        {
-            Ensure             = 'Present'
-            VMName             = $VMName
-            ControllerNumber   = 0
-            ControllerLocation = 0
-            Path               = $ISOPath
-            DependsOn          = '[xVMHyperV]NewVM'
-        }
-    }
-}
-```
-
-### Create a VM with dynamic memory for a given VHD
-
-This configuration will create a VM with dynamic memory settings, given a VHD,
- on Hyper-V host. If not specified, Secure Boot will be enabled by default for
- generation 2 VMs.
-
-```powershell
-Configuration Sample_xVMHyperV_DynamicMemory
-{
-    param
-    (
-        [Parameter()]
-        [string[]]
-        $NodeName = 'localhost',
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VMName,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VhdPath,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateSet(1,2)]
-        [unit32]
-        $Generation,
-
-        [Parameter(Mandatory = $true)]
-        [Uint64]
-        $StartupMemory,
-
-        [Parameter(Mandatory = $true)]
-        [Uint64]
-        $MinimumMemory,
-
-        [Parameter(Mandatory = $true)]
-        [Uint64]
-        $MaximumMemory,
-
-        [Parameter()]
-        [Boolean]
-        $SecureBoot = $true
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node $NodeName
-    {
-        # Install HyperV features, if not installed - Server SKU only
-        WindowsFeature HyperV
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V'
-        }
-
-        WindowsFeature HyperVPowerShell
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V-PowerShell'
-        }
-
-        # Ensures a VM with dynamic memory
-        xVMHyperV NewVM
-        {
-            Ensure        = 'Present'
-            Name          = $VMName
-            VhdPath       = $VhdPath
-            Generation    = $Generation
-            SecureBoot    = $SecureBoot
-            StartupMemory = $StartupMemory
-            MinimumMemory = $MinimumMemory
-            MaximumMemory = $MaximumMemory
-            DependsOn     = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
-        }
-    }
-}
-```
-
-### Create a VM with dynamic memory, nic and processor count for a given VHD
-
-This configuration will create a VM with dynamic memory, network interface and
- processor count settings, given a VHD, on Hyper-V host.
-
-```powershell
-Configuration Sample_xVMHyperV_Complete
-{
-    param
-    (
-        [Parameter()]
-        [string[]]
-        $NodeName = 'localhost',
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VMName,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VhdPath,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateSet(1,2)]
-        [unit32]
-        $Generation,
-
-        [Parameter(Mandatory = $true)]
-        [Uint64]
-        $StartupMemory,
-
-        [Parameter(Mandatory = $true)]
-        [Uint64]
-        $MinimumMemory,
-
-        [Parameter(Mandatory = $true)]
-        [Uint64]
-        $MaximumMemory,
-
-        [Parameter(Mandatory = $true)]
-        [String]
-        $SwitchName,
-
-        [Parameter(Mandatory = $true)]
-        [String]
-        $Path,
-
-        [Parameter(Mandatory = $true)]
-        [Uint32]
-        $ProcessorCount,
-
-        [Parameter()]
-        [ValidateSet('Off','Paused','Running')]
-        [String]
-        $State = 'Off',
-
-        [Parameter()]
-        [Boolean]
-        $SecureBoot = $true,
-
-        [Parameter()]
-        [Switch]
-        $WaitForIP
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node $NodeName
-    {
-        # Install HyperV features, if not installed - Server SKU only
-        WindowsFeature HyperV
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V'
-        }
-
-        WindowsFeature HyperVPowerShell
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V-PowerShell'
-        }
-
-        # Ensures a VM with all the properties
-        xVMHyperV NewVM
-        {
-            Ensure          = 'Present'
-            Name            = $VMName
-            VhdPath         = $VhdPath
-            SwitchName      = $SwitchName
-            State           = $State
-            Path            = $Path
-            Generation      = $Generation
-            SecureBoot      = $SecureBoot
-            StartupMemory   = $StartupMemory
-            MinimumMemory   = $MinimumMemory
-            MaximumMemory   = $MaximumMemory
-            ProcessorCount  = $ProcessorCount
-            MACAddress      = $MACAddress
-            RestartIfNeeded = $true
-            WaitForIP       = $WaitForIP
-            DependsOn       = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
-        }
-    }
-}
-```
-
-### Create VM with multiple NICs
-
-This configuration will create two internal virtual switches and create a VM
- with two network interfaces, one attached to each virtual switch.
-
-```powershell
-Configuration Sample_xVMHyperV_MultipleNICs
-{
-    param
-    (
-        [Parameter()]
-        [string[]]
-        $NodeName = 'localhost',
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VMName,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $VhdPath,
-
-        [Parameter(Mandatory = $true)]
-        [string[]]
-        $SwitchName,
-
-        [Parameter()]
-        [string[]]
-        $MACAddress
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node $NodeName
-    {
-        # Install HyperV features, if not installed - Server SKU only
-        WindowsFeature HyperV
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V'
-        }
-
-        WindowsFeature HyperVPowerShell
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V-PowerShell'
-        }
-
-        # Dynamically build the 'DependsOn' array for the 'xVMHyperV' feature
-        # based on the number of virtual switches specified
-        $xVMHyperVDependsOn = @('[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell')
-
-        # Create each virtual switch
-        foreach ($vmSwitch in $SwitchName)
-        {
-            # Remove spaces and hyphens from the identifier
-            $vmSwitchName = $vmSwitch -replace ' ','' -replace '-',''
-            # Add the virtual switch dependency
-            $xVMHyperVDependsOn += "[xVMHyperV]$vmSwitchName"
-
-            xVMSwitch $vmSwitchName
-            {
-                Ensure    = 'Present'
-                Name      = $vmSwitch
-                Type      = 'Internal'
-                DependsOn = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
-            }
-        }
-
-        # Ensures a VM with all the properties
-        xVMHyperV $VMName
-        {
-            Ensure     = 'Present'
-            Name       = $VMName
-            VhdPath    = $VhdPath
-            SwitchName = $SwitchName
-            MACAddress = $MACAddress
-            # Use the dynamically created dependency list/array
-            DependsOn  = $xVMHyperVDependsOn
-        }
-    }
-}
-
-Sample_xVMHyperV_MultipleNICs `
-    -VMName 'MultiNICVM' `
-    -VhdPath 'C:\VMs\MultiNICVM.vhdx' `
-    -SwitchName 'Switch 1','Switch-2'
-```
-
-### Create an internal VM Switch
-
-This configuration will create an internal VM Switch, on Hyper-V host.
-
-```powershell
-Configuration Sample_xVMSwitch_Internal
-{
-    param
-    (
-        [Parameter()]
-        [string[]]
-        $NodeName = 'localhost',
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $SwitchName
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node $NodeName
-    {
-        # Install HyperV features, if not installed - Server SKU only
-        WindowsFeature HyperV
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V'
-        }
-
-        WindowsFeature HyperVPowerShell
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V-PowerShell'
-        }
-
-        # Ensures a VM with default settings
-        xVMSwitch InternalSwitch
-        {
-            Ensure    = 'Present'
-            Name      = $SwitchName
-            Type      = 'Internal'
-            DependsOn = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
-        }
-    }
-}
-```
-
-### Create an external VM Switch
-
-This configuration will create an external VM Switch, on Hyper-V host.
-
-```powershell
-Configuration Sample_xVMSwitch_External
-{
-    param
-    (
-        [Parameter()]
-        [string[]]
-        $NodeName = 'localhost',
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $SwitchName,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $NetAdapterName
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node $NodeName
-    {
-        # Install HyperV features, if not installed - Server SKU only
-        WindowsFeature HyperV
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V'
-        }
-
-        WindowsFeature HyperVPowerShell
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V-PowerShell'
-        }
-
-        # Ensures a VM with default settings
-        xVMSwitch ExternalSwitch
-        {
-            Ensure         = 'Present'
-            Name           = $SwitchName
-            Type           = 'External'
-            NetAdapterName = $NetAdapterName
-            DependsOn      = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
-        }
-    }
-}
-```
-
-### Create an external VM Switch that uses NIC teaming
-
-This configuration will create an external VM Switch that uses multiple NICs
-and embedded teaming, on a Hyper-V host that runs Server 2016
-
-```powershell
-Configuration Sample_xVMSwitch_External
-{
-    param
-    (
-        [Parameter()]
-        [string[]]
-        $NodeName = 'localhost',
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $SwitchName,
-
-        [Parameter(Mandatory = $true)]
-        [string[]]
-        $NetAdapterNames
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    Node $NodeName
-    {
-        # Install HyperV feature, if not installed - Server SKU only
-        WindowsFeature HyperV
-        {
-            Ensure = 'Present'
-            Name   = 'Hyper-V'
-        }
-
-        WindowsFeature HyperVTools
-        {
-            Ensure    = 'Present'
-            Name      = 'RSAT-Hyper-V-Tools'
-            DependsOn = '[WindowsFeature]HyperV'
-        }
-
-        # Ensures a VM with default settings
-        xVMSwitch ExternalSwitch
-        {
-            Ensure                = 'Present'
-            Name                  = $SwitchName
-            Type                  = 'External'
-            NetAdapterName        = $NetAdapterNames
-            EnableEmbeddedTeaming = $true
-            DependsOn             = '[WindowsFeature]HyperVTools'
-        }
-    }
-}
-```
-
-### Copy a file or folder into a VHD
-
-```powershell
-Configuration xVhdD_CopyFileOrFolder
-{
-
-    param
-    (
-        [Parameter(Mandatory=$true, Position=0)]
-        [ValidateScript({Test-Path -Path $_})]
-        [string]
-        $VhdPath,
-
-        [Parameter(Mandatory=$true)]
-        [ValidateScript({Test-Path -Path $_})]
-        [string]
-        $ItemToCopy,
-
-        [Parameter(Mandatory=$true)]
-        [string]
-        $RelativeDestinationPath
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    xVhdFile FileCopy
-    {
-        VhdPath =  $VhdPath
-        FileDirectory = MSFT_xFileDirectory {
-            SourcePath = $ItemToCopy
-            DestinationPath = $RelativeDestinationPath
-        }
-    }
-}
-```
-
-### Change an Attribute for a File
-
-```powershell
-Configuration ChangeAttribute
-{
-    param
-    (
-        [Parameter(Mandatory=$true, Position=0)]
-        [ValidateScript({Test-Path -Path $_})]
-        [string]
-        $VhdPath,
-
-        [Parameter(Mandatory=$true)]
-        [string]
-        $RelativeDestinationPath,
-
-        [Parameter()]
-        [ValidateSet ("Archive", "Hidden",  "ReadOnly", "System" )]
-        $Attribute
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    xVhdFile Change-Attribute
-    {
-        VhdPath =  $VhdPath
-        FileDirectory =  MSFT_xFileDirectory {
-            DestinationPath = $RelativeDestinationPath
-            Attributes  = $Attribute
-        }
-    }
-}
-```
-
-### Change the Hyper-V Host VM file locations
-
-```powershell
-Configuration HyperVHostPaths
-{
-    param
-    (
-        [Parameter(Mandatory=$true, Position=0)]
-        [ValidateScript({Test-Path -Path $_})]
-        [string]
-        $VirtualHardDiskPath,
-
-        [Parameter(Mandatory=$true, Position=1)]
-        [ValidateScript({Test-Path -Path $_})]
-        [string]
-        $VirtualMachinePath
-    )
-
-    Import-DscResource -Module xHyper-V
-
-    xVMHost HyperVHostPaths
-    {
-        IsSingleInstance    = 'Yes'
-        VirtualHardDiskPath = $VirtualHardDiskPath
-        VirtualMachinePath  = $VirtualMachinePath
-    }
-}
-```
-
-### Add a new VM Network adapter in the management OS
-
-```powershell
-Configuration HostOSAdapter
-{
-    Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
-    Import-DscResource -ModuleName PSDesiredStateConfiguration
-
-    xVMNetworkAdapter HostOSAdapter
-    {
-        Id = 'Management-NIC'
-        Name = 'Management-NIC'
-        SwitchName = 'SETSwitch'
-        VMName = 'ManagementOS'
-        Ensure = 'Present'
-    }
-}
-```
-
-### Add multiple network adapters to a VM
-
-```powershell
-Configuration VMAdapter
-{
-    Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
-    Import-DscResource -ModuleName PSDesiredStateConfiguration
-
-    xVMNetworkAdapter MyVM01NIC
-    {
-        Id = 'MyVM01-NIC'
-        Name = 'MyVM01-NIC'
-        SwitchName = 'SETSwitch'
-        VMName = 'MyVM01'
-        Ensure = 'Present'
-    }
-
-    xVMNetworkAdapter MyVM02NIC
-    {
-        Id = 'MyVM02-NIC'
-        Name = 'NetAdapter'
-        SwitchName = 'SETSwitch'
-        VMName = 'MyVM02'
-        Ensure = 'Present'
-    }
-
-    xVMNetworkAdapter MyVM03NIC
-    {
-        Id = 'MyVM03-NIC'
-        Name = 'NetAdapter'
-        SwitchName = 'SETSwitch'
-        VMName = 'MyVM03'
-        Ensure = 'Present'
-    }
-}
-```
+* [Create an internal VM Switch](/Examples/Sample_xVMSwitch_Internal.ps1)
+* [Create an external VM Switch](/Examples/Sample_xVMSwitch_External.ps1)
+* [Create an external VM Switch with embedded teaming](/Examples/Sample_xVMSwitch_ExternalSET.ps1)
