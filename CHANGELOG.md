@@ -26,9 +26,14 @@
   * Updated Readme to match DscResources style.
   * Created change log and linked to it from Readme.
   * Removed version info from Readme.
+  * Updated appveyor.yml to use Appveyor module.
   * Examples:
     * Removed code from Readme and linked to example files instead.
     * Moved code to new example files where there was only code in Readme.
+  * Codecov:
+    * Updated appveyor.yml to include codecov.
+    * Added .codecov.yml.
+    * Added codecov badges to Readme.
 
 ## 3.8.0.0
 
