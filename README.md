@@ -46,13 +46,13 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **SecureBoot**: Enables or disables secure boot __only on generation 2 virtual machines__.
   If not specified, it defaults to True.
 * **StartupMemory**: Startup RAM for the VM.
-  If neither MinimumMemory nor MaximumMemory is specified dynamic memory will be disabled. 
+  If neither MinimumMemory nor MaximumMemory is specified, dynamic memory will be disabled. 
 * **MinimumMemory**: Minimum RAM for the VM.
   Setting this property enables dynamic memory. Exception:
-  If MinimumMemory, MaximumMemory and StartupMemory is equal dynamic memory will be disabled.
+  If MinimumMemory, MaximumMemory and StartupMemory is equal, dynamic memory will be disabled.
 * **MaximumMemory**: Maximum RAM for the VM.
   Setting this property enables dynamic memory. Exception:
-  If MinimumMemory, MaximumMemory and StartupMemory is equal dynamic memory will be disabled.
+  If MinimumMemory, MaximumMemory and StartupMemory is equal, dynamic memory will be disabled.
 * **MACAddress**: MAC address(es) of the VM.
   Multiple MAC addresses can now be assigned.
 * **ProcessorCount**: Processor count for the VM
