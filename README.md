@@ -267,10 +267,13 @@ The following properties **cannot** be changed after VM creation:
  __only on generation 2 virtual machines__.
  The default value is $true.
 * **`[Uint64]` StartupMemory** _(Write)_: Startup RAM for the VM.
+  If neither MinimumMemory nor MaximumMemory is specified, dynamic memory will be disabled.
 * **`[Uint64]` MinimumMemory** _(Write)_: Minimum RAM for the VM.
-  Setting this property enables dynamic memory.
+  Setting this property enables dynamic memory. Exception:
+  If MinimumMemory, MaximumMemory and StartupMemory is equal, dynamic memory will be disabled.
 * **`[Uint64]` MaximumMemory** _(Write)_: Maximum RAM for the VM.
-  Setting this property enables dynamic memory.
+  Setting this property enables dynamic memory. Exception:
+  If MinimumMemory, MaximumMemory and StartupMemory is equal, dynamic memory will be disabled.
 * **`[String[]]` MACAddress** _(Write)_: MAC address(es) of the VM.
   Multiple MAC addresses can now be assigned.
 * **`[Uint32]` ProcessorCount** _(Write)_: Processor count for the VM.
