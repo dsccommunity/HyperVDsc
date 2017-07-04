@@ -234,6 +234,11 @@ function Set-TargetResource
             }
 
             $changeProperty = @{}
+
+            # Assume VM should have static memory
+            $changeProperty["StaticMemory"]=$true
+            $changeProperty["DynamicMemory"]=$false
+
             # If the VM does not have the right startup memory
             if($StartupMemory -and ($vmObj.MemoryStartup -ne $StartupMemory))
             {
@@ -255,6 +260,7 @@ function Set-TargetResource
             if($MinimumMemory -or $MaximumMemory)
             {
                 $changeProperty["DynamicMemory"]=$true
+                $changeProperty["StaticMemory"]=$false
 
                 if($MinimumMemory -and ($vmObj.Memoryminimum -ne $MinimumMemory))
                 {
@@ -280,6 +286,22 @@ function Set-TargetResource
             {
                 Set-VMProperty -Name $Name -VMCommand "Set-VM" -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
                 Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
+            }
+
+            # Special case: If startup, minimum and maximum memory are equal, disable dynamic memory
+            if (($StartupMemory -eq $MinimumMemory) -and ($StartupMemory -eq $MaximumMemory))
+            {
+                # Refresh VM properties
+                $vmObj = Get-VM -Name $Name -ErrorAction SilentlyContinue
+                if ($vmObj.DynamicMemoryEnabled)
+                {
+                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'DynamicMemoryEnabled', $false, $vmObj.DynamicMemoryEnabled)
+                    $changeProperty = @{}
+                    $changeProperty["StaticMemory"]=$true
+                    $changeProperty["DynamicMemory"]=$false
+                    Set-VMProperty -Name $Name -VMCommand "Set-VM" -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
+                    Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
+                }
             }
 
             ## Set VM network switches. This can be done while the VM is running.
@@ -407,9 +429,12 @@ function Set-TargetResource
 
             $parameters = @{}
             $parameters["Name"] = $Name
-            if($MinimumMemory -or $MaximumMemory)
+            $parameters["StaticMemory"]=$true
+            $parameters["DynamicMemory"]=$false
+            if ($MinimumMemory -or $MaximumMemory)
             {
                 $parameters["DynamicMemory"]=$true
+                $parameters["StaticMemory"]=$false
                 if($MinimumMemory){$parameters["MemoryMinimumBytes"]=$MinimumMemory}
                 if($MaximumMemory){$parameters["MemoryMaximumBytes"]=$MaximumMemory}
             }
@@ -425,6 +450,16 @@ function Set-TargetResource
             }
 
             $null = Set-VM @parameters
+
+            # Special case: Disable dynamic memory if startup, minimum and maximum memory are equal
+            If(($StartupMemory -eq $MinimumMemory) -and ($StartupMemory -eq $MaximumMemory))
+            {
+                $parameters = @{}
+                $parameters["Name"] = $Name
+                $parameters["StaticMemory"]=$true
+                $parameters["DynamicMemory"]=$false
+                $null = Set-VM @parameters
+            }
 
             ## There's always a NIC added with New-VM
             if($MACAddress)
@@ -636,6 +671,23 @@ function Test-TargetResource
             }
             if($state -and ($vmObj.State -ne $State)){return $false}
             if($StartupMemory -and ($vmObj.MemoryStartup -ne $StartupMemory)){return $false}
+            if($MaximumMemory -and ($vmObj.MemoryMaximum -ne $MaximumMemory)){return $false}
+            if($MinimumMemory -and ($vmObj.MemoryMinimum -ne $MinimumMemory)){return $false}
+            # If neither minimum nor maximum memory specified, dynamic memory should be disabled
+            If( (-not $MinimumMemory) -and 
+                (-not $MaximumMemory) -and 
+                $vmobj.DynamicMemoryEnabled )
+            {
+                return $false
+            }
+            # If startup, minimum and maximum memory are equal, dynamic memory should be disabled
+            If(($StartupMemory -eq $MinimumMemory) -and 
+               ($StartupMemory -eq $MaximumMemory) -and
+               $vmobj.DynamicMemoryEnabled)
+            {
+                return $false
+            }
+
             if($vmObj.HardDrives.Path -notcontains $VhdPath){return $false}
             for ($i = 0; $i -lt $SwitchName.Count; $i++)
             {
@@ -645,8 +697,6 @@ function Test-TargetResource
                     return $false
                 }
             }
-            if($state -and ($vmObj.State -ne $State)){return $false}
-            if($StartupMemory -and ($vmObj.MemoryStartup -ne $StartupMemory)){return $false}
             for ($i = 0; $i -lt $MACAddress.Count; $i++)
             {
                 if ($vmObj.NetworkAdapters[$i].MACAddress -ne $MACAddress[$i])
@@ -660,8 +710,6 @@ function Test-TargetResource
             if($PSBoundParameters.ContainsKey('Generation') -and ($Generation -ne $vmObj.Generation)){return $false}
 
             if($ProcessorCount -and ($vmObj.ProcessorCount -ne $ProcessorCount)){return $false}
-            if($MaximumMemory -and ($vmObj.MemoryMaximum -ne $MaximumMemory)){return $false}
-            if($MinimumMemory -and ($vmObj.MemoryMinimum -ne $MinimumMemory)){return $false}
 
             if($vmObj.Generation -eq 2) {
                 $vmSecureBoot = Test-VMSecureBoot -Name $Name
