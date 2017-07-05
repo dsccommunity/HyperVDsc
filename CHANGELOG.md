@@ -9,6 +9,8 @@
 * Added the following resources:
   * MSFT_xVMProcessor to manage virtual machine processor options.
   * MSFT_xVMHost to managing Hyper-V host settings.
+  * MSFT_xVMHardDiskDrive to manage additional attached VHD/Xs.
+  * MSFT_xVMScsiController to manage virtual machine SCSI controllers.
 * MSFT_xVMSwitch:
   * Added support for Switch Embedded Teaming (SET) in Server 2016.
   * Fixed a bug where Get-TargetResource threw an error if a non External switch
