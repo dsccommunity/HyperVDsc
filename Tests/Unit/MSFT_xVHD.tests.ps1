@@ -1,106 +1,66 @@
-$script:DSCModuleName      = 'xHyper-V'
-$script:DSCResourceName    = 'MSFT_xVHD'
-
 #region HEADER
-# Unit Test Template Version: 1.1.0
-[String] $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+
+# Unit Test Template Version: 1.2.0
+$script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+    (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
+    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
 }
 
-Import-Module (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:DSCModuleName `
-    -DSCResourceName $script:DSCResourceName `
+    -DSCModuleName 'xHyper-V' `
+    -DSCResourceName 'MSFT_xVHD' `
     -TestType Unit
+
 #endregion HEADER
+
+function Invoke-TestSetup
+{
+
+}
+
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
 
 # Begin Testing
 try
 {
-    #region Pester Tests
-    InModuleScope $script:DSCResourceName {
-        # Function to create a exception object for testing output exceptions
-        function Get-InvalidArgumentError
-        {
-            [CmdletBinding()]
-            param
-            (
-                [Parameter(Mandatory)]
-                [ValidateNotNullOrEmpty()]
-                [System.String]
-                $ErrorId,
+    Invoke-TestSetup
 
-                [Parameter(Mandatory)]
-                [ValidateNotNullOrEmpty()]
-                [System.String]
-                $ErrorMessage
-            )
+    InModuleScope 'MSFT_xVHD' {
 
-            $exception = New-Object -TypeName System.ArgumentException `
-                -ArgumentList $ErrorMessage
-            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
-            $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
-                -ArgumentList $exception, $ErrorId, $errorCategory, $null
-            return $errorRecord
-        } # end function Get-InvalidArgumentError
-
-        #region Pester Test Initialization
-
-        $script:VMName = 'HyperVUnitTestsVM'
-        $script:TestISOPath = 'd:\test\test.iso'
-
-        $script:splatParentPathFixed = @{
-            Name       = 'server'
-            Path       = 'C:\VMs'
-            ParentPath = 'C:\VMs\Parent'
-            Type       = 'Fixed'
-            Verbose    = $True
-        }
-
-        $script:splatNoParentPathDifferencing = @{
-            Name       = 'server'
-            Path       = 'C:\VMs'
-            Type       = 'Differencing'
-            Verbose    = $True
-        }
-
-        #region Function Set-TargetResource
-        Describe 'MSFT_xVHD\Set-TargetResource' {
-            Context 'Parent Path is passed fot a non Differencing disk' {
-                It 'should throw exception' {
-                    { Set-TargetResource @script:splatParentPathFixed } | Should Throw 'Parent path is only supported for Differencing disks'
-                }
-            }
-            Context 'Differencing disk needs a Parent Path' {
-                It 'should throw exception' {
-                    { Set-TargetResource @script:splatNoParentPathDifferencing } | Should Throw 'Differencing requires a parent path'
-                }
-            }
-        }
-        #endregion
-
-        #region Function Test-TargetResource
         Describe 'MSFT_xVHD\Test-TargetResource' {
-            Context 'Parent Path is passed fot a non Differencing disk' {
-                It 'should throw exception' {
-                    { Test-TargetResource @script:splatParentPathFixed } | Should Throw 'Parent path is only supported for Differencing disks'
-                }
+
+            # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
+            Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
+                return $true
             }
-            Context 'Differencing disk needs a Parent Path' {
-                It 'should throw exception' {
-                    { Test-TargetResource @script:splatNoParentPathDifferencing } | Should Throw 'Differencing requires a parent path'
+
+            Context 'Parameter validation' {
+                It 'Fixed and Dynamic VHDs need MaximumSizeBytes specified' {
+                    { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Dynamic' } |
+                        Should Throw 'Specify MaximumSizeBytes property for Fixed and Dynamic VHDs.'
+                }
+
+                It 'Parent Path is passed for a non Differencing disk' {
+                    { Test-TargetResource -Name 'server' -Path 'C:\VMs' -ParentPath 'C:\VMs\Parent' -Type 'Fixed' -MaximumSizeBytes 1GB } |
+                        Should Throw 'Parent path is only supported for Differencing disks'
+                }
+
+                It 'Differencing disk needs a Parent Path' {
+                    { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' } |
+                        Should Throw 'Differencing requires a parent path'
                 }
             }
         }
-        #endregion
     }
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Invoke-TestCleanup
 }
