@@ -23,7 +23,7 @@ try
     #region Pester Tests
     InModuleScope $script:DSCResourceName {
         # Function to create a exception object for testing output exceptions
-        function Get-InvalidArguementError
+        function Get-InvalidArgumentError
         {
             [CmdletBinding()]
             param
@@ -45,7 +45,7 @@ try
             $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
                 -ArgumentList $exception, $ErrorId, $errorCategory, $null
             return $errorRecord
-        } # end function Get-InvalidArguementError
+        } # end function Get-InvalidArgumentError
 
         #region Pester Test Initialization
 
@@ -627,7 +627,7 @@ try
                 Mock -CommandName Get-VMHardDiskDrive
 
                 It 'should throw exception' {
-                    $errorRecord = Get-InvalidArguementError `
+                    $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'RoleMissingError' `
                         -ErrorMessage ($LocalizedData.RoleMissingError -f `
                             'Hyper-V')
@@ -698,7 +698,7 @@ try
                 Mock -CommandName Get-VMHardDiskDrive
 
                 It 'should throw exception' {
-                    $errorRecord = Get-InvalidArguementError `
+                    $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'VMControllerDoesNotExistError' `
                         -ErrorMessage ($LocalizedData.VMControllerDoesNotExistError -f `
                             $script:VMName,0)
@@ -747,7 +747,7 @@ try
                 Mock -CommandName Get-VMIdeController
 
                 It 'should throw exception' {
-                    $errorRecord = Get-InvalidArguementError `
+                    $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'ControllerConflictError' `
                         -ErrorMessage ($LocalizedData.ControllerConflictError -f `
                             $script:VMName,0,1)
@@ -800,7 +800,7 @@ try
                 Mock -CommandName Get-VMIdeController
 
                 It 'should throw exception' {
-                    $errorRecord = Get-InvalidArguementError `
+                    $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'PathDoesNotExistError' `
                         -ErrorMessage ($LocalizedData.PathDoesNotExistError -f `
                             $script:TestISOPath)
