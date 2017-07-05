@@ -270,7 +270,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet('Dynamic', 'Fixed', 'Differencing')]
         [String]
-        $Type,
+        $Type = 'Dynamic',
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -302,12 +302,6 @@ function Test-TargetResource
 
     if($ParentPath)
     {
-        # Ensure only one value is specified - differencing disk or new disk
-        if($MaximumSizeBytes)
-        {
-            Throw 'Cannot specify both ParentPath and MaximumSizeBytes. Specify only one and try again.'
-        }
-
         if(!(Test-Path -Path $ParentPath))
         {
             Throw "$ParentPath does not exists"
