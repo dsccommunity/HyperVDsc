@@ -33,6 +33,54 @@ try
     Invoke-TestSetup
 
     InModuleScope 'MSFT_xVHD' {
+        Describe 'MSFT_xVHD\Get-TargetResource' {
+            # Create an empty function to be able to mock the missing Hyper-V cmdlet
+            function Get-VHD
+            {
+
+            }
+
+            Context 'Should stop when Hyper-V module is missing' {
+                Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
+                    return $false
+                }
+                It 'Should throw when the module is missing' {
+                    { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
+                        Should Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
+                }
+            }
+
+            # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
+            Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
+                return $true
+            }
+
+            Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
+
+            Context 'VHD Present' {
+                It 'Should return a hashtable with Ensure being Present' {
+                    Mock -CommandName Get-VHD -MockWith {
+                        [pscustomobject]@{
+                            Path = 'server.vhdx'
+                        }
+                    }
+
+                    $getTargetResult = Get-TargetResource -Name 'server' -Path 'c:\boguspath' -Generation 'vhdx'
+                    $getTargetResult.Ensure | Should Be 'Present'
+                    $getTargetResult | Should BeOfType hashtable
+                }
+            }
+
+            Context 'VHD Not Present' {
+                It 'Should return a hashtable with Ensure being Absent' {
+                    Mock -CommandName Get-VHD
+
+                    $getTargetResult = Get-TargetResource -Name 'server' -Path 'c:\boguspath' -Generation 'vhdx'
+                    $getTargetResult.Ensure | Should Be 'Absent'
+                    $getTargetResult | Should BeOfType hashtable
+                }
+            }
+        }
 
         Describe 'MSFT_xVHD\GetNameWithExtension' {
             Context 'Name does not have extension' {
