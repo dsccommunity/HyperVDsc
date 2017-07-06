@@ -310,7 +310,7 @@ function Test-TargetResource
         # Check if the generation matches parenting disk
         if($Generation -and ($ParentPath.Split('.')[-1] -ne $Generation))
         {
-            Throw "Generation $geneartion should match ParentPath extension $($ParentPath.Split('.')[-1])"
+            Throw "Generation $Generation should match ParentPath extension $($ParentPath.Split('.')[-1])"
         }
     }
 
@@ -359,7 +359,7 @@ function GetNameWithExtension
         $extension = $Name.Split('.')[-1]
         if ($Generation -ne $extension)
         {
-            throw "the extension $extension on the name does match the generation $Generation"
+            throw "the extension $extension on the name does not match the generation $Generation"
         }
         else
         {
