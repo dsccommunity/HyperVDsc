@@ -213,6 +213,80 @@ try
                 }
             }
         }
+
+        Describe 'MSFT_xVHD\Set-TargetResource' {
+            # Create an empty function to be able to mock the missing Hyper-V cmdlet
+            function Get-VHD
+            {
+
+            }
+
+            function Set-VHD
+            {
+
+            }
+
+            function Resize-VHD
+            {
+
+            }
+
+            function New-VHD
+            {
+
+            }
+
+            Context 'Ensure is Absent' {
+                Mock -CommandName Test-Path -MockWith { $true }
+                Mock -CommandName Remove-Item
+                Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
+
+                It 'Should remove when Ensure is Absent and vhdx exists' {
+                    $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Absent'
+                    Assert-MockCalled -CommandName Remove-Item -Times 1 -Exactly
+                }
+            }
+
+            Context 'Ensure is Present' {
+                BeforeEach {
+                    Mock -CommandName Get-VHD -MockWith {
+                        [pscustomobject]@{
+                            Path = 'server.vhdx'
+                            ParentPath = 'c:\boguspath\server.vhdx'
+                            Size = 1073741824
+                            Type = 'Differencing'
+                        }
+                    }
+
+                    Mock -CommandName Set-VHD
+                    Mock -CommandName Resize-VHD
+                    Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
+                    Mock -CommandName New-VHD -MockWith { }
+                }
+
+                It 'Should Create a VHD when Ensure is present and no VHD exists yet for non Differencing disk' {
+                    Mock -CommandName Get-VHD -MockWith { throw }
+                    $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Present'
+                    Assert-MockCalled -CommandName New-VHD -Exactly -Times 1 -Scope It
+                }
+
+                It 'Should Create a VHD when Ensure is present and no VHD exists yet for Differencing disk' {
+                    Mock -CommandName Get-VHD -MockWith { throw }
+                    $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Present' -ParentPath 'c:\boguspath\server.vhdx' -Type 'Differencing'
+                    Assert-MockCalled -CommandName New-VHD -Exactly -Times 1 -Scope It
+                }
+
+                It 'Should resize a VHD which has a different size as intended' {
+                    $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -MaximumSizeBytes 2GB -Ensure 'Present'
+                    Assert-MockCalled -CommandName Resize-VHD -Exactly -Times 1 -Scope It
+                }
+
+                It 'Should update the parentpath if it is different from intent' {
+                    $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -ParentPath 'c:\boguspath2\server.vhdx' -Ensure 'Present'
+                    Assert-MockCalled -CommandName Set-VHD -Exactly -Times 1 -Scope It
+                }
+            }
+        }
     }
 }
 finally
