@@ -170,7 +170,7 @@ function Set-TargetResource
             }
 
             # This is a fixed disk, check the size
-            else
+            elseif ($PSBoundParameters.ContainsKey('MaximumSizeBytes'))
             {
                 Write-Verbose -Message "Checking if $vhdFilePath size is $MaximumSizeBytes ..."
 
@@ -189,7 +189,7 @@ function Set-TargetResource
 
             if($vhd.Type -ne $Type)
             {
-                Throw 'This module can''t convert disk types'
+                Write-Verbose -Message 'This module can''t convert disk types'
             }
         }
 
