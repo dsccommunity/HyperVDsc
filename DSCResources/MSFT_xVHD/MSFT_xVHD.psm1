@@ -32,7 +32,7 @@ function Get-TargetResource
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
-    if(!(Get-Module -ListAvailable -Name Hyper-V))
+    if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
         Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
     }
@@ -134,7 +134,7 @@ function Set-TargetResource
     Write-Verbose -Message "Checking if $vhdFilePath is $Ensure ..."
 
     # If vhd should be absent, delete it
-    if($Ensure -eq 'Absent')
+    if ($Ensure -eq 'Absent')
     {
         if (Test-Path -Path $vhdFilePath)
         {
@@ -152,12 +152,12 @@ function Set-TargetResource
             $vhd = Get-VHD -Path $vhdFilePath -ErrorAction Stop
 
             # If this is a differencing disk, check the parent path
-            if($ParentPath)
+            if ($ParentPath)
             {
                 Write-Verbose -Message "Checking if $vhdFilePath parent path is $ParentPath ..."
 
                 # If the parent path is not set correct, fix it
-                if($vhd.ParentPath -ne $ParentPath)
+                if ($vhd.ParentPath -ne $ParentPath)
                 {
                     Write-Verbose -Message "$vhdFilePath parent path is not $ParentPath."
                     Set-VHD -Path $vhdFilePath -ParentPath $ParentPath
@@ -175,7 +175,7 @@ function Set-TargetResource
                 Write-Verbose -Message "Checking if $vhdFilePath size is $MaximumSizeBytes ..."
 
                 # If the size is not correct, fix it
-                if($vhd.Size -ne $MaximumSizeBytes)
+                if ($vhd.Size -ne $MaximumSizeBytes)
                 {
                     Write-Verbose -Message "$vhdFilePath size is not $MaximumSizeBytes."
                     Resize-VHD -Path $vhdFilePath -SizeBytes $MaximumSizeBytes
@@ -187,7 +187,7 @@ function Set-TargetResource
                 }
             }
 
-            if($vhd.Type -ne $Type)
+            if ($vhd.Type -ne $Type)
             {
                 Write-Verbose -Message 'This module can''t convert disk types'
             }
@@ -197,7 +197,7 @@ function Set-TargetResource
         catch
         {
             Write-Verbose -Message "$vhdFilePath is not $Ensure"
-            if($ParentPath)
+            if ($ParentPath)
             {
                 $null = New-VHD -Path $vhdFilePath -ParentPath $ParentPath
             }
@@ -210,6 +210,7 @@ function Set-TargetResource
                 }
                 $null = New-VHD @params
             }
+
             Write-Verbose -Message "$vhdFilePath is now $Ensure"
         }
     }
@@ -279,42 +280,42 @@ function Test-TargetResource
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
-    if(!(Get-Module -ListAvailable -Name Hyper-V))
+    if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
         Throw "Please ensure that Hyper-V role is installed with its PowerShell module"
     }
 
     # input validation
-    if($Type -ne 'Differencing' -and -not $MaximumSizeBytes)
+    if ($Type -ne 'Differencing' -and -not $MaximumSizeBytes)
     {
        Throw 'Specify MaximumSizeBytes property for Fixed and Dynamic VHDs.'
     }
 
-    if($ParentPath -and $Type -ne 'Differencing')
+    if ($ParentPath -and $Type -ne 'Differencing')
     {
         Throw 'Parent path is only supported for Differencing disks'
     }
 
-    if(-not $ParentPath -and $Type -eq 'Differencing')
+    if (-not $ParentPath -and $Type -eq 'Differencing')
     {
         Throw 'Differencing requires a parent path'
     }
 
-    if($ParentPath)
+    if ($ParentPath)
     {
-        if(!(Test-Path -Path $ParentPath))
+        if (!(Test-Path -Path $ParentPath))
         {
             Throw "$ParentPath does not exists"
         }
 
         # Check if the generation matches parenting disk
-        if($Generation -and ($ParentPath.Split('.')[-1] -ne $Generation))
+        if ($Generation -and ($ParentPath.Split('.')[-1] -ne $Generation))
         {
             Throw "Generation $Generation should match ParentPath extension $($ParentPath.Split('.')[-1])"
         }
     }
 
-    if(!(Test-Path -Path $Path))
+    if (!(Test-Path -Path $Path))
     {
         Throw "$Path does not exists"
     }

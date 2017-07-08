@@ -44,6 +44,7 @@ try
                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
                     return $false
                 }
+
                 It 'Should throw when the module is missing' {
                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
                         Should Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
@@ -124,6 +125,7 @@ try
                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
                     return $false
                 }
+
                 It 'Should throw when the module is missing' {
                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
                         Should Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
@@ -153,15 +155,17 @@ try
             }
 
             Context 'ParentPath specified' {
-                Mock -CommandName Test-Path -MockWith { $false }
                 It 'Should throw when ParentPath does not exist' {
+                    Mock -CommandName Test-Path -MockWith { $false }
+
                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' -ParentPath 'c:\boguspath' } |
                         Should Throw 'c:\boguspath does not exists'
                 }
 
-                #"Generation $Generation should match ParentPath extension $($ParentPath.Split('.')[-1])"
-                Mock -CommandName Test-Path -MockWith { $true }
+                # "Generation $Generation should match ParentPath extension $($ParentPath.Split('.')[-1])"
                 It 'Should throw when file extension and generation have a mismatch' {
+                    Mock -CommandName Test-Path -MockWith { $true }
+
                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' -ParentPath 'c:\boguspath.vhd' -Generation 'Vhdx' } |
                         Should Throw 'Generation Vhdx should match ParentPath extension vhd'
                 }
@@ -170,6 +174,7 @@ try
             Context 'Path does not exist' {
                 It 'Should throw when the path does not exist' {
                     Mock -CommandName Test-Path -MockWith { $false }
+
                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
                         Should Throw 'C:\VMs does not exists'
                 }
@@ -266,12 +271,14 @@ try
 
                 It 'Should Create a VHD when Ensure is present and no VHD exists yet for non Differencing disk' {
                     Mock -CommandName Get-VHD -MockWith { throw }
+
                     $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Present'
                     Assert-MockCalled -CommandName New-VHD -Exactly -Times 1 -Scope It
                 }
 
                 It 'Should Create a VHD when Ensure is present and no VHD exists yet for Differencing disk' {
                     Mock -CommandName Get-VHD -MockWith { throw }
+
                     $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Present' -ParentPath 'c:\boguspath\server.vhdx' -Type 'Differencing'
                     Assert-MockCalled -CommandName New-VHD -Exactly -Times 1 -Scope It
                 }
