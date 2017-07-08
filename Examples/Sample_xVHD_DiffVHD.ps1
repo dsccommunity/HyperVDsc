@@ -2,28 +2,38 @@ configuration Sample_xVhd_DiffVhd
 {
     param
     (
-        [string[]]$NodeName = 'localhost',
-        
-        [Parameter(Mandatory)]
-        [string]$Name,
-        
-        [Parameter(Mandatory)]
-        [string]$Path,
-        
-        [Parameter(Mandatory)]
-        [string]$ParentPath,
-        
-        [ValidateSet("Vhd","Vhdx")]
-        [string]$Generation = "Vhd",
+        [Parameter()]
+        [string[]]
+        $NodeName = 'localhost',
 
-        [ValidateSet("Dynamic","Fixed","Differencing")]
-        [string]$Type = "Differencing",
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Name,
 
-        [ValidateSet("Present","Absent")]
-        [string]$Ensure = "Present"    
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Path,
+
+        [Parameter(Mandatory = $true)]
+        [string]
+        $ParentPath,
+
+        [Parameter()]
+        [ValidateSet('Vhd', 'Vhdx')]
+        [string]
+        $Generation = 'Vhd',
+
+        [Parameter()]
+        [ValidateSet('Dynamic', 'Fixed', 'Differencing')]
+        [string]$Type = 'Differencing',
+
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [string]
+        $Ensure = 'Present'
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName xHyper-V
 
     Node $NodeName
     {
@@ -33,7 +43,13 @@ configuration Sample_xVhd_DiffVhd
             Ensure = 'Present'
             Name   = 'Hyper-V'
         }
-        
+
+        WindowsFeature HyperVPowerShell
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V-PowerShell'
+        }
+
         xVhd DiffVhd
         {
             Ensure     = $Ensure
@@ -42,7 +58,7 @@ configuration Sample_xVhd_DiffVhd
             ParentPath = $ParentPath
             Generation = $Generation
             Type       = $Type
-            DependsOn  = '[WindowsFeature]HyperV'
+            DependsOn  = '[WindowsFeature]HyperV', '[WindowsFeature]HyperVPowerShell'
         }
     }
 }
