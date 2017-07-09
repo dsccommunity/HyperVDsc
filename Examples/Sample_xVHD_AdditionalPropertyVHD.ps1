@@ -2,26 +2,34 @@ configuration Sample_xVHD_AdditionalPropertyVHD
 {
     param
     (
-        [Parameter(Mandatory)]
-        [string]$Name,
-        
-        [Parameter(Mandatory)]
-        [string]$Path,
-        
-        [Parameter(Mandatory)]
-        [string]$ParentPath,
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Name,
 
-        [Parameter(Mandatory)]
-        [string]$MaximumSizeBytes,
-        
-        [ValidateSet("Vhd","Vhdx")]
-        [string]$Generation = "Vhd",
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Path,
 
-        [ValidateSet("Present","Absent")]
-        [string]$Ensure = "Present"    
+        [Parameter(Mandatory = $true)]
+        [string]
+        $ParentPath,
+
+        [Parameter(Mandatory = $true)]
+        [string]
+        $MaximumSizeBytes,
+
+        [Parameter()]
+        [ValidateSet('Vhd', 'Vhdx')]
+        [string]
+        $Generation = 'Vhd',
+
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [string]
+        $Ensure = 'Present'
     )
 
-    Import-DscResource -Module xHyper-V
+    Import-DscResource -ModuleName xHyper-V
 
     Node localhost
     {

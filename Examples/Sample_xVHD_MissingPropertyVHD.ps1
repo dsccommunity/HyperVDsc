@@ -2,17 +2,23 @@ configuration Sample_xVHD_MissingPropertyVHD
 {
     param
     (
-        [Parameter(Mandatory)]
-        [string]$Name,
-        
-        [Parameter(Mandatory)]
-        [string]$Path,
-                
-        [ValidateSet("Vhd","Vhdx")]
-        [string]$Generation = "Vhd",
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Name,
 
-        [ValidateSet("Present","Absent")]
-        [string]$Ensure = "Present"    
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Path,
+
+        [Parameter()]
+        [ValidateSet('Vhd', 'Vhdx')]
+        [string]
+        $Generation = 'Vhd',
+
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [string]
+        $Ensure = 'Present'
     )
 
     Import-DscResource -module xHyper-V

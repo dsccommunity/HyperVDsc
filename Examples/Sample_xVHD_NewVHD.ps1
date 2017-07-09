@@ -2,25 +2,33 @@ configuration Sample_xVHD_NewVhd
 {
     param
     (
-        [string[]]$NodeName = 'localhost',
-        
-        [Parameter(Mandatory)]
-        [string]$Name,
-        
-        [Parameter(Mandatory)]
-        [string]$Path,
-                
-        [Parameter(Mandatory)]
-        [Uint64]$MaximumSizeBytes,
+        [Parameter()]
+        [string[]]
+        $NodeName = 'localhost',
 
-        [ValidateSet("Vhd","Vhdx")]
-        [string]$Generation = "Vhd",
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Name,
 
-        [ValidateSet("Present","Absent")]
-        [string]$Ensure = "Present"        
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Path,
+
+        [Parameter(Mandatory = $true)]
+        [Uint64]
+        $MaximumSizeBytes,
+
+        [Parameter()]
+        [ValidateSet('Vhd', 'Vhdx')]
+        [string]$Generation = 'Vhd',
+
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [string]
+        $Ensure = 'Present'
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName xHyper-V
 
     Node $NodeName
     {
@@ -30,7 +38,13 @@ configuration Sample_xVHD_NewVhd
             Ensure = 'Present'
             Name   = 'Hyper-V'
         }
-        
+
+        WindowsFeature HyperVPowerShell
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V-PowerShell'
+        }
+
         xVhd NewVhd
         {
             Ensure           = $Ensure
@@ -38,7 +52,7 @@ configuration Sample_xVHD_NewVhd
             Path             = $Path
             Generation       = $Generation
             MaximumSizeBytes = $MaximumSizeBytes
-            DependsOn        = '[WindowsFeature]HyperV'
+            DependsOn        = '[WindowsFeature]HyperV', '[WindowsFeature]HyperVPowerShell'
         }
     }
 }
