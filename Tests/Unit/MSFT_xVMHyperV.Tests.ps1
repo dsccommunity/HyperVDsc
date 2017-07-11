@@ -132,6 +132,11 @@ Describe 'xVMHyper-V' {
                 $targetResource = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
                 $targetResource.ContainsKey('EnableGuestService') | Should Be $true;
             }
+            It 'Throws when Hyper-V Tools are not installed' {
+                ## This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
+                Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { }
+                { Get-TargetResource -Name 'RunningVM' @testParams } | Should Throw;
+            }
         } #end context Validates Get-TargetResource Method
 
         Context 'Validates Test-TargetResource Method' {
@@ -285,34 +290,66 @@ Describe 'xVMHyper-V' {
             Mock -CommandName Set-VMNetworkAdapter -MockWith { return $true; }
             Mock -CommandName Get-VMNetworkAdapter -MockWith { return $stubVM.NetworkAdapters.IpAddresses; }
             Mock -CommandName Set-VMState -MockWith { return $true; }
+            Mock -CommandName Set-VMMemory -MockWith { }
 
             It 'Removes an existing VM when "Ensure" = "Absent"' {
                 Set-TargetResource -Name 'RunningVM' -Ensure Absent @testParams;
                 Assert-MockCalled -CommandName Remove-VM -Scope It;
             }
 
-            It 'Creates and does not start a VM that does not exist when "Ensure" = "Present"' {
-                Set-TargetResource -Name 'NewVM' @testParams;
-                Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It;
-                Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It;
-                Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It;
-            }
-
-            It 'Creates and starts a VM that does not exist when "Ensure" = "Present" and "State" = "Running"' {
+            It 'Creates and starts a VM VM with disabled dynamic memory that does not exist when "Ensure" = "Present" and "State" = "Running"' {
                 Set-TargetResource -Name 'NewVM' -State Running @testParams;
                 Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It;
                 Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It;
                 Assert-MockCalled -CommandName Set-VMState -Exactly -Times 1 -Scope It;
             }
 
+            It 'Creates but does not start a VM with disabled dynamic memory that does not exist when "Ensure" = "Present"' {
+                Set-TargetResource -Name 'NewVM' @testParams;
+                Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It;
+                Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It;
+                Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It;
+            }
+
+            It 'Creates but does not start a VM with disabled dynamic memory when only StartupMemory is specified' {
+                Set-TargetResource -Name 'NewVM' @testParams -StartupMemory 4GB;
+                Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It;
+                Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It;
+            }
+
+            It 'Creates but does not start a VM with disabled dynamic memory when identical values for startup, minimum and maximum memory are specified' {
+                Set-TargetResource -Name 'NewVM' @testParams -StartupMemory 4GB -MinimumMemory 4GB -MaximumMemory 4GB;
+                Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Set-VMMemory -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It
+            }
+
+            It 'Creates but does not start a VM with enabled dynamic memory because a MinimumMemory value is specified' {
+                Set-TargetResource -Name 'NewVM' @testParams -MinimumMemory 512MB
+                Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Set-VMMemory -Exactly -Times 0 -Scope It
+                Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It
+            }
+
+            It 'Creates but does not start a VM with enabled dynamic memory because a MaximumMemory value is specified' {
+                Set-TargetResource -Name 'NewVM' @testParams -MaximumMemory 16GB
+                Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName Set-VMMemory -Exactly -Times 0 -Scope It
+                Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It
+            }
+
             It 'Does not change VM state when VM "State" = "Running" and requested "State" = "Running"' {
                 Set-TargetResource -Name 'RunningVM' -State Running @testParams;
-                 Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It;
+                Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It;
             }
 
             It 'Does not change VM state when VM "State" = "Off" and requested "State" = "Off"' {
                 Set-TargetResource -Name 'StoppedVM' -State Off @testParams;
-                 Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It;
+                Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It;
             }
 
             It 'Changes VM state when existing VM "State" = "Off" and requested "State" = "Running"' {
@@ -394,46 +431,36 @@ Describe 'xVMHyper-V' {
 
             It 'Does not change Secure Boot call "Set-VMProperty" when creating a generation 1 VM' {
                 Mock Set-VMProperty -MockWith { }
-
                 Set-TargetResource -Name 'RunningVM' @testParams;
-
                 Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It;
             }
 
             It 'Does call "Set-VMProperty" when creating a generation 2 VM' {
                 Mock Test-VMSecureBoot -MockWith { return $true; }
                 Mock Set-VMProperty -MockWith { }
-
                 Set-TargetResource -Name 'RunningVM' -Generation 2 -SecureBoot $false @testParams;
-
                 Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 1 -Scope It;
             }
 
             It 'Does not change Secure Boot for generation 1 VM' {
                 Mock Test-VMSecureBoot -MockWith { return $true; }
                 Mock Set-VMProperty -MockWith { }
-
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $true @testParams;
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $false @testParams;
-
                 Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It;
             }
 
             It 'Does not change Secure Boot for generation 2 VM with VM "SecureBoot" match' {
                 Mock Test-VMSecureBoot -MockWith { return $true; }
                 Mock Set-VMProperty -MockWith { }
-
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $true -Generation 2 @testParams;
-
                 Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It;
             }
 
             It 'Does change Secure Boot for generation 2 VM with VM "SecureBoot" mismatch' {
                 Mock Test-VMSecureBoot -MockWith { return $false; }
                 Mock Set-VMProperty -MockWith { }
-
                 Set-TargetResource -Name 'StoppedVM' -SecureBoot $true -Generation 2 @testParams;
-
                 Assert-MockCalled Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 1 -Scope It;
             }
 
@@ -448,6 +475,46 @@ Describe 'xVMHyper-V' {
                 Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$true;Id=$stubGuestServiceInterfaceId}}
                 Set-TargetResource -Name 'RunningVM' -EnableGuestService $false @testParams
                 Assert-MockCalled -CommandName Disable-VMIntegrationService -Exactly -Times 1 -Scope It
+            }
+
+            It 'Disables dynamic memory of RuningVM if only StartupMemory specified' {
+                Mock Set-VMProperty -MockWith { }
+                Set-TargetResource -Name 'RunningVM' -StartupMemory 4GB @testParams
+                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { 
+                    $VMCommand -eq 'Set-VM' -and
+                    ($ChangeProperty.StaticMemory -eq $true) -and
+                    ($ChangeProperty.DynamicMemory -eq $false) 
+                    }  -Exactly -Times 1 -Scope It
+            }
+
+            It 'Disables dynamic memory of RuningVM if StartupMemory, MinimumMemory and MaximumMemory are specified with the same values' {
+                Mock Set-VMProperty -MockWith { }
+                Set-TargetResource -Name 'RunningVM' -StartupMemory 4GB -MinimumMemory 4GB -MaximumMemory 4GB @testParams
+                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { 
+                    $VMCommand -eq 'Set-VM' -and
+                    ($ChangeProperty.StaticMemory -eq $true) -and
+                    ($ChangeProperty.DynamicMemory -eq $false) 
+                    }  -Exactly -Times 1 -Scope It
+            }
+
+            It 'Enables dynamic memory of RuningVM if MinimumMemory is specified ' {
+                Mock Set-VMProperty -MockWith { }
+                Set-TargetResource -Name 'RunningVM' -MinimumMemory 4GB @testParams
+                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { 
+                    $VMCommand -eq 'Set-VM' -and
+                    ($ChangeProperty.StaticMemory -eq $false) -and
+                    ($ChangeProperty.DynamicMemory -eq $true) 
+                    }  -Exactly -Times 1 -Scope It
+            }
+
+            It 'Enables dynamic memory of RuningVM if MaximumMemory is specified ' {
+                Mock Set-VMProperty -MockWith { }
+                Set-TargetResource -Name 'RunningVM' -MaximumMemory 4GB @testParams
+                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { 
+                    $VMCommand -eq 'Set-VM' -and
+                    ($ChangeProperty.StaticMemory -eq $false) -and
+                    ($ChangeProperty.DynamicMemory -eq $true) 
+                    }  -Exactly -Times 1 -Scope It
             }
 
             It 'Throws when Hyper-V Tools are not installed' {
