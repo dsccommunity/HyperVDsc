@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.9.0.0
+
 * MSFT_xVMHyperV:
   * Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
   * EnableGuestService works on localized OS (language independent).
