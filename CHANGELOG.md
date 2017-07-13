@@ -37,10 +37,14 @@
     * Added .codecov.yml.
     * Added codecov badges to Readme.
 * MSFT_xVHD:
-  * Support setting the disk type.
-  * Added unit tests.
-  * Added example Sample\_xVHD\_FixedVHD.ps1
-  * Style fixes
+    * Support setting the disk type.
+    * Added unit tests.
+    * Added example Sample\_xVHD\_FixedVHD.ps1
+    * Style fixes
+* MSFT_xVhdFileDirectory
+    * Fixed PSSA rule violations
+    * Added descriptions to the schema
+    * Style fixes
 
 ## 3.8.0.0
 
