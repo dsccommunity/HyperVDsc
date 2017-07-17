@@ -35,6 +35,7 @@ Describe 'xVMHyper-V' {
         function Enable-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $Name)}
         function Disable-VMIntegrationService { param ([Parameter(ValueFromPipeline)] $VM, $name)}
         function Get-VHD { param ( $Path ) }
+        function Set-VMMemory { }
 
         $stubVhdxDisk = New-Item -Path 'TestDrive:\TestVM.vhdx' -ItemType File;
         $studVhdxDiskSnapshot = New-Item -Path "TestDrive:\TestVM_D0145678-1576-4435-AB18-9F000C1C17D0.avhdx"  -ItemType File;
@@ -247,7 +248,6 @@ Describe 'xVMHyper-V' {
 
             It 'Returns $true when VM has snapshot chain' {
                 Mock -CommandName Get-VhdHierarchy -MockWith { Write-Host $VhdPath; return @($studVhdxDiskSnapshot, $stubVhdxDisk); }
-
                 Test-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk -Verbose | Should Be $true;
             }
 
