@@ -43,7 +43,7 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [ValidateSet(0,1,2,3)]
-        [System.Int32]
+        [System.UInt32]
         $ControllerNumber
     )
 
@@ -99,7 +99,7 @@ function Test-TargetResource
 
         [Parameter(Mandatory = $true)]
         [ValidateSet(0,1,2,3)]
-        [System.Int32]
+        [System.UInt32]
         $ControllerNumber,
 
         [Parameter()]
@@ -155,7 +155,7 @@ function Set-TargetResource
 
         [Parameter(Mandatory = $true)]
         [ValidateSet(0,1,2,3)]
-        [System.Int32]
+        [System.UInt32]
         $ControllerNumber,
 
         [Parameter()]
