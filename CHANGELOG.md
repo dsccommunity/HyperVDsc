@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.9.0.0
+
 * MSFT_xVMHyperV:
   * Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
   * EnableGuestService works on localized OS (language independent).
@@ -36,6 +38,11 @@
     * Updated appveyor.yml to include codecov.
     * Added .codecov.yml.
     * Added codecov badges to Readme.
+* MSFT_xVHD:
+  * Support setting the disk type.
+  * Added unit tests.
+  * Added example Sample\_xVHD\_FixedVHD.ps1
+  * Style fixes
 
 ## 3.8.0.0
 
