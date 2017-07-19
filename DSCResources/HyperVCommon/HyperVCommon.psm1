@@ -416,7 +416,6 @@ function ConvertFrom-TimeSpan
 function Get-VMHyperV
 {
     [CmdletBinding()]
-    [OutputType([Microsoft.HyperV.PowerShell.VirtualMachine])]
     param
     (
         [Parameter(Mandatory = $true)]
