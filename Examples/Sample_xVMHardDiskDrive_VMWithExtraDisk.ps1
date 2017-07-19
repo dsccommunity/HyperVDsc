@@ -3,20 +3,16 @@ configuration Sample_xVMHardDiskDrive
     param
     (
         [Parameter()]
-        [string[]]
+        [System.String[]]
         $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $VMName,
-        
+
         [Parameter(Mandatory = $true)]
-        [string]
-        $VhdPath,   
-        
-        [Parameter(Mandatory = $true)]
-        [string]
-        $ControllerNumber
+        [System.String]
+        $VhdPath
     )
 
     Import-DscResource -ModuleName 'xHyper-V'
@@ -36,22 +32,22 @@ configuration Sample_xVMHardDiskDrive
 
         xVHD DiskOS
         {
-            Ensure = 'Present'
-            DependsOn = '[WindowsFeature]HyperV'
-            Name = $diskNameOS
-            Path = $VhdPath
-            Generation = 'vhdx'
+            Name             = $diskNameOS
+            Path             = $VhdPath
+            Generation       = 'vhdx'
             MaximumSizeBytes = 20GB
+            Ensure           = 'Present'
+            DependsOn        = '[WindowsFeature]HyperV'
         }
 
         xVHD Disk1
         {
-            Ensure = 'Present'
-            DependsOn = '[WindowsFeature]HyperV'
-            Name = $diskNameExtra1
-            Path = $VhdPath
-            Generation = 'vhdx'
+            Name             = $diskNameExtra1
+            Path             = $VhdPath
+            Generation       = 'vhdx'
             MaximumSizeBytes = 20GB
+            Ensure           = 'Present'
+            DependsOn        = '[WindowsFeature]HyperV'
         }
 
         xVMHyperV NewVM
@@ -63,28 +59,19 @@ configuration Sample_xVMHardDiskDrive
             DependsOn  = '[xVHD]DiskOS'
         }
 
-        # Ensures a VM with default settings
-        xVMScsiController Controller
-        {
-            Ensure           = 'Present'
-            VMName           = $VMName
-            ControllerNumber = $ControllerNumber
-            DependsOn        = '[xVMHyperV]NewVM'
-        }
-
         xVMHardDiskDrive ExtraDisk
         {
-            VMName = $VMName
-            Path = Join-Path $VhdPath -ChildPath $diskNameExtra1
-            ControllerLocation = $ControllerLocation
-            ControllerNumber = $ControllerNumber
-            Ensure = 'Present'
-            DependsOn = '[xVMScsiController]Controller', '[xVHD]Disk1'
+            VMName             = $VMName
+            Path               = Join-Path $VhdPath -ChildPath $diskNameExtra1
+            ControllerNumber   = 0
+            ControllerLocation = 1
+            Ensure             = 'Present'
+            DependsOn          = '[xVHD]Disk1'
         }
     }
 }
 
 $mofPath = "C:\temp\Sample_xVMHardDiskDrive"
 
-Sample_xVMHardDiskDrive -VMName test1 -VhdPath C:\temp\Tests -ControllerNumber 2 -OutputPath $mofPath 
+Sample_xVMHardDiskDrive -VMName test1 -VhdPath C:\temp\Tests -OutputPath $mofPath
 Start-DscConfiguration -Path $mofPath -Verbose -Wait -Force

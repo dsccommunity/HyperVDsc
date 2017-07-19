@@ -3,20 +3,16 @@ configuration Sample_xVMScsiController
     param
     (
         [Parameter()]
-        [string[]]
+        [System.String[]]
         $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $VMName,
-        
+
         [Parameter(Mandatory = $true)]
-        [string]
-        $VhdPath,   
-        
-        [Parameter(Mandatory = $true)]
-        [string]
-        $ControllerNumber
+        [System.String]
+        $VhdPath
     )
 
     Import-DscResource -ModuleName 'xHyper-V'
@@ -36,12 +32,12 @@ configuration Sample_xVMScsiController
         # Create the VHD for the OS
         xVHD DiskOS
         {
-            Ensure = 'Present'
-            DependsOn = '[WindowsFeature]HyperV'
-            Name = $diskNameOS
-            Path = $VhdPath
-            Generation = 'vhdx'
+            Ensure           = 'Present'
+            Name             = $diskNameOS
+            Path             = $VhdPath
+            Generation       = 'vhdx'
             MaximumSizeBytes = 20GB
+            DependsOn        = '[WindowsFeature]HyperV'
         }
 
         # Create the VM
@@ -49,24 +45,24 @@ configuration Sample_xVMScsiController
         {
             Ensure     = 'Present'
             Name       = $VMName
-            VhdPath    = Join-Path $VhdPath -ChildPath $diskNameOS
-            Generation = 1
+            VhdPath    = Join-Path -Path $VhdPath -ChildPath $diskNameOS
+            Generation = 2
             DependsOn  = '[xVHD]DiskOS'
         }
-        
-        # Ensures a SCSI controller exists on the VM
+
+        # Add and additional SCSI controller
         xVMScsiController Controller
         {
             Ensure           = 'Present'
             VMName           = $VMName
-            ControllerNumber = $ControllerNumber
+            ControllerNumber = 1
             DependsOn        = '[xVMHyperV]NewVM'
         }
 
     }
 }
 
-$mofPath = "C:\temp\Sample_xVMHardDiskDrive"
+$mofPath = "C:\temp\Sample_xVMScsiController"
 
-Sample_xVMScsiController -VMName "test1" -VhdPath "C:\temp\Tests" -ControllerNumber 2 -OutputPath $mofPath
+Sample_xVMScsiController -VMName "test1" -VhdPath "C:\temp\Tests" -OutputPath $mofPath
 Start-DscConfiguration -Path $mofPath -Verbose -Wait -Force
