@@ -170,16 +170,16 @@ function Set-TargetResource
 
     Assert-Module -Name 'Hyper-V'
 
-    if (-not $RestartIfNeeded)
+    # Getting the state of the VM so we can restore it later
+    $existingVmState = (Get-VMHyperV -VMName $VMName).State
+
+    if ((-not $RestartIfNeeded) -and ($existingVmState -ne 'Off'))
     {
         $errorMessage = $localizedData.CannotUpdateVmOnlineError -f $VMName
         New-InvalidOperationError -ErrorId InvalidState -ErrorMessage $errorMessage
     }
 
-    # Getting the state of the VM so we can restore it
-    $existingVmState = (Get-VMHyperV -VMName $VMName).State
     Set-VMState -Name $VMName -State 'Off'
-
     [System.Int32] $scsiControllerCount = @(Get-VMScsiController -VMName $VMName).Count
     if ($Ensure -eq 'Present')
     {

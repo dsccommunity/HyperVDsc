@@ -143,7 +143,7 @@ try
             }
         } # describe Test-TargetResource
 
-        Describe 'MSFT_xVMHardDiskDrive\Set-TargetResource' {
+        Describe 'MSFT_xVMScsiController\Set-TargetResource' {
 
             function Get-VMScsiController {
                 param
@@ -195,7 +195,7 @@ try
                 $null = Set-TargetResource @setTargetResourceParams
             }
 
-            It 'Should throw if "RestartIfNeeded" is not specified' {
+            It 'Should throw if "RestartIfNeeded" is not specified and VM is "Running"' {
                 Mock Get-VMHyperV { return @{ State = 'Running' } }
                 $setTargetResourceParams = @{
                     VMName           = $testVMName
@@ -203,6 +203,16 @@ try
                 }
 
                 { Set-TargetResource @setTargetResourceParams } | Should Throw 'RestartIfNeeded'
+            }
+
+            It 'Should not throw if "RestartIfNeeded" is not specified and VM is "Off"' {
+                Mock Get-VMHyperV { return @{ State = 'Off' } }
+                $setTargetResourceParams = @{
+                    VMName           = $testVMName
+                    ControllerNumber = 0
+                }
+
+                { Set-TargetResource @setTargetResourceParams } | Should Not Throw
             }
 
             It 'Should call "Set-VMState" to stop running VM' {
