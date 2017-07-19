@@ -186,21 +186,21 @@ When ControllerNumber or ControllerLocation is not provided, the same logic as
 
 #### Parameters for xVMHardDiskDrive
 
-* **`[String]` VMName** (_Key_): Specifies the name of the virtual machine
+* **`[String]` VMName** _(Key)_: Specifies the name of the virtual machine
  whose hard disk drive is to be manipulated.
-* **`[String]` VhdPath** (_Key_): Specifies the full path of the VHD file to be
+* **`[String]` VhdPath** _(Key)_: Specifies the full path of the VHD file to be
  manipulated.
-* **`[String]` ControllerType** (_Write_): Specifies the type of controller to which
+* **`[String]` ControllerType** _(Write)_: Specifies the type of controller to which
  the the hard disk drive is to be set. { *SCSI* | IDE}.
-* **`[Uint32]` ControllerNumber** (_Write_): Specifies the number of the controller
+* **`[Uint32]` ControllerNumber** _(Write)_: Specifies the number of the controller
  to which the hard disk drive is to be set.
  For IDE: { 0, 1 }, for SCSI: { 0 | 1 | 2 | 3 }.
  Defaults to 0.
-* **`[Uint32]` ControllerLocation** (_Write_): Specifies the number of the location
+* **`[Uint32]` ControllerLocation** _(Write)_: Specifies the number of the location
  on the controller at which the hard disk drive is to be set.
  For IDE: { 0 | 1 }, for SCSI: { 0 .. 63 }.
  Defaults to 0.
-* **`[String]` Ensure** (_Write_): Specifies if the hard disk drive should exist or
+* **`[String]` Ensure** _(Write)_: Specifies if the hard disk drive should exist or
  not. { *Present* | Absent }.
 
 #### Read-Only Properties from Get-TargetResource for xVMHardDiskDrive
@@ -445,11 +445,11 @@ When removing a controller, all the disks still connected to the controller will
 
 #### Parameters for xVMScsiController
 
-* **`[String]` VMName** (_Key_): Specifies the name of the virtual machine whose SCSI
+* **`[String]` VMName** _(Key)_: Specifies the name of the virtual machine whose SCSI
  controller is to be manipulated.
-* **`[Uint32]` ControllerNumber** (_Key_): Specifies the number of the controller to
+* **`[Uint32]` ControllerNumber** _(Key)_: Specifies the number of the controller to
  be set: { 0 | 1 | 2 | 3 }.
-* **`[String]` Ensure** (_Write_): Specifies if the SCSI controller should exist or
+* **`[String]` Ensure** _(Write)_: Specifies if the SCSI controller should exist or
  not. { *Present* | Absent }.
 
 #### Read-Only Properties from Get-TargetResource for xVMScsiController

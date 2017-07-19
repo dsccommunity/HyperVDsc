@@ -405,3 +405,33 @@ function ConvertFrom-TimeSpan
         'Days' { return $TimeSpan.TotalDays -as [System.UInt32] }
     }
 } #end function ConvertFrom-TimeSpan
+
+<#
+    .SYNOPSIS
+    Helper function for retrieving a virtual machine, ensuring only one VM is resolved
+
+    .PARAMETER VMName
+    Name of the Hyper-V virtual machine to return
+#>
+function Get-VMHyperV
+{
+    [CmdletBinding()]
+    [OutputType([Microsoft.HyperV.PowerShell.VirtualMachine])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $VMName
+    )
+
+    $vm = Get-VM -Name $VMName -ErrorAction SilentlyContinue
+
+    # Check if 1 or 0 VM with name = $name exist
+    if ($vm.count -gt 1)
+    {
+        $errorMessage = $localizedData.MoreThanOneVMExistsError -f $VMName
+        New-InvalidArgumentError -ErrorId 'MultipleVMsFound' -ErrorMessage $errorMessage
+    }
+
+    return $vm
+} #end function Get-VMHyperV
