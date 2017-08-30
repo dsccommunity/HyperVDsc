@@ -17,10 +17,10 @@ Import-Module (Join-Path $RepoRoot "DSCResources\$ModuleName\$ModuleName.psm1") 
 Describe 'xVMHyper-V' {
     InModuleScope $ModuleName {
 
-        ## Create empty functions to be able to mock the missing Hyper-V cmdlets
-        ## CmdletBinding required on Get-VM to support $ErrorActionPreference
+        # Create empty functions to be able to mock the missing Hyper-V cmdlets
+        # CmdletBinding required on Get-VM to support $ErrorActionPreference
         function Get-VM { [CmdletBinding()] param( [Parameter(ValueFromRemainingArguments)] $Name) }
-        ## Generation parameter is required for the mocking -ParameterFilter to work
+        # Generation parameter is required for the mocking -ParameterFilter to work
         function New-VM { param ( $Generation) }
         function Set-VM { }
         function Stop-VM { }
@@ -100,41 +100,44 @@ Describe 'xVMHyper-V' {
         }
         Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$false;Id=$stubGuestServiceInterfaceId}}
         Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { return $true; }
-
         Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhd') } -MockWith {
-            ## Return single Vhd chain for .vhds
+            # Return single Vhd chain for .vhds
             return @($stubVhdDisk.FullName);
         }
         Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhdx') } -MockWith {
-            ## Return snapshot hierarchy for .vhdxs
+            # Return snapshot hierarchy for .vhdxs
             return @($stubVhdxDiskSnapshot.FullName, $stubVhdxDisk.FullName);
         }
-
         Context 'Validates Get-TargetResource Method' {
 
             It 'Returns a hashtable' {
                 $targetResource = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
                 $targetResource -is [System.Collections.Hashtable] | Should Be $true;
             }
+
             It 'Throws when multiple VMs are present' {
                 { Get-TargetResource -Name 'DuplicateVM' -VhdPath $stubVhdxDisk.FullName } | Should Throw;
             }
+
             It 'Does not call Get-VMFirmware if a generation 1 VM' {
                 Mock -CommandName Get-VMFirmware -MockWith { throw; }
                 $null = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
                 Assert-MockCalled -CommandName Get-VMFirmware -Scope It -Exactly 0;
             }
+
             It 'Calls Get-VMFirmware if a generation 2 VM' {
                 Mock -CommandName Get-VMFirmware -MockWith { return $true; }
                 $null = Get-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk.FullName;
                 Assert-MockCalled -CommandName Get-VMFirmware -Scope It -Exactly 1;
             }
+
             It 'Hash table contains key EnableGuestService' {
                 $targetResource = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
                 $targetResource.ContainsKey('EnableGuestService') | Should Be $true;
             }
+
             It 'Throws when Hyper-V Tools are not installed' {
-                ## This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
+                # This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { }
                 { Get-TargetResource -Name 'RunningVM' @testParams } | Should Throw;
             }
@@ -265,7 +268,7 @@ Describe 'xVMHyper-V' {
             }
 
             It 'Throws when Hyper-V Tools are not installed' {
-                ## This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
+                # This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { }
                 { Test-TargetResource -Name 'RunningVM' @testParams } | Should Throw;
             }
@@ -380,14 +383,14 @@ Describe 'xVMHyper-V' {
             It 'Calls "Add-VMNetworkAdapter" for each NIC when creating a new VM' {
                 Mock -CommandName Add-VMNetworkAdapter -MockWith { }
                 Set-TargetResource -Name 'NewVM' @testParams -SwitchName 'Switch1','Switch2';
-                ## The first NIC is assigned during the VM creation
+                # The first NIC is assigned during the VM creation
                 Assert-MockCalled -CommandName Add-VMNetworkAdapter -Exactly 1 -Scope It;
             }
 
             It 'Calls "Connect-VMNetworkAdapter" for each existing NIC when updating an existing VM' {
                 Mock -CommandName Connect-VMNetworkAdapter -MockWith { }
                 Set-TargetResource -Name 'StoppedVM' @testParams -SwitchName 'Switch1','Switch2';
-                ## The first NIC is assigned during the VM creation
+                # The first NIC is assigned during the VM creation
                 Assert-MockCalled -CommandName Connect-VMNetworkAdapter -Exactly 2 -Scope It;
             }
 
@@ -395,7 +398,7 @@ Describe 'xVMHyper-V' {
                 Mock -CommandName Connect-VMNetworkAdapter -MockWith { }
                 Mock -CommandName Add-VMNetworkAdapter -MockWith { }
                 Set-TargetResource -Name 'StoppedVM' @testParams -SwitchName 'Switch1','Switch2','Switch3';
-                ## The first NIC is assigned during the VM creation
+                # The first NIC is assigned during the VM creation
                 Assert-MockCalled -CommandName Connect-VMNetworkAdapter -Exactly 2 -Scope It;
                 Assert-MockCalled -CommandName Add-VMNetworkAdapter -Exactly 1 -Scope It;
             }
@@ -425,7 +428,7 @@ Describe 'xVMHyper-V' {
             It 'Calls "Set-VMNetworkAdapter" for each MAC address on a stopped VM' {
                 Mock -CommandName Set-VMNetworkAdapter -MockWith { }
                 Set-TargetResource -Name 'StoppedVM' @testParams -MACAddress 'AABBCCDDEEFE','AABBCCDDEEFF';
-                ## The first NIC is assigned during the VM creation
+                # The first NIC is assigned during the VM creation
                 Assert-MockCalled -CommandName Set-VMNetworkAdapter -Exactly 2 -Scope It;
             }
 
@@ -480,40 +483,40 @@ Describe 'xVMHyper-V' {
             It 'Disables dynamic memory of RuningVM if only StartupMemory specified' {
                 Mock Set-VMProperty -MockWith { }
                 Set-TargetResource -Name 'RunningVM' -StartupMemory 4GB @testParams
-                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { 
+                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
                     $VMCommand -eq 'Set-VM' -and
                     ($ChangeProperty.StaticMemory -eq $true) -and
-                    ($ChangeProperty.DynamicMemory -eq $false) 
+                    ($ChangeProperty.DynamicMemory -eq $false)
                     }  -Exactly -Times 1 -Scope It
             }
 
             It 'Disables dynamic memory of RuningVM if StartupMemory, MinimumMemory and MaximumMemory are specified with the same values' {
                 Mock Set-VMProperty -MockWith { }
                 Set-TargetResource -Name 'RunningVM' -StartupMemory 4GB -MinimumMemory 4GB -MaximumMemory 4GB @testParams
-                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { 
+                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
                     $VMCommand -eq 'Set-VM' -and
                     ($ChangeProperty.StaticMemory -eq $true) -and
-                    ($ChangeProperty.DynamicMemory -eq $false) 
+                    ($ChangeProperty.DynamicMemory -eq $false)
                     }  -Exactly -Times 1 -Scope It
             }
 
             It 'Enables dynamic memory of RuningVM if MinimumMemory is specified ' {
                 Mock Set-VMProperty -MockWith { }
                 Set-TargetResource -Name 'RunningVM' -MinimumMemory 4GB @testParams
-                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { 
+                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
                     $VMCommand -eq 'Set-VM' -and
                     ($ChangeProperty.StaticMemory -eq $false) -and
-                    ($ChangeProperty.DynamicMemory -eq $true) 
+                    ($ChangeProperty.DynamicMemory -eq $true)
                     }  -Exactly -Times 1 -Scope It
             }
 
             It 'Enables dynamic memory of RuningVM if MaximumMemory is specified ' {
                 Mock Set-VMProperty -MockWith { }
                 Set-TargetResource -Name 'RunningVM' -MaximumMemory 4GB @testParams
-                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { 
+                Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
                     $VMCommand -eq 'Set-VM' -and
                     ($ChangeProperty.StaticMemory -eq $false) -and
-                    ($ChangeProperty.DynamicMemory -eq $true) 
+                    ($ChangeProperty.DynamicMemory -eq $true)
                     }  -Exactly -Times 1 -Scope It
             }
 
@@ -544,7 +547,7 @@ Describe 'xVMHyper-V' {
 
             It 'Does not throw with null parent path (#52)' {
 
-                ## Must use a different file extension to ensure existing mocks Get-VhdHierarchy or not called
+                # Must use a different file extension to ensure existing mocks Get-VhdHierarchy or not called
                 $fakeVhdPath = 'BaseVhd.avhdx';
                 Mock -CommandName Get-VHD -ParameterFilter { $Path -eq $fakeVhdPath } -MockWith {
                     return [PSCustomObject] @{
