@@ -75,10 +75,10 @@ function Get-TargetResource
     }
 
     $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
-    
+
     @{
         Name               = $Name
-        ## Return the Vhd specified if it exists in the Vhd chain
+        # Return the Vhd specified if it exists in the Vhd chain
         VhdPath            = if ($vhdChain -contains $VhdPath) { $VhdPath };
         SwitchName         = $vmObj.NetworkAdapters.SwitchName
         State              = $vmobj.State
@@ -238,34 +238,34 @@ function Set-TargetResource
             if ($PSBoundParameters.ContainsKey('StartupMemory') -and ($vmObj.MemoryStartup -ne $StartupMemory))
             {
                 Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MemoryStartup', $StartupMemory, $vmObj.MemoryStartup)
-                $changeProperty["MemoryStartup"]=$StartupMemory
+                $changeProperty["MemoryStartup"] = $StartupMemory
             }
             elseif ($PSBoundParameters.ContainsKey('MinimumMemory') -and ($vmObj.MemoryStartup -lt $MinimumMemory))
             {
                 Write-Verbose -Message ($localizedData.AdjustingLessThanMemoryWarning -f 'StartupMemory', $vmObj.MemoryStartup, 'MinimumMemory', $MinimumMemory)
-                $changeProperty["MemoryStartup"]=$MinimumMemory
+                $changeProperty["MemoryStartup"] = $MinimumMemory
             }
             elseif ($PSBoundParameters.ContainsKey('MaximumMemory') -and ($vmObj.MemoryStartup -gt $MaximumMemory))
             {
                 Write-Verbose -Message ($localizedData.AdjustingGreaterThanMemoryWarning -f 'StartupMemory', $vmObj.MemoryStartup, 'MaximumMemory', $MaximumMemory)
-                $changeProperty["MemoryStartup"]=$MaximumMemory
+                $changeProperty["MemoryStartup"] = $MaximumMemory
             }
 
             # If the VM does not have the right minimum or maximum memory, stop the VM, set the right memory, start the VM
             if ($PSBoundParameters.ContainsKey('MinimumMemory') -or $PSBoundParameters.ContainsKey('MaximumMemory'))
             {
-                $changeProperty["DynamicMemory"]=$true
-                $changeProperty["StaticMemory"]=$false
+                $changeProperty["DynamicMemory"] = $true
+                $changeProperty["StaticMemory"] = $false
 
                 if ($PSBoundParameters.ContainsKey('MinimumMemory') -and ($vmObj.Memoryminimum -ne $MinimumMemory))
                 {
                     Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MinimumMemory', $MinimumMemory, $vmObj.MemoryMinimum)
-                    $changeProperty["MemoryMinimum"]=$MinimumMemory
+                    $changeProperty["MemoryMinimum"] = $MinimumMemory
                 }
                 if ($PSBoundParameters.ContainsKey('MaximumMemory') -and ($vmObj.Memorymaximum -ne $MaximumMemory))
                 {
                     Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MaximumMemory', $MaximumMemory, $vmObj.MemoryMaximum)
-                    $changeProperty["MemoryMaximum"]=$MaximumMemory
+                    $changeProperty["MemoryMaximum"] = $MaximumMemory
                 }
             }
 
@@ -273,7 +273,7 @@ function Set-TargetResource
             if ($PSBoundParameters.ContainsKey('ProcessorCount') -and ($vmObj.ProcessorCount -ne $ProcessorCount))
             {
                 Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'ProcessorCount', $ProcessorCount, $vmObj.ProcessorCount)
-                $changeProperty["ProcessorCount"]=$ProcessorCount
+                $changeProperty["ProcessorCount"] = $ProcessorCount
             }
 
             # Stop the VM, set the right properties, start the VM only if there are properties to change
@@ -283,17 +283,19 @@ function Set-TargetResource
                 Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
             }
 
-            # Special cases to disable dynamic memory:
-            # - If startup, minimum and maximum memory are specified with equal values -or
-            # - If only startup memory is specified, but neither minimum nor maximum
+            <#
+                Special cases to disable dynamic memory:
+                - If startup, minimum and maximum memory are specified with equal values or
+                - If only startup memory is specified, but neither minimum nor maximum
+            #>
             if ( ($PSBoundParameters.ContainsKey('StartupMemory') -and
-                   ($StartupMemory -eq $MinimumMemory) -and 
-                   ($StartupMemory -eq $MaximumMemory) 
+                   ($StartupMemory -eq $MinimumMemory) -and
+                   ($StartupMemory -eq $MaximumMemory)
                  ) -or
                  ( $PSBoundParameters.ContainsKey('StartupMemory') -and
-                   (-not $PSBoundParameters.ContainsKey('MinimumMemory')) -and 
-                   (-not $PSBoundParameters.ContainsKey('MaximumMemory')) 
-                 ) 
+                   (-not $PSBoundParameters.ContainsKey('MinimumMemory')) -and
+                   (-not $PSBoundParameters.ContainsKey('MaximumMemory'))
+                 )
                )
             {
                 # Refresh VM properties
@@ -305,24 +307,24 @@ function Set-TargetResource
                         VMName = $Name
                         VMCommand = 'Set-VM'
                         ChangeProperty = @{
-                            StaticMemory = $true 
+                            StaticMemory = $true
                             DynamicMemory = $false
-                            }
+                        }
                         WaitForIP = $WaitForIP
                         RestartIfNeeded = $RestartIfNeeded
-                        }
+                    }
                     Set-VMProperty @setVMPropertyParams
                     Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
                 }
             }
 
-            ## Set VM network switches. This can be done while the VM is running.
+            # Set VM network switches. This can be done while the VM is running.
             for ($i = 0; $i -lt $SwitchName.Count; $i++)
             {
                 $switch = $SwitchName[$i]
                 $nic = $vmObj.NetworkAdapters[$i]
                 if ($nic) {
-                    ## We cannot change the MAC address whilst the VM is running.. This is changed later
+                    # We cannot change the MAC address whilst the VM is running.. This is changed later
                     if ($nic.SwitchName -ne $switch) {
                         Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'NIC', $switch, $nic.SwitchName)
                         $nic | Connect-VMNetworkAdapter -SwitchName $switch
@@ -341,7 +343,7 @@ function Set-TargetResource
                         Add-VMNetworkAdapter -VMName $Name -SwitchName $switch
                         Write-Verbose -Message ($localizedData.VMPropertySet -f 'NIC', $switch)
                     }
-                    ## Refresh the NICs after we've added one
+                    # Refresh the NICs after we've added one
                     $vmObj = Get-VM -Name $Name -ErrorAction SilentlyContinue
                 }
             }
@@ -430,24 +432,24 @@ function Set-TargetResource
             # Optional parameters
             if ($SwitchName)
             {
-                $parameters["SwitchName"]=$SwitchName[0]
+                $parameters["SwitchName"] = $SwitchName[0]
             }
             if ($Path)
             {
-                $parameters["Path"]=$Path
+                $parameters["Path"] = $Path
             }
             $defaultStartupMemory = 512MB
             if ($PSBoundParameters.ContainsKey('StartupMemory'))
             {
-                $parameters["MemoryStartupBytes"]=$StartupMemory
+                $parameters["MemoryStartupBytes"] = $StartupMemory
             }
             elseif ($PSBoundParameters.ContainsKey('MinimumMemory') -and ($defaultStartupMemory -lt $MinimumMemory))
             {
-                $parameters["MemoryStartupBytes"]=$MinimumMemory
+                $parameters["MemoryStartupBytes"] = $MinimumMemory
             }
             elseif ($PSBoundParameters.ContainsKey('MaximumMemory') -and ($defaultStartupMemory -gt $MaximumMemory))
             {
-                $parameters["MemoryStartupBytes"]=$MaximumMemory
+                $parameters["MemoryStartupBytes"] = $MaximumMemory
             }
             $null = New-VM @parameters
 
@@ -483,19 +485,19 @@ function Set-TargetResource
 
             # Special case: Disable dynamic memory if startup, minimum and maximum memory are equal
             if ($PSBoundParameters.ContainsKey('StartupMemory') -and
-                ($StartupMemory -eq $MinimumMemory) -and 
+                ($StartupMemory -eq $MinimumMemory) -and
                 ($StartupMemory -eq $MaximumMemory))
             {
                 Set-VMMemory -VMName $Name -DynamicMemoryEnabled $false
             }
 
-            ## There's always a NIC added with New-VM
+            # There's always a NIC added with New-VM
             if ($MACAddress)
             {
                 Set-VMNetworkAdapter -VMName $Name -StaticMacAddress $MACAddress[0]
             }
 
-            ## Add additional NICs
+            # Add additional NICs
             for ($i = 1; $i -lt $SwitchName.Count; $i++)
             {
                 $addVMNetworkAdapterParams = @{
@@ -654,24 +656,24 @@ function Test-TargetResource
     }
 
     # Check if Minimum memory is less than StartUpmemory
-    if ($PSBoundParameters.ContainsKey('StartupMemory') -and 
-        $PSBoundParameters.ContainsKey('MinimumMemory') -and  
+    if ($PSBoundParameters.ContainsKey('StartupMemory') -and
+        $PSBoundParameters.ContainsKey('MinimumMemory') -and
         ($MinimumMemory -gt $StartupMemory))
     {
         Throw ($localizedData.MinMemGreaterThanStartupMemError -f $MinimumMemory, $StartupMemory)
     }
 
     # Check if Minimum memory is greater than Maximummemory
-    if ($PSBoundParameters.ContainsKey('MaximumMemory') -and 
-        $PSBoundParameters.ContainsKey('MinimumMemory') -and 
+    if ($PSBoundParameters.ContainsKey('MaximumMemory') -and
+        $PSBoundParameters.ContainsKey('MinimumMemory') -and
         ($MinimumMemory -gt $MaximumMemory))
     {
         Throw ($localizedData.MinMemGreaterThanMaxMemError -f $MinimumMemory, $MaximumMemory)
     }
 
     # Check if Startup memory is greater than Maximummemory
-    if ($PSBoundParameters.ContainsKey('MaximumMemory') -and 
-        $PSBoundParameters.ContainsKey('StartupMemory') -and 
+    if ($PSBoundParameters.ContainsKey('MaximumMemory') -and
+        $PSBoundParameters.ContainsKey('StartupMemory') -and
         ($StartupMemory -gt $MaximumMemory))
     {
         Throw ($localizedData.StartUpMemGreaterThanMaxMemError -f $StartupMemory, $MaximumMemory)
@@ -703,46 +705,46 @@ function Test-TargetResource
                 Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'VhdPath', $VhdPath, ($vhdChain -join ','))
                 return $false
             }
-            if ($state -and ($vmObj.State -ne $State)) 
+            if ($state -and ($vmObj.State -ne $State))
             {
                 return $false
             }
-            if ($PSBoundParameters.ContainsKey('StartupMemory') -and 
+            if ($PSBoundParameters.ContainsKey('StartupMemory') -and
                 ($vmObj.MemoryStartup -ne $StartupMemory))
             {
                 return $false
             }
-            if ($PSBoundParameters.ContainsKey('MaximumMemory') -and 
+            if ($PSBoundParameters.ContainsKey('MaximumMemory') -and
                 ($vmObj.MemoryMaximum -ne $MaximumMemory))
             {
                 return $false
             }
-            if ($PSBoundParameters.ContainsKey('MinimumMemory') -and 
-                ($vmObj.MemoryMinimum -ne $MinimumMemory)) 
+            if ($PSBoundParameters.ContainsKey('MinimumMemory') -and
+                ($vmObj.MemoryMinimum -ne $MinimumMemory))
             {
                 return $false
             }
             # If startup memory but neither minimum nor maximum memory specified, dynamic memory should be disabled
-            if ($PSBoundParameters.ContainsKey('$StartupMemory') -and 
-               ( -not $PSBoundParameters.ContainsKey('MinimumMemory')) -and 
-               ( -not $PSBoundParameters.ContainsKey('MaximumMemory')) -and 
-               $vmobj.DynamicMemoryEnabled) 
+            if ($PSBoundParameters.ContainsKey('$StartupMemory') -and
+               ( -not $PSBoundParameters.ContainsKey('MinimumMemory')) -and
+               ( -not $PSBoundParameters.ContainsKey('MaximumMemory')) -and
+               $vmobj.DynamicMemoryEnabled)
             {
                 return $false
             }
-            
-            # If startup, minimum and maximum memory are specified with the same values
-            if ($PSBoundParameters.ContainsKey('StartupMemory') -and 
-                $PSBoundParameters.ContainsKey('MinimumMemory') -and 
-                $PSBoundParameters.ContainsKey('MaximumMemory') -and 
-                ($StartupMemory -eq $MinimumMemory) -and 
+
+            # If startup, minimum and maximum memory are specified with the same values, dynamic memory should be disabled
+            if ($PSBoundParameters.ContainsKey('StartupMemory') -and
+                $PSBoundParameters.ContainsKey('MinimumMemory') -and
+                $PSBoundParameters.ContainsKey('MaximumMemory') -and
+                ($StartupMemory -eq $MinimumMemory) -and
                 ($StartupMemory -eq $MaximumMemory) -and
                 $vmobj.DynamicMemoryEnabled)
             {
                 return $false
             }
 
-            if ($vmObj.HardDrives.Path -notcontains $VhdPath) 
+            if ($vmObj.HardDrives.Path -notcontains $VhdPath)
             {
                 return $false
             }
@@ -763,13 +765,13 @@ function Test-TargetResource
                 }
             }
 
-            ## $Generation always exists, only check if parameter has been explicitly specified
-            if ($PSBoundParameters.ContainsKey('Generation') -and ($Generation -ne $vmObj.Generation)) 
+            # $Generation always exists, only check if parameter has been explicitly specified
+            if ($PSBoundParameters.ContainsKey('Generation') -and ($Generation -ne $vmObj.Generation))
             {
                 return $false
             }
 
-            if ($PSBoundParameters.ContainsKey('ProcessorCount') -and ($vmObj.ProcessorCount -ne $ProcessorCount)) 
+            if ($PSBoundParameters.ContainsKey('ProcessorCount') -and ($vmObj.ProcessorCount -ne $ProcessorCount))
             {
                 return $false
             }
