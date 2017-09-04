@@ -386,8 +386,8 @@ function SetVHDFile
     Write-Verbose "Setting the VHD file $($PSCmdlet.ParameterSetName)"
     if ($PSCmdlet.ParameterSetName -eq 'Copy')
     {
-        New-Item -Path (Split-Path $destinationPath) -ItemType Directory -ErrorAction SilentlyContinue        
-        Copy-Item -Path $sourcePath -Destination $destinationPath -Force:$force -Recurse:$recurse -ErrorAction SilentlyContinue
+        New-Item -Path (Split-Path $destinationPath) -ItemType Directory        
+        Copy-Item -Path $sourcePath -Destination $destinationPath -Force:$force -Recurse:$recurse
     }
     elseif ($PSCmdlet.ParameterSetName -eq 'New')
     {
