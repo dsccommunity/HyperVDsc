@@ -329,12 +329,11 @@ function Test-TargetResource
     $result = Test-VHD -Path $vhdFilePath -ErrorAction SilentlyContinue
     Write-Verbose -Message "Vhd $vhdFilePath is present:$result and Ensure is $Ensure"
     
-	if($result -eq $true)
+    if($result -eq $true)
     {
         $result = (Get-VHD -Path $vhdFilePath).Size -eq $MaximumSizeBytes
-		Write-Verbose -Message "Vhd $vhdFilePath is right size: $result"
+        Write-Verbose -Message "Vhd $vhdFilePath is right size: $result"
     }
-    
     return ($result -and ($Ensure -eq "Present"))
 }
 
