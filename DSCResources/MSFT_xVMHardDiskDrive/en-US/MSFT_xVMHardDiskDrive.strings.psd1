@@ -1,6 +1,6 @@
 ConvertFrom-StringData @'
     DiskFound                    = Found hard disk '{0}' attached to VM '{1}'.
-    DiskNotFound                 = Hard disk '{0}' not found attached to VM '{1}'
+    DiskNotFound                 = Hard disk '{0}' missing from VM '{1}'
     CheckingDiskIsAttached       = Checking if the disk is already attached to the VM.
     CheckingExistingDiskLocation = Checking if there is an existing disk in the specified location.
     AddingDisk                   = Adding the disk '{0}' to VM '{1}'.

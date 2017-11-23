@@ -1,6 +1,6 @@
 ConvertFrom-StringData @'
     ControllerFound                 = Found controller '{0}' attached to VM '{1}'.
-    ControllerNotFound              = Controller '{0}' not found attached to VM '{1}'
+    ControllerNotFound              = Controller '{0}' missing from VM '{1}'
     ComparingParameter              = Comparing '{0}'; expected '{1}', actual '{2}'.
     AddingController                = Adding controller number '{0}'.
     CheckingExistingDisks           = Checking for existing disks on controller '{0}'.

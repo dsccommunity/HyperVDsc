@@ -114,7 +114,7 @@ try
                 ControllerType     = 'SCSI'
                 ControllerNumber   = 0
                 ControllerLocation = 0
-                Ensure             = 'Present';
+                Ensure             = 'Present'
             }
 
             It 'Should return a [System.Boolean] object type' {

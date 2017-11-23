@@ -101,7 +101,7 @@ try
             $stubTargetResource = @{
                 VMName           = $testVMName
                 ControllerNumber = 0
-                Ensure           = 'Present';
+                Ensure           = 'Present'
             }
 
             It 'Should return a [System.Boolean] object type' {
@@ -193,6 +193,8 @@ try
                 }
 
                 $null = Set-TargetResource @setTargetResourceParams
+
+                Assert-MockCalled Assert-Module
             }
 
             It 'Should throw if "RestartIfNeeded" is not specified and VM is "Running"' {

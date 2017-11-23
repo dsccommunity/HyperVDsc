@@ -29,6 +29,12 @@ configuration Sample_xVMHardDiskDrive
             Name   = 'Hyper-V'
         }
 
+        WindowsFeature HyperVPowerShell
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V-PowerShell'
+        }
+
         # Create the VHD for the OS
         xVHD DiskOS
         {
@@ -89,8 +95,3 @@ configuration Sample_xVMHardDiskDrive
         }
     }
 }
-
-$mofPath = "C:\temp\Sample_xVMHardDiskDrive"
-
-Sample_xVMHardDiskDrive -VMName "test1" -VhdPath "C:\temp\Tests" -OutputPath $mofPath
-Start-DscConfiguration -Path $mofPath -Verbose -Wait -Force

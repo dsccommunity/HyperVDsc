@@ -194,7 +194,7 @@ When ControllerNumber or ControllerLocation is not provided, the same logic as
 * **`[String]` VhdPath** _(Key)_: Specifies the full path of the VHD file to be
  manipulated.
 * **`[String]` ControllerType** _(Write)_: Specifies the type of controller to which
- the the hard disk drive is to be set. { *SCSI* | IDE}.
+ the hard disk drive is to be set. The default value is SCSI. { *SCSI* | IDE }.
 * **`[Uint32]` ControllerNumber** _(Write)_: Specifies the number of the controller
  to which the hard disk drive is to be set.
  For IDE: { 0, 1 }, for SCSI: { 0 | 1 | 2 | 3 }.
@@ -204,7 +204,7 @@ When ControllerNumber or ControllerLocation is not provided, the same logic as
  For IDE: { 0 | 1 }, for SCSI: { 0 .. 63 }.
  Defaults to 0.
 * **`[String]` Ensure** _(Write)_: Specifies if the hard disk drive should exist or
- not. { *Present* | Absent }.
+ not. The default value is Present. { *Present* | Absent }.
 
 #### Read-Only Properties from Get-TargetResource for xVMHardDiskDrive
 
@@ -436,10 +436,7 @@ None
 ### xVMScsiController
 
 Manages the SCSI controllers attached to a Hyper-V virtual machine.
-When there is only 1 SCSI controller and ControllerNumber 3 is created, all the
- intermediate controllers will also be created.
-When removing a controller, all the disks still connected to the controller will
- be detached.
+When removing a controller, all the disks still connected to the controller will be detached.
 
 #### Requirements for xVMScsiController
 
@@ -453,7 +450,7 @@ When removing a controller, all the disks still connected to the controller will
 * **`[Uint32]` ControllerNumber** _(Key)_: Specifies the number of the controller to
  be set: { 0 | 1 | 2 | 3 }.
 * **`[String]` Ensure** _(Write)_: Specifies if the SCSI controller should exist or
- not. { *Present* | Absent }.
+ not. The default value is Present. { *Present* | Absent }.
 
 #### Read-Only Properties from Get-TargetResource for xVMScsiController
 

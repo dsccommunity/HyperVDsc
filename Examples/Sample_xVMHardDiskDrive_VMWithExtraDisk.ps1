@@ -30,6 +30,12 @@ configuration Sample_xVMHardDiskDrive
             Name   = 'Hyper-V'
         }
 
+        WindowsFeature HyperVPowerShell
+        {
+            Ensure = 'Present'
+            Name   = 'Hyper-V-PowerShell'
+        }
+
         xVHD DiskOS
         {
             Name             = $diskNameOS
@@ -63,6 +69,7 @@ configuration Sample_xVMHardDiskDrive
         {
             VMName             = $VMName
             Path               = Join-Path $VhdPath -ChildPath $diskNameExtra1
+            ControllerType     = 'IDE'
             ControllerNumber   = 0
             ControllerLocation = 1
             Ensure             = 'Present'
@@ -70,8 +77,3 @@ configuration Sample_xVMHardDiskDrive
         }
     }
 }
-
-$mofPath = "C:\temp\Sample_xVMHardDiskDrive"
-
-Sample_xVMHardDiskDrive -VMName test1 -VhdPath C:\temp\Tests -OutputPath $mofPath
-Start-DscConfiguration -Path $mofPath -Verbose -Wait -Force
