@@ -12,6 +12,7 @@ DATA localizedData
         StartUpMemGreaterThanMaxMemError = StartupMemory '{0}' should not be greater than MaximumMemory '{1}'.
         VhdUnsupportedOnGen2VMError = Generation 2 virtual machines do not support the .VHD virtual disk extension.
         CannotUpdatePropertiesOnlineError = Can not change properties for VM '{0}' in '{1}' state unless 'RestartIfNeeded' is set to true.
+        AutomaticCheckpointsUnsupported = AutomaticCheckpoints are not supported on this host.
 
         AdjustingGreaterThanMemoryWarning = VM {0} '{1}' is greater than {2} '{3}'. Adjusting {0} to be '{3}'.
         AdjustingLessThanMemoryWarning = VM {0} '{1}' is less than {2} '{3}'. Adjusting {0} to be '{3}'.
@@ -75,7 +76,7 @@ function Get-TargetResource
     }
 
     $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
-    
+
     @{
         Name               = $Name
         ## Return the Vhd specified if it exists in the Vhd chain
@@ -100,6 +101,7 @@ function Get-TargetResource
         HasDynamicMemory   = $vmobj.DynamicMemoryEnabled
         NetworkAdapters    = $vmobj.NetworkAdapters.IPAddresses
         EnableGuestService = ($vmobj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}).Enabled
+        AutomaticCheckpointsEnabled = $vmobj.AutomaticCheckpointsEnabled
     }
 }
 
@@ -196,13 +198,29 @@ function Set-TargetResource
         # Enable Guest Services
         [Parameter()]
         [Boolean]
-        $EnableGuestService = $false
+        $EnableGuestService = $false,
+
+        # Enable AutomaticCheckpoints
+        [Parameter()]
+        [Boolean]
+        $AutomaticCheckpointsEnabled
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if(!(Get-Module -ListAvailable -Name Hyper-V))
     {
         Throw ($localizedData.RoleMissingError -f 'Hyper-V')
+    }
+
+    # Check if AutomaticCheckpointsEnabled is set in configuration
+    if($PSBoundParameters.ContainsKey("AutomaticCheckpointsEnabled"))
+    {
+        # Check if AutomaticCheckpoints are supported
+        # If AutomaticCheckpoints are supported, parameter exists on Set-VM
+        if (-Not (Get-Command -Name Set-VM -Module Hyper-V).Parameters.ContainsKey('AutomaticCheckpointsEnabled'))
+        {
+            Throw ($localizedData.AutomaticCheckpointsUnsupportedError)
+        }
     }
 
     Write-Verbose -Message ($localizedData.CheckingVMExists -f $Name)
@@ -221,7 +239,7 @@ function Set-TargetResource
             Write-Verbose -Message ($localizedData.VMPropertySet -f 'Ensure', $Ensure)
         }
 
-        # If VM is present, check its state, startup memory, minimum memory, maximum memory,processor countand mac address
+        # If VM is present, check its state, startup memory, minimum memory, maximum memory,processor count, automatic checkpoint and mac address
         # One cannot set the VM's vhdpath, path, generation and switchName after creation
         else
         {
@@ -377,6 +395,15 @@ function Set-TargetResource
                 $guestService | Disable-VMIntegrationService
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
             }
+
+            # If AutomaticCheckpointsEnabled is set in configuration
+            if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
+            {
+                if($vmObj.AutomaticCheckpointsEnabled -ne $AutomaticCheckpointsEnabled)
+                {
+                    Set-VM -Name $Name -AutomaticCheckpointsEnabled $AutomaticCheckpointsEnabled
+                }
+            }
         }
     }
 
@@ -422,6 +449,12 @@ function Set-TargetResource
             if($ProcessorCount)
             {
                 $parameters["ProcessorCount"]=$ProcessorCount
+            }
+
+            # If AutomaticCheckpointsEnabled is set in configuration
+            if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
+            {
+                $parameters["AutomaticCheckpointsEnabled"]=$AutomaticCheckpointsEnabled
             }
 
             $null = Set-VM @parameters
@@ -567,7 +600,12 @@ function Test-TargetResource
 
         [Parameter()]
         [Boolean]
-        $EnableGuestService = $false
+        $EnableGuestService = $false,
+
+        # Enable AutomaticCheckpoints
+        [Parameter()]
+        [Boolean]
+        $AutomaticCheckpointsEnabled
     )
 
     #region input validation
@@ -619,6 +657,17 @@ function Test-TargetResource
     if($Path -and !(Test-Path -Path $Path))
     {
         Throw ($localizedData.PathDoesNotExistError -f $Path)
+    }
+
+    # Check if AutomaticCheckpointsEnabled is set in configuration
+    if($PSBoundParameters.ContainsKey("AutomaticCheckpointsEnabled"))
+    {
+        # Check if AutomaticCheckpoints are supported
+        # If AutomaticCheckpoints are supported, parameter exists on Set-VM
+        if (-Not (Get-Command -Name Set-VM -Module Hyper-V).Parameters.ContainsKey('AutomaticCheckpointsEnabled'))
+        {
+            Throw ($localizedData.AutomaticCheckpointsUnsupportedError)
+        }
     }
 
     #endregion
@@ -678,6 +727,17 @@ function Test-TargetResource
                 Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
                 return $false
             }
+
+            # If AutomaticCheckpointsEnabled is set in configuration
+            if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
+            {
+                if($vmObj.AutomaticCheckpointsEnabled -ne $AutomaticCheckpointsEnabled)
+                {
+                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'AutomaticCheckpointsEnabled', $AutomaticCheckpointsEnabled, $vmObj.AutomaticCheckpointsEnabled)
+                    return $false
+                }
+            }
+
             return $true
         }
         else
