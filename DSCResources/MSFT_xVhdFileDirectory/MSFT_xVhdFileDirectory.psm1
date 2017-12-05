@@ -38,7 +38,7 @@ function Get-TargetResource
     $itemsFound = foreach($Item in $FileDirectory)
     {
         $item = GetItemToCopy -item $item
-        $mountedDrive =  $mountVHD | Get-Disk | Get-Partition | Get-Volume
+        $mountedDrive =  $mountVHD | Get-Disk | Get-Partition | ?{$_.Type -ne 'Recovery'} | Get-Volume
         $letterDrive  = (-join $mountedDrive.DriveLetter) + ":\"
        
         # show the drive letters.
@@ -98,7 +98,7 @@ function Set-TargetResource
             # show the drive letters.
             Get-PSDrive | Write-Verbose
 
-            $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Get-Volume
+            $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | ?{$_.Type -ne 'Recovery'} | Get-Volume
             
             foreach ($item in $FileDirectory)
             {
@@ -185,7 +185,7 @@ function Test-TargetResource
         # Show the drive letters after mount 
         Get-PSDrive | Write-Verbose
 
-        $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Get-Volume
+        $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | ?{$_.Type -ne 'Recovery'} | Get-Volume
         $letterDrive  = (-join $mountedDrive.DriveLetter) + ":\"
         Write-Verbose $letterDrive
 
