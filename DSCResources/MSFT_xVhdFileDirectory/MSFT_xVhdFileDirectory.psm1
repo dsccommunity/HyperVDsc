@@ -84,7 +84,7 @@ function Set-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
         
-        [Parameter(Mandatory = $False)]
+        [Parameter()]
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
         $CheckSum = 'ModifiedDate'
@@ -168,7 +168,7 @@ function Test-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
         
-        [Parameter(Mandatory = $False)]
+        [Parameter()]
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
         $CheckSum = 'ModifiedDate'
@@ -316,7 +316,7 @@ function EnsureVHDState
 function GetItemToCopy
 {
     param(
-        [Parameter(Mandatory = $False)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance] $item
         )
     
@@ -340,9 +340,11 @@ function GetItemToCopy
         #Get Property Value
         $thisItem = $item.CimInstanceProperties[$_].Value
         
-        if (-not $thisItem -and $_ -in $DefaultValues.Keys) {
+        if (-not $thisItem -and $_ -in $DefaultValues.Keys)
+        {
             #If unset and a default value is defined enter here
-            if ($_ -eq 'Type') {
+            if ($_ -eq 'Type')
+            {
                 #Special behavior for the Type property based on SourcePath
                 #This relies on SourcePath preceeding Type in the list of keys (the reason for using OrderedDictionary)
                 if (Test-Path $returnValue.SourcePath -PathType Leaf ) {
@@ -351,7 +353,9 @@ function GetItemToCopy
                  }
             }
             $returnValue[$_] = $DefaultValues[$_]
-        } else {
+        }
+        else
+        {
             #If value present or no default value enter here
             $returnValue[$_] = $item.CimInstanceProperties[$_].Value
         }
@@ -365,7 +369,7 @@ function GetItemToCopy
     )
     
     # Convert string values to boolean for ease of programming.
-    $PropertyValuesToBoolean | %{
+    $PropertyValuesToBoolean | ForEach-Object -Process {
         $returnValue[$_] = $returnValue[$_] -eq $DesiredProperties[$_]
     }
       
