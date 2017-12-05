@@ -17,7 +17,7 @@ function Get-TargetResource
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
 
-        [Parameter(Mandatory = $false)]
+        [Parameter()]
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
         $CheckSum = 'ModifiedDate'
@@ -274,9 +274,9 @@ function EnsureVHDState
     [CmdletBinding(DefaultParametersetName="Mounted")] 
     param(        
         
-        [Parameter(Mandatory=$false,ParameterSetName = "Mounted")]
+        [Parameter(ParameterSetName = "Mounted")]
         [switch]$Mounted,
-        [Parameter(Mandatory=$false,ParameterSetName = "Dismounted")]  
+        [Parameter(ParameterSetName = "Dismounted")]  
         [switch]$Dismounted,
         [Parameter(Mandatory=$true)]
         $vhdPath 
@@ -319,50 +319,60 @@ function GetItemToCopy
         [Parameter(Mandatory = $False)]
         [Microsoft.Management.Infrastructure.CimInstance] $item
         )
-
-    $returnValue =   @{
-        SourcePath = $item.CimInstanceProperties["SourcePath"].Value
-        DestinationPath = $item.CimInstanceProperties["DestinationPath"].Value 
-        Ensure = $item.CimInstanceProperties["Ensure"].Value 
-        Recurse = $item.CimInstanceProperties["Recurse"].Value
-        Force = $item.CimInstanceProperties["Force"].Value  
-        Content = $item.CimInstanceProperties["Content"].Value       
-        Attributes = @($item.CimInstanceProperties["Attributes"].Value) 
-        Type = $item.CimInstanceProperties["Type"].Value 
+    
+    #Initialize Return Object
+    $returnValue = @{}
+    
+    #Define Default Values
+    
+    $DesiredProperties = [ordered]@{
+        'SourcePath' = $null
+        'DestinationPath' = $null
+        'Ensure' = 'Present'
+        'Recurse' = 'True'
+        'Force' = 'True'
+        'Content' = $null
+        'Attributes' = $null
+        'Type' = 'Directory'
+    }
+    
+    [string[]]($DesiredProperties.Keys) | Foreach-Object -Process {
+        #Get Property Value
+        $thisItem = $item.CimInstanceProperties[$_].Value
+        
+        if (-not $thisItem -and $_ -in $DefaultValues.Keys) {
+            #If unset and a default value is defined enter here
+            if ($_ -eq 'Type') {
+                #Special behavior for the Type property based on SourcePath
+                #This relies on SourcePath preceeding Type in the list of keys (the reason for using OrderedDictionary)
+                if (Test-Path $returnValue.SourcePath -PathType Leaf ) {
+                    #If the sourcepath resolves to a file, set the default to File instad of Directory
+                    $DefaultValues.Type = 'File'
+                 }
+            }
+            $returnValue[$_] = $DefaultValues[$_]
+        } else {
+            #If value present or no default value enter here
+            $returnValue[$_] = $item.CimInstanceProperties[$_].Value
+        }
+    }
+    
+    #Relies on default values in the $DesiredProperties object being the $True equivalent values
+    $PropertyValuesToBoolean = @(
+        'Force',
+        'Recurse',
+        'Ensure'
+    )
+    
+    # Convert string values to boolean for ease of programming.
+    $PropertyValuesToBoolean | %{
+        $returnValue[$_] = $returnValue[$_] -eq $DesiredProperties[$_]
+    }
+      
+      
+      $returnValue.Keys | ForEach-Object -Process {
+        Write-Verbose "$_ => $($returnValue[$_])"
       }
-
-      # Assign Default values, if they are not specified.
-      if ($returnValue.Ensure -eq $null)
-      {
-        $returnValue.Ensure = "Present"
-      }
-
-      if ($returnValue.Force -eq $null)
-      {
-        $returnValue.Force = "True"
-      }
-
-      if ($returnValue.Recurse -eq $null)
-      {
-         $returnValue.Recurse  = "True"
-      }
-      if ($returnValue.Type -eq $null)
-      {
-         if (Test-Path $returnValue.SourcePath -PathType Leaf )
-         {
-            $returnValue.Type = 'File'
-         }
-         else
-         {
-            $returnValue.Type = 'Directory'
-         }
-      }
-
-      # Convert string "True" or "False" to boolean for ease of programming.
-      $returnValue.Force =  $returnValue.Force -eq "True"
-      $returnValue.Recurse = $returnValue.Recurse -eq "True"
-      $returnValue.Ensure = $returnValue.Ensure -eq "Present"
-      $returnValue.Keys | ForEach-Object -Process { Write-Verbose "$_ => $($returnValue[$_])"}
 
     return $returnValue
 }
@@ -375,13 +385,13 @@ function SetVHDFile
     param(       
         [Parameter(Mandatory=$true,ParameterSetName = "Copy")]
         $sourcePath,        
-        [Parameter(Mandatory=$false)]
+        [Parameter()]
         [switch]$recurse,
-        [Parameter(Mandatory=$false)]
+        [Parameter()]
         [switch]$force,
-        [Parameter(Mandatory=$false,ParameterSetName = "New")]  
+        [Parameter(ParameterSetName = "New")]  
         $type,
-        [Parameter(Mandatory=$false,ParameterSetName = "New")]  
+        [Parameter(ParameterSetName = "New")]  
         $content,       
         [Parameter(Mandatory=$true)]
         $destinationPath, 
@@ -431,7 +441,7 @@ function ItemHasChanged
     [Parameter(Mandatory=$true)]
     [ValidateScript({Test-Path $_})]
     $destinationPath,
-    [Parameter(Mandatory=$false)]
+    [Parameter()]
     [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
     $CheckSum = 'ModifiedDate'
     )
