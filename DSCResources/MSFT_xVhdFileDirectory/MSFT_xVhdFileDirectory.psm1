@@ -9,14 +9,15 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VhdPath,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
 
+        [Parameter(Mandatory = $false)]
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
         $CheckSum = 'ModifiedDate'
@@ -38,7 +39,7 @@ function Get-TargetResource
     $itemsFound = foreach($Item in $FileDirectory)
     {
         $item = GetItemToCopy -item $item
-        $mountedDrive =  $mountVHD | Get-Disk | Get-Partition | ?{$_.Type -ne 'Recovery'} | Get-Volume
+        $mountedDrive =  $mountVHD | Get-Disk | Get-Partition | Where-Object -FilterScript {$_.Type -ne 'Recovery'} | Get-Volume
         $letterDrive  = (-join $mountedDrive.DriveLetter) + ":\"
        
         # show the drive letters.
@@ -75,14 +76,15 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VhdPath,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
-
+        
+        [Parameter(Mandatory = $False)]
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
         $CheckSum = 'ModifiedDate'
@@ -98,7 +100,7 @@ function Set-TargetResource
             # show the drive letters.
             Get-PSDrive | Write-Verbose
 
-            $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | ?{$_.Type -ne 'Recovery'} | Get-Volume
+            $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Where-Object -FilterScript {$_.Type -ne 'Recovery'} | Get-Volume
             
             foreach ($item in $FileDirectory)
             {
@@ -158,14 +160,15 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VhdPath,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
-
+        
+        [Parameter(Mandatory = $False)]
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
         $CheckSum = 'ModifiedDate'
@@ -185,7 +188,7 @@ function Test-TargetResource
         # Show the drive letters after mount 
         Get-PSDrive | Write-Verbose
 
-        $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | ?{$_.Type -ne 'Recovery'} | Get-Volume
+        $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Where-Object -FilterScript {$_.Type -ne 'Recovery'} | Get-Volume
         $letterDrive  = (-join $mountedDrive.DriveLetter) + ":\"
         Write-Verbose $letterDrive
 
@@ -250,7 +253,7 @@ function Test-TargetResource
             # Check the attribute 
             if ($itemToCopy.Attributes)
             {
-                $currentAttribute = @(Get-ItemProperty -Path $finalDestinationPath |% Attributes)
+                $currentAttribute = @(Get-ItemProperty -Path $finalDestinationPath | ForEach-Object -MemberName Attributes)
                 $result = $currentAttribute.Contains($itemToCopy.Attributes)
             }           
           }
@@ -271,11 +274,11 @@ function EnsureVHDState
     [CmdletBinding(DefaultParametersetName="Mounted")] 
     param(        
         
-        [parameter(Mandatory=$false,ParameterSetName = "Mounted")]
+        [Parameter(Mandatory=$false,ParameterSetName = "Mounted")]
         [switch]$Mounted,
-        [parameter(Mandatory=$false,ParameterSetName = "Dismounted")]  
+        [Parameter(Mandatory=$false,ParameterSetName = "Dismounted")]  
         [switch]$Dismounted,
-        [parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$true)]
         $vhdPath 
         )
 
@@ -312,7 +315,10 @@ function EnsureVHDState
 # Change the Cim Instance objects in to a hash table containing property value pair.
 function GetItemToCopy
 {
-    param([Microsoft.Management.Infrastructure.CimInstance] $item)
+    param(
+        [Parameter(Mandatory = $False)]
+        [Microsoft.Management.Infrastructure.CimInstance] $item
+        )
 
     $returnValue =   @{
         SourcePath = $item.CimInstanceProperties["SourcePath"].Value
@@ -356,7 +362,7 @@ function GetItemToCopy
       $returnValue.Force =  $returnValue.Force -eq "True"
       $returnValue.Recurse = $returnValue.Recurse -eq "True"
       $returnValue.Ensure = $returnValue.Ensure -eq "Present"
-      $returnValue.Keys | %{ Write-Verbose "$_ => $($returnValue[$_])"}
+      $returnValue.Keys | ForEach-Object -Process { Write-Verbose "$_ => $($returnValue[$_])"}
 
     return $returnValue
 }
@@ -367,19 +373,21 @@ function SetVHDFile
 {
      [CmdletBinding(DefaultParametersetName="Copy")] 
     param(       
-        [parameter(Mandatory=$true,ParameterSetName = "Copy")]
+        [Parameter(Mandatory=$true,ParameterSetName = "Copy")]
         $sourcePath,        
+        [Parameter(Mandatory=$false)]
         [switch]$recurse,
+        [Parameter(Mandatory=$false)]
         [switch]$force,
-        [parameter(Mandatory=$false,ParameterSetName = "New")]  
+        [Parameter(Mandatory=$false,ParameterSetName = "New")]  
         $type,
-        [parameter(Mandatory=$false,ParameterSetName = "New")]  
+        [Parameter(Mandatory=$false,ParameterSetName = "New")]  
         $content,       
-        [parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$true)]
         $destinationPath, 
-        [parameter(Mandatory=$true,ParameterSetName = "Set")]  
+        [Parameter(Mandatory=$true,ParameterSetName = "Set")]  
         $attribute,
-        [parameter(Mandatory=$true,ParameterSetName = "Delete")]
+        [Parameter(Mandatory=$true,ParameterSetName = "Delete")]
         [switch]$ensure 
         )      
     
@@ -417,13 +425,13 @@ function SetVHDFile
 function ItemHasChanged
 {
     param(
-    [parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$true)]
     [ValidateScript({Test-Path $_})] 
     $sourcePath,
-    [parameter(Mandatory=$true)]
+    [Parameter(Mandatory=$true)]
     [ValidateScript({Test-Path $_})]
     $destinationPath,
-    [parameter(Mandatory=$false)]
+    [Parameter(Mandatory=$false)]
     [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
     $CheckSum = 'ModifiedDate'
     )
@@ -455,7 +463,6 @@ function ItemHasChanged
 
     switch ($CheckSum)
     {
-
         'ModifiedDate'
         {
             $difference = Compare-Object -ReferenceObject $sourceItems -DifferenceObject $destinationItems -Property LastWriteTime
