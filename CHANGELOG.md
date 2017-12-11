@@ -1,6 +1,7 @@
 # Change log for xHyper-V
 
 ## Unreleased
+
 * MSFT_xVMHyperV:
   * Added support for configuring automatic snapshots
 
