@@ -198,7 +198,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Test-ParameterValid -Exactly 1
                     Assert-MockCalled -CommandName Get-VMDvdDrive -Exactly 1 `
                         -ParameterFilter { $VMName -eq $script:splatGetDvdDrive.VMName }
@@ -232,7 +232,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Test-ParameterValid -Exactly 1
                     Assert-MockCalled -CommandName Get-VMDvdDrive -Exactly 1 `
                         -ParameterFilter { $VMName -eq $script:splatGetDvdDrive.VMName }
@@ -266,7 +266,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Test-ParameterValid -Exactly 1
                     Assert-MockCalled -CommandName Get-VMDvdDrive -Exactly 1 `
                         -ParameterFilter { $VMName -eq $script:splatGetDvdDrive.VMName }
@@ -348,7 +348,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                     Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 1 `
                         -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
@@ -374,7 +374,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                     Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 0
                     Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 0
@@ -403,7 +403,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                     Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 0
                     Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 1 `
@@ -433,7 +433,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                     Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 0
                     Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 0
@@ -459,7 +459,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                     Assert-MockCalled -CommandName Add-VMDvdDrive -Exactly 0
                     Assert-MockCalled -CommandName Set-VMDvdDrive -Exactly 0
@@ -483,7 +483,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                 }
             }
@@ -500,7 +500,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                 }
             }
@@ -517,7 +517,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                 }
             }
@@ -534,7 +534,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                 }
             }
@@ -551,7 +551,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-TargetResource -Exactly 1
                 }
             }
@@ -636,7 +636,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
                 }
             }
@@ -664,7 +664,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
                     Assert-MockCalled -CommandName Get-VM -Exactly 1 `
                         -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
@@ -707,7 +707,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
                     Assert-MockCalled -CommandName Get-VM -Exactly 1 `
                         -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
@@ -756,7 +756,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
                     Assert-MockCalled -CommandName Get-VM -Exactly 1 `
                         -ParameterFilter { $VMName -eq $script:splatAddDvdDriveNoPath.VMName }
@@ -809,7 +809,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
                     Assert-MockCalled -CommandName Get-VM -Exactly 1 `
                         -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName }
@@ -858,7 +858,7 @@ try
                 }
 
                 It 'all the get mocks should be called' {
-                    Assert-VerifiableMocks
+                    Assert-VerifiableMock
                     Assert-MockCalled -CommandName Get-Module -Exactly 1
                     Assert-MockCalled -CommandName Get-VM -Exactly 1 `
                         -ParameterFilter { $VMName -eq $script:splatAddDvdDrive.VMName }
