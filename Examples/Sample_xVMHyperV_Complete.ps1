@@ -6,9 +6,9 @@ configuration Sample_xVMHyperV_Complete
 
         [Parameter(Mandatory)]
         [string]$VMName,
-        
+
         [Parameter(Mandatory)]
-        [string]$VhdPath,
+        [uint64]$VhdSizeBytes,
 
         [Parameter(Mandatory)]
         [Uint64]$StartupMemory,
@@ -31,18 +31,52 @@ configuration Sample_xVMHyperV_Complete
         [ValidateSet('Off','Paused','Running')]
         [String]$State = 'Off',
 
-        [Switch]$WaitForIP
+        [Switch]$WaitForIP,
+
+        [bool]$AutomaticCheckpointsEnabled
     )
 
     Import-DscResource -module xHyper-V
 
     Node $NodeName
     {
-        # Install HyperV feature, if not installed - Server SKU only
+        # Logic to handle both Client and Server OS
+        # Configuration needs to be compiled on target server
+        $Operatingsystem = Get-CimInstance -ClassName Win32_OperatingSystem
+        if ($Operatingsystem.ProductType -eq 1)
+        {
+            # Client OS, install Hyper-V as OptionalFeature
+            $HyperVDependency = '[WindowsOptionalFeature]HyperV'
+            WindowsOptionalFeature HyperV
+            {
+                Ensure = 'Enable'
+                Name = 'Microsoft-Hyper-V-All'
+            }
+        }
+        else {
+            # Server OS, install HyperV as WindowsFeature
+            $HyperVDependency = '[WindowsFeature]HyperV','[WindowsFeature]HyperVPowerShell'
         WindowsFeature HyperV
         {
             Ensure = 'Present'
             Name   = 'Hyper-V'
+        }
+            WindowsFeature HyperVPowerShell
+            {
+                Ensure = 'Present'
+                Name   = 'Hyper-V-PowerShell'
+            }
+        }
+
+        # Create new VHD
+        xVhd NewVhd
+        {
+            Ensure           = 'Present'
+            Name             = "$VMName-OSDisk.vhdx"
+            Path             = $Path
+            Generation       = 'vhdx'
+            MaximumSizeBytes = $VhdSizeBytes
+            DependsOn        = $HyperVDependency
         }
 
         # Ensures a VM with all the properties
@@ -50,7 +84,7 @@ configuration Sample_xVMHyperV_Complete
         {
             Ensure          = 'Present'
             Name            = $VMName
-            VhdPath         = $VhdPath
+            VhdPath         = (Join-Path -Path $Path -ChildPath "$VMName-OSDisk.vhdx")
             SwitchName      = $SwitchName
             State           = $State
             Path            = $Path
@@ -61,8 +95,9 @@ configuration Sample_xVMHyperV_Complete
             ProcessorCount  = $ProcessorCount
             MACAddress      = $MACAddress
             RestartIfNeeded = $true
-            WaitForIP       = $WaitForIP 
-            DependsOn       = '[WindowsFeature]HyperV'
+            WaitForIP       = $WaitForIP
+            AutomaticCheckpointsEnabled = $AutomaticCheckpointsEnabled
+            DependsOn       = '[xVhd]NewVhd'
         }
     }
 }

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* MSFT_xVMHyperV:
+  * Added support for configuring automatic snapshots
+
 ## 3.9.0.0
 
 * MSFT_xVMHyperV:
