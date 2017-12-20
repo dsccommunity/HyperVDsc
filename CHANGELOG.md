@@ -2,9 +2,15 @@
 
 ## Unreleased
 
+## 3.10.0.0
+
+* MSFT_xVMHyperV:
+  * Added support for configuring automatic snapshots
+
 ## 3.9.0.0
 
 * MSFT_xVMHyperV:
+  * Enable / disable dynamic memory for client and server SKUs in identical way.
   * Increased xVMHyperV StartupMemory and MinimumMemory limits from 17GB to 64GB.
   * EnableGuestService works on localized OS (language independent).
   * Adds missing Hyper-V-PowerShell feature in examples.
