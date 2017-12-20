@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.10.0.0
+
 * MSFT_xVMHyperV:
   * Added support for configuring automatic snapshots
 
