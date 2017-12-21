@@ -22,7 +22,7 @@ Describe 'xVMHyper-V' {
         function Get-VM { [CmdletBinding()] param( [Parameter(ValueFromRemainingArguments)] $Name) }
         # Generation parameter is required for the mocking -ParameterFilter to work
         function New-VM { param ( $Generation) }
-        function Set-VM { }
+        function Set-VM { param ( $Name, $AutomaticCheckpointsEnabled ) }
         function Stop-VM { }
         function Remove-VM { }
         function Get-VMNetworkAdapter { }
@@ -98,6 +98,20 @@ Describe 'xVMHyper-V' {
             $gen2VM['Generation'] = 2;
             return [PSCustomObject] $gen2VM;
         }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'VMWithAutomaticCheckpoints'} -MockWith {
+            $AutomaticCheckPointVM = $stubVM.Clone();
+            $AutomaticCheckPointVM['AutomaticCheckpointsEnabled'] = $true;
+            return [PSCustomObject] $AutomaticCheckPointVM;
+        }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'VMWithoutAutomaticCheckpoints'} -MockWith {
+            $NoAutomaticCheckPointVM = $stubVM.Clone()
+            $NoAutomaticCheckPointVM['AutomaticCheckpointsEnabled'] = $false
+            return [PSCustomObject] $NoAutomaticCheckPointVM
+        }
+        Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'VMAutomaticCheckpointsUnsupported'} -MockWith {
+            $AutomaticCheckPointUnsupportedVM = $stubVM.Clone()
+            return [PSCustomObject] $AutomaticCheckPointUnsupportedVM
+        }
         Mock -CommandName Get-VMIntegrationService -MockWith {return [pscustomobject]@{Enabled=$false;Id=$stubGuestServiceInterfaceId}}
         Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { return $true; }
         Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhd') } -MockWith {
@@ -135,7 +149,10 @@ Describe 'xVMHyper-V' {
                 $targetResource = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.FullName;
                 $targetResource.ContainsKey('EnableGuestService') | Should Be $true;
             }
-
+            It 'Hash table contains key AutomaticCheckpointEnabled' {
+                $targetResource = Get-TargetResource -Name 'VMWithAutomaticCheckpoints' -VhdPath $stubVhdxDisk.FullName;
+                $targetResource.ContainsKey('AutomaticCheckpointsEnabled') | Should Be $true;
+            }
             It 'Throws when Hyper-V Tools are not installed' {
                 # This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { }
@@ -260,6 +277,40 @@ Describe 'xVMHyper-V' {
 
             It 'Returns $true when EnableGuestService is off and "EnableGuestService" is not requested"' {
                 Test-TargetResource -Name 'RunningVM'  @testParams | Should be $true;
+            }
+
+            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'Set-VM' -and $Module -eq 'Hyper-V'} -MockWith {
+                [pscustomobject]@{
+                    parameters = @{
+                        # Does not contains parameter AutomaticCheckpointsEnabled
+                    }
+                }
+            }
+            It 'Throws when AutomaticCheckpointsEnabled is configured but not supported' {
+                { Test-TargetResource -Name 'VMAutomaticCheckpoinstUnsupported' -AutomaticCheckpointsEnabled $true @testParams } | Should Throw;
+            }
+
+            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'Set-VM' -and $Module -eq 'Hyper-V'} -MockWith {
+                [pscustomobject]@{
+                    parameters = @{
+                        'AutomaticCheckpointsEnabled' = ''
+                    }
+                }
+            }
+            It 'Returns $true when AutomaticCheckpointsEnabled is on and requested "AutomaticCheckpointsEnabled" is not requested' {
+                Test-TargetResource -Name 'VMWithAutomaticCheckpoints' @testParams | Should be $true;
+            }
+            It 'Returns $true when AutomaticCheckpointsEnabled is on and requested "AutomaticCheckpointsEnabled" = "$true"' {
+                Test-TargetResource -Name 'VMWithAutomaticCheckpoints' -AutomaticCheckpointsEnabled $true @testParams | Should be $true;
+            }
+            It 'Returns $true when AutomaticCheckpointsEnabled is off and requested "AutomaticCheckpointsEnabled" = "$false"' {
+                Test-TargetResource -Name 'VMWithoutAutomaticCheckpoints' -AutomaticCheckpointsEnabled $false @testParams | Should be $true;
+            }
+            It 'Returns $false when AutomaticCheckpointsEnabled is off and requested "AutomaticCheckpointsEnabled" = "$true"' {
+                Test-TargetResource -Name 'VMWithoutAutomaticCheckpoints' -AutomaticCheckpointsEnabled $true @testParams | Should be $false;
+            }
+            It 'Returns $false when AutomaticCheckpointsEnabled is on and requested "AutomaticCheckpointsEnabled" = "$false"' {
+                Test-TargetResource -Name 'VMWithAutomaticCheckpoints' -AutomaticCheckpointsEnabled $false @testParams | Should be $false;
             }
 
             It 'Returns $true when EnableGuestService is on and requested "EnableGuestService" = "$true"' {
@@ -480,6 +531,59 @@ Describe 'xVMHyper-V' {
                 Assert-MockCalled -CommandName Disable-VMIntegrationService -Exactly -Times 1 -Scope It
             }
 
+            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'Set-VM' -and $Module -eq 'Hyper-V'} -MockWith {
+                [pscustomobject]@{
+                    parameters = @{
+                        # Does not contain parameter AutomaticCheckpointsEnabled
+                    }
+                }
+            }
+            It 'Throws when AutomaticCheckpointsEnabled is configured but not supported' {
+                { Set-TargetResource -Name 'VMAutomaticCheckpointsUnsupported' -AutomaticCheckpointsEnabled $true @testParams } | Should Throw;
+            }
+            It 'Does not call "Set-VM" when "AutomaticCheckpointsEnabled" is unsupported and unspecified' {
+                Set-TargetResource -Name 'VMAutomaticCheckpointsUnsupported' @testParams
+                Assert-MockCalled -CommandName Set-VM -Exactly -Times 0 -Scope It
+            }
+
+            Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'Set-VM' -and $Module -eq 'Hyper-V'} -MockWith {
+                [pscustomobject]@{
+                    parameters = @{
+                        'AutomaticCheckpointsEnabled' = ''
+                    }
+                }
+            }
+            $AutomaticCheckpointsEnabledTestCases = @(
+                @{
+                    VMName = 'VMWithAutomaticCheckpoints'
+                    SetAutomaticCheckpointsEnabled = $true
+                    Assert = 'Does not call "Set-VM"'
+                    Times = 0
+                },
+                @{
+                    VMName = 'VMWithoutAutomaticCheckpoints'
+                    SetAutomaticCheckpointsEnabled = $false
+                    Assert = 'Does not call "Set-VM"'
+                    Times = 0
+                },
+                @{
+                    VMName = 'VMWithAutomaticCheckpoints'
+                    SetAutomaticCheckpointsEnabled = $false
+                    Assert = 'Does call "Set-VM"'
+                    Times = 1
+                },
+                @{
+                    VMName = 'VMWithoutAutomaticCheckpoints'
+                    SetAutomaticCheckpointsEnabled = $true
+                    Assert = 'Does call "Set-VM"'
+                    Times = 1
+                }
+            )
+            It '<Assert> on VM <VMName> when "AutomaticCheckpointsEnabled" is set to "<SetAutomaticCheckpointsEnabled>"' -TestCases $AutomaticCheckpointsEnabledTestCases {
+                Param($VMName,$SetAutomaticCheckpointsEnabled,$Times)
+                Set-TargetResource -Name $VMName -AutomaticCheckpointsEnabled $SetAutomaticCheckpointsEnabled @testParams
+                Assert-MockCalled -CommandName Set-VM -ParameterFilter {$Name -eq $VMName -and $AutomaticCheckpointsEnabled -eq $SetAutomaticCheckpointsEnabled} -Exactly -Times $Times -Scope It
+            }
             It 'Disables dynamic memory of RuningVM if only StartupMemory specified' {
                 Mock Set-VMProperty -MockWith { }
                 Set-TargetResource -Name 'RunningVM' -StartupMemory 4GB @testParams
@@ -524,7 +628,6 @@ Describe 'xVMHyper-V' {
                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { }
                 { Set-TargetResource -Name 'RunningVM' @testParams } | Should Throw;
             }
-
         } #end context Validates Set-TargetResource Method
 
         Context 'Validates Test-VMSecureBoot Method' {
