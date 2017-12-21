@@ -347,10 +347,11 @@ function GetItemToCopy
             {
                 #Special behavior for the Type property based on SourcePath
                 #This relies on SourcePath preceeding Type in the list of keys (the reason for using OrderedDictionary)
-                if (Test-Path $returnValue.SourcePath -PathType Leaf ) {
+                if (Test-Path $returnValue.SourcePath -PathType Leaf )
+                {
                     #If the sourcepath resolves to a file, set the default to File instad of Directory
                     $DefaultValues.Type = 'File'
-                 }
+                }
             }
             $returnValue[$_] = $DefaultValues[$_]
         }
