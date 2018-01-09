@@ -1,5 +1,5 @@
 # sample values used for testing.
-$vhdPath = "C:\test_vhds\RenameComputer.Vhd"
+$sampleVhdPath = "C:\test_vhds\RenameComputer.Vhd"
 
 # sample text file that you want to copy in the VHD.
 $sampletxt  = "C:\sample.txt"
@@ -39,10 +39,10 @@ Configuration xVhdD_CopyFileOrFolder
 }
 
 # Copy File/Folder example
-xVhdD_CopyFileOrFolder -vhdPath $vhdPath -itemToCopy $sampletxt -relativeDestinationPath $sampleVhdDestinationPath
+xVhdD_CopyFileOrFolder -vhdPath $sampleVhdPath -itemToCopy $sampletxt -relativeDestinationPath $sampleVhdDestinationPath
 Start-DscConfiguration -ComputerName localhost -Path $pwd\xVhdD_CopyFileOrFolder\ -Wait -Verbose
 
-xVhdD_CopyFileOrFolder -vhdPath $vhdPath -itemToCopy $samplefolder -relativeDestinationPath $sampleVhdDestinationPath
+xVhdD_CopyFileOrFolder -vhdPath $sampleVhdPath -itemToCopy $samplefolder -relativeDestinationPath $sampleVhdDestinationPath
 Start-DscConfiguration -ComputerName localhost -Path $pwd\xVhdD_CopyFileOrFolder\ -Wait -Verbose
 
 Configuration RemoveFileOrFolderFromVHD
@@ -68,7 +68,7 @@ Configuration RemoveFileOrFolderFromVHD
 
 }
 
-RemoveFileOrFolderFromVHD -vhdPath $vhdPath -relativeDestinationPath $sampleVhdDestinationPath
+RemoveFileOrFolderFromVHD -vhdPath $sampleVhdPath -relativeDestinationPath $sampleVhdDestinationPath
 Start-DscConfiguration -ComputerName localhost -Path $pwd\RemoveFileOrFolderFromVHD\ -Wait -Verbose
 
 Configuration ChangeAttribute
@@ -94,7 +94,7 @@ Configuration ChangeAttribute
         }
 }
 
-ChangeAttribute -vhdPath $vhdPath -relativeDestinationPath $sampleVhdDestinationPath -attribute 'ReadOnly'
+ChangeAttribute -vhdPath $sampleVhdPath -relativeDestinationPath $sampleVhdDestinationPath -attribute 'ReadOnly'
 Start-DscConfiguration -ComputerName localhost -Path $pwd\RemoveFileOrFolderFromVHD\ -Wait -Verbose
 
 # End to end sample for x-Hyper-v
@@ -104,14 +104,12 @@ Configuration Sample_EndToEndXHyperV_RunningVM
     param
     (
         [Parameter(Mandatory)]
-        $baseVhdPath,
-
+        $vhdPath,
         [Parameter(Mandatory)]
         $name,
         [Parameter(Mandatory)]
         [validatescript({Test-Path $_})]
         $unattendedFilePathToCopy
-
     )
 
     Import-DscResource -module xHyper-V
@@ -130,9 +128,9 @@ Configuration Sample_EndToEndXHyperV_RunningVM
 
             Ensure           = "Present"
             Name             = $name
-            Path             = (Split-Path $baseVhdPath)
+            Path             = (Split-Path $vhdPath)
             Generation       = "vhd"
-            ParentPath       =  $baseVhdPath
+            ParentPath       =  $vhdPath
 
     }
 
@@ -153,7 +151,7 @@ Configuration Sample_EndToEndXHyperV_RunningVM
     {
         Name = "$($name)_vm"
         SwitchName = "Test-Switch"
-        VhdPath = Join-path (Split-Path $baseVhdPath) "$name.vhd"
+        VhdPath = Join-path (Split-Path $vhdPath) "$name.vhd"
         ProcessorCount = 2
         MaximumMemory  = 1GB
         MinimumMemory = 512MB
@@ -166,7 +164,7 @@ Configuration Sample_EndToEndXHyperV_RunningVM
 }
 
 # Create a mof file.
-Sample_EndToEndXHyperV_RunningVM -baseVhdPath "C:\test_vhds\testvhd.vhd" -name TestMachine -unattendedFilePathToCopy C:\temp\unattended.xml
+Sample_EndToEndXHyperV_RunningVM -vhdPath $sampleVhdPath -name TestMachine -unattendedFilePathToCopy C:\temp\unattended.xml
 
 # Run the configuration on localhost.
 Start-DscConfiguration -Path $pwd\Sample_EndToEndXHyperV_RunningVM  -ComputerName localhost -Verbose -Wait
