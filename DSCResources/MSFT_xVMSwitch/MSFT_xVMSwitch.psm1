@@ -175,7 +175,7 @@ function Set-TargetResource
         [String]
         $BandwidthReservationMode = "NA",
 
-        [parameter()]
+        [Parameter()]
         [ValidateSet('Dynamic','HyperVPort')]
         [String]
         $LoadBalancingAlgorithm,
@@ -406,7 +406,7 @@ function Test-TargetResource
         [String]
         $BandwidthReservationMode = "NA",
 
-        [parameter()]
+        [Parameter()]
         [ValidateSet('Dynamic','HyperVPort')]
         [String]
         $LoadBalancingAlgorithm,
@@ -549,13 +549,16 @@ function Test-TargetResource
                         }
                     }
 
-                    if($PSBoundParameters.ContainsKey('LoadBalancingAlgorithm')) {
+                    if($PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
+                    {
                         Write-Verbose -Message ($LocalizedData.CheckingLoadBalancingAlgorithm -f $Name)
                         $loadBalancingAlgorithm = ($switch | Get-VMSwitchTeam).LoadBalancingAlgorithm.toString()
-                        if($loadBalancingAlgorithm -ne $LoadBalancingAlgorithm) {
+                        if($loadBalancingAlgorithm -ne $LoadBalancingAlgorithm)
+                        {
                             return $false
                         }
-                        else {
+                        else
+                        {
                             Write-Verbose -Message ($LocalizedData.LoadBalancingAlgorithmCorrect -f $Name)
                         }
                     }
