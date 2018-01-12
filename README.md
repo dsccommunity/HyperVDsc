@@ -418,8 +418,8 @@ Manages virtual switches in a Hyper-V host.
 * **`[String]` BandwidthReservationMode** _(Write)_: Specify the QoS mode used
  (options other than NA are only supported on Hyper-V 2012+).
  The default value is NA. { Default | Weight | Absolute | None | *NA* }.
-* **`[String]` LoadBalancingAlgorithm** _(Write)_: Specify the Load Balancing algorithm which should be used for the embedded NIC teaming
-{ Dynamic | HyperVPort }.
+* **`[String]` LoadBalancingAlgorithm** _(Write)_: Specify the Load Balancing algorithm which should be used for the embedded NIC teaming.
+ { Dynamic | HyperVPort }.
 * **`[String]` Ensure** _(Write)_: Ensures that the VM Switch is Present or Absent.
  The default value is Present. { *Present* | Absent }.
 
