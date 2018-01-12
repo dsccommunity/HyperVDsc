@@ -26,6 +26,9 @@ ConvertFrom-StringData @'
     CorrectNetAdapterInterfaces = Switch '{0}' has a correct list of network adapters
     CheckEnableEmbeddedTeaming = Checking if Switch '{0}' has correct EnableEmbeddedTeaming ...
     EnableEmbeddedTeamingCorrect = Switch '{0}' has correct EnableEmbeddedTeaming or it does not apply to this OS
+    SetLoadBalancingAlgorithmMessage = Set Load Balancing Algorithm of Switch '{0}' to '{1}'
+    CheckingLoadBalancingAlgorithm = Checking if Switch '{0}' has correct LoadBalancingAlgorithm ...
+    LoadBalancingAlgorithmCorrect = Switch '{0}' has correct LoadBalancingAlgorithm
 
     SETServer2016Error = Embedded teaming is only supported on Windows Server 2016
     HyperVNotInstalledError = Please ensure that the Hyper-V role is installed with its PowerShell module
