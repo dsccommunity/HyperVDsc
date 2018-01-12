@@ -69,15 +69,14 @@ function Get-TargetResource
                 $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription -ErrorAction SilentlyContinue).Name
                 $description = $switch.NetAdapterInterfaceDescription
 
-                $loadBalancingAlgorithm = ($switch | Get-VMSwitchTeam).LoadBalancingAlgorithm.toString()
-
+                $loadBalancingAlgorithm = 'N/A'
             }
             else
             {
                 $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions).Name
                 $description = $switch.NetAdapterInterfaceDescriptions
 
-                $loadBalancingAlgorithm = 'N/A'
+                $loadBalancingAlgorithm = ($switch | Get-VMSwitchTeam).LoadBalancingAlgorithm.toString()
             }
         }
         else
