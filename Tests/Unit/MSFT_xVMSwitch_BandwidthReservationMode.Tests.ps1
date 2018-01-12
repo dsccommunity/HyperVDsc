@@ -105,6 +105,41 @@ try
 
             }
 
+            function Get-VMSwitchTeam
+            {
+
+            }
+
+            function Set-VMSwitchTeam
+            {
+
+            }
+
+            <#
+                Mocks Get-VMSwitchTeam and will return a moked VMSwitchTeam
+            #>
+            Mock -CommandName Get-VMSwitchTeam -MockWith {
+                return $global:mockedVMSwitchTeam
+            }
+
+            <#
+                Mocks Set-VMSwitchTeam and will return a moked VMSwitchTeam
+            #>
+            Mock -CommandName Set-VMSwitchTeam -MockWith {
+                param
+                (
+                    [parameter(Mandatory=$true)]
+                    [ValidateSet('Dynamic','HyperVPort')]
+                    [String]
+                    $LoadBalancingAlgorithm,
+
+                    [String]
+                    $Name
+                )
+
+                $global:mockedVMSwitchTeam.LoadBalancingAlgorithm = $LoadBalancingAlgorithm
+            }
+
             <#
                 Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
