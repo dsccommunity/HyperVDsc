@@ -107,7 +107,7 @@ function Get-TargetResource
     {
         $returnValue['BandwidthReservationMode'] = $switch.BandwidthReservationMode
     }
-    else 
+    else
     {
         $returnValue['BandwidthReservationMode'] = 'NA'
     }
@@ -236,7 +236,7 @@ function Set-TargetResource
                     $removeReaddSwitch = $true
                 }
             }
-            
+
             if (($BandwidthReservationMode -ne "NA") -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
             {
                 Write-Verbose -Message ($LocalizedData.BandwidthReservationModeIncorrect -f $Name)
@@ -318,7 +318,7 @@ function Set-TargetResource
                 }
             }
             else
-            { 
+            {
                 $parameters["SwitchType"] = $Type
             }
 
@@ -326,7 +326,7 @@ function Set-TargetResource
             {
                 $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
             }
-            
+
             $switch = New-VMSwitch @parameters
             Write-Verbose -Message ($LocalizedData.PresentCorrect -f $Name, $Ensure)
         }
@@ -367,8 +367,8 @@ function Set-TargetResource
 .PARAMETER BandwidthReservationMode
     Type of Bandwidth Reservation Mode to use for the switch.
 
-.PARAMETER BandwidthReservationMode
-    Type of Bandwidth Reservation Mode to use for the switch.
+.PARAMETER LoadBalancingAlgorithm
+    The load balancing algorithm that this switch team use.
 
 .PARAMETER Ensure
     Whether switch should be present or absent.
@@ -495,7 +495,7 @@ function Test-TargetResource
                         {
                             $adapter = Get-NetAdapter -Name $NetAdapterName -ErrorAction SilentlyContinue
                         }
-                        catch 
+                        catch
                         {
                             # There are scenarios where the SilentlyContinue error action is not honoured,
                             # so this block serves to handle those and the write-verbose message is here
@@ -513,7 +513,7 @@ function Test-TargetResource
                             Write-Verbose -Message ($LocalizedData.NetAdapterInterfaceCorrect -f $Name)
                         }
                     }
-                    else 
+                    else
                     {
                         Write-Verbose -Message ($LocalizedData.CheckingNetAdapterInterfaces -f $Name)
                         if ($null -ne $switch.NetAdapterInterfaceDescriptions)
@@ -524,18 +524,18 @@ function Test-TargetResource
                                 Write-Verbose -Message ($LocalizedData.IncorrectNetAdapterInterfaces -f $Name)
                                 return $false
                             }
-                            else 
+                            else
                             {
                                 Write-Verbose -Message ($LocalizedData.CorrectNetAdapterInterfaces -f $Name)
                             }
                         }
-                        else 
+                        else
                         {
-                            Write-Verbose -Message ($LocalizedData.IncorrectNetAdapterInterfaces -f $Name)  
+                            Write-Verbose -Message ($LocalizedData.IncorrectNetAdapterInterfaces -f $Name)
                             return $false
                         }
-                    }  
-                
+                    }
+
                     if ($PSBoundParameters.ContainsKey("AllowManagementOS"))
                     {
                         Write-Verbose -Message ($LocalizedData.CheckAllowManagementOS -f $Name)
