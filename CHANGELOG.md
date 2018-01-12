@@ -1,6 +1,8 @@
 # Change log for xHyper-V
 
 ## Unreleased
+* MSFT_xVMSwitch:
+  * Added parameter ot specify the Load Balancing Algorithm of a vSwitch with Switch Embedded Teaming (SET)
 
 ## 3.10.0.0
 
