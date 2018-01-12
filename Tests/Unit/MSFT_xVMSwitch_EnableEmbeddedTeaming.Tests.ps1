@@ -250,13 +250,6 @@ try
                 $global:mockedVMSwitchTeam.LoadBalancingAlgorithm = $LoadBalancingAlgorithm
             }
 
-            <#
-                Mocks Set-VMSwitchTeam and will return a moked VMSwitchTeam
-            #>
-            Mock -CommandName Get-VMSwitchTeam -MockWith {
-                return $global:mockedVMSwitchTeam
-            }
-
             # Mocks Get-NetAdapter which returns a simplified network adapter
             Mock -CommandName Get-NetAdapter -MockWith {
                 return @(
