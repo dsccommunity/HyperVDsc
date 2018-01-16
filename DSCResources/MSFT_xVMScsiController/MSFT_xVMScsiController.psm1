@@ -62,9 +62,10 @@ function Get-TargetResource
         $ensure = 'Present'
     }
 
-    Write-Output -InputObject @{
+    return @{
         VMName           = $Controller.VMName
         ControllerNumber = $Controller.ControllerNumber
+        RestartIfNeeded  = $false
         Ensure           = $ensure
     }
 }

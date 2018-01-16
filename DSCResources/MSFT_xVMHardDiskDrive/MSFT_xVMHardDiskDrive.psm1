@@ -60,7 +60,7 @@ function Get-TargetResource
         $ensure = 'Present'
     }
 
-    Write-Output -InputObject @{
+    return @{
         VMName             = $VMName
         Path               = $hardDiskDrive.Path
         ControllerType     = $hardDiskDrive.ControllerType
