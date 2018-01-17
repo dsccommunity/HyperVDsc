@@ -12,4 +12,5 @@ ConvertFrom-StringData @'
     CannotUpdatePropertiesOnlineError = Can not change properties for VM '{0}' in '{1}' state unless 'RestartIfNeeded' is set to true.
     WaitForVMIPAddressTimeoutError    = Waiting for VM '{0}' IP address timed out after {1} seconds.
     RoleMissingError                  = Please ensure that '{0}' role is installed with its PowerShell module.
+    MoreThanOneVMExistsError          = More than one VM with the name '{0}' exists.
 '@
