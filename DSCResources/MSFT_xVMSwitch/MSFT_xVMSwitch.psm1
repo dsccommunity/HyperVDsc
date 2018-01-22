@@ -69,7 +69,7 @@ function Get-TargetResource
                 $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription -ErrorAction SilentlyContinue).Name
                 $description = $switch.NetAdapterInterfaceDescription
 
-                $loadBalancingAlgorithm = 'N/A'
+                $loadBalancingAlgorithm = 'NA'
             }
             else
             {
