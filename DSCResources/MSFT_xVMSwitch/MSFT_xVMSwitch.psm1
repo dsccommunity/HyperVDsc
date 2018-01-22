@@ -68,11 +68,15 @@ function Get-TargetResource
             {
                 $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescription -ErrorAction SilentlyContinue).Name
                 $description = $switch.NetAdapterInterfaceDescription
+
+                $loadBalancingAlgorithm = 'NA'
             }
             else
             {
                 $netAdapterName = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions).Name
                 $description = $switch.NetAdapterInterfaceDescriptions
+
+                $loadBalancingAlgorithm = ($switch | Get-VMSwitchTeam).LoadBalancingAlgorithm.toString()
             }
         }
         else
@@ -87,13 +91,14 @@ function Get-TargetResource
     }
 
     $returnValue = @{
-        Name                  = $switch.Name
-        Type                  = $switch.SwitchType
-        NetAdapterName        = [string[]]$netAdapterName
-        AllowManagementOS     = $switch.AllowManagementOS
-        EnableEmbeddedTeaming = $switch.EmbeddedTeamingEnabled
-        Ensure                = $ensure
-        Id                    = $switch.Id
+        Name                    = $switch.Name
+        Type                    = $switch.SwitchType
+        NetAdapterName          = [string[]]$netAdapterName
+        AllowManagementOS       = $switch.AllowManagementOS
+        EnableEmbeddedTeaming   = $switch.EmbeddedTeamingEnabled
+        LoadBalancingAlgorithm  = $loadBalancingAlgorithm
+        Ensure                  = $ensure
+        Id                      = $switch.Id
         NetAdapterInterfaceDescription = $description
     }
 
@@ -101,7 +106,7 @@ function Get-TargetResource
     {
         $returnValue['BandwidthReservationMode'] = $switch.BandwidthReservationMode
     }
-    else 
+    else
     {
         $returnValue['BandwidthReservationMode'] = 'NA'
     }
@@ -130,6 +135,9 @@ function Get-TargetResource
 
 .PARAMETER BandwidthReservationMode
     Type of Bandwidth Reservation Mode to use for the switch.
+
+.PARAMETER LoadBalancingAlgorithm
+    The load balancing algorithm that this switch team use.
 
 .PARAMETER Ensure
     Whether switch should be present or absent.
@@ -165,6 +173,11 @@ function Set-TargetResource
         [ValidateSet("Default","Weight","Absolute","None","NA")]
         [String]
         $BandwidthReservationMode = "NA",
+
+        [Parameter()]
+        [ValidateSet('Dynamic','HyperVPort')]
+        [String]
+        $LoadBalancingAlgorithm,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -222,7 +235,7 @@ function Set-TargetResource
                     $removeReaddSwitch = $true
                 }
             }
-            
+
             if (($BandwidthReservationMode -ne "NA") -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
             {
                 Write-Verbose -Message ($LocalizedData.BandwidthReservationModeIncorrect -f $Name)
@@ -304,7 +317,7 @@ function Set-TargetResource
                 }
             }
             else
-            { 
+            {
                 $parameters["SwitchType"] = $Type
             }
 
@@ -312,9 +325,16 @@ function Set-TargetResource
             {
                 $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
             }
-            
-            $null = New-VMSwitch @parameters 
+
+            $switch = New-VMSwitch @parameters
             Write-Verbose -Message ($LocalizedData.PresentCorrect -f $Name, $Ensure)
+        }
+
+        # Set the load balancing algorithm if it's a SET Switch and the paramter is specified
+        if($EnableEmbeddedTeaming -eq $true -and $PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
+        {
+            Write-Verbose -Message ($LocalizedData.SetLoadBalancingAlgorithmMessage -f $Name, $LoadBalancingAlgorithm)
+            Set-VMSwitchTeam -Name $switch.Name -LoadBalancingAlgorithm $LoadBalancingAlgorithm -Verbose
         }
     }
     # Ensure is set to "Absent", remove the switch
@@ -345,6 +365,9 @@ function Set-TargetResource
 
 .PARAMETER BandwidthReservationMode
     Type of Bandwidth Reservation Mode to use for the switch.
+
+.PARAMETER LoadBalancingAlgorithm
+    The load balancing algorithm that this switch team use.
 
 .PARAMETER Ensure
     Whether switch should be present or absent.
@@ -381,6 +404,11 @@ function Test-TargetResource
         [ValidateSet("Default","Weight","Absolute","None","NA")]
         [String]
         $BandwidthReservationMode = "NA",
+
+        [Parameter()]
+        [ValidateSet('Dynamic','HyperVPort')]
+        [String]
+        $LoadBalancingAlgorithm,
 
         [Parameter()]
         [ValidateSet("Present","Absent")]
@@ -466,7 +494,7 @@ function Test-TargetResource
                         {
                             $adapter = Get-NetAdapter -Name $NetAdapterName -ErrorAction SilentlyContinue
                         }
-                        catch 
+                        catch
                         {
                             # There are scenarios where the SilentlyContinue error action is not honoured,
                             # so this block serves to handle those and the write-verbose message is here
@@ -484,7 +512,7 @@ function Test-TargetResource
                             Write-Verbose -Message ($LocalizedData.NetAdapterInterfaceCorrect -f $Name)
                         }
                     }
-                    else 
+                    else
                     {
                         Write-Verbose -Message ($LocalizedData.CheckingNetAdapterInterfaces -f $Name)
                         if ($null -ne $switch.NetAdapterInterfaceDescriptions)
@@ -495,18 +523,18 @@ function Test-TargetResource
                                 Write-Verbose -Message ($LocalizedData.IncorrectNetAdapterInterfaces -f $Name)
                                 return $false
                             }
-                            else 
+                            else
                             {
                                 Write-Verbose -Message ($LocalizedData.CorrectNetAdapterInterfaces -f $Name)
                             }
                         }
-                        else 
+                        else
                         {
-                            Write-Verbose -Message ($LocalizedData.IncorrectNetAdapterInterfaces -f $Name)  
+                            Write-Verbose -Message ($LocalizedData.IncorrectNetAdapterInterfaces -f $Name)
                             return $false
                         }
-                    }  
-                
+                    }
+
                     if ($PSBoundParameters.ContainsKey("AllowManagementOS"))
                     {
                         Write-Verbose -Message ($LocalizedData.CheckAllowManagementOS -f $Name)
@@ -517,6 +545,20 @@ function Test-TargetResource
                         else
                         {
                             Write-Verbose -Message ($LocalizedData.AllowManagementOSCorrect -f $Name)
+                        }
+                    }
+
+                    if($PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
+                    {
+                        Write-Verbose -Message ($LocalizedData.CheckingLoadBalancingAlgorithm -f $Name)
+                        $loadBalancingAlgorithm = ($switch | Get-VMSwitchTeam).LoadBalancingAlgorithm.toString()
+                        if($loadBalancingAlgorithm -ne $LoadBalancingAlgorithm)
+                        {
+                            return $false
+                        }
+                        else
+                        {
+                            Write-Verbose -Message ($LocalizedData.LoadBalancingAlgorithmCorrect -f $Name)
                         }
                     }
                 }

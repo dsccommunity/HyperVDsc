@@ -5,6 +5,8 @@
 * Added the following resources:
   * MSFT_xVMHardDiskDrive to manage additional attached VHD/Xs.
   * MSFT_xVMScsiController to manage virtual machine SCSI controllers.
+* MSFT_xVMSwitch:
+  * Added parameter ot specify the Load Balancing Algorithm of a vSwitch with Switch Embedded Teaming (SET)
 
 ## 3.10.0.0
 
