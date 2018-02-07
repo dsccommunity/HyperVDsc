@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.11.0.0
+
 * Added the following resources:
   * MSFT_xVMHardDiskDrive to manage additional attached VHD/Xs.
   * MSFT_xVMScsiController to manage virtual machine SCSI controllers.

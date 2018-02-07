@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '3.10.0.0'
+ModuleVersion = '3.11.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'f5a5f169-7026-4053-932a-19a7c37b1ca5'
@@ -47,8 +47,11 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* MSFT_xVMHyperV:
-  * Added support for configuring automatic snapshots
+        ReleaseNotes = '* Added the following resources:
+  * MSFT_xVMHardDiskDrive to manage additional attached VHD/Xs.
+  * MSFT_xVMScsiController to manage virtual machine SCSI controllers.
+* MSFT_xVMSwitch:
+  * Added parameter ot specify the Load Balancing Algorithm of a vSwitch with Switch Embedded Teaming (SET)
 
 '
 
@@ -56,6 +59,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
