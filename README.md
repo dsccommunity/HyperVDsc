@@ -46,11 +46,13 @@ A full list of changes in each version can be found in the [change log](CHANGELO
  into a VM.
 * [**xVMDvdDrive**](#xvmdvddrive) manages DVD drives attached to a Hyper-V
  virtual machine.
+* [**xVMHardDiskDrive**](#xvmharddiskdrive) manages VHD(X)s attached to a Hyper-V virtual machine.
 * [**xVMHost**](#xvmhost) manages Hyper-V host settings.
 * [**xVMHyperV**](#xvmhyperv) manages VMs in a Hyper-V host.
 * [**xVMNetworkAdapter**](#xvmnetworkadapter) manages VMNetadapters attached to
  a Hyper-V virtual machine or the management OS.
 * [**xVMProcessor**](#xvmprocessor) manages Hyper-V virtual machine processor options.
+* [**xVMScsiController**](#xvmscsicontroller) manages the SCSI controllers attached to a Hyper-V virtual machine.
 * [**xVMSwitch**](#xvmswitch) manages virtual switches in a Hyper-V host.
 
 ### xVHD
@@ -173,6 +175,45 @@ None
 #### Examples xVMDvdDrive
 
 * [Create a VM, given a VHDX and add a DVD Drives](/Examples/Sample_xVMHyperV_SimpleWithDVDDrive.ps1)
+
+### xVMHardDiskDrive
+
+Manages VHD(X)s attached to a Hyper-V virtual machine.
+When ControllerNumber or ControllerLocation is not provided, the same logic as
+ Set-VMHardDiskDrive cmdlet is used.
+
+#### Requirements for xVMHardDiskDrive
+
+* The Hyper-V Role has to be installed on the machine.
+* The Hyper-V PowerShell module has to be installed on the machine.
+
+#### Parameters for xVMHardDiskDrive
+
+* **`[String]` VMName** _(Key)_: Specifies the name of the virtual machine
+ whose hard disk drive is to be manipulated.
+* **`[String]` VhdPath** _(Key)_: Specifies the full path of the VHD file to be
+ manipulated.
+* **`[String]` ControllerType** _(Write)_: Specifies the type of controller to which
+ the hard disk drive is to be set. The default value is SCSI. { *SCSI* | IDE }.
+* **`[Uint32]` ControllerNumber** _(Write)_: Specifies the number of the controller
+ to which the hard disk drive is to be set.
+ For IDE: { 0, 1 }, for SCSI: { 0 | 1 | 2 | 3 }.
+ Defaults to 0.
+* **`[Uint32]` ControllerLocation** _(Write)_: Specifies the number of the location
+ on the controller at which the hard disk drive is to be set.
+ For IDE: { 0 | 1 }, for SCSI: { 0 .. 63 }.
+ Defaults to 0.
+* **`[String]` Ensure** _(Write)_: Specifies if the hard disk drive should exist or
+ not. The default value is Present. { *Present* | Absent }.
+
+#### Read-Only Properties from Get-TargetResource for xVMHardDiskDrive
+
+None
+
+#### Examples xVMHardDiskDrive
+
+* [Create a VM, with an OS drive and an additional data drive](/Examples/Sample_xVMHardDiskDrive_VMWithExtraDisk.ps1)
+* [Create a VM, with an OS drive and 4 data drives](/Examples/Sample_xVMHardDiskDrive_VMWith4AdditionalDisks.ps1)
 
 ### xVMHost
 
@@ -395,6 +436,33 @@ None
 
 * [Create a secure boot gen 2 VM for a given VHD with nested virtualisation enabled](/Examples/Sample_xVMHyperV_SimpleWithNestedVirtualization.ps1)
 
+### xVMScsiController
+
+Manages the SCSI controllers attached to a Hyper-V virtual machine.
+When removing a controller, all the disks still connected to the controller will be detached.
+
+#### Requirements for xVMScsiController
+
+* The Hyper-V Role has to be installed on the machine.
+* The Hyper-V PowerShell module has to be installed on the machine.
+
+#### Parameters for xVMScsiController
+
+* **`[String]` VMName** _(Key)_: Specifies the name of the virtual machine whose SCSI
+ controller is to be manipulated.
+* **`[Uint32]` ControllerNumber** _(Key)_: Specifies the number of the controller to
+ be set: { 0 | 1 | 2 | 3 }.
+* **`[String]` Ensure** _(Write)_: Specifies if the SCSI controller should exist or
+ not. The default value is Present. { *Present* | Absent }.
+
+#### Read-Only Properties from Get-TargetResource for xVMScsiController
+
+None
+
+#### Examples xVMScsiController
+
+* [Add a secondary SCSI controller](/Examples/Sample_xVMScsiController_AddControllers.ps1)
+
 ### xVMSwitch
 
 Manages virtual switches in a Hyper-V host.
@@ -418,6 +486,8 @@ Manages virtual switches in a Hyper-V host.
 * **`[String]` BandwidthReservationMode** _(Write)_: Specify the QoS mode used
  (options other than NA are only supported on Hyper-V 2012+).
  The default value is NA. { Default | Weight | Absolute | None | *NA* }.
+* **`[String]` LoadBalancingAlgorithm** _(Write)_: Specify the Load Balancing algorithm which should be used for the embedded NIC teaming.
+ { Dynamic | HyperVPort }.
 * **`[String]` Ensure** _(Write)_: Ensures that the VM Switch is Present or Absent.
  The default value is Present. { *Present* | Absent }.
 

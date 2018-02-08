@@ -71,6 +71,11 @@ try
                 [string]
                 $BandwidthReservationMode,
 
+                [parameter()]
+                [ValidateSet('Dynamic','HyperVPort')]
+                [String]
+                $LoadBalancingAlgorithm,
+
                 [Parameter()]
                 [bool]
                 $AllowManagementOS = $false
@@ -86,6 +91,11 @@ try
             if ($BandwidthReservationMode -ne 'NA')
             {
                 $mockedVMSwitch['BandwidthReservationMode'] = $BandwidthReservationMode
+            }
+
+            if($PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
+            {
+                $mockedVMSwitch['LoadBalancingAlgorithm'] = $LoadBalancingAlgorithm
             }
 
             return [PsObject]$mockedVMSwitch
@@ -109,6 +119,16 @@ try
             }
 
             function Remove-VMSwitch
+            {
+
+            }
+
+            function Get-VMSwitchTeam
+            {
+
+            }
+
+            function Set-VMSwitchTeam
             {
 
             }
@@ -162,6 +182,15 @@ try
                 )
 
                 $global:mockedVMSwitch = New-MockedVMSwitch -Name $Name -BandwidthReservationMode $MinimumBandwidthMode -AllowManagementOS $AllowManagementOS
+                #is SET is enabled mok a VMSwitchTeam
+                if($EnableEmbeddedTeaming){
+                    $global:mockedVMSwitchTeam = [PSCustomObject]@{
+                        Name = "TestSwitch"
+                        Id = [Guid]::NewGuid()
+                        TeamingMode = 'SwitchIndependent'
+                        LoadBalancingAlgorithm = 'Dynamic'
+                    }
+                }
                 return $global:mockedVMSwitch
             }
 
@@ -194,6 +223,31 @@ try
             #>
             Mock -CommandName Remove-VMSwitch -MockWith {
                 $global:mockedVMSwitch = $null
+            }
+
+            <#
+                Mocks Get-VMSwitchTeam and will return a moked VMSwitchTeam
+            #>
+            Mock -CommandName Get-VMSwitchTeam -MockWith {
+                return $global:mockedVMSwitchTeam
+            }
+
+            <#
+                Mocks Set-VMSwitchTeam and will return a moked VMSwitchTeam
+            #>
+            Mock -CommandName Set-VMSwitchTeam -MockWith {
+                param
+                (
+                    [parameter(Mandatory=$true)]
+                    [ValidateSet('Dynamic','HyperVPort')]
+                    [String]
+                    $LoadBalancingAlgorithm,
+
+                    [String]
+                    $Name
+                )
+
+                $global:mockedVMSwitchTeam.LoadBalancingAlgorithm = $LoadBalancingAlgorithm
             }
 
             # Mocks Get-NetAdapter which returns a simplified network adapter
@@ -301,6 +355,55 @@ try
                     AllowManagementOS = $true
                     EnableEmbeddedTeaming = $true
                     BandwidthReservationMode = "NA"
+                    Ensure = "Present"
+                }
+
+                It "Should return present in the get method" {
+                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Present"
+                }
+
+                It "Should return false in the test method" {
+                    Test-TargetResource @testParams | Should Be $false
+                }
+
+                It "Should run the set method without exceptions" {
+                    Set-TargetResource @testParams
+                    Assert-MockCalled -CommandName "Remove-VMSwitch" -Times 1
+                    Assert-MockCalled -CommandName "New-VMSwitch" -Times 1
+                }
+            }
+
+            Context "A virtual switch with embedded teaming exists but does not use the correct LB algorithm" {
+                $global:mockedVMSwitch = @{
+                    Name = "TestSwitch"
+                    SwitchType = "External"
+                    AllowManagementOS = $true
+                    EmbeddedTeamingEnabled = $true
+                    LoadBalancingAlgorithm = 'Dynamic'
+                    Id = [Guid]::NewGuid()
+                    NetAdapterInterfaceDescriptions = @("Microsoft Network Adapter Multiplexor Driver #1", "Microsoft Network Adapter Multiplexor Driver #2")
+                }
+
+                Mock -CommandName Get-NetAdapter -MockWith {
+                    return @(
+                        [PSCustomObject]@{
+                            Name = 'NIC01'
+                            InterfaceDescription = "Microsoft Network Adapter Multiplexor Driver #1"
+                        }
+                        [PSCustomObject]@{
+                            Name = 'NIC2'
+                            InterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver #2'
+                        }
+                    )
+                }
+
+                $testParams = @{
+                    Name = "TestSwitch"
+                    Type = "External"
+                    NetAdapterName = @("NIC1", "NIC2")
+                    AllowManagementOS = $true
+                    EnableEmbeddedTeaming = $true
+                    LoadBalancingAlgorithm = 'HyperVPort'
                     Ensure = "Present"
                 }
 

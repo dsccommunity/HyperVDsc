@@ -227,6 +227,107 @@ try
         }
     } # describe HyperVCommon\WaitVMIPAddress
 
+    Describe 'HyperVCommon\ConvertTo-TimeSpan' {
+
+        It 'Should convert 60 seconds to "System.TimeSpan" of 1 minute' {
+            $testSeconds = 60
+
+            $result = ConvertTo-TimeSpan -TimeInterval $testSeconds -TimeIntervalType Seconds
+
+            $result.TotalMinutes | Should Be 1
+        }
+
+        It 'Should convert 60 minutes to "System.TimeSpan" of 60 minutes' {
+            $testMinutes = 60
+
+            $result = ConvertTo-TimeSpan -TimeInterval $testMinutes -TimeIntervalType Minutes
+
+            $result.TotalHours | Should Be 1
+        }
+
+        It 'Should convert 48 hours to "System.TimeSpan" of 2 days' {
+            $testHours = 48
+
+            $result = ConvertTo-TimeSpan -TimeInterval $testHours -TimeIntervalType Hours
+
+            $result.TotalDays | Should Be 2
+        }
+
+    } # describe HyperVCommon\ConvertTo-TimeSpan
+
+    Describe 'HyperVCommon\ConvertFrom-TimeSpan' {
+
+        It 'Should convert a "System.TimeSpan" of 1 minute to 60 seconds' {
+            $testTimeSpan = New-TimeSpan -Minutes 1
+
+            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Seconds
+
+            $result | Should Be 60
+        }
+
+        It 'Should convert a "System.TimeSpan" of 1 hour to 60 minutes' {
+            $testTimeSpan = New-TimeSpan -Hours 1
+
+            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Minutes
+
+            $result | Should Be 60
+        }
+
+        It 'Should convert a "System.TimeSpan" of 2 dayes to 48 hours' {
+            $testTimeSpan = New-TimeSpan -Days 2
+
+            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Hours
+
+            $result | Should Be 48
+        }
+
+    } # describe HyperVCommon\ConvertFrom-TimeSpan
+
+    Describe 'HyperVCommon\Get-VMHyperV' {
+
+        function Get-VM {
+            [CmdletBinding()]
+            param
+            (
+                $Name
+            )
+        }
+
+        # Guard mocks
+        Mock Get-VM -ModuleName $script:DSCResourceName { }
+
+        It 'Should not throw when no VM is found' {
+            Mock Get-VM -ModuleName $script:DSCResourceName { }
+            $testVMName = 'TestVM'
+
+            $result = Get-VMHyperV -VMName $testVMName
+
+            $result | Should BeNullOrEmpty
+        }
+
+        It 'Should not throw when one VM is found' {
+            Mock Get-VM -ModuleName $script:DSCResourceName {
+                Write-Output -InputObject ([PSCustomObject] @{ Name = $VMName })
+            }
+            $testVMName = 'TestVM'
+
+            $result = Get-VMHyperV -VMName $testVMName
+
+            $result.Name | Should Be $testVMName
+        }
+
+        It 'Should throw when more than one VM is found' {
+            Mock Get-VM -ModuleName $script:DSCResourceName {
+                Write-Output -InputObject ([PSCustomObject] @{ Name = $VMName })
+                Write-Output -InputObject ([PSCustomObject] @{ Name = $VMName })
+            }
+            $testVMName = 'TestVM'
+
+            { Get-VMHyperV -VMName $testVMName } | Should Throw 'More than one VM'
+        }
+
+    } # describe HyperVCommon\Get-VMHyperV
+
 }
 finally
 {

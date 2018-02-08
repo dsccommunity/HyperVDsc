@@ -32,8 +32,8 @@ if (-not (Test-HyperVInstalled))
 try
 {
     $VMName = 'HyperVIntTestsVM'
-    $VMPath = Join-Path -Path $TestDrive `
-        -ChildPath $VMName
+    ## Cannot use $TestDrive here as it no longer accessible outside of Describe/Context
+    $VMPath = Join-Path -Path $env:Temp -ChildPath $VMName
 
     # Make sure test VM does not exist
     if (Get-VM -Name $VMName -ErrorAction SilentlyContinue)
