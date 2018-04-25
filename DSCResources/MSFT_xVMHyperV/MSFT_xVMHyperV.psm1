@@ -737,7 +737,7 @@ function Test-TargetResource
         # If AutomaticCheckpoints are supported, parameter exists on Set-VM
         if (-Not (Get-Command -Name Set-VM -Module Hyper-V).Parameters.ContainsKey('AutomaticCheckpointsEnabled'))
         {
-            Throw ($localizedData.AutomaticCheckpointsUnsupportedError)
+            Throw ($localizedData.AutomaticCheckpointsUnsupported)
         }
     }
 
