@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+* Changes to xHyper-V
+  * Removed alignPropertyValuePairs from the Visual Studio Code default style
+    formatting settings (issue #110).
+
 ## 3.11.0.0
 
 * Added the following resources:
