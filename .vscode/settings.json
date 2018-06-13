@@ -7,7 +7,6 @@
     "powershell.codeFormatting.whitespaceAroundOperator": true,
     "powershell.codeFormatting.whitespaceAfterSeparator": true,
     "powershell.codeFormatting.ignoreOneLineBlock": false,
-    "powershell.codeFormatting.alignPropertyValuePairs": false,
     "powershell.codeFormatting.preset": "Custom",
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true
