@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+* Update appveyor.yml to use the default template.
+* Added default template files .codecov.yml, .gitattributes, and .gitignore, and
+  .vscode folder.
+
 ## 3.12.0.0
 
 * Changes to xHyper-V
