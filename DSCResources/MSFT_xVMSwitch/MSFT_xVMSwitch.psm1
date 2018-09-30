@@ -139,6 +139,9 @@ function Get-TargetResource
 .PARAMETER LoadBalancingAlgorithm
     The load balancing algorithm that this switch team use.
 
+.PARAMETER Id
+    Desired unique ID of the Hyper-V Switch (Windows Server 2016 only).
+
 .PARAMETER Ensure
     Whether switch should be present or absent.
 #>
@@ -402,6 +405,9 @@ function Set-TargetResource
 
 .PARAMETER LoadBalancingAlgorithm
     The load balancing algorithm that this switch team use.
+
+.PARAMETER Id
+    Desired unique ID of the Hyper-V Switch (Windows Server 2016 only).
 
 .PARAMETER Ensure
     Whether switch should be present or absent.
