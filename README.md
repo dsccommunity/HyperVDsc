@@ -493,6 +493,7 @@ Manages virtual switches in a Hyper-V host.
  The default value is Present. { *Present* | Absent }.
 
 #### Read-Only Properties from Get-TargetResource for xVMSwitch
+
 * **`[String]` NetAdapterInterfaceDescription** _(Read)_: Description of the
  network interface.
 
