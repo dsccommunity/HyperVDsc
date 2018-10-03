@@ -37,6 +37,31 @@ try
 
     InModuleScope $script:DSCResourceName {
 
+        # A helper function to create a exception object for testing output exceptions
+        function Get-InvalidArgumentError
+        {
+            [CmdletBinding()]
+            param
+            (
+                [Parameter(Mandatory = $true)]
+                [ValidateNotNullOrEmpty()]
+                [System.String]
+                $ErrorId,
+
+                [Parameter(Mandatory = $true)]
+                [ValidateNotNullOrEmpty()]
+                [System.String]
+                $ErrorMessage
+            )
+
+            $exception = New-Object -TypeName System.ArgumentException `
+                -ArgumentList $ErrorMessage
+            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
+            $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
+                -ArgumentList $exception, $ErrorId, $errorCategory, $null
+            return $errorRecord
+        }
+
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch
         {
@@ -236,12 +261,60 @@ try
                     Id                       = New-Guid
                 }
 
-                It 'Should Should run without exception while re-creating the VMSwitch' {
+                It 'Should run without exception while re-creating the VMSwitch' {
                     {Set-TargetResource @testParams} | Should -Not -Throw
                     Assert-MockCalled -CommandName "Get-VMSwitch" -Times 1
                     Assert-MockCalled -CommandName 'Get-NetAdapter' -Times 1
                     Assert-MockCalled -CommandName 'Remove-VMSwitch' -Times 1
                     Assert-MockCalled -CommandName 'New-VMSwitch' -Times 1
+                }
+            }
+
+            Context 'When the specified value for Id parameter is not a GUID' {
+
+                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
+
+                $testParams = @{
+                    Name                     = 'TestSwitch'
+                    Type                     = 'External'
+                    NetAdapterName           = @('NIC1', 'NIC2')
+                    AllowManagementOS        = $true
+                    EnableEmbeddedTeaming    = $true
+                    Ensure                   = 'Present'
+                    Id                       = '123'
+                }
+
+                It 'Should throw "The VMSwitch Id must be in GUID format!"' {
+                    {Set-TargetResource @testParams} | Should -Throw 'The VMSwitch Id must be in GUID format!'
+                }
+            }
+
+            Context 'When the system is not running Server 2016' {
+
+                $desiredVMSwitchID = New-Guid
+
+                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch' -Id $desiredVMSwitchID
+
+                $testParams = @{
+                    Name                     = 'TestSwitch'
+                    Type                     = 'External'
+                    NetAdapterName           = 'NIC1'
+                    AllowManagementOS        = $true
+                    EnableEmbeddedTeaming    = $false
+                    Ensure                   = 'Present'
+                    Id                       = $desiredVMSwitchID
+                }
+
+                Mock -CommandName Get-OSVersion -MockWith {
+                    return [Version]::Parse('6.3.9600')
+                }
+
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId 'VMSwitchIDServer2016Error' `
+                    -ErrorMessage $LocalizedData.VMSwitchIDServer2016Error
+
+                It 'Should throw "VMSwitchIDServer2016Error"' {
+                    {Set-TargetResource @testParams} | Should -Throw $errorRecord
                 }
             }
         }
@@ -290,6 +363,55 @@ try
                     Assert-MockCalled -CommandName 'Get-NetAdapter' -Times 1
                 }
             }
+
+            Context 'When the specified value for Id parameter is not a GUID' {
+
+                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
+
+                $testParams = @{
+                    Name                     = 'TestSwitch'
+                    Type                     = 'External'
+                    NetAdapterName           = @('NIC1', 'NIC2')
+                    AllowManagementOS        = $true
+                    EnableEmbeddedTeaming    = $true
+                    Ensure                   = 'Present'
+                    Id                       = '123'
+                }
+
+                It 'Should throw "The VMSwitch Id must be in GUID format!"' {
+                    {Set-TargetResource @testParams} | Should -Throw 'The VMSwitch Id must be in GUID format!'
+                }
+            }
+
+            Context 'When the system is not running Server 2016' {
+
+                $desiredVMSwitchID = New-Guid
+
+                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch' -Id $desiredVMSwitchID
+
+                $testParams = @{
+                    Name                     = 'TestSwitch'
+                    Type                     = 'External'
+                    NetAdapterName           = 'NIC1'
+                    AllowManagementOS        = $true
+                    EnableEmbeddedTeaming    = $false
+                    Ensure                   = 'Present'
+                    Id                       = $desiredVMSwitchID
+                }
+
+                Mock -CommandName Get-OSVersion -MockWith {
+                    return [Version]::Parse('6.3.9600')
+                }
+
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId 'VMSwitchIDServer2016Error' `
+                    -ErrorMessage $LocalizedData.VMSwitchIDServer2016Error
+
+                It 'Should throw "VMSwitchIDServer2016Error"' {
+                    {Set-TargetResource @testParams} | Should -Throw $errorRecord
+                }
+            }
+
         }
     }
 }
