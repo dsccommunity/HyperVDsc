@@ -5,6 +5,8 @@
 * Update appveyor.yml to use the default template.
 * Added default template files .codecov.yml, .gitattributes, and .gitignore, and
   .vscode folder.
+* MSFT_xVMHost:
+  * Added support to Enable / Disable VM Live Migration
 
 ## 3.12.0.0
 
@@ -18,7 +20,7 @@
   * MSFT_xVMHardDiskDrive to manage additional attached VHD/Xs.
   * MSFT_xVMScsiController to manage virtual machine SCSI controllers.
 * MSFT_xVMSwitch:
-  * Added parameter ot specify the Load Balancing Algorithm of a vSwitch with Switch Embedded Teaming (SET)
+  * Added parameter to specify the Load Balancing Algorithm of a vSwitch with Switch Embedded Teaming (SET)
 
 ## 3.10.0.0
 
