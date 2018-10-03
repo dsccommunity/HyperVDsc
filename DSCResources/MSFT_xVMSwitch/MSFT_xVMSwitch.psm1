@@ -184,7 +184,8 @@ function Set-TargetResource
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [Guid]
+        [ValidateScript({$testGuid = New-Guid; if([guid]::TryParse($_,[ref]$testGuid)){return $true}else{Throw 'The VMSwitch Id must be in GUID format!'}})]
+        [String]
         $Id,
 
         [Parameter()]
@@ -360,7 +361,7 @@ function Set-TargetResource
 
             if ($PSBoundParameters.ContainsKey('Id'))
             {
-                $parameters["Id"] = $Id.ToString()
+                $parameters["Id"] = $Id
             }
 
             $switch = New-VMSwitch @parameters
@@ -452,7 +453,8 @@ function Test-TargetResource
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [guid]
+        [ValidateScript({$testGuid = New-Guid; if([guid]::TryParse($_,[ref]$testGuid)){return $true}else{Throw 'The VMSwitch Id must be in GUID format!'}})]
+        [String]
         $Id,
 
         [Parameter()]
@@ -634,7 +636,7 @@ function Test-TargetResource
                 if ($PSBoundParameters.ContainsKey("Id") -eq $true)
                 {
                     Write-Verbose -Message ($LocalizedData.CheckID -f $Name)
-                    if ($switch.Id -eq $Id)
+                    if ($switch.Id.Guid -eq $Id)
                     {
                         Write-Verbose -Message ($LocalizedData.IdCorrect -f $Name)
                     }
