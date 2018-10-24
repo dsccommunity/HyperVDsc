@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 3.13.0.0
+
+* MSFT_xVMSwitch:
+  * Changed 'Id' parameter form read only to optional so the VMSwitch ID can be set on Windows Server 2016. This is important for SDN setups where the VMSwitch ID must remain the same when a Hyper-V host is re-installed.
+  * Update appveyor.yml to use the default template.
+  * Added default template files .codecov.yml, .gitattributes, and .gitignore, and
+  .vscode folder.
+
 ## 3.12.0.0
 
 * Changes to xHyper-V
