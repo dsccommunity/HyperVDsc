@@ -10,19 +10,11 @@
         MacAddress = '001523be0c'
         VMName = 'MyVM01'
         NetworkSetting = xNetworkSettings {
-            Dhcp = $true
-        }
-        Ensure = 'Present'
-    }
-
-    xVMNetworkAdapter MyVM02NIC {
-        Id = 'MyVM02-NIC'
-        Name = 'MyVM02-NIC'
-        SwitchName = 'SETSwitch'
-        MacAddress = '001523be0d'
-        VMName = 'MyVM02'
-        NetworkSetting = xNetworkSettings {
-            Dhcp = $true
+            Dhcp = $false
+            IpAddress = "192.168.0.100"
+            Subnet = "255.255.255.255"
+            DefaultGateway = "192.168.0.1"
+            DnsServer = "192.168.0.1"
         }
         Ensure = 'Present'
     }

@@ -12,18 +12,7 @@
         NetworkSetting = xNetworkSettings {
             Dhcp = $true
         }
-        Ensure = 'Present'
-    }
-
-    xVMNetworkAdapter MyVM02NIC {
-        Id = 'MyVM02-NIC'
-        Name = 'MyVM02-NIC'
-        SwitchName = 'SETSwitch'
-        MacAddress = '001523be0d'
-        VMName = 'MyVM02'
-        NetworkSetting = xNetworkSettings {
-            Dhcp = $true
-        }
+        VlanId = '1'
         Ensure = 'Present'
     }
 }

@@ -8,6 +8,9 @@
         Name = 'Management-NIC'
         SwitchName = 'SETSwitch'
         VMName = 'ManagementOS'
+        NetworkSetting = xNetworkSettings {
+            Dhcp = $true
+        }
         Ensure = 'Present'
     }
 }

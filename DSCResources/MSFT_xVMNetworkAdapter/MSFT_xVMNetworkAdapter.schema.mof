@@ -1,4 +1,14 @@
 
+[ClassVersion("2.0.0.0")]
+Class xNetworkSettings
+{
+  [Required] Boolean Dhcp;
+  [Write] string IpAddress;
+  [Write] string Subnet;
+  [Write] string DefaultGateway;
+  [Write] string DnsServer;
+};
+
 [ClassVersion("2.0.0.0"), FriendlyName("xVMNetworkAdapter")]
 class MSFT_xVMNetworkAdapter : OMI_BaseResource
 {
@@ -7,6 +17,8 @@ class MSFT_xVMNetworkAdapter : OMI_BaseResource
     [Required] String SwitchName;
     [Required] String VMName;
     [Write] String MacAddress;
+    [Required, EmbeddedInstance("xNetworkSettings")] String NetworkSetting;
+    [Write] String VlanId;
     [Write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
     [Read] Boolean DynamicMacAddress;
 };
