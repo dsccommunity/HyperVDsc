@@ -263,14 +263,43 @@ try
                 Assert-MockCalled Set-VMHost -ParameterFilter { $ResourceMeteringSaveInterval -is [System.TimeSpan] }
             }
 
-            It 'Should call "Enable-VMMigration" when "VirtualMachineMigrationEnabled" is set to true' {
+            It 'Should call "Enable-VMMigration" when "VirtualMachineMigrationEnabled" is set to true and computer is domain joined' {
+                Mock -CommandName 'Get-CimInstance' -MockWith {
+                    [pscustomobject]@{
+                        PartOfDomain = $true
+                    }
+                }
+
+                Mock -CommandName 'Write-Error'
+
                 $setTargetResourceParams = @{
                     IsSingleInstance = 'Yes'
                     VirtualMachineMigrationEnabled = $true
                 }
 
                 $result = Set-TargetResource @setTargetResourceParams
+                Assert-MockCalled -CommandName Write-Error -Times 0 -Exactly -Scope it
                 Assert-MockCalled -CommandName Enable-VMMigration -Times 1 -Exactly -Scope it
+                Assert-MockCalled -CommandName Disable-VMMigration -Times 0 -Exactly -Scope it
+            }
+
+            It 'Should not call "Enable-VMMigration" when "VirtualMachineMigrationEnabled" is set to true and computer is not domain joined' {
+                Mock -CommandName 'Get-CimInstance' -MockWith {
+                    [pscustomobject]@{
+                        PartOfDomain = $false
+                    }
+                }
+
+                Mock -CommandName 'Write-Error'
+
+                $setTargetResourceParams = @{
+                    IsSingleInstance = 'Yes'
+                    VirtualMachineMigrationEnabled = $true
+                }
+
+                $result = Set-TargetResource @setTargetResourceParams
+                Assert-MockCalled -CommandName Write-Error -Times 1 -Exactly -Scope it
+                Assert-MockCalled -CommandName Enable-VMMigration -Times 0 -Exactly -Scope it
                 Assert-MockCalled -CommandName Disable-VMMigration -Times 0 -Exactly -Scope it
             }
 
@@ -294,6 +323,20 @@ try
 
                 Assert-MockCalled -CommandName Enable-VMMigration -Times 0 -Exactly -Scope it
                 Assert-MockCalled -CommandName Disable-VMMigration -Times 0 -Exactly -Scope it
+            }
+
+            It 'Should not call "Set-VMHost" when only "VirtualMachineMigrationEnabled" is set' {
+                $setTargetResourceParams = @{
+                    IsSingleInstance = 'Yes'
+                    VirtualMachineMigrationEnabled = $false
+                    Verbose = $true
+                }
+
+                $result = Set-TargetResource @setTargetResourceParams
+
+                Assert-MockCalled -CommandName Enable-VMMigration -Times 0 -Exactly -Scope it
+                Assert-MockCalled -CommandName Disable-VMMigration -Times 1 -Exactly -Scope it
+                Assert-MockCalled -CommandName Set-VMHost -Times 0 -Exactly -Scope it
             }
 
         } # describe Set-TargetResource

@@ -439,8 +439,16 @@ function Set-TargetResource
             Disable-VMMigration
         }
     }
-
-    Write-Verbose -Message $localizedData.UpdatingVMHostProperties
-    Set-VMHost @PSBoundParameters
-    Write-Verbose -Message $localizedData.VMHostPropertiesUpdated
+    $vmHostParams = $PSBoundParameters.GetEnumerator() | Where-Object -FilterScript {
+        $_.Key -notin (
+            [System.Management.Automation.PSCmdlet]::CommonParameters +
+            [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
+        )
+    }
+    if ($vmHostParams.Count -ne 0)
+    {
+        Write-Verbose -Message $localizedData.UpdatingVMHostProperties
+        Set-VMHost @PSBoundParameters
+        Write-Verbose -Message $localizedData.VMHostPropertiesUpdated
+    }
 } #end function
