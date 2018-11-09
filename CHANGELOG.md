@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* MSFT_xVMHost:
+  * Added support to Enable / Disable VM Live Migration. Fixes [Issue #155](https://github.com/PowerShell/xHyper-V/issues/155).
+
 ## 3.13.0.0
 
 * MSFT_xVMSwitch:
@@ -9,8 +12,6 @@
   * Update appveyor.yml to use the default template.
   * Added default template files .codecov.yml, .gitattributes, and .gitignore, and
   .vscode folder.
-* MSFT_xVMHost:
-  * Added support to Enable / Disable VM Live Migration
 
 ## 3.12.0.0
 

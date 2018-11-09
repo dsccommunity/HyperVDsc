@@ -423,10 +423,19 @@ function Set-TargetResource
         $null = $PSBoundParameters.Remove('VirtualMachineMigrationEnabled')
         if ($VirtualMachineMigrationEnabled)
         {
-            Enable-VMMigration
+            if ((Get-CimInstance -ClassName Win32_ComputerSystem).PartOfDomain)
+            {
+                Write-Verbose -Message $localizedData.EnableLiveMigration
+                Enable-VMMigration
+            }
+            else
+            {
+                Write-Error -Message $localizedData.LiveMigrationDomainOnly
+            }
         }
         else
         {
+            Write-Verbose -Message $localizedData.DisableLiveMigration
             Disable-VMMigration
         }
     }
