@@ -283,22 +283,19 @@ try
                 Assert-MockCalled -CommandName Disable-VMMigration -Times 0 -Exactly -Scope it
             }
 
-            It 'Should not call "Enable-VMMigration" when "VirtualMachineMigrationEnabled" is set to true and computer is not domain joined' {
+            It 'Should not call "Enable-VMMigration" and should throw when "VirtualMachineMigrationEnabled" is set to true and computer is not domain joined' {
                 Mock -CommandName 'Get-CimInstance' -MockWith {
                     [pscustomobject]@{
                         PartOfDomain = $false
                     }
                 }
 
-                Mock -CommandName 'Write-Error'
-
                 $setTargetResourceParams = @{
                     IsSingleInstance = 'Yes'
                     VirtualMachineMigrationEnabled = $true
                 }
 
-                $result = Set-TargetResource @setTargetResourceParams
-                Assert-MockCalled -CommandName Write-Error -Times 1 -Exactly -Scope it
+                { Set-TargetResource @setTargetResourceParams } | Should -Throw
                 Assert-MockCalled -CommandName Enable-VMMigration -Times 0 -Exactly -Scope it
                 Assert-MockCalled -CommandName Disable-VMMigration -Times 0 -Exactly -Scope it
             }

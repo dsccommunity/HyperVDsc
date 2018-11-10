@@ -421,6 +421,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey('VirtualMachineMigrationEnabled'))
     {
         $null = $PSBoundParameters.Remove('VirtualMachineMigrationEnabled')
+
         if ($VirtualMachineMigrationEnabled)
         {
             if ((Get-CimInstance -ClassName Win32_ComputerSystem).PartOfDomain)
@@ -430,7 +431,7 @@ function Set-TargetResource
             }
             else
             {
-                Write-Error -Message $localizedData.LiveMigrationDomainOnly
+                New-InvalidOperationError -ErrorId InvalidState -ErrorMessage $localizedData.LiveMigrationDomainOnly
             }
         }
         else
@@ -439,12 +440,14 @@ function Set-TargetResource
             Disable-VMMigration
         }
     }
+
     $vmHostParams = $PSBoundParameters.GetEnumerator() | Where-Object -FilterScript {
         $_.Key -notin (
             [System.Management.Automation.PSCmdlet]::CommonParameters +
             [System.Management.Automation.PSCmdlet]::OptionalCommonParameters
         )
     }
+
     if ($vmHostParams.Count -ne 0)
     {
         Write-Verbose -Message $localizedData.UpdatingVMHostProperties
