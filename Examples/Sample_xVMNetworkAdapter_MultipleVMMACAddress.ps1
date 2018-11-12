@@ -9,9 +9,6 @@
         SwitchName = 'SETSwitch'
         MacAddress = '001523be0c'
         VMName = 'MyVM01'
-        NetworkSetting = xNetworkSettings {
-            Dhcp = $true
-        }
         Ensure = 'Present'
     }
 
@@ -21,9 +18,6 @@
         SwitchName = 'SETSwitch'
         MacAddress = '001523be0d'
         VMName = 'MyVM02'
-        NetworkSetting = xNetworkSettings {
-            Dhcp = $true
-        }
         Ensure = 'Present'
     }
 }

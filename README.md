@@ -363,22 +363,22 @@ Manages VMNetadapters attached to a Hyper-V virtual machine or the management OS
 
 * **`[String]` Id** _(Key)_: Unique string for identifying the resource instance.
 * **`[String]` Name** _(Required)_: Name of the network adapter as it appears either
- in the management OS or attached to a VM.
+in the management OS or attached to a VM.
 * **`[String]` SwitchName** _(Required)_: Virtual Switch name to connect to.
 * **`[String]` VMName** _(Required)_: Name of the VM to attach to.
- If you want to attach new VM Network adapter to the management OS,
- set this property to 'Management OS'.
-* **`[xNetworkSettings]` NetworkSetting** _(Required)_: Network Settings of the network adapter.
+If you want to attach new VM Network adapter to the management OS,
+set this property to 'Management OS'.
+* **`[xNetworkSettings]` NetworkSetting** _(Write)_: Network Settings of the network adapter.
+If not supplied thne network adapter will be set for DHCP.
 * **`[String]` MacAddress** _(Write)_: Use this to specify a Static MAC Address.
- If this parameter is not specified, dynamic MAC Address will be set.
+If this parameter is not specified, dynamic MAC Address will be set.
 * **`[String]` VlanId** _(Write)_: Use this to specify a Vlan id on the
 * Network Adapter.
 * **`[String]` Ensure** _(Write)_: Ensures that the VM Network Adapter is
- Present or Absent. The default value is Present. { *Present* | Absent }.
+Present or Absent. The default value is Present. { *Present* | Absent }.
 
  ##### xNetworkSettings Class
 
-* **`[Boolean]` Dhcp** _(Required)_: Indicates if you want Dhcp enabled.
 * **`[String]` IpAddress** _(Write)_: IpAddress to give the network adapter.
   Only used if not Dhcp. Required if not Dhcp.
 * **`[String]` Subnet** _(Write)_: Subnet to give the network adapter.

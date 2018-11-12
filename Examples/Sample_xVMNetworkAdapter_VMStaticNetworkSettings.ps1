@@ -10,7 +10,6 @@
         MacAddress = '001523be0c'
         VMName = 'MyVM01'
         NetworkSetting = xNetworkSettings {
-            Dhcp = $false
             IpAddress = "192.168.0.100"
             Subnet = "255.255.255.255"
             DefaultGateway = "192.168.0.1"

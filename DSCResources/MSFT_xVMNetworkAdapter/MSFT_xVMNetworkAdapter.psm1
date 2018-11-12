@@ -47,11 +47,7 @@ Function Get-TargetResource
         [String] $SwitchName,
 
         [Parameter(Mandatory)]
-        [String] $VMName,
-
-        [Parameter(Mandatory = $true)]
-        [Microsoft.Management.Infrastructure.CimInstance]
-        $NetworkSetting
+        [String] $VMName
     )
 
     $configuration = @{
@@ -93,8 +89,11 @@ Function Get-TargetResource
         }
 
         $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
-        $item = New-CimInstance -ClassName MSFT_xNetworkSettings -Property $networkInfo -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
-        $configuration.Add('NetworkSetting', $item)
+        if($networkInfo)
+        {
+            $item = New-CimInstance -ClassName MSFT_xNetworkSettings -Property $networkInfo -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+            $configuration.Add('NetworkSetting', $item)
+        }
 
         $configuration.Add('Ensure','Present')
 
@@ -163,7 +162,7 @@ Function Set-TargetResource
         [Parameter()]
         [String] $MacAddress,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $NetworkSetting,
 
@@ -266,9 +265,9 @@ Function Set-TargetResource
         if ($VmName -ne 'ManagementOS')
         {
             $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
-            if ($NetworkSetting.CimInstanceProperties["Dhcp"].Value)
+            if (-not $NetworkSetting)
             {
-                if (-not $networkInfo.Dhcp)
+                if($networkInfo)
                 {
                     Write-Verbose -Message $localizedData.EnableDhcp
                     Set-NetworkInformation -VMName $VMName -Name $Name -Dhcp
@@ -388,7 +387,7 @@ Function Test-TargetResource
         [Parameter()]
         [String] $MacAddress,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $NetworkSetting,
 
@@ -446,9 +445,9 @@ Function Test-TargetResource
                 }
 
                 $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
-                if ($NetworkSetting.CimInstanceProperties["Dhcp"].Value)
+                if (-not $NetworkSetting)
                 {
-                    if (-not $networkInfo.Dhcp)
+                    if($networkInfo)
                     {
                         Write-Verbose -Message $localizedData.NotDhcp
                         return $false
@@ -456,7 +455,7 @@ Function Test-TargetResource
                 }
                 else
                 {
-                    if ($networkInfo.Dhcp)
+                    if (-not $networkInfo)
                     {
                         Write-Verbose -Message $localizedData.Dhcp
                         return $false
@@ -586,14 +585,11 @@ function Get-NetworkInformation
 
     if ($networkSettings.DHCPEnabled)
     {
-        return @{
-            Dhcp = $true
-        }
+        return $null
     }
     else
     {
         return  @{
-            Dhcp = $false
             IpAddress = $networkSettings.IPAddresses -join ','
             Subnet = $networkSettings.Subnets -join ','
             DefaultGateway = $networkSettings.DefaultGateways -join ','

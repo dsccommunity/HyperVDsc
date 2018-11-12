@@ -9,9 +9,6 @@
         SwitchName = 'SETSwitch'
         MacAddress = '001523be0c'
         VMName = 'MyVM01'
-        NetworkSetting = xNetworkSettings {
-            Dhcp = $true
-        }
         VlanId = '1'
         Ensure = 'Present'
     }

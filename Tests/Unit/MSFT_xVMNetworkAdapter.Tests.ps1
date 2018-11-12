@@ -32,14 +32,7 @@ try
             VMName              = 'ManagementOS'
         }
 
-        $properties = @{
-            Dhcp = $true
-        }
-
-        $networkSettings = New-CimInstance -ClassName xNetworkSettings -Property $properties -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
-
         $propertiesStatic = @{
-            Dhcp = $false
             IpAddress = "192.168.0.1"
             Subnet = "255.255.255.0"
         }
@@ -51,7 +44,6 @@ try
             Name                    = $MockHostAdapter.Name
             SwitchName              = $MockHostAdapter.SwitchName
             VMName                  = $MockHostAdapter.VMName
-            NetworkSetting = $networkSettings
         }
 
         $MockAdapter = [PSObject]@{
@@ -99,9 +91,7 @@ try
                 Mock -CommandName Get-VMNetworkAdapterVlan -MockWith {
                     $MockAdapterVlanUntagged
                 }
-                Mock -CommandName Get-NetworkInformation -MockWith {
-                    @{ Dhcp = $true }
-                }
+                Mock -CommandName Get-NetworkInformation
 
                 It 'should return adapter properties' {
                     $Result = Get-TargetResource @TestAdapter
@@ -111,7 +101,7 @@ try
                     $Result.VMName                 | Should Be 'ManagementOS'
                     $Result.Id                     | Should Be $TestAdapter.Id
                     $Result.VlanId                 | Should -BeNullOrEmpty
-                    $Result.NetworkSetting         | Should -Not -BeNullOrEmpty
+                    $Result.NetworkSetting         | Should -BeNullOrEmpty
                 }
                 It 'should call the expected mocks' {
                     Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
@@ -222,7 +212,6 @@ try
                 Name                    = $TestAdapter.Name
                 SwitchName              = $TestAdapter.SwitchName
                 VMName                  = 'ManagementOS'
-                NetworkSetting          = $networkSettings
                 Ensure                  = 'Present'
             }
 
@@ -266,9 +255,7 @@ try
             Context 'Adapter exists and no action needed with Vlan tag' {
                 Mock Get-VMNetworkAdapter -MockWith { $MockAdapter }
                 Mock Get-VMNetworkAdapterVlan -MockWith { $MockAdapterVlanTagged }
-                Mock -CommandName Get-NetworkInformation -MockWith {
-                    @{ Dhcp = $true }
-                }
+                Mock -CommandName Get-NetworkInformation
 
                 It 'should return true' {
                     $updateAdapter = $newAdapter.Clone()
@@ -286,9 +273,7 @@ try
             Context 'Adapter exists but Vlan is not tagged' {
                 Mock Get-VMNetworkAdapter -MockWith { $MockAdapter }
                 Mock Get-VMNetworkAdapterVlan
-                Mock -CommandName Get-NetworkInformation -MockWith {
-                    @{ Dhcp = $true }
-                }
+                Mock -CommandName Get-NetworkInformation
 
                 It 'should return false' {
                     $updateAdapter = $newAdapter.Clone()
@@ -306,9 +291,7 @@ try
             Context 'Adapter exists but Vlan tag is wrong' {
                 Mock Get-VMNetworkAdapter -MockWith { $MockAdapter }
                 Mock Get-VMNetworkAdapterVlan -MockWith { $MockAdapterVlanTagged }
-                Mock -CommandName Get-NetworkInformation -MockWith {
-                    @{ Dhcp = $true }
-                }
+                Mock -CommandName Get-NetworkInformation
 
                 It 'should return false' {
                     $updateAdapter = $newAdapter.Clone()

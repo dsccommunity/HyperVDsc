@@ -3,8 +3,7 @@
 ## Unreleased
 
 * MSFT_xVMNetworkAdapter:
-  * __Breaking change:__ Added NetworkSettings to be able to statically set IPAddress or use as DHCP. This is
-    a required field.
+  * Added NetworkSettings to be able to statically set IPAddress.
   * Added option for Vlan tagging. You can now setup a Network Adapeter as an access switch on a specific Vlan.
 
 ## 3.13.0.0

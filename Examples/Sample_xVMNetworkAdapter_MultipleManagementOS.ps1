@@ -8,9 +8,6 @@
         Name = 'Management-NIC'
         SwitchName = 'SETSwitch'
         VMName = 'ManagementOS'
-        NetworkSetting = xNetworkSettings {
-            Dhcp = $true
-        }
         Ensure = 'Present'
     }
 
@@ -19,9 +16,6 @@
         Name = 'Cluster-NIC'
         SwitchName = 'SETSwitch'
         VMName = 'ManagementOS'
-        NetworkSetting = xNetworkSettings {
-            Dhcp = $true
-        }
         Ensure = 'Present'
     }
 }

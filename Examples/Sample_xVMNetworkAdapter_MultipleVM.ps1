@@ -8,9 +8,6 @@
         Name = 'MyVM01-NIC'
         SwitchName = 'SETSwitch'
         VMName = 'MyVM01'
-        NetworkSetting = xNetworkSettings {
-            Dhcp = $true
-        }
         Ensure = 'Present'
     }
 
@@ -19,9 +16,6 @@
         Name = 'NetAdapter'
         SwitchName = 'SETSwitch'
         VMName = 'MyVM02'
-        NetworkSetting = xNetworkSettings {
-            Dhcp = $true
-        }
         Ensure = 'Present'
     }
 
@@ -30,9 +24,6 @@
         Name = 'NetAdapter'
         SwitchName = 'SETSwitch'
         VMName = 'MyVM03'
-        NetworkSetting = xNetworkSettings {
-            Dhcp = $true
-        }
         Ensure = 'Present'
     }
 }
