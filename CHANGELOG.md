@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* MSFT_xVMHost:
+  * Added support to Enable / Disable VM Live Migration. Fixes [Issue #155](https://github.com/PowerShell/xHyper-V/issues/155).
+
 ## 3.13.0.0
 
 * MSFT_xVMSwitch:
@@ -22,7 +25,7 @@
   * MSFT_xVMHardDiskDrive to manage additional attached VHD/Xs.
   * MSFT_xVMScsiController to manage virtual machine SCSI controllers.
 * MSFT_xVMSwitch:
-  * Added parameter ot specify the Load Balancing Algorithm of a vSwitch with Switch Embedded Teaming (SET)
+  * Added parameter to specify the Load Balancing Algorithm of a vSwitch with Switch Embedded Teaming (SET)
 
 ## 3.10.0.0
 

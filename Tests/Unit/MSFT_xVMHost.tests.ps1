@@ -91,6 +91,7 @@ try
                 VirtualMachineMigrationAuthenticationType = 'CredSSP';
                 VirtualMachineMigrationPerformanceOption = 'TCPIP';
                 VirtualHardDiskPath = 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks';
+                VirtualMachineMigrationEnabled = $true
             }
 
             It 'Should return a [System.Boolean] object type' {
@@ -99,6 +100,7 @@ try
                 $testTargetResourceParams = @{
                     IsSingleInstance = 'Yes';
                     EnableEnhancedSessionMode = $fakeTargetResource.EnableEnhancedSessionMode;
+                    VirtualMachineMigrationEnabled = $fakeTargetResource.VirtualMachineMigrationEnabled
                 }
                 $result = Test-TargetResource @testTargetResourceParams
 
@@ -130,7 +132,8 @@ try
                 'ResourceMeteringSaveIntervalMinute',
                 'UseAnyNetworkForMigration',
                 'VirtualHardDiskPath',
-                'VirtualMachinePath'
+                'VirtualMachinePath',
+                'VirtualMachineMigrationEnabled'
             )
 
             # Test each individual parameter value separately
@@ -173,12 +176,15 @@ try
                 }
             }
 
-            It "Should pass when parameter '<Parameter>' is correct" -TestCases @(
+            It "Should pass when parameter <Parameter> is correct" -TestCases @(
                 @{  Parameter = 'VirtualMachineMigrationAuthenticationType';
                     Value = $fakeTargetResource.VirtualMachineMigrationAuthenticationType;
                     Expected = $true; }
                 @{  Parameter = 'VirtualMachineMigrationPerformanceOption';
                     Value = $fakeTargetResource.VirtualMachineMigrationPerformanceOption;
+                    Expected = $true; }
+                @{  Parameter = 'VirtualMachineMigrationEnabled';
+                    Value = $fakeTargetResource.VirtualMachineMigrationEnabled;
                     Expected = $true; }
             ) -Test {
                 param (
@@ -194,13 +200,16 @@ try
                 $result = Test-TargetResource @testTargetResourceParams | Should Be $Expected;
             }
 
-            It "Should fail when parameter '<Parameter>' is incorrect" -TestCases @(
+            It "Should fail when parameter <Parameter> is incorrect" -TestCases @(
                 @{  Parameter = 'VirtualMachineMigrationAuthenticationType';
                     Value = 'Kerberos';
                     Expected = $false; }
                 @{  Parameter = 'VirtualMachineMigrationPerformanceOption';
                     Value = 'Compression';
                     Expected = $false; }
+                @{  Parameter = 'VirtualMachineMigrationEnabled';
+                    Value = $true;
+                    Expected = $true; }
             ) -Test {
                     param
                     (
@@ -223,10 +232,16 @@ try
             function Get-VMHost { }
             function Set-VMHost { param ($ResourceMeteringSaveInterval) }
 
+            function Enable-VMMigration { }
+
+            function Disable-VMMigration { }
+
             # Guard mocks
             Mock Assert-Module { }
             Mock Get-VMHost { }
             Mock Set-VMHost { }
+            Mock Enable-VMMigration { }
+            Mock Disable-VMMigration { }
 
             It 'Should assert Hyper-V module is installed' {
                 $setTargetResourceParams = @{
@@ -246,6 +261,79 @@ try
                 $result = Set-TargetResource @setTargetResourceParams
 
                 Assert-MockCalled Set-VMHost -ParameterFilter { $ResourceMeteringSaveInterval -is [System.TimeSpan] }
+            }
+
+            It 'Should call "Enable-VMMigration" when "VirtualMachineMigrationEnabled" is set to true and computer is domain joined' {
+                Mock -CommandName 'Get-CimInstance' -MockWith {
+                    [pscustomobject]@{
+                        PartOfDomain = $true
+                    }
+                }
+
+                Mock -CommandName 'Write-Error'
+
+                $setTargetResourceParams = @{
+                    IsSingleInstance = 'Yes'
+                    VirtualMachineMigrationEnabled = $true
+                }
+
+                $result = Set-TargetResource @setTargetResourceParams
+                Assert-MockCalled -CommandName Write-Error -Times 0 -Exactly -Scope it
+                Assert-MockCalled -CommandName Enable-VMMigration -Times 1 -Exactly -Scope it
+                Assert-MockCalled -CommandName Disable-VMMigration -Times 0 -Exactly -Scope it
+            }
+
+            It 'Should not call "Enable-VMMigration" and should throw when "VirtualMachineMigrationEnabled" is set to true and computer is not domain joined' {
+                Mock -CommandName 'Get-CimInstance' -MockWith {
+                    [pscustomobject]@{
+                        PartOfDomain = $false
+                    }
+                }
+
+                $setTargetResourceParams = @{
+                    IsSingleInstance = 'Yes'
+                    VirtualMachineMigrationEnabled = $true
+                }
+
+                { Set-TargetResource @setTargetResourceParams } | Should -Throw
+                Assert-MockCalled -CommandName Enable-VMMigration -Times 0 -Exactly -Scope it
+                Assert-MockCalled -CommandName Disable-VMMigration -Times 0 -Exactly -Scope it
+            }
+
+            It 'Should call "Disable-VMMigration" when "VirtualMachineMigrationEnabled" is set to false' {
+                $setTargetResourceParams = @{
+                    IsSingleInstance = 'Yes'
+                    VirtualMachineMigrationEnabled = $false
+                }
+
+                $result = Set-TargetResource @setTargetResourceParams
+                Assert-MockCalled -CommandName Enable-VMMigration -Times 0 -Exactly -Scope it
+                Assert-MockCalled -CommandName Disable-VMMigration -Times 1 -Exactly -Scope it
+            }
+
+            It 'Should not call "Disable-VMMigration" or "Enable-VMMigration" when "VirtualMachineMigrationEnabled" is not set' {
+                $setTargetResourceParams = @{
+                    IsSingleInstance = 'Yes'
+                }
+
+                $result = Set-TargetResource @setTargetResourceParams
+
+                Assert-MockCalled -CommandName Enable-VMMigration -Times 0 -Exactly -Scope it
+                Assert-MockCalled -CommandName Disable-VMMigration -Times 0 -Exactly -Scope it
+            }
+
+            It 'Should not call "Set-VMHost" when only "VirtualMachineMigrationEnabled" is set' {
+                $setTargetResourceParams = @{
+                    IsSingleInstance = 'Yes'
+                    VirtualMachineMigrationEnabled = $false
+                    Verbose = $true
+                }
+
+                $result = Set-TargetResource @setTargetResourceParams
+
+                Assert-MockCalled -CommandName Enable-VMMigration -Times 0 -Exactly -Scope it
+                Assert-MockCalled -CommandName Disable-VMMigration -Times 1 -Exactly -Scope it
+                Assert-MockCalled -CommandName Set-VMHost -Times 0 -Exactly -Scope it
             }
 
         } # describe Set-TargetResource
