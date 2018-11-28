@@ -272,6 +272,8 @@ Manages Hyper-V host settings.
  performance option to use for live migration. { TCPIP | Compression | SMB }.
 * **`[String]` VirtualMachinePath** _(Write)_: Specifies the default folder
  to store virtual machine configuration files on the Hyper-V host.
+* **`[Boolean]` VirtualMachineMigrationEnabled** _(Write)_: Indicates whether Live
+ Migration should be enabled or disabled on the Hyper-V host.
 
 #### Read-Only Properties from Get-TargetResource for xVMHost
 
