@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.14.0.0
+
 * MSFT_xVMHost:
   * Added support to Enable / Disable VM Live Migration. Fixes [Issue #155](https://github.com/PowerShell/xHyper-V/issues/155).
 
