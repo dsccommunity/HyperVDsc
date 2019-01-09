@@ -655,8 +655,6 @@ function Test-TargetResource
         $AutomaticCheckpointsEnabled
     )
 
-    #region input validation
-
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
@@ -667,49 +665,6 @@ function Test-TargetResource
     if ((Get-VM -Name $Name -ErrorAction SilentlyContinue).count -gt 1)
     {
        Throw ($localizedData.MoreThanOneVMExistsError -f $Name)
-    }
-
-    # Check if $VhdPath exist
-    if (!(Test-Path $VhdPath))
-    {
-        Throw ($localizedData.VhdPathDoesNotExistError -f $VhdPath)
-    }
-
-    # Check if Minimum memory is less than StartUpmemory
-    if ($PSBoundParameters.ContainsKey('StartupMemory') -and
-        $PSBoundParameters.ContainsKey('MinimumMemory') -and
-        ($MinimumMemory -gt $StartupMemory))
-    {
-        Throw ($localizedData.MinMemGreaterThanStartupMemError -f $MinimumMemory, $StartupMemory)
-    }
-
-    # Check if Minimum memory is greater than Maximummemory
-    if ($PSBoundParameters.ContainsKey('MaximumMemory') -and
-        $PSBoundParameters.ContainsKey('MinimumMemory') -and
-        ($MinimumMemory -gt $MaximumMemory))
-    {
-        Throw ($localizedData.MinMemGreaterThanMaxMemError -f $MinimumMemory, $MaximumMemory)
-    }
-
-    # Check if Startup memory is greater than Maximummemory
-    if ($PSBoundParameters.ContainsKey('MaximumMemory') -and
-        $PSBoundParameters.ContainsKey('StartupMemory') -and
-        ($StartupMemory -gt $MaximumMemory))
-    {
-        Throw ($localizedData.StartUpMemGreaterThanMaxMemError -f $StartupMemory, $MaximumMemory)
-    }
-
-    <#  VM Generation has no direct relation to the virtual hard disk format and cannot be changed
-        after the virtual machine has been created. Generation 2 VMs do not support .VHD files.  #>
-    if (($Generation -eq 2) -and ($VhdPath.Split('.')[-1] -eq 'vhd'))
-    {
-        Throw ($localizedData.VhdUnsupportedOnGen2VMError)
-    }
-
-    # Check if $Path exist
-    if ($Path -and !(Test-Path -Path $Path))
-    {
-        Throw ($localizedData.PathDoesNotExistError -f $Path)
     }
 
     # Check if AutomaticCheckpointsEnabled is set in configuration
@@ -723,38 +678,84 @@ function Test-TargetResource
         }
     }
 
-    #endregion
-
     try
     {
         $vmObj = Get-VM -Name $Name -ErrorAction Stop
-        if ($Ensure -eq "Present")
+        if ($Ensure -eq 'Present')
         {
+            # Check if $VhdPath exist
+            if (!(Test-Path $VhdPath))
+            {
+                Throw ($localizedData.VhdPathDoesNotExistError -f $VhdPath)
+            }
+
+            # Check if Minimum memory is less than StartUpmemory
+            if ($PSBoundParameters.ContainsKey('StartupMemory') -and
+                $PSBoundParameters.ContainsKey('MinimumMemory') -and
+                ($MinimumMemory -gt $StartupMemory))
+            {
+                Throw ($localizedData.MinMemGreaterThanStartupMemError -f $MinimumMemory, $StartupMemory)
+            }
+
+            # Check if Minimum memory is greater than Maximummemory
+            if ($PSBoundParameters.ContainsKey('MaximumMemory') -and
+                $PSBoundParameters.ContainsKey('MinimumMemory') -and
+                ($MinimumMemory -gt $MaximumMemory))
+            {
+                Throw ($localizedData.MinMemGreaterThanMaxMemError -f $MinimumMemory, $MaximumMemory)
+            }
+
+            # Check if Startup memory is greater than Maximummemory
+            if ($PSBoundParameters.ContainsKey('MaximumMemory') -and
+                $PSBoundParameters.ContainsKey('StartupMemory') -and
+                ($StartupMemory -gt $MaximumMemory))
+            {
+                Throw ($localizedData.StartUpMemGreaterThanMaxMemError -f $StartupMemory, $MaximumMemory)
+            }
+
+            <#  VM Generation has no direct relation to the virtual hard disk format and cannot be changed
+                after the virtual machine has been created. Generation 2 VMs do not support .VHD files.  #>
+            if (($Generation -eq 2) -and ($VhdPath.Split('.')[-1] -eq 'vhd'))
+            {
+                Throw ($localizedData.VhdUnsupportedOnGen2VMError)
+            }
+
+            # Check if $Path exist
+            if ($Path -and !(Test-Path -Path $Path))
+            {
+                Throw ($localizedData.PathDoesNotExistError -f $Path)
+            }
+
             $vhdChain = @(Get-VhdHierarchy -VhdPath ($vmObj.HardDrives[0].Path))
             if ($vhdChain -notcontains $VhdPath)
             {
                 Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'VhdPath', $VhdPath, ($vhdChain -join ','))
                 return $false
             }
+
             if ($state -and ($vmObj.State -ne $State))
             {
                 return $false
             }
+
             if ($PSBoundParameters.ContainsKey('StartupMemory') -and
                 ($vmObj.MemoryStartup -ne $StartupMemory))
             {
                 return $false
             }
+
             if ($PSBoundParameters.ContainsKey('MaximumMemory') -and
                 ($vmObj.MemoryMaximum -ne $MaximumMemory))
             {
                 return $false
             }
+
             if ($PSBoundParameters.ContainsKey('MinimumMemory') -and
                 ($vmObj.MemoryMinimum -ne $MinimumMemory))
             {
                 return $false
             }
+
             # If startup memory but neither minimum nor maximum memory specified, dynamic memory should be disabled
             if ($PSBoundParameters.ContainsKey('$StartupMemory') -and
                ( -not $PSBoundParameters.ContainsKey('MinimumMemory')) -and
@@ -779,6 +780,7 @@ function Test-TargetResource
             {
                 return $false
             }
+
             for ($i = 0; $i -lt $SwitchName.Count; $i++)
             {
                 if ($vmObj.NetworkAdapters[$i].SwitchName -ne $SwitchName[$i])
@@ -787,6 +789,7 @@ function Test-TargetResource
                     return $false
                 }
             }
+
             for ($i = 0; $i -lt $MACAddress.Count; $i++)
             {
                 if ($vmObj.NetworkAdapters[$i].MACAddress -ne $MACAddress[$i])
@@ -815,6 +818,7 @@ function Test-TargetResource
                     return $false
                 }
             }
+
             $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
             $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
             if ($guestService.Enabled  -ne $EnableGuestService)
