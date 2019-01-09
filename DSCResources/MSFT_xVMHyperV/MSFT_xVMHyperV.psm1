@@ -50,7 +50,10 @@ function Get-TargetResource
 
     # Retrieve the Vhd hierarchy to ensure we enumerate snapshots/differencing disks
     # Fixes #28
-    $vhdChain = @(Get-VhdHierarchy -VhdPath ($vmObj.HardDrives[0].Path))
+    if ($null -ne $vmobj)
+    {
+        $vhdChain = @(Get-VhdHierarchy -VhdPath ($vmObj.HardDrives[0].Path))
+    }
 
     $vmSecureBootState = $false
     if ($vmobj.Generation -eq 2)
