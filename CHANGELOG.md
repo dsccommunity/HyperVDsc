@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.15.0.0
+
 * Explicitly removed extra hidden files from release package
 
 ## 3.14.0.0
