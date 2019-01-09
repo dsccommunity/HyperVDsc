@@ -9,6 +9,7 @@
   * Redo of abandoned PRs
     * [PR #148](https://github.com/PowerShell/xHyper-V/pull/148), Fixes [Issue #149](https://github.com/PowerShell/xHyper-V/issues/149)
     * [PR #67](https://github.com/PowerShell/xHyper-V/pull/67), Fixes [Issue #145](https://github.com/PowerShell/xHyper-V/issues/145)
+  * Fixed Get throws error when NetworkAdapters are not attached or missing properties
 
 ## 3.14.0.0
 

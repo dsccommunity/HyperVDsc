@@ -61,11 +61,28 @@ function Get-TargetResource
 
     $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
 
+    $macAddress = @()
+    $switchName = @()
+    $ipAddress = @()
+
+    foreach ($n in $vmobj.NetworkAdapters)
+    {
+        $macAddress += $n.MacAddress
+        if (-Not ([string]::IsNullOrEmpty($n.SwitchName)))
+        {
+            $switchName += $n.SwitchName
+        }
+        if ($n.IPAddresses.Count -ge 1)
+        {
+            $ipAddress += $n.IPAddresses
+        }
+    }
+
     @{
         Name               = $Name
         # Return the Vhd specified if it exists in the Vhd chain
         VhdPath            = if ($vhdChain -contains $VhdPath) { $VhdPath } else { $null }
-        SwitchName         = $vmObj.NetworkAdapters.SwitchName
+        SwitchName         = $switchName
         State              = $vmobj.State
         Path               = $vmobj.Path
         Generation         = $vmobj.Generation
@@ -73,7 +90,7 @@ function Get-TargetResource
         StartupMemory      = $vmobj.MemoryStartup
         MinimumMemory      = $vmobj.MemoryMinimum
         MaximumMemory      = $vmobj.MemoryMaximum
-        MACAddress         = $vmObj.NetWorkAdapters.MacAddress
+        MACAddress         = $macAddress
         ProcessorCount     = $vmobj.ProcessorCount
         Ensure             = if ($vmobj) { 'Present'} else { 'Absent' }
         ID                 = $vmobj.Id
@@ -83,7 +100,7 @@ function Get-TargetResource
         Uptime             = $vmobj.Uptime
         CreationTime       = $vmobj.CreationTime
         HasDynamicMemory   = $vmobj.DynamicMemoryEnabled
-        NetworkAdapters    = $vmobj.NetworkAdapters.IPAddresses
+        NetworkAdapters    = $ipAddress
         EnableGuestService = ($vmobj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}).Enabled
         AutomaticCheckpointsEnabled = $vmobj.AutomaticCheckpointsEnabled
     }
