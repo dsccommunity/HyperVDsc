@@ -762,7 +762,7 @@ function Test-TargetResource
             }
 
             # If startup memory but neither minimum nor maximum memory specified, dynamic memory should be disabled
-            if ($PSBoundParameters.ContainsKey('$StartupMemory') -and
+            if ($PSBoundParameters.ContainsKey('StartupMemory') -and
                 ( -not $PSBoundParameters.ContainsKey('MinimumMemory')) -and
                 ( -not $PSBoundParameters.ContainsKey('MaximumMemory')) -and
                 $vmobj.DynamicMemoryEnabled)
