@@ -23,4 +23,6 @@ ConvertFrom-StringData @'
     VMPropertySet                     = VM property '{0}' is '{1}'.
     VMPropertiesUpdated               = VM '{0}' properties have been updated.
     WaitingForVMIPAddress             = Waiting for IP Address for VM '{0}' ...
+
+    QueryingVM                        = Querying VM '{0}'.
 '@

@@ -32,6 +32,8 @@ function Get-TargetResource
         $VhdPath
     )
 
+    Write-Verbose -Message ($localizedData.QueryingVM -f $Name)
+
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
@@ -62,7 +64,7 @@ function Get-TargetResource
     @{
         Name               = $Name
         # Return the Vhd specified if it exists in the Vhd chain
-        VhdPath            = if ($vhdChain -contains $VhdPath) { $VhdPath }
+        VhdPath            = if ($vhdChain -contains $VhdPath) { $VhdPath } else { $null }
         SwitchName         = $vmObj.NetworkAdapters.SwitchName
         State              = $vmobj.State
         Path               = $vmobj.Path
