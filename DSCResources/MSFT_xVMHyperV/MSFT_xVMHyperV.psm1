@@ -43,7 +43,7 @@ function Get-TargetResource
     # Check if 1 or 0 VM with name = $name exist
     if ($vmobj.count -gt 1)
     {
-       Throw ($localizedData.MoreThanOneVMExistsError -f $Name)
+        Throw ($localizedData.MoreThanOneVMExistsError -f $Name)
     }
 
     # Retrieve the Vhd hierarchy to ensure we enumerate snapshots/differencing disks
@@ -53,8 +53,8 @@ function Get-TargetResource
     $vmSecureBootState = $false
     if ($vmobj.Generation -eq 2)
     {
-       # Retrieve secure boot status (can only be enabled on Generation 2 VMs) and convert to a boolean.
-       $vmSecureBootState = ($vmobj | Get-VMFirmware).SecureBoot -eq 'On'
+        # Retrieve secure boot status (can only be enabled on Generation 2 VMs) and convert to a boolean.
+        $vmSecureBootState = ($vmobj | Get-VMFirmware).SecureBoot -eq 'On'
     }
 
     $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
@@ -62,7 +62,7 @@ function Get-TargetResource
     @{
         Name               = $Name
         # Return the Vhd specified if it exists in the Vhd chain
-        VhdPath            = if ($vhdChain -contains $VhdPath) { $VhdPath };
+        VhdPath            = if ($vhdChain -contains $VhdPath) { $VhdPath }
         SwitchName         = $vmObj.NetworkAdapters.SwitchName
         State              = $vmobj.State
         Path               = $vmobj.Path
@@ -73,7 +73,7 @@ function Get-TargetResource
         MaximumMemory      = $vmobj.MemoryMaximum
         MACAddress         = $vmObj.NetWorkAdapters.MacAddress
         ProcessorCount     = $vmobj.ProcessorCount
-        Ensure             = if ($vmobj){"Present"} else {"Absent"}
+        Ensure             = if ($vmobj) { 'Present'} else { 'Absent' }
         ID                 = $vmobj.Id
         Status             = $vmobj.Status
         CPUUsage           = $vmobj.CPUUsage
@@ -109,7 +109,7 @@ function Set-TargetResource
 
         # State of the VM
         [Parameter()]
-        [ValidateSet('Running','Paused','Off')]
+        [ValidateSet('Running', 'Paused', 'Off')]
         [String]
         $State,
 
@@ -120,25 +120,25 @@ function Set-TargetResource
 
         # Virtual machine generation
         [Parameter()]
-        [ValidateRange(1,2)]
+        [ValidateRange(1, 2)]
         [UInt32]
         $Generation = 1,
 
         # Startup RAM for the VM
         [Parameter()]
-        [ValidateRange(32MB,65536MB)]
+        [ValidateRange(32MB, 65536MB)]
         [UInt64]
         $StartupMemory,
 
         # Minimum RAM for the VM. This enables dynamic memory
         [Parameter()]
-        [ValidateRange(32MB,65536MB)]
+        [ValidateRange(32MB, 65536MB)]
         [UInt64]
         $MinimumMemory,
 
         # Maximum RAM for the VM. This enables dynamic memory
         [Parameter()]
-        [ValidateRange(32MB,1048576MB)]
+        [ValidateRange(32MB, 1048576MB)]
         [UInt64]
         $MaximumMemory,
 
@@ -164,7 +164,7 @@ function Set-TargetResource
 
         # Should the VM be created or deleted
         [Parameter()]
-        [ValidateSet('Present','Absent')]
+        [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure = 'Present',
 
@@ -195,7 +195,7 @@ function Set-TargetResource
     }
 
     # Check if AutomaticCheckpointsEnabled is set in configuration
-    if($PSBoundParameters.ContainsKey("AutomaticCheckpointsEnabled"))
+    if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
     {
         # Check if AutomaticCheckpoints are supported
         # If AutomaticCheckpoints are supported, parameter exists on Set-VM
@@ -214,7 +214,7 @@ function Set-TargetResource
         Write-Verbose -Message ($localizedData.VMExists -f $Name)
 
         # If VM shouldn't be there, stop it and remove it
-        if ($Ensure -eq "Absent")
+        if ($Ensure -eq 'Absent')
         {
             Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'Ensure', $Ensure, 'Present')
             Get-VM $Name | Stop-VM -Force -Passthru -WarningAction SilentlyContinue | Remove-VM -Force
@@ -238,34 +238,34 @@ function Set-TargetResource
             if ($PSBoundParameters.ContainsKey('StartupMemory') -and ($vmObj.MemoryStartup -ne $StartupMemory))
             {
                 Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MemoryStartup', $StartupMemory, $vmObj.MemoryStartup)
-                $changeProperty["MemoryStartup"] = $StartupMemory
+                $changeProperty['MemoryStartup'] = $StartupMemory
             }
             elseif ($PSBoundParameters.ContainsKey('MinimumMemory') -and ($vmObj.MemoryStartup -lt $MinimumMemory))
             {
                 Write-Verbose -Message ($localizedData.AdjustingLessThanMemoryWarning -f 'StartupMemory', $vmObj.MemoryStartup, 'MinimumMemory', $MinimumMemory)
-                $changeProperty["MemoryStartup"] = $MinimumMemory
+                $changeProperty['MemoryStartup'] = $MinimumMemory
             }
             elseif ($PSBoundParameters.ContainsKey('MaximumMemory') -and ($vmObj.MemoryStartup -gt $MaximumMemory))
             {
                 Write-Verbose -Message ($localizedData.AdjustingGreaterThanMemoryWarning -f 'StartupMemory', $vmObj.MemoryStartup, 'MaximumMemory', $MaximumMemory)
-                $changeProperty["MemoryStartup"] = $MaximumMemory
+                $changeProperty['MemoryStartup'] = $MaximumMemory
             }
 
             # If the VM does not have the right minimum or maximum memory, stop the VM, set the right memory, start the VM
             if ($PSBoundParameters.ContainsKey('MinimumMemory') -or $PSBoundParameters.ContainsKey('MaximumMemory'))
             {
-                $changeProperty["DynamicMemory"] = $true
-                $changeProperty["StaticMemory"] = $false
+                $changeProperty['DynamicMemory'] = $true
+                $changeProperty['StaticMemory'] = $false
 
                 if ($PSBoundParameters.ContainsKey('MinimumMemory') -and ($vmObj.Memoryminimum -ne $MinimumMemory))
                 {
                     Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MinimumMemory', $MinimumMemory, $vmObj.MemoryMinimum)
-                    $changeProperty["MemoryMinimum"] = $MinimumMemory
+                    $changeProperty['MemoryMinimum'] = $MinimumMemory
                 }
                 if ($PSBoundParameters.ContainsKey('MaximumMemory') -and ($vmObj.Memorymaximum -ne $MaximumMemory))
                 {
                     Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MaximumMemory', $MaximumMemory, $vmObj.MemoryMaximum)
-                    $changeProperty["MemoryMaximum"] = $MaximumMemory
+                    $changeProperty['MemoryMaximum'] = $MaximumMemory
                 }
             }
 
@@ -273,13 +273,13 @@ function Set-TargetResource
             if ($PSBoundParameters.ContainsKey('ProcessorCount') -and ($vmObj.ProcessorCount -ne $ProcessorCount))
             {
                 Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'ProcessorCount', $ProcessorCount, $vmObj.ProcessorCount)
-                $changeProperty["ProcessorCount"] = $ProcessorCount
+                $changeProperty['ProcessorCount'] = $ProcessorCount
             }
 
             # Stop the VM, set the right properties, start the VM only if there are properties to change
             if ($changeProperty.Count -gt 0)
             {
-                Set-VMProperty -Name $Name -VMCommand "Set-VM" -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
+                Set-VMProperty -Name $Name -VMCommand 'Set-VM' -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
                 Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
             }
 
@@ -289,14 +289,14 @@ function Set-TargetResource
                 - If only startup memory is specified, but neither minimum nor maximum
             #>
             if ( ($PSBoundParameters.ContainsKey('StartupMemory') -and
-                   ($StartupMemory -eq $MinimumMemory) -and
-                   ($StartupMemory -eq $MaximumMemory)
-                 ) -or
-                 ( $PSBoundParameters.ContainsKey('StartupMemory') -and
-                   (-not $PSBoundParameters.ContainsKey('MinimumMemory')) -and
-                   (-not $PSBoundParameters.ContainsKey('MaximumMemory'))
-                 )
-               )
+                    ($StartupMemory -eq $MinimumMemory) -and
+                    ($StartupMemory -eq $MaximumMemory)
+                ) -or
+                ( $PSBoundParameters.ContainsKey('StartupMemory') -and
+                    (-not $PSBoundParameters.ContainsKey('MinimumMemory')) -and
+                    (-not $PSBoundParameters.ContainsKey('MaximumMemory'))
+                )
+            )
             {
                 # Refresh VM properties
                 $vmObj = Get-VM -Name $Name -ErrorAction SilentlyContinue
@@ -323,15 +323,18 @@ function Set-TargetResource
             {
                 $switch = $SwitchName[$i]
                 $nic = $vmObj.NetworkAdapters[$i]
-                if ($nic) {
+                if ($nic)
+                {
                     # We cannot change the MAC address whilst the VM is running.. This is changed later
-                    if ($nic.SwitchName -ne $switch) {
+                    if ($nic.SwitchName -ne $switch)
+                    {
                         Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'NIC', $switch, $nic.SwitchName)
                         $nic | Connect-VMNetworkAdapter -SwitchName $switch
                         Write-Verbose -Message ($localizedData.VMPropertySet -f 'NIC', $switch)
                     }
                 }
-                else {
+                else
+                {
                     Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'NIC', $switch, '<missing>')
                     if ($MACAddress -and (-not [System.String]::IsNullOrEmpty($MACAddress[$i])))
                     {
@@ -376,6 +379,7 @@ function Set-TargetResource
                     {
                         $enableSecureBoot = 'Off'
                     }
+
                     # Cannot change the secure boot state whilst the VM is powered on.
                     $setVMPropertyParams = @{
                         VMName = $Name
@@ -417,7 +421,7 @@ function Set-TargetResource
             # If AutomaticCheckpointsEnabled is set in configuration
             if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
             {
-                if($vmObj.AutomaticCheckpointsEnabled -ne $AutomaticCheckpointsEnabled)
+                if ($vmObj.AutomaticCheckpointsEnabled -ne $AutomaticCheckpointsEnabled)
                 {
                     Set-VM -Name $Name -AutomaticCheckpointsEnabled $AutomaticCheckpointsEnabled
                 }
@@ -429,71 +433,71 @@ function Set-TargetResource
     else
     {
         Write-Verbose -Message ($localizedData.VMDoesNotExist -f $Name)
-        if ($Ensure -eq "Present")
+        if ($Ensure -eq 'Present')
         {
             Write-Verbose -Message ($localizedData.CreatingVM -f $Name)
 
             $parameters = @{}
-            $parameters["Name"] = $Name
-            $parameters["VHDPath"] = $VhdPath
-            $parameters["Generation"] = $Generation
+            $parameters['Name'] = $Name
+            $parameters['VHDPath'] = $VhdPath
+            $parameters['Generation'] = $Generation
 
             # Optional parameters
             if ($SwitchName)
             {
-                $parameters["SwitchName"] = $SwitchName[0]
+                $parameters['SwitchName'] = $SwitchName[0]
             }
             if ($Path)
             {
-                $parameters["Path"] = $Path
+                $parameters['Path'] = $Path
             }
             $defaultStartupMemory = 512MB
             if ($PSBoundParameters.ContainsKey('StartupMemory'))
             {
-                $parameters["MemoryStartupBytes"] = $StartupMemory
+                $parameters['MemoryStartupBytes'] = $StartupMemory
             }
             elseif ($PSBoundParameters.ContainsKey('MinimumMemory') -and ($defaultStartupMemory -lt $MinimumMemory))
             {
-                $parameters["MemoryStartupBytes"] = $MinimumMemory
+                $parameters['MemoryStartupBytes'] = $MinimumMemory
             }
             elseif ($PSBoundParameters.ContainsKey('MaximumMemory') -and ($defaultStartupMemory -gt $MaximumMemory))
             {
-                $parameters["MemoryStartupBytes"] = $MaximumMemory
+                $parameters['MemoryStartupBytes'] = $MaximumMemory
             }
             $null = New-VM @parameters
 
             $parameters = @{}
-            $parameters["Name"] = $Name
-            $parameters["StaticMemory"] = $true
-            $parameters["DynamicMemory"] = $false
+            $parameters['Name'] = $Name
+            $parameters['StaticMemory'] = $true
+            $parameters['DynamicMemory'] = $false
             if ($PSBoundParameters.ContainsKey('MinimumMemory') -or $PSBoundParameters.ContainsKey('MaximumMemory'))
             {
-                $parameters["DynamicMemory"] = $true
-                $parameters["StaticMemory"] = $false
+                $parameters['DynamicMemory'] = $true
+                $parameters['StaticMemory'] = $false
                 if ($PSBoundParameters.ContainsKey('MinimumMemory'))
                 {
-                    $parameters["MemoryMinimumBytes"] = $MinimumMemory
+                    $parameters['MemoryMinimumBytes'] = $MinimumMemory
                 }
                 if ($PSBoundParameters.ContainsKey('MaximumMemory'))
                 {
-                    $parameters["MemoryMaximumBytes"] = $MaximumMemory
+                    $parameters['MemoryMaximumBytes'] = $MaximumMemory
                 }
             }
 
             if ($Notes)
             {
-                $parameters["Notes"] = $Notes
+                $parameters['Notes'] = $Notes
             }
 
             if ($PSBoundParameters.ContainsKey('ProcessorCount'))
             {
-                $parameters["ProcessorCount"] = $ProcessorCount
+                $parameters['ProcessorCount'] = $ProcessorCount
             }
 
             # If AutomaticCheckpointsEnabled is set in configuration
             if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
             {
-                $parameters["AutomaticCheckpointsEnabled"]=$AutomaticCheckpointsEnabled
+                $parameters['AutomaticCheckpointsEnabled'] = $AutomaticCheckpointsEnabled
             }
 
             $null = Set-VM @parameters
@@ -516,7 +520,7 @@ function Set-TargetResource
             for ($i = 1; $i -lt $SwitchName.Count; $i++)
             {
                 $addVMNetworkAdapterParams = @{
-                    VMName = $Name;
+                    VMName = $Name
                     SwitchName = $SwitchName[$i]
                 }
                 if ($MACAddress -and (-not [System.String]::IsNullOrEmpty($MACAddress[$i])))
@@ -527,7 +531,8 @@ function Set-TargetResource
                 Write-Verbose -Message ($localizedData.VMPropertySet -f 'NIC', $SwitchName[$i])
             }
 
-            if ($Generation -eq 2) {
+            if ($Generation -eq 2)
+            {
                 # Secure boot is only applicable to Generation 2 VMs and it defaults to on.
                 # Therefore, we only need to explicitly set it to off if specified.
                 if ($SecureBoot -eq $false)
@@ -577,7 +582,7 @@ function Test-TargetResource
 
         # State of the VM
         [Parameter()]
-        [ValidateSet('Running','Paused','Off')]
+        [ValidateSet('Running', 'Paused', 'Off')]
         [String]
         $State,
 
@@ -588,25 +593,25 @@ function Test-TargetResource
 
         # Virtual machine generation
         [Parameter()]
-        [ValidateRange(1,2)]
+        [ValidateRange(1, 2)]
         [UInt32]
         $Generation = 1,
 
         # Startup RAM for the VM
         [Parameter()]
-        [ValidateRange(32MB,65536MB)]
+        [ValidateRange(32MB, 65536MB)]
         [UInt64]
         $StartupMemory,
 
         # Minimum RAM for the VM. This enables dynamic memory
         [Parameter()]
-        [ValidateRange(32MB,65536MB)]
+        [ValidateRange(32MB, 65536MB)]
         [UInt64]
         $MinimumMemory,
 
         # Maximum RAM for the VM. This enables dynamic memory
         [Parameter()]
-        [ValidateRange(32MB,1048576MB)]
+        [ValidateRange(32MB, 1048576MB)]
         [UInt64]
         $MaximumMemory,
 
@@ -632,7 +637,7 @@ function Test-TargetResource
 
         # Should the VM be created or deleted
         [Parameter()]
-        [ValidateSet('Present','Absent')]
+        [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure = 'Present',
 
@@ -664,11 +669,11 @@ function Test-TargetResource
     # Check if 1 or 0 VM with name = $name exist
     if ((Get-VM -Name $Name -ErrorAction SilentlyContinue).count -gt 1)
     {
-       Throw ($localizedData.MoreThanOneVMExistsError -f $Name)
+        Throw ($localizedData.MoreThanOneVMExistsError -f $Name)
     }
 
     # Check if AutomaticCheckpointsEnabled is set in configuration
-    if($PSBoundParameters.ContainsKey("AutomaticCheckpointsEnabled"))
+    if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
     {
         # Check if AutomaticCheckpoints are supported
         # If AutomaticCheckpoints are supported, parameter exists on Set-VM
@@ -758,9 +763,9 @@ function Test-TargetResource
 
             # If startup memory but neither minimum nor maximum memory specified, dynamic memory should be disabled
             if ($PSBoundParameters.ContainsKey('$StartupMemory') -and
-               ( -not $PSBoundParameters.ContainsKey('MinimumMemory')) -and
-               ( -not $PSBoundParameters.ContainsKey('MaximumMemory')) -and
-               $vmobj.DynamicMemoryEnabled)
+                ( -not $PSBoundParameters.ContainsKey('MinimumMemory')) -and
+                ( -not $PSBoundParameters.ContainsKey('MaximumMemory')) -and
+                $vmobj.DynamicMemoryEnabled)
             {
                 return $false
             }
@@ -810,7 +815,8 @@ function Test-TargetResource
                 return $false
             }
 
-            if ($vmObj.Generation -eq 2) {
+            if ($vmObj.Generation -eq 2)
+            {
                 $vmSecureBoot = Test-VMSecureBoot -Name $Name
                 if ($SecureBoot -ne $vmSecureBoot)
                 {
@@ -821,7 +827,7 @@ function Test-TargetResource
 
             $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
             $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
-            if ($guestService.Enabled  -ne $EnableGuestService)
+            if ($guestService.Enabled -ne $EnableGuestService)
             {
                 Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
                 return $false
@@ -830,7 +836,7 @@ function Test-TargetResource
             # If AutomaticCheckpointsEnabled is set in configuration
             if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
             {
-                if($vmObj.AutomaticCheckpointsEnabled -ne $AutomaticCheckpointsEnabled)
+                if ($vmObj.AutomaticCheckpointsEnabled -ne $AutomaticCheckpointsEnabled)
                 {
                     Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'AutomaticCheckpointsEnabled', $AutomaticCheckpointsEnabled, $vmObj.AutomaticCheckpointsEnabled)
                     return $false
@@ -864,7 +870,7 @@ function Get-VhdHierarchy
 
     $vmVhdPath = Get-VHD -Path $VhdPath
     Write-Output -InputObject $vmVhdPath.Path
-    while(-not [System.String]::IsNullOrEmpty($vmVhdPath.ParentPath))
+    while (-not [System.String]::IsNullOrEmpty($vmVhdPath.ParentPath))
     {
         $vmVhdPath.ParentPath
         $vmVhdPath = (Get-VHD -Path $vmVhdPath.ParentPath)
@@ -899,24 +905,24 @@ function Set-VMMACAddress
     )
     $vmObj = Get-VM -Name $Name
     $originalState = $vmObj.state
-    if ($originalState -ne "Off" -and $RestartIfNeeded)
+    if ($originalState -ne 'Off' -and $RestartIfNeeded)
     {
         Set-VMState -Name $Name -State Off
         $vmObj.NetworkAdapters[$NICIndex] | Set-VMNetworkAdapter -StaticMacAddress $MACAddress
 
         # Can not move a off VM to paused, but only to running state
-        if ($originalState -eq "Running")
+        if ($originalState -eq 'Running')
         {
             Set-VMState -Name $Name -State Running -WaitForIP $WaitForIP
         }
 
         # Cannot make a paused VM to go back to Paused state after turning Off
-        if ($originalState -eq "Paused")
+        if ($originalState -eq 'Paused')
         {
             Write-Warning -Message ($localizedData.VMStateWillBeOffWarning -f $Name)
         }
     }
-    elseif ($originalState -eq "Off")
+    elseif ($originalState -eq 'Off')
     {
         $vmObj.NetworkAdapters[$NICIndex] | Set-VMNetworkAdapter -StaticMacAddress $MACAddress
         Write-Verbose -Message ($localizedData.VMPropertySet -f 'MACAddress', $MACAddress)
