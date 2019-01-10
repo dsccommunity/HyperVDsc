@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '3.14.0.0'
+moduleVersion = '3.15.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'f5a5f169-7026-4053-932a-19a7c37b1ca5'
@@ -47,8 +47,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* MSFT_xVMHost:
-  * Added support to Enable / Disable VM Live Migration. Fixes [Issue 155](https://github.com/PowerShell/xHyper-V/issues/155).
+        ReleaseNotes = '* Explicitly removed extra hidden files from release package
 
 '
 
@@ -56,6 +55,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
