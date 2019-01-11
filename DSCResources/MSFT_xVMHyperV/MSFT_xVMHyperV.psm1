@@ -48,8 +48,10 @@ function Get-TargetResource
         Throw ($localizedData.MoreThanOneVMExistsError -f $Name)
     }
 
-    # Retrieve the Vhd hierarchy to ensure we enumerate snapshots/differencing disks
-    # Fixes #28
+    <#
+        Retrieve the Vhd hierarchy to ensure we enumerate snapshots/differencing disks
+        Fixes #28
+    #>
     if ($null -ne $vmobj)
     {
         $vhdChain = @(Get-VhdHierarchy -VhdPath ($vmObj.HardDrives[0].Path))
@@ -219,8 +221,10 @@ function Set-TargetResource
     # Check if AutomaticCheckpointsEnabled is set in configuration
     if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
     {
-        # Check if AutomaticCheckpoints are supported
-        # If AutomaticCheckpoints are supported, parameter exists on Set-VM
+        <#
+            Check if AutomaticCheckpoints are supported
+            If AutomaticCheckpoints are supported, parameter exists on Set-VM
+        #>
         if (-Not (Get-Command -Name Set-VM -Module Hyper-V).Parameters.ContainsKey('AutomaticCheckpointsEnabled'))
         {
             Throw ($localizedData.AutomaticCheckpointsUnsupported)
@@ -243,8 +247,10 @@ function Set-TargetResource
             Write-Verbose -Message ($localizedData.VMPropertySet -f 'Ensure', $Ensure)
         }
 
-        # If VM is present, check its state, startup memory, minimum memory, maximum memory,processor count, automatic checkpoint and mac address
-        # One cannot set the VM's vhdpath, path, generation and switchName after creation
+        <#
+            If VM is present, check its state, startup memory, minimum memory, maximum memory,processor count, automatic checkpoint and mac address
+            One cannot set the VM's vhdpath, path, generation and switchName after creation
+        #>
         else
         {
             # If state has been specified and the VM is not in right state, set it to right state
@@ -555,8 +561,10 @@ function Set-TargetResource
 
             if ($Generation -eq 2)
             {
-                # Secure boot is only applicable to Generation 2 VMs and it defaults to on.
-                # Therefore, we only need to explicitly set it to off if specified.
+                <#
+                    Secure boot is only applicable to Generation 2 VMs and it defaults to on.
+                    Therefore, we only need to explicitly set it to off if specified.
+                #>
                 if ($SecureBoot -eq $false)
                 {
                     Set-VMFirmware -VMName $Name -EnableSecureBoot Off
@@ -697,8 +705,10 @@ function Test-TargetResource
     # Check if AutomaticCheckpointsEnabled is set in configuration
     if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
     {
-        # Check if AutomaticCheckpoints are supported
-        # If AutomaticCheckpoints are supported, parameter exists on Set-VM
+        <#
+            Check if AutomaticCheckpoints are supported
+            If AutomaticCheckpoints are supported, parameter exists on Set-VM
+        #>
         if (-Not (Get-Command -Name Set-VM -Module Hyper-V).Parameters.ContainsKey('AutomaticCheckpointsEnabled'))
         {
             Throw ($localizedData.AutomaticCheckpointsUnsupported)
@@ -740,8 +750,10 @@ function Test-TargetResource
                 Throw ($localizedData.StartUpMemGreaterThanMaxMemError -f $StartupMemory, $MaximumMemory)
             }
 
-            <#  VM Generation has no direct relation to the virtual hard disk format and cannot be changed
-                after the virtual machine has been created. Generation 2 VMs do not support .VHD files.  #>
+            <#
+                VM Generation has no direct relation to the virtual hard disk format and cannot be changed
+                after the virtual machine has been created. Generation 2 VMs do not support .VHD files.
+            #>
             if (($Generation -eq 2) -and ($VhdPath.Split('.')[-1] -eq 'vhd'))
             {
                 Throw ($localizedData.VhdUnsupportedOnGen2VMError)
@@ -880,7 +892,7 @@ function Test-TargetResource
 
 #region Helper function
 
-<# Returns VM VHDs, including snapshots and differencing disks #>
+# Returns VM VHDs, including snapshots and differencing disks
 function Get-VhdHierarchy
 {
     param
@@ -899,8 +911,10 @@ function Get-VhdHierarchy
     }
 }
 
-# The 'Set-VMProperty' method cannot be used as it cannot deal with piped
-# command in it's current implementation
+<#
+    The 'Set-VMProperty' method cannot be used as it cannot deal with piped
+    command in it's current implementation
+#>
 function Set-VMMACAddress
 {
     param
