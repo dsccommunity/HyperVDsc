@@ -70,16 +70,18 @@ function Get-TargetResource
     $switchName = @()
     $ipAddress = @()
 
-    foreach ($n in $vmobj.NetworkAdapters)
+    foreach ($networkAdapter in $vmobj.NetworkAdapters)
     {
-        $macAddress += $n.MacAddress
-        if (-Not ([string]::IsNullOrEmpty($n.SwitchName)))
+        $macAddress += $networkAdapter.MacAddress
+
+        if (-Not ([string]::IsNullOrEmpty($networkAdapter.SwitchName)))
         {
-            $switchName += $n.SwitchName
+            $switchName += $networkAdapter.SwitchName
         }
-        if ($n.IPAddresses.Count -ge 1)
+
+        if ($networkAdapter.IPAddresses.Count -ge 1)
         {
-            $ipAddress += $n.IPAddresses
+            $ipAddress += $networkAdapter.IPAddresses
         }
     }
 
