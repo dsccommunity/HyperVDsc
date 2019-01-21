@@ -286,7 +286,8 @@ function Set-TargetResource
                 $removeReaddSwitch = $true
             }
 
-            If ($switch.IovEnabled -ne $IovEnabled) {
+            If ($switch.IovEnabled -ne $IovEnabled)
+            {
                 Write-Verbose -Message ($LocalizedData.IovEnabledIncorrect -f $Name)
                 $removeReaddSwitch = $true
             }
