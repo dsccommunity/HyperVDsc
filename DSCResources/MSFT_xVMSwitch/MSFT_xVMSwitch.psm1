@@ -174,7 +174,7 @@ function Set-TargetResource
 
         [Parameter()]
         [Boolean]
-        $IovEnabled = $true,
+        $IovEnabled = $false,
 
         [Parameter()]
         [Boolean]
@@ -349,7 +349,7 @@ function Set-TargetResource
             Write-Verbose -Message $LocalizedData.CreatingSwitch
             $parameters = @{}
             $parameters["Name"] = $Name
-            $parameters['EnableIov'] = $IovEnabled
+            $parameters["EnableIov"] = $IovEnabled
 
             if ($BandwidthReservationMode -ne "NA")
             {
@@ -457,7 +457,7 @@ function Test-TargetResource
 
         [Parameter()]
         [Boolean]
-        $IovEnabled = $true,
+        $IovEnabled = $false,
 
         [Parameter()]
         [Boolean]
