@@ -91,7 +91,14 @@ try
                 Mock -CommandName Get-VMNetworkAdapterVlan -MockWith {
                     $MockAdapterVlanUntagged
                 }
-                Mock -CommandName Get-NetworkInformation
+                Mock -CommandName Get-NetworkInformation -MockWith {
+                    return @{
+                        IpAddress = '10.10.10.10'
+                        Subnet = '255.255.255.0'
+                        DefaultGateway = '10.10.10.1'
+                        DnsServer = '10.10.10.1'
+                    }
+                }
 
                 It 'should return adapter properties' {
                     $Result = Get-TargetResource @TestAdapter
@@ -101,7 +108,7 @@ try
                     $Result.VMName                 | Should Be 'ManagementOS'
                     $Result.Id                     | Should Be $TestAdapter.Id
                     $Result.VlanId                 | Should -BeNullOrEmpty
-                    $Result.NetworkSetting         | Should -BeNullOrEmpty
+                    $Result.NetworkSetting         | Should -Not -BeNullOrEmpty
                 }
                 It 'should call the expected mocks' {
                     Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
