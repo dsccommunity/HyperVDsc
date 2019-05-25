@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.16.0.0
+
 * MSFT_xVMHyperV:
   * Moved localization string data to own file.
   * Fixed code styling issues.
