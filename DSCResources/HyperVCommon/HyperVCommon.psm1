@@ -1,4 +1,4 @@
-﻿#region localizeddata
+#region localizeddata
 if (Test-Path "${PSScriptRoot}\${PSUICulture}")
 {
     Import-LocalizedData `

@@ -124,9 +124,11 @@ function Set-TargetResource
         [System.Uint32]
         $ControllerNumber,
 
+        [Parameter()]
         [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = 'Present'
@@ -239,6 +241,7 @@ function Test-TargetResource
         [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = 'Present'

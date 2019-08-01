@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
     Tests if Hyper-V is installed on this OS.
 
