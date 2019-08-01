@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## 3.16.0.0
+
+* MSFT_xVMHyperV:
+  * Moved localization string data to own file.
+  * Fixed code styling issues.
+  * Fixed bug where StartupMemory was not evaluated in Test-TargetResource.
+  * Redo of abandoned PRs:
+    * [PR #148](https://github.com/PowerShell/xHyper-V/pull/148), Fixes [Issue #149](https://github.com/PowerShell/xHyper-V/issues/149).
+    * [PR #67](https://github.com/PowerShell/xHyper-V/pull/67), Fixes [Issue #145](https://github.com/PowerShell/xHyper-V/issues/145).
+  * Fixed Get throws error when NetworkAdapters are not attached or missing properties.
+
+## 3.15.0.0
+
+* Explicitly removed extra hidden files from release package.
+
+## 3.14.0.0
+
 * MSFT_xVMHost:
   * Added support to Enable / Disable VM Live Migration. Fixes [Issue #155](https://github.com/PowerShell/xHyper-V/issues/155).
 
@@ -25,12 +42,12 @@
   * MSFT_xVMHardDiskDrive to manage additional attached VHD/Xs.
   * MSFT_xVMScsiController to manage virtual machine SCSI controllers.
 * MSFT_xVMSwitch:
-  * Added parameter to specify the Load Balancing Algorithm of a vSwitch with Switch Embedded Teaming (SET)
+  * Added parameter to specify the Load Balancing Algorithm of a vSwitch with Switch Embedded Teaming (SET).
 
 ## 3.10.0.0
 
 * MSFT_xVMHyperV:
-  * Added support for configuring automatic snapshots
+  * Added support for configuring automatic snapshots.
 
 ## 3.9.0.0
 
