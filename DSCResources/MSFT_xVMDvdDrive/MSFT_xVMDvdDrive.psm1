@@ -40,15 +40,15 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VMName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerNumber,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerLocation
     )
@@ -112,15 +112,15 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VMName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerLocation,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerNumber,
 
@@ -172,7 +172,8 @@ function Set-TargetResource
                     -f $VMName,$ControllerNumber,$ControllerLocation,$Path `
                 ) -join '' )
 
-            if (-not [String]::IsNullOrWhiteSpace($Path)) {
+            if (-not [String]::IsNullOrWhiteSpace($Path))
+            {
                 $PSBoundParameters.Add('Path',$Path)
             } # if
 
@@ -222,18 +223,19 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VMName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerLocation,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerNumber,
 
+        [Parameter()]
         [System.String]
         $Path,
 
@@ -359,21 +361,23 @@ function Test-ParameterValid
     [OutputType([Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VMName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerLocation,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerNumber,
 
+        [Parameter()]
         [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet("Present","Absent")]
         [System.String]
         $Ensure = 'Present'

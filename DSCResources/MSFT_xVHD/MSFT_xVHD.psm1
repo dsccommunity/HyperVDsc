@@ -349,7 +349,7 @@ function GetNameWithExtension
         [String]
         $Name,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [String]
         $Generation = 'Vhd'
     )
@@ -371,8 +371,8 @@ function GetNameWithExtension
     else
     {
         # Append generation to the name
-        $vhdName = "$Name.$Generation"
         Write-Verbose -Message "Vhd full name is $vhdName"
+        $vhdName = "$Name.$Generation"
     }
 
     $vhdName

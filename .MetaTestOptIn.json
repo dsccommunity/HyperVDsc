@@ -1,3 +1,10 @@
 [
-    "Common Tests - Validate Markdown Files"
+    "Common Tests - Validate Markdown Files",
+    "Common Tests - Validate Module Files",
+    "Common Tests - Required Script Analyzer Rules",
+    "Common Tests - Custom Script Analyzer Rules",
+    "Common Tests - Validate Example Files",
+    "Common Tests - Spellcheck Markdown Files",
+    "Common Tests - Validate Markdown Links",
+    "Common Tests - Validate Localization"
 ]

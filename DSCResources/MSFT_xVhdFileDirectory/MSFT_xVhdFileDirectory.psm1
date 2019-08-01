@@ -1,6 +1,6 @@
 
 <#
-#  Get the current configuration of the machine 
+#  Get the current configuration of the machine
 #  This function is called when you do Get-DscConfiguration after the configuration is set.
 #>
 function Get-TargetResource
@@ -26,7 +26,7 @@ function Get-TargetResource
     if ( -not (Test-path $VhdPath))
     {
         $item = New-CimInstance -ClassName MSFT_FileDirectoryConfiguration -Property @{DestinationPath = $VhdPath; Ensure = "Absent"} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
-            
+
         Return @{
             VhdPath = $VhdPath
             FileDirectory = $item
@@ -35,18 +35,18 @@ function Get-TargetResource
 
     # Mount VHD.
     $mountVHD = EnsureVHDState -Mounted -vhdPath $vhdPath
-    
+
     $itemsFound = foreach($Item in $FileDirectory)
     {
         $item = GetItemToCopy -item $item
         $mountedDrive =  $mountVHD | Get-Disk | Get-Partition | Where-Object -FilterScript {$_.Type -ne 'Recovery'} | Get-Volume
         $letterDrive  = (-join $mountedDrive.DriveLetter) + ":\"
-       
+
         # show the drive letters.
-        Get-PSDrive | Write-Verbose       
+        Get-PSDrive | Write-Verbose
 
         $finalPath = Join-Path $letterDrive $item.DestinationPath
-        
+
         Write-Verbose "Getting the current value at $finalPath ..."
 
         if (Test-Path $finalPath)
@@ -54,19 +54,19 @@ function Get-TargetResource
             New-CimInstance -ClassName MSFT_FileDirectoryConfiguration -Property @{DestinationPath = $finalPath; Ensure = "Present"} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
         }
         else
-        {            
-            New-CimInstance -ClassName MSFT_FileDirectoryConfiguration -Property @{DestinationPath = $finalPath ; Ensure = "Absent"} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly    
+        {
+            New-CimInstance -ClassName MSFT_FileDirectoryConfiguration -Property @{DestinationPath = $finalPath ; Ensure = "Absent"} -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
         }
    }
 
     # Dismount VHD.
-    EnsureVHDState -Dismounted -vhdPath $VhdPath 
-    
+    EnsureVHDState -Dismounted -vhdPath $VhdPath
+
     # Return the result.
     Return @{
       VhdPath = $VhdPath
       FileDirectory = $itemsFound
-    }   
+    }
 }
 
 
@@ -83,15 +83,15 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
-        
+
         [Parameter()]
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
         $CheckSum = 'ModifiedDate'
     )
 
-    if (-not (Test-Path $VhdPath)) { throw "Specified destination path $VhdPath does not exist!"}   
-    
+    if (-not (Test-Path $VhdPath)) { throw "Specified destination path $VhdPath does not exist!"}
+
     # mount the VHD.
     $mountedVHD = EnsureVHDState -Mounted -vhdPath $VhdPath
 
@@ -101,15 +101,15 @@ function Set-TargetResource
             Get-PSDrive | Write-Verbose
 
             $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Where-Object -FilterScript {$_.Type -ne 'Recovery'} | Get-Volume
-            
+
             foreach ($item in $FileDirectory)
             {
                 $itemToCopy = GetItemToCopy -item $item
                 $letterDrive  = (-join $mountedDrive.DriveLetter) + ":\"
                 $finalDestinationPath = $letterDrive
                 $finalDestinationPath = Join-Path  $letterDrive  $itemToCopy.DestinationPath
-               
-                # if the destination should be removed 
+
+                # if the destination should be removed
                 if (-not($itemToCopy.Ensure))
                 {
                     if (Test-Path $finalDestinationPath)
@@ -126,7 +126,7 @@ function Set-TargetResource
                     }
                     elseif ($itemToCopy.Content)
                     {
-                        "Writing a content to a file"
+                        Write-Verbose -Message "Writing content to file $itemToCopy"
 
                         # if the type is not specified assume it is a file.
                         if (-not ($itemToCopy.Type))
@@ -136,7 +136,7 @@ function Set-TargetResource
 
                         # Create file/folder scenario
                         SetVHDFile -destinationPath $finalDestinationPath -type $itemToCopy.Type -force:($itemToCopy.Force)  -content $itemToCopy.Content
-                    }                   
+                    }
 
                     # Set Attribute scenario
                     if ($itemToCopy.Attributes)
@@ -150,7 +150,7 @@ function Set-TargetResource
     finally
     {
         EnsureVHDState -Dismounted -vhdPath $VhdPath
-    }    
+    }
 }
 
 # This function returns if the current configuration of the machine is the same as the desired configration for this resource.
@@ -167,7 +167,7 @@ function Test-TargetResource
         [Parameter(Mandatory = $true)]
         [Microsoft.Management.Infrastructure.CimInstance[]]
         $FileDirectory,
-        
+
         [Parameter()]
         [ValidateSet('ModifiedDate','SHA-1','SHA-256','SHA-512')]
         [System.String]
@@ -178,14 +178,14 @@ function Test-TargetResource
     if ( -not (Test-Path $VhdPath))
     {
         throw "VHD does not exist in the specified path $VhdPath"
-    } 
+    }
 
     # mount the vhd.
     $mountedVHD = EnsureVHDState -Mounted -vhdPath $VhdPath
 
-    try 
+    try
     {
-        # Show the drive letters after mount 
+        # Show the drive letters after mount
         Get-PSDrive | Write-Verbose
 
         $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Where-Object -FilterScript {$_.Type -ne 'Recovery'} | Get-Volume
@@ -196,16 +196,16 @@ function Test-TargetResource
         $result = $true
 
         foreach ($item in $FileDirectory)
-        {  
+        {
             $itemToCopy = GetItemToCopy -item $item
-            $destination =  $itemToCopy.DestinationPath  
+            $destination =  $itemToCopy.DestinationPath
             Write-Verbose ("Testing the file with relative VHD destination $destination")
             $destination =  $itemToCopy.DestinationPath
             $finalDestinationPath = $letterDrive
-            $finalDestinationPath = Join-Path $letterDrive $destination            
+            $finalDestinationPath = Join-Path $letterDrive $destination
 
-            if (Test-Path $finalDestinationPath) 
-            {               
+            if (Test-Path $finalDestinationPath)
+            {
                   if( -not ($itemToCopy.Ensure))
                   {
                     $result = $false
@@ -219,7 +219,7 @@ function Test-TargetResource
                         if ($itemToCopyIsFile -and $destinationIsFolder)
                         {
                             # Verify if the file exist inside the folder
-                            $fileName = Split-Path $itemToCopy.SourcePath -Leaf                                                        
+                            $fileName = Split-Path $itemToCopy.SourcePath -Leaf
                             Write-Verbose "Checking if $fileName exist under $finalDestinationPath"
                             $fileExistInDestination = Test-Path (Join-Path $finalDestinationPath $fileName)
 
@@ -227,12 +227,12 @@ function Test-TargetResource
                             Write-Verbose "File exist on the destination under $finalDestinationPath :- $fileExistInDestination"
                             $result = $fileExistInDestination
                             $result = $result -and -not(ItemHasChanged -sourcePath $itemToCopy.SourcePath -destinationPath (Join-Path $finalDestinationPath $fileName) -CheckSum $CheckSum)
-                        }                        
-                        
+                        }
+
                         if (($itemToCopy.Type -eq "Directory") -and ($itemToCopy.Recurse))
                         {
                             $result = $result -and -not(ItemHasChanged -sourcePath $itemToCopy.SourcePath -destinationPath $finalDestinationPath -CheckSum $CheckSum)
-                            
+
                             if (-not ($result))
                             {
                                break;
@@ -247,39 +247,39 @@ function Test-TargetResource
                 {
                     $result = $false
                     break;
-                }                
+                }
             }
 
-            # Check the attribute 
+            # Check the attribute
             if ($itemToCopy.Attributes)
             {
                 $currentAttribute = @(Get-ItemProperty -Path $finalDestinationPath | ForEach-Object -MemberName Attributes)
                 $result = $currentAttribute.Contains($itemToCopy.Attributes)
-            }           
+            }
           }
     }
     finally
     {
         EnsureVHDState -Dismounted -vhdPath $VhdPath
     }
-   
+
 
    Write-Verbose "Test returned $result"
    return $result;
 }
 
 # Assert the state of the VHD.
-function EnsureVHDState 
+function EnsureVHDState
 {
-    [CmdletBinding(DefaultParametersetName="Mounted")] 
-    param(        
-        
+    [CmdletBinding(DefaultParametersetName="Mounted")]
+    param(
+
         [Parameter(ParameterSetName = "Mounted")]
         [switch]$Mounted,
-        [Parameter(ParameterSetName = "Dismounted")]  
+        [Parameter(ParameterSetName = "Dismounted")]
         [switch]$Dismounted,
         [Parameter(Mandatory=$true)]
-        $vhdPath 
+        $vhdPath
         )
 
         if ( -not ( Get-Module -ListAvailable Hyper-v))
@@ -295,10 +295,10 @@ function EnsureVHDState
             if ($var)
             {
                 Write-Verbose "Mounting Failed. Attempting to dismount and mount it back"
-                Dismount-VHD $vhdPath 
+                Dismount-VHD $vhdPath
                 $mountedVHD = Mount-VHD -Path $vhdPath -Passthru -ErrorAction SilentlyContinue
 
-                return $mountedVHD            
+                return $mountedVHD
             }
             else
             {
@@ -308,7 +308,7 @@ function EnsureVHDState
         else
         {
             Dismount-VHD $vhdPath -ea SilentlyContinue
-                
+
         }
 }
 
@@ -319,12 +319,12 @@ function GetItemToCopy
         [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance] $item
         )
-    
+
     #Initialize Return Object
     $returnValue = @{}
-    
+
     #Define Default Values
-    
+
     $DesiredProperties = [ordered]@{
         'SourcePath' = $null
         'DestinationPath' = $null
@@ -335,11 +335,11 @@ function GetItemToCopy
         'Attributes' = $null
         'Type' = 'Directory'
     }
-    
+
     [string[]]($DesiredProperties.Keys) | Foreach-Object -Process {
         #Get Property Value
         $thisItem = $item.CimInstanceProperties[$_].Value
-        
+
         if (-not $thisItem -and $_ -in $DefaultValues.Keys)
         {
             #If unset and a default value is defined enter here
@@ -361,20 +361,20 @@ function GetItemToCopy
             $returnValue[$_] = $item.CimInstanceProperties[$_].Value
         }
     }
-    
+
     #Relies on default values in the $DesiredProperties object being the $True equivalent values
     $PropertyValuesToBoolean = @(
         'Force',
         'Recurse',
         'Ensure'
     )
-    
+
     # Convert string values to boolean for ease of programming.
     $PropertyValuesToBoolean | ForEach-Object -Process {
         $returnValue[$_] = $returnValue[$_] -eq $DesiredProperties[$_]
     }
-      
-      
+
+
       $returnValue.Keys | ForEach-Object -Process {
         Write-Verbose "$_ => $($returnValue[$_])"
       }
@@ -386,42 +386,42 @@ function GetItemToCopy
 # This is the main function that gets called after the file is mounted to perform copy, set or new operations on the mounted drive.
 function SetVHDFile
 {
-     [CmdletBinding(DefaultParametersetName="Copy")] 
-    param(       
+     [CmdletBinding(DefaultParametersetName="Copy")]
+    param(
         [Parameter(Mandatory=$true,ParameterSetName = "Copy")]
-        $sourcePath,        
+        $sourcePath,
         [Parameter()]
         [switch]$recurse,
         [Parameter()]
         [switch]$force,
-        [Parameter(ParameterSetName = "New")]  
+        [Parameter(ParameterSetName = "New")]
         $type,
-        [Parameter(ParameterSetName = "New")]  
-        $content,       
+        [Parameter(ParameterSetName = "New")]
+        $content,
         [Parameter(Mandatory=$true)]
-        $destinationPath, 
-        [Parameter(Mandatory=$true,ParameterSetName = "Set")]  
+        $destinationPath,
+        [Parameter(Mandatory=$true,ParameterSetName = "Set")]
         $attribute,
         [Parameter(Mandatory=$true,ParameterSetName = "Delete")]
-        [switch]$ensure 
-        )      
-    
+        [switch]$ensure
+        )
+
     Write-Verbose "Setting the VHD file $($PSCmdlet.ParameterSetName)"
     if ($PSCmdlet.ParameterSetName -eq 'Copy')
     {
-        New-Item -Path (Split-Path $destinationPath) -ItemType Directory -ErrorAction SilentlyContinue        
+        New-Item -Path (Split-Path $destinationPath) -ItemType Directory -ErrorAction SilentlyContinue
         Copy-Item -Path $sourcePath -Destination $destinationPath -Force:$force -Recurse:$recurse -ErrorAction SilentlyContinue
     }
     elseif ($PSCmdlet.ParameterSetName -eq 'New')
     {
-        If ($type -eq 'Directory')
+        if ($type -eq 'Directory')
         {
             New-Item -Path $destinationPath -ItemType $type
         }
         else
         {
             New-Item -Path $destinationPath -ItemType $type
-            $content | Out-File $destinationPath 
+            $content | Out-File $destinationPath
         }
 
     }
@@ -441,7 +441,7 @@ function ItemHasChanged
 {
     param(
     [Parameter(Mandatory=$true)]
-    [ValidateScript({Test-Path $_})] 
+    [ValidateScript({Test-Path $_})]
     $sourcePath,
     [Parameter(Mandatory=$true)]
     [ValidateScript({Test-Path $_})]
@@ -451,7 +451,7 @@ function ItemHasChanged
     $CheckSum = 'ModifiedDate'
     )
 
-    $itemIsFolder = Test-Path $sourcePath -Type Container  
+    $itemIsFolder = Test-Path $sourcePath -Type Container
     $sourceItems = $null;
     $destinationItems = $null;
 
@@ -472,7 +472,7 @@ function ItemHasChanged
     {
         return $true;
     }
-   
+
     # Compute the difference using the algorithem specified.
     $difference = $null
 
@@ -481,7 +481,7 @@ function ItemHasChanged
         'ModifiedDate'
         {
             $difference = Compare-Object -ReferenceObject $sourceItems -DifferenceObject $destinationItems -Property LastWriteTime
-        }    
+        }
         'SHA-1'
         {
             $difference = Compare-Object -ReferenceObject ($sourceItems | Get-FileHash -Algorithm SHA1) -DifferenceObject ($destinationItems | Get-FileHash -Algorithm SHA1) -Property Hash

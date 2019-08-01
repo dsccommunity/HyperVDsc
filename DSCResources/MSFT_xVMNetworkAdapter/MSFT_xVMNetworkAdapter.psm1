@@ -3,7 +3,7 @@ if (Test-Path "${PSScriptRoot}\${PSUICulture}")
 {
     Import-LocalizedData -BindingVariable LocalizedData -filename MSFT_xVMNetworkAdapter.psd1 `
                          -BaseDirectory "${PSScriptRoot}\${PSUICulture}"
-} 
+}
 else
 {
     #fallback to en-US
@@ -34,16 +34,16 @@ Function Get-TargetResource
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     Param (
-        [Parameter(Mandatory)]
-        [String] $Id, 
+        [Parameter(Mandatory = $true)]
+        [String] $Id,
 
-        [Parameter(Mandatory)]
-        [String] $Name,        
+        [Parameter(Mandatory = $true)]
+        [String] $Name,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $SwitchName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $VMName
     )
 
@@ -81,7 +81,7 @@ Function Get-TargetResource
         }
         elseif ($netAdapter.VMName)
         {
-            $configuration.Add('MacAddress', $netAdapter.MacAddress)   
+            $configuration.Add('MacAddress', $netAdapter.MacAddress)
             $configuration.Add('DynamicMacAddress', $netAdapter.DynamicMacAddressEnabled)
         }
         $configuration.Add('Ensure','Present')
@@ -123,16 +123,16 @@ Function Set-TargetResource
 {
     [CmdletBinding()]
     Param (
-        [Parameter(Mandatory)]
-        [String] $Id, 
+        [Parameter(Mandatory = $true)]
+        [String] $Id,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $Name,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $SwitchName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $VMName,
 
         [Parameter()]
@@ -156,10 +156,10 @@ Function Set-TargetResource
         $arguments.Add('ManagementOS', $true)
         $arguments.Add('SwitchName', $SwitchName)
     }
-    
+
     Write-Verbose -Message $localizedData.GetVMNetAdapter
     $netAdapterExists = Get-VMNetworkAdapter @arguments -ErrorAction SilentlyContinue
-    
+
     if ($Ensure -eq 'Present')
     {
         if ($netAdapterExists)
@@ -188,13 +188,13 @@ Function Set-TargetResource
                         $updateMacAddress = $true
                     }
                 }
-                
+
                 if ($netAdapterExists.SwitchName -ne $SwitchName)
                 {
                     Write-Verbose -Message $localizedData.PerformSwitchConnect
                     Connect-VMNetworkAdapter -VMNetworkAdapter $netAdapterExists -SwitchName $SwitchName -ErrorAction Stop -Verbose
                 }
-                
+
                 if (($updateMacAddress))
                 {
                     Write-Verbose -Message $localizedData.PerformVMNetModify
@@ -267,16 +267,16 @@ Function Test-TargetResource
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     Param (
-        [Parameter(Mandatory)]
-        [String] $Id, 
-                
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
+        [String] $Id,
+
+        [Parameter(Mandatory = $true)]
         [String] $Name,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $SwitchName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $VMName,
 
         [Parameter()]
@@ -300,7 +300,7 @@ Function Test-TargetResource
         $arguments.Add('ManagementOS', $true)
         $arguments.Add('SwitchName', $SwitchName)
     }
-    
+
     Write-Verbose -Message $localizedData.GetVMNetAdapter
     $netAdapterExists = Get-VMNetworkAdapter @arguments -ErrorAction SilentlyContinue
 
@@ -330,13 +330,13 @@ Function Test-TargetResource
                         Write-Verbose -Message $localizedData.EnableDynamicMacAddress
                         return $false
                     }
-                } 
-                
+                }
+
                 if ($netAdapterExists.SwitchName -ne $SwitchName)
                 {
                     Write-Verbose -Message $localizedData.SwitchIsDifferent
                     return $false
-                } 
+                }
                 else
                 {
                     Write-Verbose -Message $localizedData.VMNetAdapterExistsNoActionNeeded
@@ -348,7 +348,7 @@ Function Test-TargetResource
                 Write-Verbose -Message $localizedData.VMNetAdapterExistsNoActionNeeded
                 return $true
             }
-        } 
+        }
         else
         {
             Write-Verbose -Message $localizedData.VMNetAdapterDoesNotExistShouldAdd
