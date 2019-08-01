@@ -25,5 +25,5 @@
         SwitchName = 'SETSwitch'
         VMName = 'MyVM03'
         Ensure = 'Present'
-    }    
+    }
 }
