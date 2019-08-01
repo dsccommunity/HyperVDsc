@@ -1,4 +1,4 @@
-﻿Configuration VMAdapter
+Configuration VMAdapter
 {
     Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration
@@ -25,5 +25,5 @@
         SwitchName = 'SETSwitch'
         VMName = 'MyVM03'
         Ensure = 'Present'
-    }    
+    }
 }

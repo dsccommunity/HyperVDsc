@@ -1,4 +1,4 @@
-﻿Configuration HostOSAdapter
+Configuration HostOSAdapter
 {
     Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration
