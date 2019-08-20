@@ -1,4 +1,4 @@
-﻿Configuration VMAdapter
+Configuration VMAdapter
 {
     Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration
