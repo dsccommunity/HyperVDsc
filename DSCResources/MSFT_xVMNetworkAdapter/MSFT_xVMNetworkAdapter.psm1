@@ -578,7 +578,7 @@ function Get-NetworkInformation
         [String] $Name
     )
 
-    $vm = Get-CimInstance -Namespace 'root\virtualization\v2' -ClassName 'Msvm_ComputerSystem' | Where-Object { $_.ElementName -ieq "$VmName" }
+    $vm = Get-WmiObject -Namespace 'root\virtualization\v2' -Class 'Msvm_ComputerSystem' | Where-Object { $_.ElementName -ieq "$VmName" }
     $vmSettings = $vm.GetRelated('Msvm_VirtualSystemSettingData') | Where-Object { $_.VirtualSystemType -eq 'Microsoft:Hyper-V:System:Realized' }
     $vmNetAdapter = $vmSettings.GetRelated('Msvm_SyntheticEthernetPortSettingData') | Where-Object { $_.ElementName -ieq "$Name" }
     $networkSettings = $vmNetAdapter.GetRelated("Msvm_GuestNetworkAdapterConfiguration")
@@ -625,7 +625,7 @@ function Set-NetworkInformation
         [String] $DnsServer
     )
 
-    $vm = Get-CimInstance -Namespace 'root\virtualization\v2' -ClassName 'Msvm_ComputerSystem' | Where-Object { $_.ElementName -ieq "$VmName" }
+    $vm = Get-WmiObject -Namespace 'root\virtualization\v2' -Class 'Msvm_ComputerSystem' | Where-Object { $_.ElementName -ieq "$VmName" }
     $vmSettings = $vm.GetRelated('Msvm_VirtualSystemSettingData') | Where-Object { $_.VirtualSystemType -eq 'Microsoft:Hyper-V:System:Realized' }
     $vmNetAdapter = $vmSettings.GetRelated('Msvm_SyntheticEthernetPortSettingData') | Where-Object { $_.ElementName -ieq $Name }
     $networkSettings = $vmNetAdapter.GetRelated("Msvm_GuestNetworkAdapterConfiguration") | Select-Object -First 1
@@ -658,7 +658,7 @@ function Set-NetworkInformation
     }
     $networkSettings.ProtocolIFType = 4096
 
-    $service = Get-CimInstance -ClassName "Msvm_VirtualSystemManagementService" -Namespace "root\virtualization\v2"
+    $service = Get-WmiObject -Class "Msvm_VirtualSystemManagementService" -Namespace "root\virtualization\v2"
     $setIP = $service.SetGuestNetworkAdapterConfiguration($vm, $networkSettings.GetText(1))
 
     if ($setIP.ReturnValue -eq 4096)

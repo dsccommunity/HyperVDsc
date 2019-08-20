@@ -19,7 +19,6 @@
         'PSAvoidUsingInvokeExpression',
         'PSAvoidUsingPositionalParameters',
         'PSAvoidShouldContinueWithoutForce',
-        'PSAvoidUsingWMICmdlet',
         'PSAvoidUsingWriteHost',
         'PSDSCReturnCorrectTypesForDSCFunctions',
         'PSDSCStandardDSCFunctionsInResource',
