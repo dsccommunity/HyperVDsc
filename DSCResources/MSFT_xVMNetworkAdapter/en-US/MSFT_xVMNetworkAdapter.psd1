@@ -1,7 +1,21 @@
-ConvertFrom-StringData @'    
+ConvertFrom-StringData @'
     VMNameAndManagementTogether=VMName cannot be provided when ManagementOS is set to True.
     MustProvideVMName=Must provide VMName parameter when ManagementOS is set to False.
     GetVMNetAdapter=Getting VM Network Adapter information.
+    GetVMNetAdapterVlan=Getting VM Network Adapter VLAN information.
+    VlanShouldntBeTagged=VM Network Adapter should not have a Vlan tag.
+    VlanNotUntagged=Vlan is tagged. It will be removed.
+    VlanDoesNotMatch=VlanId does not match.
+    RemovingVlanTag=Removing Vlan tagging on Network Adapter.
+    SettingVlan=Setting VlanId on network adapter.
+    IpAddressIsNotSet=Ip Address is not set.
+    NotDhcp=Ethernet Adapter is not configured for Dhcp.
+    Dhcp=Ethernet Adapter is configured for Dhcp.
+    EnableDhcp=Enabling DHCP.
+    IPAddressNotConfigured=IPAddress is not configured.
+    GatewayNotConfigured=Gateway is not configured.
+    DNSServerNotConfigured=DNS Server not configured.
+    MissingIPAndSubnet=Missing IPAddress or Subnet.
     FoundVMNetAdapter=Found VM Network Adapter.
     NoVMNetAdapterFound=No VM Network Adapter found.
     StaticMacAddressChosen=Static MAC Address has been specified.
