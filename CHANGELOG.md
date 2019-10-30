@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.17.0.0
+
 * MSFT_xVMNetworkAdapter:
   * Added NetworkSettings to be able to statically set IPAddress.
   * Added option for Vlan tagging. You can now setup a Network Adapeter as an access switch on a specific Vlan.
