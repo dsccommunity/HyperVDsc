@@ -135,7 +135,7 @@ function Set-TargetResource
                         }
 
                         # Create file/folder scenario
-                        SetVHDFile -destinationPath $finalDestinationPath -type $itemToCopy.Type -force:($itemToCopy.Force)  -content $itemToCopy.Content
+                        SetVHDFile -destinationPath $finalDestinationPath -type $itemToCopy.Type -force:($itemToCopy.Force)  -content $itemToCopy.Content -contentEncoding $itemToCopy.ContentEncoding
                     }
 
                     # Set Attribute scenario
@@ -213,6 +213,8 @@ function Test-TargetResource
                   }
                   else
                   {
+					    # Do not test for Content
+					    if($null -eq  $itemToCopy.SourcePath) {$result = $false; break;}
                         $itemToCopyIsFile = Test-Path $itemToCopy.SourcePath -PathType Leaf
                         $destinationIsFolder = Test-Path $finalDestinationPath -PathType Container
 
@@ -332,6 +334,7 @@ function GetItemToCopy
         'Recurse' = 'True'
         'Force' = 'True'
         'Content' = $null
+		'ContentEncoding' = $null
         'Attributes' = $null
         'Type' = 'Directory'
     }
@@ -340,20 +343,20 @@ function GetItemToCopy
         #Get Property Value
         $thisItem = $item.CimInstanceProperties[$_].Value
 
-        if (-not $thisItem -and $_ -in $DefaultValues.Keys)
+        if (-not $thisItem -and $_ -in $DesiredProperties.Keys)
         {
             #If unset and a default value is defined enter here
             if ($_ -eq 'Type')
             {
                 #Special behavior for the Type property based on SourcePath
                 #This relies on SourcePath preceeding Type in the list of keys (the reason for using OrderedDictionary)
-                if (Test-Path $returnValue.SourcePath -PathType Leaf )
+                if (($null -eq $returnValue.SourcePath) -or (Test-Path $returnValue.SourcePath -PathType Leaf ))
                 {
                     #If the sourcepath resolves to a file, set the default to File instad of Directory
-                    $DefaultValues.Type = 'File'
+                    $DesiredProperties.Type = 'File'
                 }
             }
-            $returnValue[$_] = $DefaultValues[$_]
+            $returnValue[$_] = $DesiredProperties[$_]
         }
         else
         {
@@ -398,7 +401,9 @@ function SetVHDFile
         $type,
         [Parameter(ParameterSetName = "New")]
         $content,
-        [Parameter(Mandatory=$true)]
+        [Parameter(ParameterSetName = "New")]
+        $contentEncoding,
+		[Parameter(Mandatory=$true)]
         $destinationPath,
         [Parameter(Mandatory=$true,ParameterSetName = "Set")]
         $attribute,
@@ -407,10 +412,11 @@ function SetVHDFile
         )
 
     Write-Verbose "Setting the VHD file $($PSCmdlet.ParameterSetName)"
+
     if ($PSCmdlet.ParameterSetName -eq 'Copy')
     {
         New-Item -Path (Split-Path $destinationPath) -ItemType Directory -ErrorAction SilentlyContinue
-        Copy-Item -Path $sourcePath -Destination $destinationPath -Force:$force -Recurse:$recurse -ErrorAction SilentlyContinue
+        Copy-Item -Path $sourcePath -Destination $destinationPath -Force:$force -Recurse:$recurse -ErrorAction Stop
     }
     elseif ($PSCmdlet.ParameterSetName -eq 'New')
     {
@@ -420,8 +426,7 @@ function SetVHDFile
         }
         else
         {
-            New-Item -Path $destinationPath -ItemType $type
-            $content | Out-File $destinationPath
+            $content | Out-File $destinationPath -Encoding $contentEncoding
         }
 
     }
