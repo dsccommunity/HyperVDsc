@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* MSFT_xVhdFileDirectory:
+  * Added initial set of unit tests
+
 ## 3.17.0.0
 
 * MSFT_xVMNetworkAdapter:
