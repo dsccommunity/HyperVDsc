@@ -40,31 +40,33 @@ try
     InModuleScope $script:dscResourceName {
 
         #region Functions, Variables and Mocks
-        Function GetFreeDriveLetter {
+        function Get-FreeDriveLetter
+        {
             [CmdletBinding()]
+            param()
 
             $driveLettersInUse = (Get-Volume).DriveLetter
-            $upperCaseChars = 67..90 | ForEach {[char]$_}
+            $upperCaseChars = 67..90 | forEach {[char]$_}
 
-            ForEach ($char in $upperCaseChars)
+            forEach ($char in $upperCaseChars)
             {
-                If ($driveLettersInUse -notcontains $char)
+                if ($driveLettersInUse -notcontains $char)
                 {
                     return $char
-                    Break
+                    break
                 }
             }
         }
 
-        $dscFileDirClassName = "MSFT_FileDirectoryConfiguration"
-        $dscNamespace = "root/microsoft/windows/desiredstateconfiguration"
-        $vhdDriveLetter = GetFreeDriveLetter
+        $dscFileDirClassName = 'MSFT_FileDirectoryConfiguration'
+        $dscNamespace = 'root/microsoft/windows/desiredstateconfiguration'
+        $vhdDriveLetter = Get-FreeDriveLetter
 
         Mock Mount-Vhd {
-            If ($Passthru) {
+            if ($Passthru) {
                 New-MockObject Microsoft.Vhd.PowerShell.VirtualHardDisk |
                 Add-Member -MemberType NoteProperty -Name DiskNumber -Value 999 -Force -PassThru |
-                Add-Member -MemberType NoteProperty -Name Path -Value "TestDrive:\VhdExists.vhdx" -Force -PassThru
+                Add-Member -MemberType NoteProperty -Name Path -Value 'TestDrive:\VhdExists.vhdx' -Force -PassThru
             }
         }
 
@@ -76,7 +78,7 @@ try
 
         Mock Get-Partition {
             New-CimInstance -ClassName MSFT_Partitions -Namespace ROOT/Microsoft/Windows/Storage -ClientOnly |
-                Add-Member -MemberType NoteProperty -Name Type -Value "Mocked" -Force -PassThru |
+                Add-Member -MemberType NoteProperty -Name Type -Value 'Mocked' -Force -PassThru |
                 Add-Member -MemberType NoteProperty -Name DriveLetter -Value $vhdDriveLetter -PassThru
         }
 
@@ -90,12 +92,12 @@ try
 
             BeforeAll {
                 New-item -Path TestDrive:\VhdExists.vhdx
-                "TestFile1" | Out-File TestDrive:\FileExists.txt
+                'TestFile1' | Out-File TestDrive:\FileExists.txt
                 New-Item -Path TestDrive:\SourceDirectoryExists -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot\DestinationDirectoryExists -ItemType Directory
                 New-PSDrive -PSProvider FileSystem -Name $vhdDriveLetter -Root TestDrive:\VhdRoot
-                Copy-Item -Path TestDrive:\FileExists.txt -Destination ($vhdDriveLetter + ":\DestinationDirectoryExists\FileExists.txt")
+                Copy-Item -Path TestDrive:\FileExists.txt -Destination ($vhdDriveLetter + ':\DestinationDirectoryExists\FileExists.txt')
             }
 
             AfterAll {
@@ -104,9 +106,14 @@ try
 
             It 'Should return a [System.Collections.Hashtable] object type' {
 
-                $fdProperties = @{SourcePath = "TestDrive:\FileExists.txt";DestinationPath = "\DestinationDirectoryExists\";Type = "File";Ensure = "Present"}
-                $fileDirectory = New-CimInstance -Property $fdProperties -ClassName $dscFileDirClassName -Namespace $dscNamespace  -ClientOnly
+                $fdProperties = @{
+                    SourcePath = 'TestDrive:\FileExists.txt'
+                    DestinationPath = '\DestinationDirectoryExists\'
+                    Type = 'File'
+                    Ensure = 'Present'
+                }
 
+                $fileDirectory = New-CimInstance -Property $fdProperties -ClassName $dscFileDirClassName -Namespace $dscNamespace  -ClientOnly
                 $result = Get-TargetResource -VhdPath TestDrive:\VhdExists.vhdx -FileDirectory $fileDirectory
 
                 $result -is [System.Collections.Hashtable] |
@@ -117,145 +124,118 @@ try
             $testCases_Get = @(
 
                 @{
-                    TestName = 'VhdFile exists, Source File exists, Destination Path exists'
-                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = "TestDrive:\FileExists.txt";DestinationPath = "DestinationDirectoryExists\FileExists.txt";Type = "File";Ensure = "Present"}
+                    TestName = 'VhdFile exists, Source File exists, Destination File exists'
+                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = 'TestDrive:\FileExists.txt';DestinationPath = 'DestinationDirectoryExists\FileExists.txt';Type = 'File';Ensure = 'Present'}
                     VhdPath = 'TestDrive:\VhdExists.vhdx'
                     ExpectedResult = @{
                         FileDirectory = (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = $vhdDriveLetter + ":\DestinationDirectoryExists\FileExists.txt"
-                                Ensure = "Present"
+                                DestinationPath = $vhdDriveLetter + ':\DestinationDirectoryExists\FileExists.txt'
+                                Ensure = 'Present'
                             }
                         )
                         VhdPath='TestDrive:\VhdExists.vhdx'
                     }
-                },
+                }
                 @{
-                    TestName = 'VhdFile exists, Source File exists, Destination Path does not exist'
-                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = "TestDrive:\FileExists.txt";DestinationPath = "DoesNotExist\";Type = "File";Ensure = "Present"}
+                    TestName = 'VhdFile exists, Source File exists, Destination File does not exist'
+                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = 'TestDrive:\FileExists.txt';DestinationPath = 'DestinationDirectoryExists\DoesNotExist.txt';Type = 'File';Ensure = 'Present'}
                     VhdPath = 'TestDrive:\VhdExists.vhdx'
                     ExpectedResult = @{
                         FileDirectory = (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = $vhdDriveLetter + ":\DoesNotExist\"
-                                Ensure = "Absent"
+                                DestinationPath = $vhdDriveLetter + ':\DestinationDirectoryExists\DoesNotExist.txt'
+                                Ensure = 'Absent'
                             }
                         )
                         VhdPath='TestDrive:\VhdExists.vhdx'
                     }
-                },
+                }
                 @{
-                    TestName = 'VhdFile exists, Source File does not exist, Destination Path exists'
-                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = "TestDrive:\DoesNotExist.txt";DestinationPath = "DestinationDirectoryExists\";Type = "File";Ensure = "Present"}
+                    TestName = 'VhdFile exists, Source File does not exist, Destination File exists'
+                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = 'TestDrive:\DoesNotExist.txt';DestinationPath = 'DestinationDirectoryExists\FileExists.txt';Type = 'File';Ensure = 'Present'}
                     VhdPath = 'TestDrive:\VhdExists.vhdx'
                     ExpectedResult = @{
                         FileDirectory = (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = $vhdDriveLetter + ":\DestinationDirectoryExists\"
-                                Ensure = "Present"
+                                DestinationPath = $vhdDriveLetter + ':\DestinationDirectoryExists\FileExists.txt'
+                                Ensure = 'Present'
                             }
                         )
                         VhdPath='TestDrive:\VhdExists.vhdx'
                     }
-                },
+                }
                 @{
-                    TestName = 'VhdFile exists, Source File does not exist, Destination Path does not exist'
-                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = "TestDrive:\DoesNotExist.txt";DestinationPath = "DoesNotExist\";Type = "File";Ensure = "Present"}
+                    TestName = 'VhdFile exists, Source File does not exist, Destination File does not exist'
+                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = 'TestDrive:\DoesNotExist.txt';DestinationPath = 'DestinationDirectoryExists\DoesNotExist.txt';Type = 'File';Ensure = 'Present'}
                     VhdPath = 'TestDrive:\VhdExists.vhdx'
                     ExpectedResult = @{
                         FileDirectory = (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = $vhdDriveLetter + ":\DoesNotExist\"
-                                Ensure = "Absent"
+                                DestinationPath = $vhdDriveLetter + ':\DestinationDirectoryExists\DoesNotExist.txt'
+                                Ensure = 'Absent'
                             }
                         )
                         VhdPath='TestDrive:\VhdExists.vhdx'
                     }
-                },
-                @{
-                    TestName = 'Vhd does not exist, Source File exists, Destination Path exists'
-                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = "TestDrive:\FileExists.txt";DestinationPath = "DestinationDirectoryExists\";Type = "File";Ensure = "Present"}
-                    VhdPath = 'TestDrive:\VhdDoesNotExist.vhdx'
-                    ExpectedResult = @{
-                        FileDirectory = (
-                            New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = 'TestDrive:\VhdDoesNotExist.vhdx'
-                                Ensure = "Absent"
-                            }
-                        )
-                        VhdPath='TestDrive:\VhdDoesNotExist.vhdx'
-                    }
-                },
+                }
                 @{
                     TestName = 'Vhd does not exist, Source File exists, Destination Path does not exist'
-                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = "TestDrive:\FileExists.txt";DestinationPath = "DoesNotExist\";Type = "File";Ensure = "Present"}
+                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = 'TestDrive:\FileExists.txt';DestinationPath = 'DoesNotExist\';Type = 'File';Ensure = 'Present'}
                     VhdPath = 'TestDrive:\VhdDoesNotExist.vhdx'
                     ExpectedResult = @{
                         FileDirectory = (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
                                 DestinationPath = 'TestDrive:\VhdDoesNotExist.vhdx'
-                                Ensure = "Absent"
-                            }
-                        )
-                        VhdPath='TestDrive:\VhdDoesNotExist.vhdx'
-                    }
-                },
-                @{
-                    TestName = 'Vhd does not exist, Source File does not exist, Destination Path exists'
-                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = "TestDrive:\DoesNotExist.txt";DestinationPath = "DestinationDirectoryExists\";Type = "File";Ensure = "Present"}
-                    VhdPath = 'TestDrive:\VhdDoesNotExist.vhdx'
-                    ExpectedResult = @{
-                        FileDirectory = (
-                            New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = 'TestDrive:\VhdDoesNotExist.vhdx'
-                                Ensure = "Absent"
-                            }
-                        )
-                        VhdPath='TestDrive:\VhdDoesNotExist.vhdx'
-                    }
-                },
-                @{
-                    TestName = 'Vhd does not exist, Source File does not exist, Destination Path does not exist'
-                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = "TestDrive:\DoesNotExist.txt";DestinationPath = "DoesNotExist\";Type = "File";Ensure = "Present"}
-                    VhdPath = 'TestDrive:\VhdDoesNotExist.vhdx'
-                    ExpectedResult = @{
-                        FileDirectory = (
-                            New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = 'TestDrive:\VhdDoesNotExist.vhdx'
-                                Ensure = "Absent"
+                                Ensure = 'Absent'
                             }
                         )
                         VhdPath='TestDrive:\VhdDoesNotExist.vhdx'
                     }
                 }
-
+                @{
+                    TestName = 'Vhd does not exist, Source File does not exist, Destination Path does not exist'
+                    FileDirectoryProperties = New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{SourcePath = 'TestDrive:\DoesNotExist.txt';DestinationPath = 'DoesNotExist\';Type = 'File';Ensure = 'Present'}
+                    VhdPath = 'TestDrive:\VhdDoesNotExist.vhdx'
+                    ExpectedResult = @{
+                        FileDirectory = (
+                            New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
+                                DestinationPath = 'TestDrive:\VhdDoesNotExist.vhdx'
+                                Ensure = 'Absent'
+                            }
+                        )
+                        VhdPath='TestDrive:\VhdDoesNotExist.vhdx'
+                    }
+                }
             )
 
             It 'Should correctly return state when: <TestName>' -TestCases $testCases_Get {
-                Param($FileDirectoryProperties, $VhdPath, $ExpectedResult)
+                param(
+                    $FileDirectoryProperties,
+                    $VhdPath,
+                    $ExpectedResult
+                )
 
                 $result = Get-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectoryProperties
 
-                $result["FileDirectory"].CimInstanceProperties.Value |
-                 Should Be $ExpectedResult["FileDirectory"].CimInstanceProperties.Value
+                $result['FileDirectory'].CimInstanceProperties.Value |
+                 Should Be $ExpectedResult['FileDirectory'].CimInstanceProperties.Value
 
-                $result["VhdPath"] |
-                 Should be $ExpectedResult["VhdPath"]
-
+                $result['VhdPath'] |
+                 Should be $ExpectedResult['VhdPath']
             }
-
         }
 
         Describe 'MSFT_<ResourceName>\Test-TargetResource' -Tag 'Test' {
 
             BeforeAll {
                 New-item -Path TestDrive:\VhdExists.vhdx
-                "TestFile1" | Out-File TestDrive:\FileExists.txt
+                'TestFile1' | Out-File TestDrive:\FileExists.txt
                 New-Item -Path TestDrive:\SourceDirectoryExists -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot\DestinationDirectoryExists -ItemType Directory
                 New-PSDrive -PSProvider FileSystem -Name $vhdDriveLetter  -Root TestDrive:\VhdRoot
-                Copy-Item -Path TestDrive:\FileExists.txt -Destination ($vhdDriveLetter + ":\DestinationDirectoryExists\FileExists.txt")
+                Copy-Item -Path TestDrive:\FileExists.txt -Destination ($vhdDriveLetter + ':\DestinationDirectoryExists\FileExists.txt')
             }
 
             AfterAll {
@@ -266,13 +246,13 @@ try
 
                 $testCases_Test_InDesiredState = @(
                     @{
-                        TestName = "VhdPath exists, Destination File exists, No Checksum"
-                        VhdPath = "TestDrive:\VhdExists.vhdx"
+                        TestName = 'VhdPath exists, Destination File exists, No Checksum'
+                        VhdPath = 'TestDrive:\VhdExists.vhdx'
                         FileDirectory =  (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                SourcePath = "TestDrive:\FileExists.txt"
-                                DestinationPath = "\DestinationDirectoryExists\FileExists.txt"
-                                Ensure = "Present"
+                                SourcePath = 'TestDrive:\FileExists.txt'
+                                DestinationPath = '\DestinationDirectoryExists\FileExists.txt'
+                                Ensure = 'Present'
                             }
                         )
                         Checksum = $null
@@ -281,7 +261,7 @@ try
                 )
 
                 It 'Should return [$true] when <TestName>' -TestCases $testCases_Test_InDesiredState {
-                    Param (
+                    param (
                         $VhdPath,
                         $FileDirectory,
                         $ExpectedResult
@@ -289,22 +269,19 @@ try
 
                     $result = Test-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectory
                     $result | Should be $ExpectedResult
-
                 }
-
             }
 
             Context 'When the system is not in the desired state' {
-
                 $testCases_Test_NotInDesiredState = @(
                     @{
-                        TestName = "VhdPath exists, Destination File does not exist, No Checksum"
-                        VhdPath = "TestDrive:\VhdExists.vhdx"
+                        TestName = 'VhdPath exists, Destination File does not exist, No Checksum'
+                        VhdPath = 'TestDrive:\VhdExists.vhdx'
                         FileDirectory =  (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                SourcePath = "TestDrive:\FileExists.txt"
-                                DestinationPath = "\DestinationDirectoryExists\DoesNotExist.txt"
-                                Ensure = "Present"
+                                SourcePath = 'TestDrive:\FileExists.txt'
+                                DestinationPath = '\DestinationDirectoryExists\DoesNotExist.txt'
+                                Ensure = 'Present'
                             }
                         )
                         Checksum = $null
@@ -313,7 +290,7 @@ try
                 )
 
                 It 'Should return [$false] when <TestName>' -TestCases $testCases_Test_NotInDesiredState {
-                    Param (
+                    param (
                         $VhdPath,
                         $FileDirectory,
                         $ExpectedResult
@@ -321,22 +298,19 @@ try
 
                     $result = Test-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectory
                     $result | Should be $ExpectedResult
-
                 }
-
             }
         }
 
         Describe 'MSFT_<ResourceName>\Set-TargetResource' -Tag 'Set' {
-
             BeforeAll {
                 New-item -Path TestDrive:\VhdExists.vhdx
-                "TestFile1" | Out-File TestDrive:\FileExists.txt
+                'TestFile1' | Out-File TestDrive:\FileExists.txt
                 New-Item -Path TestDrive:\SourceDirectoryExists -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot\DestinationDirectoryExists -ItemType Directory
                 New-PSDrive -PSProvider FileSystem -Name $vhdDriveLetter  -Root TestDrive:\VhdRoot
-                Copy-Item -Path TestDrive:\FileExists.txt -Destination ($vhdDriveLetter + ":\DestinationDirectoryExists\FileExists.txt")
+                Copy-Item -Path TestDrive:\FileExists.txt -Destination ($vhdDriveLetter + ':\DestinationDirectoryExists\FileExists.txt')
             }
 
             AfterAll {
@@ -344,16 +318,15 @@ try
             }
 
             Context 'When the system is in the desired state' {
-
                 $testCases_Set_InDesiredState = @(
                     @{
-                        TestName = "not Throw"
-                        VhdPath = "TestDrive:\VhdExists.vhdx"
+                        TestName = 'not Throw'
+                        VhdPath = 'TestDrive:\VhdExists.vhdx'
                         FileDirectory =  (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                SourcePath = "TestDrive:\FileExists.txt"
-                                DestinationPath = "\DestinationDirectoryExists\FileExists.txt"
-                                Ensure = "Present"
+                                SourcePath = 'TestDrive:\FileExists.txt'
+                                DestinationPath = '\DestinationDirectoryExists\FileExists.txt'
+                                Ensure = 'Present'
                             }
                         )
                         Checksum = $null
@@ -362,7 +335,7 @@ try
                 )
 
                 It 'Should <TestName>' -TestCases $testCases_Set_InDesiredState {
-                    Param (
+                    param (
                         $VhdPath,
                         $FileDirectory,
                         $ExpectedResult
@@ -376,13 +349,13 @@ try
 
                 $testCases_Set_NotInDesiredState = @(
                     @{
-                        TestName = "copy the source file to DestinationPath"
-                        VhdPath = "TestDrive:\VhdExists.vhdx"
+                        TestName = 'Copy the source file to DestinationPath'
+                        VhdPath = 'TestDrive:\VhdExists.vhdx'
                         FileDirectory =  (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                SourcePath = "TestDrive:\FileExists.txt"
-                                DestinationPath = "\DestinationDirectoryExists\FileDoesNotExist.txt"
-                                Ensure = "Present"
+                                SourcePath = 'TestDrive:\FileExists.txt'
+                                DestinationPath = '\DestinationDirectoryExists\FileDoesNotExist.txt'
+                                Ensure = 'Present'
                             }
                         )
                         Checksum = $null
@@ -390,7 +363,7 @@ try
                 )
 
                 It 'Should <TestName>' -TestCases $testCases_Set_NotInDesiredState {
-                    Param (
+                    param (
                         $VhdPath,
                         $FileDirectory
                     )
