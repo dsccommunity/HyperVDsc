@@ -39,10 +39,26 @@ try
 
     InModuleScope $script:dscResourceName {
 
-        #region Variables and Mocks
+        #region Functions, Variables and Mocks
+        Function GetFreeDriveLetter {
+            [CmdletBinding()]
+
+            $driveLettersInUse = (Get-Volume).DriveLetter
+            $upperCaseChars = 67..90 | ForEach {[char]$_}
+
+            ForEach ($char in $upperCaseChars)
+            {
+                If ($driveLettersInUse -notcontains $char)
+                {
+                    return $char
+                    Break
+                }
+            }
+        }
+
         $dscFileDirClassName = "MSFT_FileDirectoryConfiguration"
         $dscNamespace = "root/microsoft/windows/desiredstateconfiguration"
-        $VhdPartitionDriveLetter = "t"
+        $vhdDriveLetter = GetFreeDriveLetter
 
         Mock Mount-Vhd {
             If ($Passthru) {
@@ -61,14 +77,13 @@ try
         Mock Get-Partition {
             New-CimInstance -ClassName MSFT_Partitions -Namespace ROOT/Microsoft/Windows/Storage -ClientOnly |
                 Add-Member -MemberType NoteProperty -Name Type -Value "Mocked" -Force -PassThru |
-                Add-Member -MemberType NoteProperty -Name DriveLetter -Value $VhdPartitionDriveLetter -PassThru
+                Add-Member -MemberType NoteProperty -Name DriveLetter -Value $vhdDriveLetter -PassThru
         }
 
         Mock Get-Volume {
             New-CimInstance -ClassName MSFT_Volumes -Namespace ROOT/Microsoft/Windows/Storage -ClientOnly |
-                Add-Member -MemberType NoteProperty -Name DriveLetter -Value $VhdPartitionDriveLetter -PassThru
+                Add-Member -MemberType NoteProperty -Name DriveLetter -Value $vhdDriveLetter -PassThru
         }
-
         #endregion
 
         Describe 'MSFT_xVhdFileDirectory\Get-TargetResource' -Tag 'Get' {
@@ -79,12 +94,12 @@ try
                 New-Item -Path TestDrive:\SourceDirectoryExists -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot\DestinationDirectoryExists -ItemType Directory
-                New-PSDrive -PSProvider FileSystem -Name T -Root TestDrive:\VhdRoot
-                Copy-Item -Path TestDrive:\FileExists.txt -Destination t:\DestinationDirectoryExists\FileExists.txt
+                New-PSDrive -PSProvider FileSystem -Name $vhdDriveLetter -Root TestDrive:\VhdRoot
+                Copy-Item -Path TestDrive:\FileExists.txt -Destination ($vhdDriveLetter + ":\DestinationDirectoryExists\FileExists.txt")
             }
 
             AfterAll {
-                Remove-PSDrive t -ErrorAction SilentlyContinue
+                Remove-PSDrive $vhdDriveLetter -ErrorAction SilentlyContinue
             }
 
             It 'Should return a [System.Collections.Hashtable] object type' {
@@ -108,7 +123,7 @@ try
                     ExpectedResult = @{
                         FileDirectory = (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = "t:\DestinationDirectoryExists\FileExists.txt"
+                                DestinationPath = $vhdDriveLetter + ":\DestinationDirectoryExists\FileExists.txt"
                                 Ensure = "Present"
                             }
                         )
@@ -122,7 +137,7 @@ try
                     ExpectedResult = @{
                         FileDirectory = (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = "t:\DoesNotExist\"
+                                DestinationPath = $vhdDriveLetter + ":\DoesNotExist\"
                                 Ensure = "Absent"
                             }
                         )
@@ -136,7 +151,7 @@ try
                     ExpectedResult = @{
                         FileDirectory = (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = "t:\DestinationDirectoryExists\"
+                                DestinationPath = $vhdDriveLetter + ":\DestinationDirectoryExists\"
                                 Ensure = "Present"
                             }
                         )
@@ -150,7 +165,7 @@ try
                     ExpectedResult = @{
                         FileDirectory = (
                             New-CimInstance -ClassName $dscFileDirClassName -Namespace  $dscNamespace -ClientOnly -Property @{
-                                DestinationPath = "t:\DoesNotExist\"
+                                DestinationPath = $vhdDriveLetter + ":\DoesNotExist\"
                                 Ensure = "Absent"
                             }
                         )
@@ -227,7 +242,6 @@ try
                 $result["VhdPath"] |
                  Should be $ExpectedResult["VhdPath"]
 
-
             }
 
         }
@@ -240,12 +254,12 @@ try
                 New-Item -Path TestDrive:\SourceDirectoryExists -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot\DestinationDirectoryExists -ItemType Directory
-                New-PSDrive -PSProvider FileSystem -Name T -Root TestDrive:\VhdRoot
-                Copy-Item -Path TestDrive:\FileExists.txt -Destination t:\DestinationDirectoryExists\FileExists.txt
+                New-PSDrive -PSProvider FileSystem -Name $vhdDriveLetter  -Root TestDrive:\VhdRoot
+                Copy-Item -Path TestDrive:\FileExists.txt -Destination ($vhdDriveLetter + ":\DestinationDirectoryExists\FileExists.txt")
             }
 
             AfterAll {
-                Remove-PSDrive t -ErrorAction SilentlyContinue
+                Remove-PSDrive $vhdDriveLetter -ErrorAction SilentlyContinue
             }
 
             Context 'When the system is in the desired state' {
@@ -321,12 +335,12 @@ try
                 New-Item -Path TestDrive:\SourceDirectoryExists -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot -ItemType Directory
                 New-Item -Path TestDrive:\VhdRoot\DestinationDirectoryExists -ItemType Directory
-                New-PSDrive -PSProvider FileSystem -Name T -Root TestDrive:\VhdRoot
-                Copy-Item -Path TestDrive:\FileExists.txt -Destination t:\DestinationDirectoryExists\FileExists.txt
+                New-PSDrive -PSProvider FileSystem -Name $vhdDriveLetter  -Root TestDrive:\VhdRoot
+                Copy-Item -Path TestDrive:\FileExists.txt -Destination ($vhdDriveLetter + ":\DestinationDirectoryExists\FileExists.txt")
             }
 
             AfterAll {
-                Remove-PSDrive t -ErrorAction SilentlyContinue
+                Remove-PSDrive $vhdDriveLetter  -ErrorAction SilentlyContinue
             }
 
             Context 'When the system is in the desired state' {
@@ -392,7 +406,6 @@ try
 
         # TODO:
         <#
-            Add private function to find free drive letter(s) for testing
             Add a function to bundle up the test setup currently in BeforeAll blocks
             Add tests for copying directories
             Add checksum tests (looks like this is currently broken in resource)
