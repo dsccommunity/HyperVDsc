@@ -19,18 +19,18 @@ $TestEnvironment = Initialize-TestEnvironment `
     -ResourceType 'Mof' `
     -TestType Unit
 
-
+#endregion HEADER
 
 function Invoke-TestSetup
 {
-
+    Import-Module Storage, CimCmdlets
 }
 
 function Invoke-TestCleanup
 {
+    Remove-Module Storage, CimCmdlets
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
 }
-#endregion HEADER
 
 # Begin Testing
 try
@@ -45,10 +45,10 @@ try
             [CmdletBinding()]
             param()
 
-            $driveLettersInUse = (Get-Volume).DriveLetter
-            $upperCaseChars = 67..90 | forEach {[char]$_}
+            $driveLettersInUse = (Storage\Get-Volume).DriveLetter
+            $upperCaseChars = 67..90 | ForEach-Object {[char]$_}
 
-            forEach ($char in $upperCaseChars)
+            foreach ($char in $upperCaseChars)
             {
                 if ($driveLettersInUse -notcontains $char)
                 {
@@ -58,17 +58,18 @@ try
             }
         }
 
-        $dscFileDirClassName = 'MSFT_FileDirectoryConfiguration'
-        $dscNamespace = 'root/microsoft/windows/desiredstateconfiguration'
         $vhdDriveLetter = Get-FreeDriveLetter
 
-        Mock Mount-Vhd {
-            if ($Passthru) {
-                New-MockObject Microsoft.Vhd.PowerShell.VirtualHardDisk |
-                Add-Member -MemberType NoteProperty -Name DiskNumber -Value 999 -Force -PassThru |
-                Add-Member -MemberType NoteProperty -Name Path -Value 'TestDrive:\VhdExists.vhdx' -Force -PassThru
-            }
-        }
+        function Mount-Vhd {}
+        function Dismount-Vhd {}
+        function Get-Disk {}
+        function Get-Partition {}
+        function Get-Volume {}
+
+        $dscFileDirClassName = 'MSFT_FileDirectoryConfiguration'
+        $dscNamespace = 'root/microsoft/windows/desiredstateconfiguration'
+
+        Mock Mount-Vhd { [PSCustomObject] @{ Path = 'TestDrive:\VhdExists.vhdx'} }
 
         Mock Dismount-Vhd {}
 
@@ -85,6 +86,10 @@ try
         Mock Get-Volume {
             New-CimInstance -ClassName MSFT_Volumes -Namespace ROOT/Microsoft/Windows/Storage -ClientOnly |
                 Add-Member -MemberType NoteProperty -Name DriveLetter -Value $vhdDriveLetter -PassThru
+        }
+
+        Mock Get-Module {
+            $true
         }
         #endregion
 
