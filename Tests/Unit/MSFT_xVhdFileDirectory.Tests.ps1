@@ -63,7 +63,7 @@ try
 
         function New-TestDriveLayout
         {
-            [CmdletBinding()]
+            [CmdletBinding(SupportsShouldProcess,ConfirmImpact="Medium")]
             param(
                 [Parameter()]
                 [String]
@@ -87,6 +87,8 @@ try
             Copy-Item -Path TestDrive:\FileExists2.txt -Destination TestDrive:\MockVhdRoot\DestinationDirectoryExists\FileExists2.txt
             Copy-Item -Path TestDrive:\SourceDirectoryExists TestDrive:\DestinationDirectoryExists\SourceDirectory -Recurse
             (Get-Item TestDrive:\MockVhdRoot\DestinationDirectoryExists\FileExists2.txt).Attributes = ''
+
+            # ShouldProcess supported by New-PsDrive
             New-PSDrive -PSProvider FileSystem -Name $DriveLetter  -Root TestDrive:\MockVhdRoot -scope 1
         }
 
@@ -260,7 +262,7 @@ try
             }
         }
 
-        Describe 'MSFT_<ResourceName>\Test-TargetResource' -Tag 'Test' {
+        Describe "MSFT_xVhdFileDirectory\Test-TargetResource" -Tag 'Test' {
 
             BeforeAll {
                 New-TestDriveLayout -DriveLetter $script:vhdDriveLetter
@@ -403,7 +405,7 @@ try
             }
         }
 
-        Describe 'MSFT_<ResourceName>\Set-TargetResource' -Tag 'Set' {
+        Describe "MSFT_xVhdFileDirectory\Set-TargetResource" -Tag 'Set' {
             BeforeAll {
                 New-TestDriveLayout -DriveLetter $script:vhdDriveLetter
             }
