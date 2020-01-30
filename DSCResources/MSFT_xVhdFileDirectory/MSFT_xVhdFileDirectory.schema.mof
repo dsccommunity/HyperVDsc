@@ -9,6 +9,7 @@ Class MSFT_xFileDirectory
   [Write] boolean Recurse;
   [Write] boolean Force ;
   [write] string Content;
+  [write] string ContentEncoding;
   [Write,ValueMap{"ReadOnly", "Hidden", "System", "Archive"},Values{"ReadOnly", "Hidden", "System", "Archive"}] string Attributes[];
 };
 
