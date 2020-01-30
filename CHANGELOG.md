@@ -6,6 +6,8 @@
   * Added initial set of unit tests
 * MSFT_xVMDvdDrive
   * Fixed VMName property in example
+* MSFT_xVMNetworkAdapter
+  * Fixed MacAddress sample data
 
 ## 3.17.0.0
 
