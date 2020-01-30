@@ -30,7 +30,6 @@ function Get-TargetResource
         [String]
         $Generation = "Vhd"
     )
-
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
@@ -376,6 +375,55 @@ function GetNameWithExtension
     }
 
     $vhdName
+}
+
+function Export-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.String])]
+    $InformationPreference = "Continue"
+
+    # Get all VMs on the host
+    $allVMs = Get-VM
+    $i = 1
+    $content = ""
+
+    # Loop through all VMs to get their VHDs;
+    foreach ($vm in $allVMs)
+    {
+        Write-Information "    [$i/$($allVMs.Count)] Scanning VHDs for VM {$($vm.Name)}"
+        $vhds = Get-VHD -VMId $vm.ID
+        $j = 1
+        foreach ($vhd in $vhds)
+        {
+            Write-Information "        [$j/$($vhds.Count)] $($vhd.Path)"
+
+            # Defining the Key parameters to allow Get-TargetResource to retrieve the instance;
+            $vhdPathParts = $vhd.Path.Split('\')
+            $vhdName      = $vhdPathParts[$vhdPathParts.Length - 1].Split('.')[0]
+            $vhdPath      = $vhd.Path.Replace($vhdPathParts[$vhdPathParts.Length - 1], "")
+
+            $keyParams = @{
+                Name       = $vhdName
+                Generation = $vhd.VHDFormat
+                Path       = $vhdPath
+            }
+
+            # Retrieving the current instance based on the key parameters;
+            $result = Get-TargetResource @keyParams
+
+            $content += "        xVHD " + (New-GUID).ToString() + "`r`n"
+            $content += "        {`r`n"
+
+            # This is where the magic happens. Converting the retrieved Hashtable into a DSC consumable string;
+            $currentDSCBlock = Get-DSCBlock -Params $result -ModulePath $PSScriptRoot
+            $content += $currentDSCBlock
+            $content += "        }`r`n"
+            $j++
+        }
+        $i++
+    }
+    return $content
 }
 
 Export-ModuleMember -Function *-TargetResource
