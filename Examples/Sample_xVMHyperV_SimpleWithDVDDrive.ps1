@@ -38,7 +38,7 @@ configuration Sample_xVMHyperV_SimpleWithDvdDrive
         xVMDvdDrive NewVMDvdDriveISO
         {
             Ensure             = 'Present'
-            Name               = $VMName
+            VMName               = $VMName
             ControllerNumber   = 0
             ControllerLocation = 0
             Path               = $ISOPath
