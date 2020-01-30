@@ -4,6 +4,8 @@
 
 * MSFT_xVhdFileDirectory:
   * Added initial set of unit tests
+* MSFT_xVMDvdDrive
+  * Fixed VMName property in example
 
 ## 3.17.0.0
 
