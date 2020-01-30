@@ -7,7 +7,7 @@
         Id = 'MyVM01-NIC'
         Name = 'MyVM01-NIC'
         SwitchName = 'SETSwitch'
-        MacAddress = '001523be0c'
+        MacAddress = '001523be0c00'
         VMName = 'MyVM01'
         Ensure = 'Present'
     }
@@ -16,7 +16,7 @@
         Id = 'MyVM02-NIC'
         Name = 'MyVM02-NIC'
         SwitchName = 'SETSwitch'
-        MacAddress = '001523be0d'
+        MacAddress = '001523be0c00'
         VMName = 'MyVM02'
         Ensure = 'Present'
     }
