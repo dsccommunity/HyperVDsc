@@ -7,7 +7,7 @@
         Id = 'MyVM01-NIC'
         Name = 'MyVM01-NIC'
         SwitchName = 'SETSwitch'
-        MacAddress = '001523be0c'
+        MacAddress = '001523be0c00'
         VMName = 'MyVM01'
         NetworkSetting = xNetworkSettings {
             IpAddress = "192.168.0.100"
