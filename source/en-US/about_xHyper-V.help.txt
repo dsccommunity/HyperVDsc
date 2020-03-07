@@ -2,10 +2,10 @@ TOPIC
     about_xHyper-V
 
 SHORT DESCRIPTION
-    
+    DSC resources for deployment and configuration of Microsoft Hyper-V.
 
 LONG DESCRIPTION
-    {{ Add Long description here }}
+    This module contains DSC resources for deployment and configuration of Microsoft Hyper-V.
 
 EXAMPLES
     PS C:\> {{ add examples here }}
