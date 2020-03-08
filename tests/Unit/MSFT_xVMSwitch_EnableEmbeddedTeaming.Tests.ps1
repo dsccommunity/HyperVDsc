@@ -529,7 +529,7 @@ try
                 It "Should throw an error in the test method" {
                     $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'SETServer2016Error' `
-                        -ErrorMessage $LocalizedData.SETServer2016Error
+                        -ErrorMessage $script:localizedData.SETServer2016Error
 
                     {Test-TargetResource @testParams} | Should Throw $errorRecord
                 }
@@ -537,7 +537,7 @@ try
                 It "Should throw an error in the set method" {
                     $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'SETServer2016Error' `
-                        -ErrorMessage $LocalizedData.SETServer2016Error
+                        -ErrorMessage $script:localizedData.SETServer2016Error
 
                     {Set-TargetResource @testParams} | Should Throw $errorRecord
                 }

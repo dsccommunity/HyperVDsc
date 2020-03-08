@@ -27,7 +27,7 @@ function Get-TargetResource
 
     Assert-Module -Name 'Hyper-V'
 
-    Write-Verbose -Message $localizedData.QueryingVMHost
+    Write-Verbose -Message $script:localizedData.QueryingVMHost
     $vmHost = Get-VMHost
 
     # Convert the current TimeSpan into minutes
@@ -222,18 +222,18 @@ function Test-TargetResource
             ($parameter.Value -ne $targetResource[$parameter.Key]))
         {
             $isTargetResourceCompliant = $false
-            Write-Verbose -Message ($localizedData.PropertyMismatch -f $parameter.Key,
+            Write-Verbose -Message ($script:localizedData.PropertyMismatch -f $parameter.Key,
                 $parameter.Value, $targetResource[$parameter.Key])
         }
     }
 
     if ($isTargetResourceCompliant)
     {
-        Write-Verbose -Message $localizedData.VMHostInDesiredState
+        Write-Verbose -Message $script:localizedData.VMHostInDesiredState
     }
     else
     {
-        Write-Verbose -Message $localizedData.VMHostNotInDesiredState
+        Write-Verbose -Message $script:localizedData.VMHostNotInDesiredState
     }
 
     return $isTargetResourceCompliant
@@ -415,17 +415,17 @@ function Set-TargetResource
         {
             if ((Get-CimInstance -ClassName Win32_ComputerSystem).PartOfDomain)
             {
-                Write-Verbose -Message $localizedData.EnableLiveMigration
+                Write-Verbose -Message $script:localizedData.EnableLiveMigration
                 Enable-VMMigration
             }
             else
             {
-                New-InvalidOperationError -ErrorId InvalidState -ErrorMessage $localizedData.LiveMigrationDomainOnly
+                New-InvalidOperationError -ErrorId InvalidState -ErrorMessage $script:localizedData.LiveMigrationDomainOnly
             }
         }
         else
         {
-            Write-Verbose -Message $localizedData.DisableLiveMigration
+            Write-Verbose -Message $script:localizedData.DisableLiveMigration
             Disable-VMMigration
         }
     }
@@ -439,8 +439,8 @@ function Set-TargetResource
 
     if ($vmHostParams.Count -ne 0)
     {
-        Write-Verbose -Message $localizedData.UpdatingVMHostProperties
+        Write-Verbose -Message $script:localizedData.UpdatingVMHostProperties
         Set-VMHost @PSBoundParameters
-        Write-Verbose -Message $localizedData.VMHostPropertiesUpdated
+        Write-Verbose -Message $script:localizedData.VMHostPropertiesUpdated
     }
 } #end function

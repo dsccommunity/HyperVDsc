@@ -25,7 +25,7 @@ function Get-TargetResource
     )
 
     Assert-Module -Name 'Hyper-V'
-    Write-Verbose -Message ($localizedData.QueryingVMProcessor -f $VMName)
+    Write-Verbose -Message ($script:localizedData.QueryingVMProcessor -f $VMName)
     $vmProcessor = Get-VMProcessor -VMName $VMName -ErrorAction Stop
     $configuration = @{
         VMName = $VMName
@@ -176,18 +176,18 @@ function Test-TargetResource
             ($parameter.Value -ne $targetResource[$parameter.Key]))
         {
             $isTargetResourceCompliant = $false
-            Write-Verbose -Message ($localizedData.PropertyMismatch -f $parameter.Key,
+            Write-Verbose -Message ($script:localizedData.PropertyMismatch -f $parameter.Key,
                                     $parameter.Value, $targetResource[$parameter.Key])
         }
     }
 
     if ($isTargetResourceCompliant)
     {
-        Write-Verbose -Message ($localizedData.VMProcessorInDesiredState -f $VMName)
+        Write-Verbose -Message ($script:localizedData.VMProcessorInDesiredState -f $VMName)
     }
     else
     {
-        Write-Verbose -Message ($localizedData.VMProcessorNotInDesiredState -f $VMName)
+        Write-Verbose -Message ($script:localizedData.VMProcessorNotInDesiredState -f $VMName)
     }
 
     return $isTargetResourceCompliant
@@ -351,9 +351,9 @@ function Set-TargetResource
     if (-not $isRestartRequired)
     {
         # No parameter specified that requires a restart, so disable the restart flag
-        Write-Verbose -Message ($localizedData.UpdatingVMProperties -f $VMName)
+        Write-Verbose -Message ($script:localizedData.UpdatingVMProperties -f $VMName)
         Set-VMProcessor -VMName $VMName @PSBoundParameters
-        Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $VMName)
+        Write-Verbose -Message ($script:localizedData.VMPropertiesUpdated -f $VMName)
     }
     else
     {
@@ -423,7 +423,7 @@ function Assert-TargetResourceParameter
     {
         if (($PSBoundParameters.ContainsKey($parameterName)) -and ($osBuildNumber -lt 14393))
         {
-            $errorMessage = $localizedData.UnsupportedSystemError -f $parameterName, 14393
+            $errorMessage = $script:localizedData.UnsupportedSystemError -f $parameterName, 14393
             New-InvalidArgumentError -ErrorId SystemUnsupported -ErrorMessage $errorMessage
         }
     }

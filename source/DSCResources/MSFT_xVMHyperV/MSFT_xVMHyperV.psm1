@@ -22,12 +22,12 @@ function Get-TargetResource
         $VhdPath
     )
 
-    Write-Verbose -Message ($localizedData.QueryingVM -f $Name)
+    Write-Verbose -Message ($script:localizedData.QueryingVM -f $Name)
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw ($localizedData.RoleMissingError -f 'Hyper-V')
+        Throw ($script:localizedData.RoleMissingError -f 'Hyper-V')
     }
 
     $vmobj = Get-VM -Name $Name -ErrorAction SilentlyContinue
@@ -35,7 +35,7 @@ function Get-TargetResource
     # Check if 1 or 0 VM with name = $name exist
     if ($vmobj.count -gt 1)
     {
-        Throw ($localizedData.MoreThanOneVMExistsError -f $Name)
+        Throw ($script:localizedData.MoreThanOneVMExistsError -f $Name)
     }
 
     <#
@@ -207,7 +207,7 @@ function Set-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw ($localizedData.RoleMissingError -f 'Hyper-V')
+        Throw ($script:localizedData.RoleMissingError -f 'Hyper-V')
     }
 
     # Check if AutomaticCheckpointsEnabled is set in configuration
@@ -219,24 +219,24 @@ function Set-TargetResource
         #>
         if (-Not (Get-Command -Name Set-VM -Module Hyper-V).Parameters.ContainsKey('AutomaticCheckpointsEnabled'))
         {
-            Throw ($localizedData.AutomaticCheckpointsUnsupported)
+            Throw ($script:localizedData.AutomaticCheckpointsUnsupported)
         }
     }
 
-    Write-Verbose -Message ($localizedData.CheckingVMExists -f $Name)
+    Write-Verbose -Message ($script:localizedData.CheckingVMExists -f $Name)
     $vmObj = Get-VM -Name $Name -ErrorAction SilentlyContinue
 
     # VM already exists
     if ($vmObj)
     {
-        Write-Verbose -Message ($localizedData.VMExists -f $Name)
+        Write-Verbose -Message ($script:localizedData.VMExists -f $Name)
 
         # If VM shouldn't be there, stop it and remove it
         if ($Ensure -eq 'Absent')
         {
-            Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'Ensure', $Ensure, 'Present')
+            Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'Ensure', $Ensure, 'Present')
             Get-VM $Name | Stop-VM -Force -Passthru -WarningAction SilentlyContinue | Remove-VM -Force
-            Write-Verbose -Message ($localizedData.VMPropertySet -f 'Ensure', $Ensure)
+            Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'Ensure', $Ensure)
         }
 
         <#
@@ -248,26 +248,26 @@ function Set-TargetResource
             # If state has been specified and the VM is not in right state, set it to right state
             if ($State -and ($vmObj.State -ne $State))
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'State', $State, $vmObj.State)
+                Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'State', $State, $vmObj.State)
                 Set-VMState -Name $Name -State $State -WaitForIP $WaitForIP
-                Write-Verbose -Message ($localizedData.VMPropertySet -f 'State', $State)
+                Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'State', $State)
             }
 
             $changeProperty = @{}
             # If the VM does not have the right startup memory
             if ($PSBoundParameters.ContainsKey('StartupMemory') -and ($vmObj.MemoryStartup -ne $StartupMemory))
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MemoryStartup', $StartupMemory, $vmObj.MemoryStartup)
+                Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'MemoryStartup', $StartupMemory, $vmObj.MemoryStartup)
                 $changeProperty['MemoryStartup'] = $StartupMemory
             }
             elseif ($PSBoundParameters.ContainsKey('MinimumMemory') -and ($vmObj.MemoryStartup -lt $MinimumMemory))
             {
-                Write-Verbose -Message ($localizedData.AdjustingLessThanMemoryWarning -f 'StartupMemory', $vmObj.MemoryStartup, 'MinimumMemory', $MinimumMemory)
+                Write-Verbose -Message ($script:localizedData.AdjustingLessThanMemoryWarning -f 'StartupMemory', $vmObj.MemoryStartup, 'MinimumMemory', $MinimumMemory)
                 $changeProperty['MemoryStartup'] = $MinimumMemory
             }
             elseif ($PSBoundParameters.ContainsKey('MaximumMemory') -and ($vmObj.MemoryStartup -gt $MaximumMemory))
             {
-                Write-Verbose -Message ($localizedData.AdjustingGreaterThanMemoryWarning -f 'StartupMemory', $vmObj.MemoryStartup, 'MaximumMemory', $MaximumMemory)
+                Write-Verbose -Message ($script:localizedData.AdjustingGreaterThanMemoryWarning -f 'StartupMemory', $vmObj.MemoryStartup, 'MaximumMemory', $MaximumMemory)
                 $changeProperty['MemoryStartup'] = $MaximumMemory
             }
 
@@ -279,12 +279,12 @@ function Set-TargetResource
 
                 if ($PSBoundParameters.ContainsKey('MinimumMemory') -and ($vmObj.Memoryminimum -ne $MinimumMemory))
                 {
-                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MinimumMemory', $MinimumMemory, $vmObj.MemoryMinimum)
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'MinimumMemory', $MinimumMemory, $vmObj.MemoryMinimum)
                     $changeProperty['MemoryMinimum'] = $MinimumMemory
                 }
                 if ($PSBoundParameters.ContainsKey('MaximumMemory') -and ($vmObj.Memorymaximum -ne $MaximumMemory))
                 {
-                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MaximumMemory', $MaximumMemory, $vmObj.MemoryMaximum)
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'MaximumMemory', $MaximumMemory, $vmObj.MemoryMaximum)
                     $changeProperty['MemoryMaximum'] = $MaximumMemory
                 }
             }
@@ -292,7 +292,7 @@ function Set-TargetResource
             # If the VM does not have the right processor count, stop the VM, set the right memory, start the VM
             if ($PSBoundParameters.ContainsKey('ProcessorCount') -and ($vmObj.ProcessorCount -ne $ProcessorCount))
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'ProcessorCount', $ProcessorCount, $vmObj.ProcessorCount)
+                Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'ProcessorCount', $ProcessorCount, $vmObj.ProcessorCount)
                 $changeProperty['ProcessorCount'] = $ProcessorCount
             }
 
@@ -300,7 +300,7 @@ function Set-TargetResource
             if ($changeProperty.Count -gt 0)
             {
                 Set-VMProperty -Name $Name -VMCommand 'Set-VM' -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
-                Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
+                Write-Verbose -Message ($script:localizedData.VMPropertiesUpdated -f $Name)
             }
 
             <#
@@ -322,7 +322,7 @@ function Set-TargetResource
                 $vmObj = Get-VM -Name $Name -ErrorAction SilentlyContinue
                 if ($vmObj.DynamicMemoryEnabled)
                 {
-                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'DynamicMemoryEnabled', $false, $vmObj.DynamicMemoryEnabled)
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'DynamicMemoryEnabled', $false, $vmObj.DynamicMemoryEnabled)
                     $setVMPropertyParams = @{
                         VMName = $Name
                         VMCommand = 'Set-VM'
@@ -334,7 +334,7 @@ function Set-TargetResource
                         RestartIfNeeded = $RestartIfNeeded
                     }
                     Set-VMProperty @setVMPropertyParams
-                    Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
+                    Write-Verbose -Message ($script:localizedData.VMPropertiesUpdated -f $Name)
                 }
             }
 
@@ -348,23 +348,23 @@ function Set-TargetResource
                     # We cannot change the MAC address whilst the VM is running.. This is changed later
                     if ($nic.SwitchName -ne $switch)
                     {
-                        Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'NIC', $switch, $nic.SwitchName)
+                        Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'NIC', $switch, $nic.SwitchName)
                         $nic | Connect-VMNetworkAdapter -SwitchName $switch
-                        Write-Verbose -Message ($localizedData.VMPropertySet -f 'NIC', $switch)
+                        Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'NIC', $switch)
                     }
                 }
                 else
                 {
-                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'NIC', $switch, '<missing>')
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'NIC', $switch, '<missing>')
                     if ($MACAddress -and (-not [System.String]::IsNullOrEmpty($MACAddress[$i])))
                     {
                         Add-VMNetworkAdapter -VMName $Name -SwitchName $switch -StaticMacAddress $MACAddress[$i]
-                        Write-Verbose -Message ($localizedData.VMPropertySet -f 'NIC', $switch)
+                        Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'NIC', $switch)
                     }
                     else
                     {
                         Add-VMNetworkAdapter -VMName $Name -SwitchName $switch
-                        Write-Verbose -Message ($localizedData.VMPropertySet -f 'NIC', $switch)
+                        Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'NIC', $switch)
                     }
                     # Refresh the NICs after we've added one
                     $vmObj = Get-VM -Name $Name -ErrorAction SilentlyContinue
@@ -378,7 +378,7 @@ function Set-TargetResource
                 $nic = $vmObj.NetworkAdapters[$i]
                 if ($nic.MacAddress -ne $address)
                 {
-                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MACAddress', $address, $nic.MacAddress)
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'MACAddress', $address, $nic.MacAddress)
                     Set-VMMACAddress -Name $Name -NICIndex $i -MACAddress $address -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
                 }
             }
@@ -389,7 +389,7 @@ function Set-TargetResource
                 $vmSecureBoot = Test-VMSecureBoot -Name $Name
                 if ($SecureBoot -ne $vmSecureBoot)
                 {
-                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'SecureBoot', $SecureBoot, $vmSecureBoot)
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'SecureBoot', $SecureBoot, $vmSecureBoot)
 
                     if (-not $SecureBoot)
                     {
@@ -408,7 +408,7 @@ function Set-TargetResource
                         RestartIfNeeded = $RestartIfNeeded
                     }
                     Set-VMProperty @setVMPropertyParams
-                    Write-Verbose -Message ($localizedData.VMPropertySet -f 'SecureBoot', $SecureBoot)
+                    Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'SecureBoot', $SecureBoot)
                 }
             }
 
@@ -427,15 +427,15 @@ function Set-TargetResource
             $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
             if ($guestService.Enabled -eq $false -and $EnableGuestService)
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
+                Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
                 $guestService | Enable-VMIntegrationService
-                Write-Verbose -Message ($localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
+                Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
             }
             elseif ($guestService.Enabled -and -not $EnableGuestService)
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
+                Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
                 $guestService | Disable-VMIntegrationService
-                Write-Verbose -Message ($localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
+                Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'EnableGuestService', $EnableGuestService)
             }
 
             # If AutomaticCheckpointsEnabled is set in configuration
@@ -452,10 +452,10 @@ function Set-TargetResource
     # VM is not present, create one
     else
     {
-        Write-Verbose -Message ($localizedData.VMDoesNotExist -f $Name)
+        Write-Verbose -Message ($script:localizedData.VMDoesNotExist -f $Name)
         if ($Ensure -eq 'Present')
         {
-            Write-Verbose -Message ($localizedData.CreatingVM -f $Name)
+            Write-Verbose -Message ($script:localizedData.CreatingVM -f $Name)
 
             $parameters = @{}
             $parameters['Name'] = $Name
@@ -548,7 +548,7 @@ function Set-TargetResource
                     $addVMNetworkAdapterParams['StaticMacAddress'] = $MACAddress[$i]
                 }
                 Add-VMNetworkAdapter @addVMNetworkAdapterParams
-                Write-Verbose -Message ($localizedData.VMPropertySet -f 'NIC', $SwitchName[$i])
+                Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'NIC', $SwitchName[$i])
             }
 
             if ($Generation -eq 2)
@@ -569,12 +569,12 @@ function Set-TargetResource
                 Get-VMIntegrationService -VMName $Name | Where-Object -FilterScript {$_.Id -eq $guestServiceId} | Enable-VMIntegrationService
             }
 
-            Write-Verbose -Message ($localizedData.VMCreated -f $Name)
+            Write-Verbose -Message ($script:localizedData.VMCreated -f $Name)
 
             if ($State)
             {
                 Set-VMState -Name $Name -State $State -WaitForIP $WaitForIP
-                Write-Verbose -Message ($localizedData.VMPropertySet -f 'State', $State)
+                Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'State', $State)
             }
 
         }
@@ -685,13 +685,13 @@ function Test-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw ($localizedData.RoleMissingError -f 'Hyper-V')
+        Throw ($script:localizedData.RoleMissingError -f 'Hyper-V')
     }
 
     # Check if 1 or 0 VM with name = $name exist
     if ((Get-VM -Name $Name -ErrorAction SilentlyContinue).count -gt 1)
     {
-        Throw ($localizedData.MoreThanOneVMExistsError -f $Name)
+        Throw ($script:localizedData.MoreThanOneVMExistsError -f $Name)
     }
 
     # Check if AutomaticCheckpointsEnabled is set in configuration
@@ -703,7 +703,7 @@ function Test-TargetResource
         #>
         if (-Not (Get-Command -Name Set-VM -Module Hyper-V).Parameters.ContainsKey('AutomaticCheckpointsEnabled'))
         {
-            Throw ($localizedData.AutomaticCheckpointsUnsupported)
+            Throw ($script:localizedData.AutomaticCheckpointsUnsupported)
         }
     }
 
@@ -715,7 +715,7 @@ function Test-TargetResource
             # Check if $VhdPath exist
             if (!(Test-Path $VhdPath))
             {
-                Throw ($localizedData.VhdPathDoesNotExistError -f $VhdPath)
+                Throw ($script:localizedData.VhdPathDoesNotExistError -f $VhdPath)
             }
 
             # Check if Minimum memory is less than StartUpmemory
@@ -723,7 +723,7 @@ function Test-TargetResource
                 $PSBoundParameters.ContainsKey('MinimumMemory') -and
                 ($MinimumMemory -gt $StartupMemory))
             {
-                Throw ($localizedData.MinMemGreaterThanStartupMemError -f $MinimumMemory, $StartupMemory)
+                Throw ($script:localizedData.MinMemGreaterThanStartupMemError -f $MinimumMemory, $StartupMemory)
             }
 
             # Check if Minimum memory is greater than Maximummemory
@@ -731,7 +731,7 @@ function Test-TargetResource
                 $PSBoundParameters.ContainsKey('MinimumMemory') -and
                 ($MinimumMemory -gt $MaximumMemory))
             {
-                Throw ($localizedData.MinMemGreaterThanMaxMemError -f $MinimumMemory, $MaximumMemory)
+                Throw ($script:localizedData.MinMemGreaterThanMaxMemError -f $MinimumMemory, $MaximumMemory)
             }
 
             # Check if Startup memory is greater than Maximummemory
@@ -739,7 +739,7 @@ function Test-TargetResource
                 $PSBoundParameters.ContainsKey('StartupMemory') -and
                 ($StartupMemory -gt $MaximumMemory))
             {
-                Throw ($localizedData.StartUpMemGreaterThanMaxMemError -f $StartupMemory, $MaximumMemory)
+                Throw ($script:localizedData.StartUpMemGreaterThanMaxMemError -f $StartupMemory, $MaximumMemory)
             }
 
             <#
@@ -748,19 +748,19 @@ function Test-TargetResource
             #>
             if (($Generation -eq 2) -and ($VhdPath.Split('.')[-1] -eq 'vhd'))
             {
-                Throw ($localizedData.VhdUnsupportedOnGen2VMError)
+                Throw ($script:localizedData.VhdUnsupportedOnGen2VMError)
             }
 
             # Check if $Path exist
             if ($Path -and !(Test-Path -Path $Path))
             {
-                Throw ($localizedData.PathDoesNotExistError -f $Path)
+                Throw ($script:localizedData.PathDoesNotExistError -f $Path)
             }
 
             $vhdChain = @(Get-VhdHierarchy -VhdPath ($vmObj.HardDrives[0].Path))
             if ($vhdChain -notcontains $VhdPath)
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'VhdPath', $VhdPath, ($vhdChain -join ','))
+                Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'VhdPath', $VhdPath, ($vhdChain -join ','))
                 return $false
             }
 
@@ -816,7 +816,7 @@ function Test-TargetResource
             {
                 if ($vmObj.NetworkAdapters[$i].SwitchName -ne $SwitchName[$i])
                 {
-                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'SwitchName', $SwitchName[$i], $vmObj.NetworkAdapters[$i].SwitchName)
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'SwitchName', $SwitchName[$i], $vmObj.NetworkAdapters[$i].SwitchName)
                     return $false
                 }
             }
@@ -825,7 +825,7 @@ function Test-TargetResource
             {
                 if ($vmObj.NetworkAdapters[$i].MACAddress -ne $MACAddress[$i])
                 {
-                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'MACAddress', $MACAddress[$i], $vmObj.NetworkAdapters[$i].MACAddress)
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'MACAddress', $MACAddress[$i], $vmObj.NetworkAdapters[$i].MACAddress)
                     return $false
                 }
             }
@@ -846,7 +846,7 @@ function Test-TargetResource
                 $vmSecureBoot = Test-VMSecureBoot -Name $Name
                 if ($SecureBoot -ne $vmSecureBoot)
                 {
-                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'SecureBoot', $SecureBoot, $vmSecureBoot)
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'SecureBoot', $SecureBoot, $vmSecureBoot)
                     return $false
                 }
             }
@@ -855,7 +855,7 @@ function Test-TargetResource
             $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
             if ($guestService.Enabled -ne $EnableGuestService)
             {
-                Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
+                Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
                 return $false
             }
 
@@ -864,7 +864,7 @@ function Test-TargetResource
             {
                 if ($vmObj.AutomaticCheckpointsEnabled -ne $AutomaticCheckpointsEnabled)
                 {
-                    Write-Verbose -Message ($localizedData.VMPropertyShouldBe -f 'AutomaticCheckpointsEnabled', $AutomaticCheckpointsEnabled, $vmObj.AutomaticCheckpointsEnabled)
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'AutomaticCheckpointsEnabled', $AutomaticCheckpointsEnabled, $vmObj.AutomaticCheckpointsEnabled)
                     return $false
                 }
             }
@@ -947,17 +947,17 @@ function Set-VMMACAddress
         # Cannot make a paused VM to go back to Paused state after turning Off
         if ($originalState -eq 'Paused')
         {
-            Write-Warning -Message ($localizedData.VMStateWillBeOffWarning -f $Name)
+            Write-Warning -Message ($script:localizedData.VMStateWillBeOffWarning -f $Name)
         }
     }
     elseif ($originalState -eq 'Off')
     {
         $vmObj.NetworkAdapters[$NICIndex] | Set-VMNetworkAdapter -StaticMacAddress $MACAddress
-        Write-Verbose -Message ($localizedData.VMPropertySet -f 'MACAddress', $MACAddress)
+        Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'MACAddress', $MACAddress)
     }
     else
     {
-        Write-Error -Message ($localizedData.CannotUpdatePropertiesOnlineError -f $Name, $vmObj.State)
+        Write-Error -Message ($script:localizedData.CannotUpdatePropertiesOnlineError -f $Name, $vmObj.State)
     }
 }
 

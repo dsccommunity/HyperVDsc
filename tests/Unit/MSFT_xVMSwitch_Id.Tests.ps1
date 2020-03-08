@@ -311,7 +311,7 @@ try
 
                 $errorRecord = Get-InvalidArgumentError `
                     -ErrorId 'VMSwitchIDServer2016Error' `
-                    -ErrorMessage $LocalizedData.VMSwitchIDServer2016Error
+                    -ErrorMessage $script:localizedData.VMSwitchIDServer2016Error
 
                 It 'Should throw "VMSwitchIDServer2016Error"' {
                     {Set-TargetResource @testParams} | Should -Throw $errorRecord
@@ -405,7 +405,7 @@ try
 
                 $errorRecord = Get-InvalidArgumentError `
                     -ErrorId 'VMSwitchIDServer2016Error' `
-                    -ErrorMessage $LocalizedData.VMSwitchIDServer2016Error
+                    -ErrorMessage $script:localizedData.VMSwitchIDServer2016Error
 
                 It 'Should throw "VMSwitchIDServer2016Error"' {
                     {Test-TargetResource @testParams} | Should -Throw $errorRecord

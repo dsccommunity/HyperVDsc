@@ -39,7 +39,7 @@ function Get-TargetResource
     {
         New-InvalidOperationError `
             -ErrorId 'HyperVNotInstalledError' `
-            -ErrorMessage $LocalizedData.HyperVNotInstalledError
+            -ErrorMessage $script:localizedData.HyperVNotInstalledError
     }
 
     $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue
@@ -184,7 +184,7 @@ function Set-TargetResource
     {
         New-InvalidOperationError `
             -ErrorId 'HyperVNotInstalledError' `
-            -ErrorMessage $LocalizedData.HyperVNotInstalledError
+            -ErrorMessage $script:localizedData.HyperVNotInstalledError
     }
 
     # Check to see if the BandwidthReservationMode chosen is supported in the OS
@@ -192,21 +192,21 @@ function Set-TargetResource
     {
         New-InvalidArgumentError `
             -ErrorId 'BandwidthReservationModeError' `
-            -ErrorMessage $LocalizedData.BandwidthReservationModeError
+            -ErrorMessage $script:localizedData.BandwidthReservationModeError
     }
 
     if ($EnableEmbeddedTeaming -eq $true -and (Get-OSVersion).Major -lt 10)
     {
         New-InvalidArgumentError `
             -ErrorId 'SETServer2016Error' `
-            -ErrorMessage $LocalizedData.SETServer2016Error
+            -ErrorMessage $script:localizedData.SETServer2016Error
     }
 
     if (($PSBoundParameters.ContainsKey('Id')) -and (Get-OSVersion).Major -lt 10)
     {
         New-InvalidArgumentError `
             -ErrorId 'VMSwitchIDServer2016Error' `
-            -ErrorMessage $LocalizedData.VMSwitchIDServer2016Error
+            -ErrorMessage $script:localizedData.VMSwitchIDServer2016Error
     }
 
     if ($Ensure -eq 'Present')
@@ -218,12 +218,12 @@ function Set-TargetResource
         {
             $removeReaddSwitch = $false
 
-            Write-Verbose -Message ($LocalizedData.CheckingSwitchMessage -f $Name)
+            Write-Verbose -Message ($script:localizedData.CheckingSwitchMessage -f $Name)
             if ($switch.EmbeddedTeamingEnabled -eq $false -or $null -eq $switch.EmbeddedTeamingEnabled)
             {
                 if ((Get-NetAdapter -Name $NetAdapterName).InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
                 {
-                    Write-Verbose -Message ($LocalizedData.NetAdapterInterfaceIncorrectMessage -f $Name)
+                    Write-Verbose -Message ($script:localizedData.NetAdapterInterfaceIncorrectMessage -f $Name)
                     $removeReaddSwitch = $true
                 }
             }
@@ -232,40 +232,40 @@ function Set-TargetResource
                 $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction SilentlyContinue).Name
                 if ($null -ne (Compare-Object -ReferenceObject $adapters -DifferenceObject $NetAdapterName))
                 {
-                    Write-Verbose -Message ($LocalizedData.SwitchIncorrectNetworkAdapters -f $Name)
+                    Write-Verbose -Message ($script:localizedData.SwitchIncorrectNetworkAdapters -f $Name)
                     $removeReaddSwitch = $true
                 }
             }
 
             if (($BandwidthReservationMode -ne "NA") -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
             {
-                Write-Verbose -Message ($LocalizedData.BandwidthReservationModeIncorrect -f $Name)
+                Write-Verbose -Message ($script:localizedData.BandwidthReservationModeIncorrect -f $Name)
                 $removeReaddSwitch = $true
             }
 
             if ($null -ne $switch.EmbeddedTeamingEnabled -and
                 $switch.EmbeddedTeamingEnabled -ne $EnableEmbeddedTeaming)
             {
-                Write-Verbose -Message ($LocalizedData.EnableEmbeddedTeamingIncorrect -f $Name)
+                Write-Verbose -Message ($script:localizedData.EnableEmbeddedTeamingIncorrect -f $Name)
                 $removeReaddSwitch = $true
             }
 
             if ($null -ne $switch.EmbeddedTeamingEnabled -and
                 $switch.EmbeddedTeamingEnabled -ne $EnableEmbeddedTeaming)
             {
-                Write-Verbose -Message ($LocalizedData.EnableEmbeddedTeamingIncorrect -f $Name)
+                Write-Verbose -Message ($script:localizedData.EnableEmbeddedTeamingIncorrect -f $Name)
                 $removeReaddSwitch = $true
             }
 
             if ($PSBoundParameters.ContainsKey('Id') -and $switch.Id -ne $Id)
             {
-                Write-Verbose -Message ($LocalizedData.IdIncorrect -f $Name)
+                Write-Verbose -Message ($script:localizedData.IdIncorrect -f $Name)
                 $removeReaddSwitch = $true
             }
 
             if ($removeReaddSwitch)
             {
-                Write-Verbose -Message ($LocalizedData.RemoveAndReaddSwitchMessage -f $Name)
+                Write-Verbose -Message ($script:localizedData.RemoveAndReaddSwitchMessage -f $Name)
                 $switch | Remove-VMSwitch -Force
                 $parameters = @{}
                 $parameters["Name"] = $Name
@@ -297,27 +297,27 @@ function Set-TargetResource
             }
             else
             {
-                Write-Verbose -Message ($LocalizedData.SwitchCorrectNetAdapterAndBandwidthMode -f $Name, ($NetAdapterName -join ','), $BandwidthReservationMode)
+                Write-Verbose -Message ($script:localizedData.SwitchCorrectNetAdapterAndBandwidthMode -f $Name, ($NetAdapterName -join ','), $BandwidthReservationMode)
             }
 
-            Write-Verbose -Message ($LocalizedData.CheckAllowManagementOS -f $Name)
+            Write-Verbose -Message ($script:localizedData.CheckAllowManagementOS -f $Name)
             if ($PSBoundParameters.ContainsKey("AllowManagementOS") -and ($switch.AllowManagementOS -ne $AllowManagementOS))
             {
-                Write-Verbose -Message ($LocalizedData.AllowManagementOSIncorrect -f $Name)
+                Write-Verbose -Message ($script:localizedData.AllowManagementOSIncorrect -f $Name)
                 $switch | Set-VMSwitch -AllowManagementOS $AllowManagementOS
-                Write-Verbose -Message ($LocalizedData.AllowManagementOSUpdated -f $Name, $AllowManagementOS)
+                Write-Verbose -Message ($script:localizedData.AllowManagementOSUpdated -f $Name, $AllowManagementOS)
             }
             else
             {
-                Write-Verbose -Message ($LocalizedData.AllowManagementOSCorrect -f $Name)
+                Write-Verbose -Message ($script:localizedData.AllowManagementOSCorrect -f $Name)
             }
         }
 
         # If the switch is not present, create one
         else
         {
-            Write-Verbose -Message ($LocalizedData.PresentNotCorrect -f $Name, $Ensure)
-            Write-Verbose -Message $LocalizedData.CreatingSwitch
+            Write-Verbose -Message ($script:localizedData.PresentNotCorrect -f $Name, $Ensure)
+            Write-Verbose -Message $script:localizedData.CreatingSwitch
             $parameters = @{}
             $parameters["Name"] = $Name
 
@@ -350,13 +350,13 @@ function Set-TargetResource
             }
 
             $switch = New-VMSwitch @parameters
-            Write-Verbose -Message ($LocalizedData.PresentCorrect -f $Name, $Ensure)
+            Write-Verbose -Message ($script:localizedData.PresentCorrect -f $Name, $Ensure)
         }
 
         # Set the load balancing algorithm if it's a SET Switch and the parameter is specified
         if($EnableEmbeddedTeaming -eq $true -and $PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
         {
-            Write-Verbose -Message ($LocalizedData.SetLoadBalancingAlgorithmMessage -f $Name, $LoadBalancingAlgorithm)
+            Write-Verbose -Message ($script:localizedData.SetLoadBalancingAlgorithmMessage -f $Name, $LoadBalancingAlgorithm)
             Set-VMSwitchTeam -Name $switch.Name -LoadBalancingAlgorithm $LoadBalancingAlgorithm -Verbose
         }
     }
@@ -453,7 +453,7 @@ function Test-TargetResource
     {
         New-InvalidOperationError `
             -ErrorId 'HyperVNotInstalledError' `
-            -ErrorMessage $LocalizedData.HyperVNotInstalledError
+            -ErrorMessage $script:localizedData.HyperVNotInstalledError
     }
 
     #region input validation
@@ -461,48 +461,48 @@ function Test-TargetResource
     {
         New-InvalidArgumentError `
             -ErrorId 'NetAdapterNameRequiredError' `
-            -ErrorMessage $LocalizedData.NetAdapterNameRequiredError
+            -ErrorMessage $script:localizedData.NetAdapterNameRequiredError
     }
 
     if ($Type -ne 'External' -and $NetAdapterName)
     {
         New-InvalidArgumentError `
             -ErrorId 'NetAdapterNameNotRequiredError' `
-            -ErrorMessage $LocalizedData.NetAdapterNameNotRequiredError
+            -ErrorMessage $script:localizedData.NetAdapterNameNotRequiredError
     }
 
     if (($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
     {
         New-InvalidArgumentError `
             -ErrorId 'BandwidthReservationModeError' `
-            -ErrorMessage $LocalizedData.BandwidthReservationModeError
+            -ErrorMessage $script:localizedData.BandwidthReservationModeError
     }
 
     if ($EnableEmbeddedTeaming -eq $true -and (Get-OSVersion).Major -lt 10)
     {
         New-InvalidArgumentError `
             -ErrorId 'SETServer2016Error' `
-            -ErrorMessage $LocalizedData.SETServer2016Error
+            -ErrorMessage $script:localizedData.SETServer2016Error
     }
 
     if (($PSBoundParameters.ContainsKey('Id')) -and (Get-OSVersion).Major -lt 10)
     {
         New-InvalidArgumentError `
             -ErrorId 'VMSwitchIDServer2016Error' `
-            -ErrorMessage $LocalizedData.VMSwitchIDServer2016Error
+            -ErrorMessage $script:localizedData.VMSwitchIDServer2016Error
     }
     #endregion
 
     try
     {
         # Check if switch exists
-        Write-Verbose -Message ($LocalizedData.PresentChecking -f $Name, $Ensure)
+        Write-Verbose -Message ($script:localizedData.PresentChecking -f $Name, $Ensure)
         $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction Stop
 
         # If switch exists
         if ($null -ne $switch)
         {
-            Write-Verbose -Message ($LocalizedData.SwitchPresent -f $Name)
+            Write-Verbose -Message ($script:localizedData.SwitchPresent -f $Name)
             # If switch should be present, check the switch type
             if ($Ensure -eq 'Present')
             {
@@ -510,14 +510,14 @@ function Test-TargetResource
                 if ($PSBoundParameters.ContainsKey('BandwidthReservationMode'))
                 {
                     # If the BandwidthReservationMode is correct, or if $switch.BandwidthReservationMode is $null which means it isn't supported on the OS
-                    Write-Verbose -Message ($LocalizedData.CheckingBandwidthReservationMode -f $Name)
+                    Write-Verbose -Message ($script:localizedData.CheckingBandwidthReservationMode -f $Name)
                     if ($switch.BandwidthReservationMode -eq $BandwidthReservationMode -or $null -eq $switch.BandwidthReservationMode)
                     {
-                        Write-Verbose -Message ($LocalizedData.BandwidthReservationModeCorrect -f $Name)
+                        Write-Verbose -Message ($script:localizedData.BandwidthReservationModeCorrect -f $Name)
                     }
                     else
                     {
-                        Write-Verbose -Message ($LocalizedData.BandwidthReservationModeIncorrect -f $Name)
+                        Write-Verbose -Message ($script:localizedData.BandwidthReservationModeIncorrect -f $Name)
                         return $false
                     }
                 }
@@ -527,7 +527,7 @@ function Test-TargetResource
                 {
                     if ($EnableEmbeddedTeaming -eq $false)
                     {
-                        Write-Verbose -Message ($LocalizedData.CheckingNetAdapterInterface -f $Name)
+                        Write-Verbose -Message ($script:localizedData.CheckingNetAdapterInterface -f $Name)
                         $adapter = $null
                         try
                         {
@@ -539,7 +539,7 @@ function Test-TargetResource
                             # so this block serves to handle those and the write-verbose message is here
                             # to ensure that script analyser doesn't see an empty catch block to throw an
                             # error
-                            Write-Verbose -Message $LocalizedData.NetAdapterNotFound
+                            Write-Verbose -Message $script:localizedData.NetAdapterNotFound
                         }
 
                         if ($adapter.InterfaceDescription -ne $switch.NetAdapterInterfaceDescription)
@@ -548,48 +548,48 @@ function Test-TargetResource
                         }
                         else
                         {
-                            Write-Verbose -Message ($LocalizedData.NetAdapterInterfaceCorrect -f $Name)
+                            Write-Verbose -Message ($script:localizedData.NetAdapterInterfaceCorrect -f $Name)
                         }
                     }
                     else
                     {
-                        Write-Verbose -Message ($LocalizedData.CheckingNetAdapterInterfaces -f $Name)
+                        Write-Verbose -Message ($script:localizedData.CheckingNetAdapterInterfaces -f $Name)
                         if ($null -ne $switch.NetAdapterInterfaceDescriptions)
                         {
                             $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction SilentlyContinue).Name
                             if ($null -ne (Compare-Object -ReferenceObject $adapters -DifferenceObject $NetAdapterName))
                             {
-                                Write-Verbose -Message ($LocalizedData.IncorrectNetAdapterInterfaces -f $Name)
+                                Write-Verbose -Message ($script:localizedData.IncorrectNetAdapterInterfaces -f $Name)
                                 return $false
                             }
                             else
                             {
-                                Write-Verbose -Message ($LocalizedData.CorrectNetAdapterInterfaces -f $Name)
+                                Write-Verbose -Message ($script:localizedData.CorrectNetAdapterInterfaces -f $Name)
                             }
                         }
                         else
                         {
-                            Write-Verbose -Message ($LocalizedData.IncorrectNetAdapterInterfaces -f $Name)
+                            Write-Verbose -Message ($script:localizedData.IncorrectNetAdapterInterfaces -f $Name)
                             return $false
                         }
                     }
 
                     if ($PSBoundParameters.ContainsKey("AllowManagementOS"))
                     {
-                        Write-Verbose -Message ($LocalizedData.CheckAllowManagementOS -f $Name)
+                        Write-Verbose -Message ($script:localizedData.CheckAllowManagementOS -f $Name)
                         if (($switch.AllowManagementOS -ne $AllowManagementOS))
                         {
                             return $false
                         }
                         else
                         {
-                            Write-Verbose -Message ($LocalizedData.AllowManagementOSCorrect -f $Name)
+                            Write-Verbose -Message ($script:localizedData.AllowManagementOSCorrect -f $Name)
                         }
                     }
 
                     if($PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
                     {
-                        Write-Verbose -Message ($LocalizedData.CheckingLoadBalancingAlgorithm -f $Name)
+                        Write-Verbose -Message ($script:localizedData.CheckingLoadBalancingAlgorithm -f $Name)
                         $loadBalancingAlgorithm = ($switch | Get-VMSwitchTeam).LoadBalancingAlgorithm.toString()
                         if($loadBalancingAlgorithm -ne $LoadBalancingAlgorithm)
                         {
@@ -597,7 +597,7 @@ function Test-TargetResource
                         }
                         else
                         {
-                            Write-Verbose -Message ($LocalizedData.LoadBalancingAlgorithmCorrect -f $Name)
+                            Write-Verbose -Message ($script:localizedData.LoadBalancingAlgorithmCorrect -f $Name)
                         }
                     }
                 }
@@ -605,14 +605,14 @@ function Test-TargetResource
                 # Only check embedded teaming if specified
                 if ($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming") -eq $true)
                 {
-                    Write-Verbose -Message ($LocalizedData.CheckEnableEmbeddedTeaming -f $Name)
+                    Write-Verbose -Message ($script:localizedData.CheckEnableEmbeddedTeaming -f $Name)
                     if ($switch.EmbeddedTeamingEnabled -eq $EnableEmbeddedTeaming -or $null -eq $switch.EmbeddedTeamingEnabled)
                     {
-                        Write-Verbose -Message ($LocalizedData.EnableEmbeddedTeamingCorrect -f $Name)
+                        Write-Verbose -Message ($script:localizedData.EnableEmbeddedTeamingCorrect -f $Name)
                     }
                     else
                     {
-                        Write-Verbose -Message ($LocalizedData.EnableEmbeddedTeamingIncorrect -f $Name)
+                        Write-Verbose -Message ($script:localizedData.EnableEmbeddedTeamingIncorrect -f $Name)
                         return $false
                     }
                 }
@@ -620,14 +620,14 @@ function Test-TargetResource
                 # Check if the Switch has the desired ID
                 if ($PSBoundParameters.ContainsKey("Id") -eq $true)
                 {
-                    Write-Verbose -Message ($LocalizedData.CheckID -f $Name)
+                    Write-Verbose -Message ($script:localizedData.CheckID -f $Name)
                     if ($switch.Id.Guid -eq $Id)
                     {
-                        Write-Verbose -Message ($LocalizedData.IdCorrect -f $Name)
+                        Write-Verbose -Message ($script:localizedData.IdCorrect -f $Name)
                     }
                     else
                     {
-                        Write-Verbose -Message ($LocalizedData.IdIncorrect -f $Name)
+                        Write-Verbose -Message ($script:localizedData.IdIncorrect -f $Name)
                         return $false
                     }
                 }
@@ -645,7 +645,7 @@ function Test-TargetResource
     # If no switch was present
     catch [System.Management.Automation.ActionPreferenceStopException]
     {
-        Write-Verbose -Message ($LocalizedData.SwitchNotPresent -f $Name)
+        Write-Verbose -Message ($script:localizedData.SwitchNotPresent -f $Name)
         return ($Ensure -eq 'Absent')
     }
 }

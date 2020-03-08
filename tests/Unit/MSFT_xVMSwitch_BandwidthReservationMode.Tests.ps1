@@ -324,7 +324,7 @@ try
             It 'Invalid Operating System Exception' {
                 $errorRecord = Get-InvalidArgumentError `
                     -ErrorId 'BandwidthReservationModeError' `
-                    -ErrorMessage $LocalizedData.BandwidthReservationModeError
+                    -ErrorMessage $script:localizedData.BandwidthReservationModeError
                 {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
             }
 
@@ -537,7 +537,7 @@ try
 
                 $errorRecord = Get-InvalidArgumentError `
                     -ErrorId 'BandwidthReservationModeError' `
-                    -ErrorMessage $LocalizedData.BandwidthReservationModeError
+                    -ErrorMessage $script:localizedData.BandwidthReservationModeError
                 {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
             }
         }

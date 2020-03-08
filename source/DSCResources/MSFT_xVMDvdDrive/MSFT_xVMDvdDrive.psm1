@@ -40,7 +40,7 @@ function Get-TargetResource
 
     Write-Verbose -Message ( @(
             "$($MyInvocation.MyCommand): "
-            $($LocalizedData.GettingVMDVDDriveMessage `
+            $($script:localizedData.GettingVMDVDDriveMessage `
                 -f $VMName,$ControllerNumber,$ControllerLocation)
         ) -join '' )
 
@@ -119,7 +119,7 @@ function Set-TargetResource
 
     Write-Verbose -Message ( @(
             "$($MyInvocation.MyCommand): "
-            $($LocalizedData.SettingVMDVDDriveMessage `
+            $($script:localizedData.SettingVMDVDDriveMessage `
                 -f $VMName,$ControllerNumber,$ControllerLocation)
         ) -join '' )
 
@@ -141,7 +141,7 @@ function Set-TargetResource
                 # The current path assigned to the DVD Drive needs to be changed.
                 Write-Verbose -Message ( @(
                     "$($MyInvocation.MyCommand): "
-                    $($LocalizedData.VMDVDDriveChangePathMessage) `
+                    $($script:localizedData.VMDVDDriveChangePathMessage) `
                         -f $VMName,$ControllerNumber,$ControllerLocation,$Path `
                     ) -join '' )
 
@@ -153,7 +153,7 @@ function Set-TargetResource
             # The DVD Drive does not exist but should. Change required.
             Write-Verbose -Message ( @(
                 "$($MyInvocation.MyCommand): "
-                 $($LocalizedData.VMDVDDriveAddMessage) `
+                 $($script:localizedData.VMDVDDriveAddMessage) `
                     -f $VMName,$ControllerNumber,$ControllerLocation,$Path `
                 ) -join '' )
 
@@ -172,7 +172,7 @@ function Set-TargetResource
             # The DVD Drive does exist, but should not. Change required.
             Write-Verbose -Message ( @(
                 "$($MyInvocation.MyCommand): "
-                 $($LocalizedData.VMDVDDriveRemoveMessage) `
+                 $($script:localizedData.VMDVDDriveRemoveMessage) `
                     -f $VMName,$ControllerNumber,$ControllerLocation `
                 ) -join '' )
 
@@ -229,7 +229,7 @@ function Test-TargetResource
 
     Write-Verbose -Message ( @(
             "$($MyInvocation.MyCommand): "
-            $($LocalizedData.TestingVMDVDDriveMessage `
+            $($script:localizedData.TestingVMDVDDriveMessage `
                 -f $VMName,$ControllerNumber,$ControllerLocation)
         ) -join '' )
 
@@ -254,7 +254,7 @@ function Test-TargetResource
                 # The current path assigned to the DVD drive is wrong. Change required.
                 Write-Verbose -Message ( @(
                     "$($MyInvocation.MyCommand): "
-                    $($LocalizedData.VMDVDDriveExistsAndShouldPathMismatchMessage) `
+                    $($script:localizedData.VMDVDDriveExistsAndShouldPathMismatchMessage) `
                         -f $VMName,$ControllerNumber,$ControllerLocation,$Path,$dvdDrive.Path `
                     ) -join '' )
 
@@ -265,7 +265,7 @@ function Test-TargetResource
                 # The DVD drive exists and should. Change not required.
                 Write-Verbose -Message ( @(
                     "$($MyInvocation.MyCommand): "
-                    $($LocalizedData.VMDVDDriveExistsAndShouldMessage) `
+                    $($script:localizedData.VMDVDDriveExistsAndShouldMessage) `
                         -f $VMName,$ControllerNumber,$ControllerLocation,$Path `
                     ) -join '' )
             } # if
@@ -275,7 +275,7 @@ function Test-TargetResource
             # The DVD Drive does not exist but should. Change required.
             Write-Verbose -Message ( @(
                 "$($MyInvocation.MyCommand): "
-                 $($LocalizedData.VMDVDDriveDoesNotExistButShouldMessage) `
+                 $($script:localizedData.VMDVDDriveDoesNotExistButShouldMessage) `
                     -f $VMName,$ControllerNumber,$ControllerLocation `
                 ) -join '' )
 
@@ -290,7 +290,7 @@ function Test-TargetResource
             # The DVD Drive does exist, but should not. Change required.
             Write-Verbose -Message ( @(
                 "$($MyInvocation.MyCommand): "
-                 $($LocalizedData.VMDVDDriveDoesExistButShouldNotMessage) `
+                 $($script:localizedData.VMDVDDriveDoesExistButShouldNotMessage) `
                     -f $VMName,$ControllerNumber,$ControllerLocation `
                 ) -join '' )
 
@@ -301,7 +301,7 @@ function Test-TargetResource
             # The DVD Drive does not exist and should not. Change not required.
             Write-Verbose -Message ( @(
                 "$($MyInvocation.MyCommand): "
-                 $($LocalizedData.VMDVDDriveDoesNotExistAndShouldNotMessage) `
+                 $($script:localizedData.VMDVDDriveDoesNotExistAndShouldNotMessage) `
                     -f $VMName,$ControllerNumber,$ControllerLocation `
                 ) -join '' )
         } # if
@@ -369,7 +369,7 @@ function Test-ParameterValid
     {
         New-InvalidArgumentError `
             -ErrorId 'RoleMissingError' `
-            -ErrorMessage ($LocalizedData.RoleMissingError -f `
+            -ErrorMessage ($script:localizedData.RoleMissingError -f `
                 'Hyper-V')
     } # if
 
@@ -383,7 +383,7 @@ function Test-ParameterValid
         # No it does not
         New-InvalidArgumentError `
             -ErrorId 'VMControllerDoesNotExistError' `
-            -ErrorMessage ($LocalizedData.VMControllerDoesNotExistError -f `
+            -ErrorMessage ($script:localizedData.VMControllerDoesNotExistError -f `
                 $VMName,$ControllerNumber)
     } # if
 
@@ -396,7 +396,7 @@ function Test-ParameterValid
         # Yes, so don't even try and touch this
         New-InvalidArgumentError `
             -ErrorId 'ControllerConflictError' `
-            -ErrorMessage ($LocalizedData.ControllerConflictError -f `
+            -ErrorMessage ($script:localizedData.ControllerConflictError -f `
                 $VMName,$ControllerNumber,$ControllerLocation)
     } # if
 
@@ -410,7 +410,7 @@ function Test-ParameterValid
                 # Path does not exist
                 New-InvalidArgumentError `
                     -ErrorId 'PathDoesNotExistError' `
-                    -ErrorMessage ($LocalizedData.PathDoesNotExistError -f `
+                    -ErrorMessage ($script:localizedData.PathDoesNotExistError -f `
                         $Path)
             } # if
         } # if

@@ -38,12 +38,12 @@ function Get-TargetResource
     $controller = Get-VMScsiController -VMName $VMName -ControllerNumber $ControllerNumber
     if ($null -eq $controller)
     {
-        Write-Verbose -Message ($localizedData.ControllerNotFound -f $ControllerNumber, $VMName)
+        Write-Verbose -Message ($script:localizedData.ControllerNotFound -f $ControllerNumber, $VMName)
         $ensure = 'Absent'
     }
     else
     {
-        Write-Verbose -Message ($localizedData.ControllerFound -f $ControllerNumber, $VMName)
+        Write-Verbose -Message ($script:localizedData.ControllerFound -f $ControllerNumber, $VMName)
         $ensure = 'Present'
     }
 
@@ -103,7 +103,7 @@ function Test-TargetResource
     $isCompliant = $true
     foreach ($key in $resource.Keys)
     {
-        Write-Verbose -Message ($localizedData.ComparingParameter -f $key,
+        Write-Verbose -Message ($script:localizedData.ComparingParameter -f $key,
                                                                     $PSBoundParameters[$key],
                                                                     $resource[$key])
         $isCompliant = $isCompliant -and ($PSBoundParameters[$key] -eq $resource[$key])
@@ -160,7 +160,7 @@ function Set-TargetResource
 
     if ((-not $RestartIfNeeded) -and ($existingVmState -ne 'Off'))
     {
-        $errorMessage = $localizedData.CannotUpdateVmOnlineError -f $VMName
+        $errorMessage = $script:localizedData.CannotUpdateVmOnlineError -f $VMName
         New-InvalidOperationError -ErrorId InvalidState -ErrorMessage $errorMessage
     }
 
@@ -175,12 +175,12 @@ function Set-TargetResource
             controller #2 - it will only be controller #2 if controllers #0 and #1 are already
             added/present in the VM.
             #>
-            $errorMessage = $localizedData.CannotAddScsiControllerError -f $ControllerNumber
+            $errorMessage = $script:localizedData.CannotAddScsiControllerError -f $ControllerNumber
             New-InvalidArgumentError -ErrorId InvalidController -ErrorMessage $errorMessage
         }
 
         Set-VMState -Name $VMName -State 'Off'
-        Write-Verbose -Message ($localizedData.AddingController -f $scsiControllerCount)
+        Write-Verbose -Message ($script:localizedData.AddingController -f $scsiControllerCount)
         Add-VMScsiController -VMName $VMName
     }
     else
@@ -193,22 +193,22 @@ function Set-TargetResource
                 reordered. For example, if we remove controller at position #1, then a controller
                 that was at position #2 will become controller number #1.
             #>
-            $errorMessage = $localizedData.CannotRemoveScsiControllerError -f $ControllerNumber
+            $errorMessage = $script:localizedData.CannotRemoveScsiControllerError -f $ControllerNumber
             New-InvalidArgumentError -ErrorId InvalidController -ErrorMessage $errorMessage
         }
 
         Set-VMState -Name $VMName -State 'Off'
-        Write-Verbose -Message ($localizedData.CheckingExistingDisks -f $ControllerNumber)
+        Write-Verbose -Message ($script:localizedData.CheckingExistingDisks -f $ControllerNumber)
         $controller = Get-VMScsiController -VMName $VmName -ControllerNumber $ControllerNumber
 
         foreach ($drive in $controller.Drives)
         {
-            $warningMessage = $localizedData.RemovingDiskWarning -f $drive.Path, $ControllerNumber
+            $warningMessage = $script:localizedData.RemovingDiskWarning -f $drive.Path, $ControllerNumber
             Write-Warning -Message $warningMessage
             Remove-VMHardDiskDrive -VMHardDiskDrive $drive
         }
 
-        Write-Verbose -Message ($localizedData.RemovingController -f $ControllerNumber, $VMName)
+        Write-Verbose -Message ($script:localizedData.RemovingController -f $ControllerNumber, $VMName)
         Remove-VMScsiController -VMScsiController $controller
     }
 

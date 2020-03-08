@@ -629,7 +629,7 @@ try
                 It 'should throw exception' {
                     $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'RoleMissingError' `
-                        -ErrorMessage ($LocalizedData.RoleMissingError -f `
+                        -ErrorMessage ($script:localizedData.RoleMissingError -f `
                             'Hyper-V')
 
                     { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should Throw $errorRecord
@@ -700,7 +700,7 @@ try
                 It 'should throw exception' {
                     $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'VMControllerDoesNotExistError' `
-                        -ErrorMessage ($LocalizedData.VMControllerDoesNotExistError -f `
+                        -ErrorMessage ($script:localizedData.VMControllerDoesNotExistError -f `
                             $script:VMName,0)
 
                     { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should Throw $errorRecord
@@ -749,7 +749,7 @@ try
                 It 'should throw exception' {
                     $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'ControllerConflictError' `
-                        -ErrorMessage ($LocalizedData.ControllerConflictError -f `
+                        -ErrorMessage ($script:localizedData.ControllerConflictError -f `
                             $script:VMName,0,1)
 
                     { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should Throw $errorRecord
@@ -802,7 +802,7 @@ try
                 It 'should throw exception' {
                     $errorRecord = Get-InvalidArgumentError `
                         -ErrorId 'PathDoesNotExistError' `
-                        -ErrorMessage ($LocalizedData.PathDoesNotExistError -f `
+                        -ErrorMessage ($script:localizedData.PathDoesNotExistError -f `
                             $script:TestISOPath)
 
                     { Test-ParameterValid @script:splatAddDvdDrive } | Should Throw $errorRecord

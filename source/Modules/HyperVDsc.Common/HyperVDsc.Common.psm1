@@ -86,7 +86,7 @@ function Set-VMProperty
         # Turn the vm off to make changes
         Set-VMState @vmCommonProperty -State Off
 
-        Write-Verbose -Message ($localizedData.UpdatingVMProperties -f $Name)
+        Write-Verbose -Message ($script:localizedData.UpdatingVMProperties -f $Name)
         # Make changes using the passed hashtable
         & $VMCommand @ChangeProperty
 
@@ -96,23 +96,23 @@ function Set-VMProperty
             Set-VMState @vmCommonProperty -State Running -WaitForIP $WaitForIP
         }
 
-        Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
+        Write-Verbose -Message ($script:localizedData.VMPropertiesUpdated -f $Name)
 
         # Cannot restore a vm to a paused state
         if ($vmOriginalState -eq 'Paused')
         {
-            Write-Warning -Message ($localizedData.VMStateWillBeOffWarning -f $Name)
+            Write-Warning -Message ($script:localizedData.VMStateWillBeOffWarning -f $Name)
         }
     }
     elseif ($vmOriginalState -eq 'Off')
     {
-        Write-Verbose -Message ($localizedData.UpdatingVMProperties -f $Name)
+        Write-Verbose -Message ($script:localizedData.UpdatingVMProperties -f $Name)
         & $VMCommand @ChangeProperty
-        Write-Verbose -Message ($localizedData.VMPropertiesUpdated -f $Name)
+        Write-Verbose -Message ($script:localizedData.VMPropertiesUpdated -f $Name)
     }
     else
     {
-        $errorMessage = $localizedData.CannotUpdatePropertiesOnlineError -f $Name, $vmOriginalState
+        $errorMessage = $script:localizedData.CannotUpdatePropertiesOnlineError -f $Name, $vmOriginalState
         New-InvalidOperationError -ErrorId RestartRequired -ErrorMessage $errorMessage
     }
 } #end function
@@ -162,13 +162,13 @@ function Set-VMState
             if ($vmCurrentState -eq 'Paused')
             {
                 # If VM is in paused state, use resume-vm to make it running
-                Write-Verbose -Message ($localizedData.ResumingVM -f $Name)
+                Write-Verbose -Message ($script:localizedData.ResumingVM -f $Name)
                 Resume-VM -Name $Name
             }
             elseif ($vmCurrentState -eq 'Off')
             {
                 # If VM is Off, use start-vm to make it running
-                Write-Verbose -Message ($localizedData.StartingVM -f $Name)
+                Write-Verbose -Message ($script:localizedData.StartingVM -f $Name)
                 Start-VM -Name $Name
             }
 
@@ -180,14 +180,14 @@ function Set-VMState
         'Paused' {
             if ($vmCurrentState -ne 'Off')
             {
-                Write-Verbose -Message ($localizedData.SuspendingVM -f $Name)
+                Write-Verbose -Message ($script:localizedData.SuspendingVM -f $Name)
                 Suspend-VM -Name $Name
             }
         }
         'Off' {
             if ($vmCurrentState -ne 'Off')
             {
-                Write-Verbose -Message ($localizedData.StoppingVM -f $Name)
+                Write-Verbose -Message ($script:localizedData.StoppingVM -f $Name)
                 Stop-VM -Name $Name -Force -WarningAction SilentlyContinue
             }
         }
@@ -222,13 +222,13 @@ function Wait-VMIPAddress
     [System.Int32] $elapsedSeconds = 0
     while ((Get-VMNetworkAdapter -VMName $Name).IpAddresses.Count -lt 2)
     {
-        Write-Verbose -Message ($localizedData.WaitingForVMIPAddress -f $Name)
+        Write-Verbose -Message ($script:localizedData.WaitingForVMIPAddress -f $Name)
         Start-Sleep -Seconds 3;
 
         $elapsedSeconds += 3
         if ($elapsedSeconds -gt $Timeout)
         {
-            $errorMessage = $localizedData.WaitForVMIPAddressTimeoutError -f $Name, $Timeout
+            $errorMessage = $script:localizedData.WaitForVMIPAddressTimeoutError -f $Name, $Timeout
             New-InvalidOperationError -ErrorId 'WaitVmTimeout' -ErrorMessage $errorMessage
         }
     }
@@ -253,7 +253,7 @@ function Assert-Module
 
     if (-not (Get-Module -Name $Name -ListAvailable ))
     {
-        $errorMessage = $localizedData.RoleMissingError -f $Name
+        $errorMessage = $script:localizedData.RoleMissingError -f $Name
         New-InvalidOperationError -ErrorId MissingRole -ErrorMessage $errorMessage
     }
 } #end function
@@ -352,7 +352,7 @@ function Get-VMHyperV
     # Check if 1 or 0 VM with name = $name exist
     if ($vm.count -gt 1)
     {
-        $errorMessage = $localizedData.MoreThanOneVMExistsError -f $VMName
+        $errorMessage = $script:localizedData.MoreThanOneVMExistsError -f $VMName
         New-InvalidArgumentError -ErrorId 'MultipleVMsFound' -ErrorMessage $errorMessage
     }
 
