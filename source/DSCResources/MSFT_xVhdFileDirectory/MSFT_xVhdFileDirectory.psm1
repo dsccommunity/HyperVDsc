@@ -1,4 +1,10 @@
 
+$script:dscResourceCommonModulePath = Join-Path -Path $PSScriptRoot -ChildPath '../../Modules/DscResource.Common'
+
+Import-Module -Name $script:dscResourceCommonModulePath
+
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
+
 <#
 #  Get the current configuration of the machine
 #  This function is called when you do Get-DscConfiguration after the configuration is set.

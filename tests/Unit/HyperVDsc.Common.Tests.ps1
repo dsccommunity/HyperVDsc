@@ -22,12 +22,7 @@ try
 {
     #region Pester Tests
 
-    $LocalizedData = InModuleScope $script:DSCResourceName {
-        $LocalizedData
-    }
-
     InModuleScope $script:DSCResourceName {
-
         Describe 'HyperVCommon\Set-VMProperty' {
 
             function Get-VM {
