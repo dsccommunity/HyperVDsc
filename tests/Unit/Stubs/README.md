@@ -83,3 +83,19 @@ New-StubModule -FromModule 'Hyper-V' -Path $destinationFolder -FunctionBody $fun
 >Attributes      : {System.Management.Automation.ValidateNotNullAttribute, __AllParameterSets}
 >SwitchParameter : False
 >```
+
+## Post-changes due to bugs
+
+Must add a reference to the namespace `Microsoft.Management.Infrastructure` for
+the type `Microsoft.Management.Infrastructure.CimSession` to work.
+Add the following parameter to the `Add-Type` call at the top of the stub file.
+
+```powershell
+Add-Type -IgnoreWarnings -ReferencedAssemblies 'C:\Program Files (x86)\Reference Assemblies\Microsoft\WMI\v1.0\Microsoft.Management.Infrastructure.dll' -TypeDefinition @'
+
+-ReferencedAssemblies 'C:\Program Files (x86)\Reference Assemblies\Microsoft\WMI\v1.0\Microsoft.Management.Infrastructure.dll'
+```
+
+One of the namespaces for `Microsoft.HyperV.PowerShell.Commands` is wrongly
+generated twice. Remove the duplicate namespace and make sure the enums
+`WaitVMTypes` and `RestartType` is moved _inside_ the class `RestartVM`.

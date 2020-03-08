@@ -1,8 +1,8 @@
 ﻿# Name: Hyper-V
 # Version: 2.0.0.0
 # CreatedOn: 2020-03-08 16:10:56Z
+Add-Type -IgnoreWarnings -ReferencedAssemblies 'C:\Program Files (x86)\Reference Assemblies\Microsoft\WMI\v1.0\Microsoft.Management.Infrastructure.dll' -TypeDefinition @'
 
-Add-Type -IgnoreWarnings -TypeDefinition @'
 namespace Microsoft.HyperV.PowerShell
 {
     public enum BootDevice : int
@@ -2554,45 +2554,40 @@ namespace Microsoft.HyperV.PowerShell.Commands
 
     }
 
-    namespace Microsoft.HyperV.PowerShell.Commands
+    public class RestartVM
     {
-        public class RestartVM
-        {
-            // Constructor
-            public RestartVM() { }
+        // Constructor
+        public RestartVM() { }
 
-            // Property
-            public Microsoft.Management.Infrastructure.CimSession[] CimSession { get; set; }
-            public System.String[] ComputerName { get; set; }
-            public System.Management.Automation.PSCredential[] Credential { get; set; }
-            public Microsoft.HyperV.PowerShell.VirtualMachine[] VM { get; set; }
-            public System.String[] Name { get; set; }
-            public System.Management.Automation.SwitchParameter Force { get; set; }
-            public System.Management.Automation.SwitchParameter AsJob { get; set; }
-            public System.Management.Automation.SwitchParameter Passthru { get; set; }
-            public System.Management.Automation.SwitchParameter Wait { get; set; }
-            public Microsoft.HyperV.PowerShell.Commands.RestartVM.WaitVMTypes For { get; set; }
-            public System.UInt16 Delay { get; set; }
-            public System.Nullable<System.Int32> Timeout { get; set; }
-            public Microsoft.HyperV.PowerShell.Commands.RestartVM.RestartType Type { get; set; }
-            public Microsoft.HyperV.PowerShell.Commands.VirtualMachineParameterType VirtualMachineParameterType { get; set; }
-            public System.String ParameterSetName { get; set; }
-            public System.Management.Automation.InvocationInfo MyInvocation { get; set; }
-            public System.Management.Automation.PagingParameters PagingParameters { get; set; }
-            public System.Management.Automation.CommandInvocationIntrinsics InvokeCommand { get; set; }
-            public System.Management.Automation.Host.PSHost Host { get; set; }
-            public System.Management.Automation.SessionState SessionState { get; set; }
-            public System.Management.Automation.PSEventManager Events { get; set; }
-            public System.Management.Automation.JobRepository JobRepository { get; set; }
-            public System.Management.Automation.JobManager JobManager { get; set; }
-            public System.Management.Automation.ProviderIntrinsics InvokeProvider { get; set; }
-            public System.Boolean Stopping { get; set; }
-            public System.Management.Automation.ICommandRuntime CommandRuntime { get; set; }
-            public System.Management.Automation.PSTransactionContext CurrentPSTransaction { get; set; }
-            public System.Management.Automation.CommandOrigin CommandOrigin { get; set; }
-
-        }
-
+        // Property
+        public Microsoft.Management.Infrastructure.CimSession[] CimSession { get; set; }
+        public System.String[] ComputerName { get; set; }
+        public System.Management.Automation.PSCredential[] Credential { get; set; }
+        public Microsoft.HyperV.PowerShell.VirtualMachine[] VM { get; set; }
+        public System.String[] Name { get; set; }
+        public System.Management.Automation.SwitchParameter Force { get; set; }
+        public System.Management.Automation.SwitchParameter AsJob { get; set; }
+        public System.Management.Automation.SwitchParameter Passthru { get; set; }
+        public System.Management.Automation.SwitchParameter Wait { get; set; }
+        public Microsoft.HyperV.PowerShell.Commands.RestartVM.WaitVMTypes For { get; set; }
+        public System.UInt16 Delay { get; set; }
+        public System.Nullable<System.Int32> Timeout { get; set; }
+        public Microsoft.HyperV.PowerShell.Commands.RestartVM.RestartType Type { get; set; }
+        public Microsoft.HyperV.PowerShell.Commands.VirtualMachineParameterType VirtualMachineParameterType { get; set; }
+        public System.String ParameterSetName { get; set; }
+        public System.Management.Automation.InvocationInfo MyInvocation { get; set; }
+        public System.Management.Automation.PagingParameters PagingParameters { get; set; }
+        public System.Management.Automation.CommandInvocationIntrinsics InvokeCommand { get; set; }
+        public System.Management.Automation.Host.PSHost Host { get; set; }
+        public System.Management.Automation.SessionState SessionState { get; set; }
+        public System.Management.Automation.PSEventManager Events { get; set; }
+        public System.Management.Automation.JobRepository JobRepository { get; set; }
+        public System.Management.Automation.JobManager JobManager { get; set; }
+        public System.Management.Automation.ProviderIntrinsics InvokeProvider { get; set; }
+        public System.Boolean Stopping { get; set; }
+        public System.Management.Automation.ICommandRuntime CommandRuntime { get; set; }
+        public System.Management.Automation.PSTransactionContext CurrentPSTransaction { get; set; }
+        public System.Management.Automation.CommandOrigin CommandOrigin { get; set; }
 
         public enum WaitVMTypes : int
         {
@@ -2618,7 +2613,6 @@ namespace Microsoft.HyperV.PowerShell.Commands
         SingularVMName = 6,
         VMId = 7,
     }
-
 }
 
 namespace Microsoft.Vhd.PowerShell
