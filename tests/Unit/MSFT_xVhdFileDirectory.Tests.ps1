@@ -17,6 +17,9 @@ function Invoke-TestSetup
         -DSCResourceName $script:dscResourceName `
         -ResourceType 'Mof' `
         -TestType 'Unit'
+
+    # Import the stub functions.
+    Import-Module -Name "$PSScriptRoot/Stubs/Hyper-V.stubs.psm1" -Force
 }
 
 function Invoke-TestCleanup

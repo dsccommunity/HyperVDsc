@@ -3,4 +3,3 @@
     AllowPrerelease = $false
     WithYAML        = $true
 }
-

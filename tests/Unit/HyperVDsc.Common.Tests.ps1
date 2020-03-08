@@ -22,41 +22,16 @@ $script:subModuleFile = Join-Path -Path $script:subModulesFolder -ChildPath "$($
 Import-Module $script:subModuleFile -Force -ErrorAction 'Stop'
 #endregion HEADER
 
+# Import the stub functions.
+Import-Module -Name "$PSScriptRoot/Stubs/Hyper-V.stubs.psm1" -Force
+
 InModuleScope $script:subModuleName {
     Describe 'HyperVCommon\Set-VMProperty' {
-
-        function Get-VM
-        {
-            param
-            (
-                [System.String]
-                $Name
-            )
-        }
-
-        function Get-VMProcessor
-        {
-            param
-            (
-                [System.String]
-                $VMName
-            )
-        }
-
-        function Set-VMProcessor
-        {
-            param
-            (
-                [System.String]
-                $VMName
-            )
-        }
-
         # Guard mocks
-        Mock Get-VM { }
-        Mock Set-VMState { }
-        Mock Get-VMProcessor { }
-        Mock Set-VMProcessor { }
+        Mock Get-VM
+        Mock Set-VMState
+        Mock Get-VMProcessor
+        Mock Set-VMProcessor
 
         It "Should throw if VM is running and 'RestartIfNeeded' is False" {
             Mock Get-VM { return @{ State = 'Running' } }
@@ -87,58 +62,12 @@ InModuleScope $script:subModuleName {
     }
 
     Describe 'HyperVCommon\Set-VMState' {
-
-        function Get-VM
-        {
-            param
-            (
-                [System.String]
-                $Name
-            )
-        }
-
-        function Resume-VM
-        {
-            param
-            (
-                [System.String]
-                $Name
-            )
-        }
-
-        function Start-VM
-        {
-            param
-            (
-                [System.String]
-                $Name
-            )
-        }
-
-        function Stop-VM
-        {
-            param
-            (
-                [System.String]
-                $Name
-            )
-        }
-
-        function Suspend-VM
-        {
-            param
-            (
-                [System.String]
-                $Name
-            )
-        }
-
         # Guard mocks
-        Mock Resume-VM { }
-        Mock Start-VM { }
-        Mock Stop-VM { }
-        Mock Suspend-VM { }
-        Mock Wait-VMIPAddress { }
+        Mock Resume-VM
+        Mock Start-VM
+        Mock Stop-VM
+        Mock Suspend-VM
+        Mock Wait-VMIPAddress
 
         It 'Should resume VM when current "State" is "Paused" and target state is "Running"' {
             Mock Get-VM { return @{ State = 'Paused' } }
@@ -203,18 +132,8 @@ InModuleScope $script:subModuleName {
 }
 
 Describe 'HyperVCommon\Wait-VMIPAddress' {
-
-    function Get-VMNetworkAdapter
-    {
-        param
-        (
-            [System.String]
-            $VMName
-        )
-    }
-
     # Guard mocks
-    Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName { }
+    Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName
 
     It 'Should return when VM network adapter reports 2 IP addresses' {
         Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName { return @{ IpAddresses = @('192.168.0.1', '172.16.0.1') } }
@@ -288,21 +207,11 @@ Describe 'HyperVCommon\ConvertFrom-TimeSpan' {
 } # describe HyperVCommon\ConvertFrom-TimeSpan
 
 Describe 'HyperVCommon\Get-VMHyperV' {
-
-    function Get-VM
-    {
-        [CmdletBinding()]
-        param
-        (
-            $Name
-        )
-    }
-
     # Guard mocks
-    Mock Get-VM -ModuleName $script:DSCResourceName { }
+    Mock Get-VM -ModuleName $script:DSCResourceName
 
     It 'Should not throw when no VM is found' {
-        Mock Get-VM -ModuleName $script:DSCResourceName { }
+        Mock Get-VM -ModuleName $script:DSCResourceName
         $testVMName = 'TestVM'
 
         $result = Get-VMHyperV -VMName $testVMName
