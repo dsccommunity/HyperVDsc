@@ -1,26 +1,25 @@
-$script:DSCModuleName      = 'xHyper-V'
-$script:DSCResourceName    = 'MSFT_xVMHost'
+$script:dscModuleName = 'xHyper-V'
+$script:dscResourceName = 'MSFT_xVMHost'
 
-#region HEADER
-# Integration Test Template Version: 1.1.1
-[String] $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+try
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
+    Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+}
+catch [System.IO.FileNotFoundException]
+{
+    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
 }
 
-Import-Module (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
-$TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:DSCModuleName `
-    -DSCResourceName $script:DSCResourceName `
-    -TestType Integration
-#endregion
+$script:testEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
+    -TestType 'Integration'
 
 # Import the common integration test functions
 Import-Module -Name ( Join-Path `
-    -Path $PSScriptRoot `
-    -ChildPath 'IntegrationTestsCommon.psm1' )
+        -Path $PSScriptRoot `
+        -ChildPath 'IntegrationTestsCommon.psm1' )
 
 # Ensure that the tests can be performed on this computer
 if (-not (Test-HyperVInstalled))
@@ -53,11 +52,11 @@ try
                     -EnableEnhancedSessionMode (-not $currentEnableEnhancedSessionMode)
 
                 $startDscConfigurationParams = @{
-                    Path = $TestDrive;
+                    Path         = $TestDrive;
                     ComputerName = 'localhost';
-                    Wait = $true;
-                    Verbose = $true;
-                    Force = $true;
+                    Wait         = $true;
+                    Verbose      = $true;
+                    Force        = $true;
                 }
                 Start-DscConfiguration @startDscConfigurationParams
 
@@ -75,20 +74,17 @@ try
             }
 
             $current.VirtualHardDiskPath | Should Be $TestDrive.FullName
-            $current.VirtualMachinePath  | Should Be $TestDrive.FullName
+            $current.VirtualMachinePath | Should Be $TestDrive.FullName
             $current.EnableEnhancedSessionMode | Should Be (-not $currentEnableEnhancedSessionMode)
         }
     }
 }
 finally
 {
-    #region FOOTER
-
     # Restore current host settings
     Set-VMHost -VirtualHardDiskPath $currentVirtualHardDiskPath `
-                -VirtualMachinePath $currentVirtualMachinePath `
-                -EnableEnhancedSessionMode $currentEnableEnhancedSessionMode -Verbose
+        -VirtualMachinePath $currentVirtualMachinePath `
+        -EnableEnhancedSessionMode $currentEnableEnhancedSessionMode -Verbose
 
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }

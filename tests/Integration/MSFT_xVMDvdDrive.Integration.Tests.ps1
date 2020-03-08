@@ -1,26 +1,25 @@
-$script:DSCModuleName      = 'xHyper-V'
-$script:DSCResourceName    = 'MSFT_xVMDvdDrive'
+$script:dscModuleName = 'xHyper-V'
+$script:dscResourceName = 'MSFT_xVMDvdDrive'
 
-#region HEADER
-# Integration Test Template Version: 1.1.1
-[String] $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+try
 {
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
+    Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+}
+catch [System.IO.FileNotFoundException]
+{
+    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
 }
 
-Import-Module (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
-$TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:DSCModuleName `
-    -DSCResourceName $script:DSCResourceName `
-    -TestType Integration
-#endregion
+$script:testEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
+    -TestType 'Integration'
 
 # Import the common integration test functions
 Import-Module -Name ( Join-Path `
-    -Path $PSScriptRoot `
-    -ChildPath 'IntegrationTestsCommon.psm1' )
+        -Path $PSScriptRoot `
+        -ChildPath 'IntegrationTestsCommon.psm1' )
 
 # Ensure that the tests can be performed on this computer
 if (-not (Test-HyperVInstalled))
@@ -83,11 +82,11 @@ try
                 $current = Get-DscConfiguration | Where-Object {
                     $_.ConfigurationName -eq "$($script:DSCResourceName)_Add_Config"
                 }
-                $current.VMName             | Should Be $VMName
-                $current.ControllerNumber   | Should Be 0
+                $current.VMName | Should Be $VMName
+                $current.ControllerNumber | Should Be 0
                 $current.ControllerLocation | Should Be 0
-                $current.Path               | Should BeNullOrEmpty
-                $current.Ensure             | Should Be 'Present'
+                $current.Path | Should BeNullOrEmpty
+                $current.Ensure | Should Be 'Present'
             }
         }
     }
@@ -118,24 +117,22 @@ try
                 $current = Get-DscConfiguration | Where-Object {
                     $_.ConfigurationName -eq "$($script:DSCResourceName)_Remove_Config"
                 }
-                $current.VMName             | Should Be $VMName
-                $current.ControllerNumber   | Should Be 0
+                $current.VMName | Should Be $VMName
+                $current.ControllerNumber | Should Be 0
                 $current.ControllerLocation | Should Be 0
-                $current.Path               | Should BeNullOrEmpty
-                $current.Ensure             | Should Be 'Absent'
+                $current.Path | Should BeNullOrEmpty
+                $current.Ensure | Should Be 'Absent'
             }
         }
     }
 }
 finally
 {
-    #region FOOTER
     # Make sure the test VM has been removed
     if (Get-VM -Name $VMName -ErrorAction SilentlyContinue)
     {
         $null = Remove-VM -Name $VMName -Force
     } # if
 
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }

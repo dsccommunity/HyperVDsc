@@ -9,9 +9,7 @@ function Test-HyperVInstalled
 {
     [CmdletBinding()]
     [OutputType([String])]
-    param
-    (
-    )
+    param ()
 
     # Ensure that the tests can be performed on this computer
     if ($PSVersionTable.PSEdition -eq 'Core')
@@ -23,16 +21,18 @@ function Test-HyperVInstalled
     {
         $ProductType = (Get-CimInstance Win32_OperatingSystem).ProductType
     } # if
-    switch ($ProductType) {
+
+    switch ($ProductType)
+    {
         1
         {
             # Desktop OS or Nano Server
             $HyperVInstalled = (((Get-WindowsOptionalFeature `
-                    -FeatureName Microsoft-Hyper-V `
-                    -Online).State -eq 'Enabled') -and `
+                            -FeatureName Microsoft-Hyper-V `
+                            -Online).State -eq 'Enabled') -and `
                 ((Get-WindowsOptionalFeature `
-                    -FeatureName Microsoft-Hyper-V-Management-PowerShell `
-                    -Online).State -eq 'Enabled'))
+                            -FeatureName Microsoft-Hyper-V-Management-PowerShell `
+                            -Online).State -eq 'Enabled'))
             Break
         }
         3
@@ -52,8 +52,10 @@ function Test-HyperVInstalled
 
     if ($HyperVInstalled -eq $false)
     {
-        Write-Verbose -Message "Integration tests cannot be run because Hyper-V Components not installed." -Verbose
-        Return $false
+        Write-Warning -Message "Integration tests cannot be run because Hyper-V Components not installed." -Verbose
+
+        return $false
     }
-    Return $True
+
+    return $True
 } # end function Test-HyperVInstalled
