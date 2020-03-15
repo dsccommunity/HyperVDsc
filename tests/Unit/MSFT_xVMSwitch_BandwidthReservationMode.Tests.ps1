@@ -98,12 +98,6 @@ try
         }
 
         Describe 'Validates Get-TargetResource Function' {
-            # Create an empty function to be able to mock the missing Hyper-V cmdlet
-            function Get-VMSwitch
-            {
-
-            }
-
             <#
                 Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
@@ -162,8 +156,8 @@ try
                 $global:mockedVMSwitch = New-MockedVMSwitch -Name $CurrentName -BandwidthReservationMode $CurrentBandwidthReservationMode
 
                 $targetResource = Get-TargetResource -Name $CurrentName -Type 'External'
-                $targetResource -is [System.Collections.Hashtable] | Should Be $true
-                $targetResource['BandwidthReservationMode'] | Should Be $CurrentBandwidthReservationMode
+                $targetResource -is [System.Collections.Hashtable] | Should -Be $true
+                $targetResource['BandwidthReservationMode'] | Should -Be $CurrentBandwidthReservationMode
 
                 Remove-Variable -Scope 'Global' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
             }
@@ -177,8 +171,8 @@ try
                 $global:mockedVMSwitch = New-MockedVMSwitch -Name 'NaBRM' -BandwidthReservationMode 'NA'
 
                 $targetResource = Get-TargetResource -Name 'NaBRM' -Type 'External'
-                $targetResource -is [System.Collections.Hashtable] | Should Be $true
-                $targetResource['BandwidthReservationMode'] | Should Be "NA"
+                $targetResource -is [System.Collections.Hashtable] | Should -Be $true
+                $targetResource['BandwidthReservationMode'] | Should -Be "NA"
 
                 Remove-Variable -Scope 'Global' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
             }
@@ -223,12 +217,6 @@ try
         }
 
         Describe 'Validates Test-TargetResource Function' {
-            # Create an empty function to be able to mock the missing Hyper-V cmdlet
-            function Get-VMSwitch
-            {
-
-            }
-
             <#
                 Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
@@ -310,7 +298,7 @@ try
                 }
 
                 $targetResource = Test-TargetResource -Name $DesiredName -BandwidthReservationMode $DesiredBandwidthReservationMode -Type 'External' -NetAdapterName 'SomeNIC' -Ensure $Ensure -AllowManagementOS $true
-                $targetResource | Should Be $ExpectedResult
+                $targetResource | Should -Be $ExpectedResult
 
                 Remove-Variable -Scope 'Global' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
             }
@@ -324,45 +312,24 @@ try
                 $errorRecord = Get-InvalidArgumentError `
                     -ErrorId 'BandwidthReservationModeError' `
                     -ErrorMessage $script:localizedData.BandwidthReservationModeError
-                {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
+                {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorRecord
             }
 
             # Test Test-TargetResource when the version of Windows doesn't support BandwidthReservationMode and specifies NA for BandwidthReservationMode
             It 'Simulates Windows Server 2008 R2 | Desired BandwidthReservationMode set to "NA" | Ensure Present | Expected Result is True' {
                 $global:mockedVMSwitch = New-MockedVMSwitch -Name 'SomeSwitch' -BandwidthReservationMode 'NA' -AllowManagementOS $true
                 $targetResource = Test-TargetResource -Name 'SomeSwitch' -BandwidthReservationMode 'NA' -Type 'External' -NetAdapterName 'SomeNIC' -Ensure 'Present' -AllowManagementOS $true
-                $targetResource | Should Be $true
+                $targetResource | Should -Be $true
             }
 
             It 'Passes when "BandwidthReservationMode" does not match but is not specified (#48)' {
                 $global:mockedVMSwitch = New-MockedVMSwitch -Name 'SomeSwitch' -BandwidthReservationMode 'Absolute'
                 $targetResource = Test-TargetResource -Name 'SomeSwitch' -Type 'Internal' -Ensure 'Present'
-                $targetResource | Should Be $true
+                $targetResource | Should -Be $true
             }
         }
 
         Describe 'Validates Set-TargetResource Function' {
-            # Create empty functions to be able to mock the missing Hyper-V cmdlet
-            function Get-VMSwitch
-            {
-
-            }
-
-            function New-VMSwitch
-            {
-
-            }
-
-            function Remove-VMSwitch
-            {
-
-            }
-
-            function Set-VMSwitch
-            {
-
-            }
-
             <#
                 Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
@@ -499,7 +466,7 @@ try
                 }
 
                 $targetResource = Set-TargetResource -Name $DesiredName -BandwidthReservationMode $DesiredBandwidthReservationMode -Type 'External' -NetAdapterName 'SomeNIC' -Ensure $Ensure -AllowManagementOS $true
-                $targetResource | Should Be $null
+                $targetResource | Should -Be $null
 
                 if ($CurrentName -and $Ensure -eq 'Present')
                 {
@@ -537,7 +504,7 @@ try
                 $errorRecord = Get-InvalidArgumentError `
                     -ErrorId 'BandwidthReservationModeError' `
                     -ErrorMessage $script:localizedData.BandwidthReservationModeError
-                {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should Throw $errorRecord
+                {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorRecord
             }
         }
     }

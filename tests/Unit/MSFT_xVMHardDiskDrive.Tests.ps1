@@ -47,64 +47,46 @@ try
             }
 
             # Guard mocks
-            Mock Assert-Module { }
-
-            function Get-VMHardDiskDrive {
-                [CmdletBinding()]
-                param
-                (
-                    [System.String]
-                    $VMName
-                )
-            }
+            Mock -CommandName Assert-Module
 
             It 'Should return a [System.Collections.Hashtable] object type' {
-                Mock Get-VMHardDiskDrive { return $stubHardDiskDrive }
+                Mock -CommandName Get-VMHardDiskDrive { return $stubHardDiskDrive }
 
                 $result = Get-TargetResource -VMName $testVMName -Path $testhardDiskPath
 
-                $result -is [System.Collections.Hashtable] | Should Be $true
+                $result -is [System.Collections.Hashtable] | Should -Be $true
             }
 
             It 'Should return "Present" when hard disk is attached' {
-                Mock Get-VMHardDiskDrive { return $stubHardDiskDrive }
+                Mock -CommandName Get-VMHardDiskDrive { return $stubHardDiskDrive }
 
                 $result = Get-TargetResource -VMName $testVMName -Path $testhardDiskPath
 
-                $result.Ensure | Should Be 'Present'
+                $result.Ensure | Should -Be 'Present'
             }
 
             It 'Should return "Absent" when hard disk is not attached' {
-                Mock Get-VMHardDiskDrive { }
+                Mock -CommandName Get-VMHardDiskDrive
 
                 $result = Get-TargetResource -VMName $testVMName -Path $testhardDiskPath
 
-                $result.Ensure | Should Be 'Absent'
+                $result.Ensure | Should -Be 'Absent'
             }
 
             It 'Should assert Hyper-V module is installed' {
-                Mock Assert-Module { }
-                Mock Get-VMHardDiskDrive { return $stubHardDiskDrive }
+                Mock -CommandName Assert-Module
+                Mock -CommandName Get-VMHardDiskDrive { return $stubHardDiskDrive }
 
                 $null = Get-TargetResource -VMName $testVMName -Path $testhardDiskPath
 
-                Assert-MockCalled Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
             }
         } # descrive Get-TargetResource
 
         Describe 'MSFT_xVMHardDiskDrive\Test-TargetResource' {
 
             # Guard mocks
-            Mock Assert-Module { }
-
-            function Get-VMHardDiskDrive {
-                [CmdletBinding()]
-                param
-                (
-                    [System.String]
-                    $VMName
-                )
-            }
+            Mock -CommandName Assert-Module
 
             $stubTargetResource = @{
                 VMName             = $testVMName
@@ -116,11 +98,11 @@ try
             }
 
             It 'Should return a [System.Boolean] object type' {
-                Mock Get-TargetResource { return $stubTargetResource }
+                Mock -CommandName Get-TargetResource { return $stubTargetResource }
 
                 $result = Test-TargetResource -VMName $testVMName -Path $testHardDiskPath
 
-                $result -is [System.Boolean] | Should Be $true
+                $result -is [System.Boolean] | Should -Be $true
             }
 
             $parameterNames = @(
@@ -142,7 +124,7 @@ try
 
                     $result = Test-TargetResource @testTargetResourceParams
 
-                    $result | Should Be $true
+                    $result | Should -Be $true
                 }
 
                 It "Should fail when parameter '$parameterName' is incorrect" {
@@ -151,7 +133,7 @@ try
 
                     $result = Test-TargetResource @testTargetResourceParams
 
-                    $result | Should Be $false
+                    $result | Should -Be $false
                 }
             }
 
@@ -164,7 +146,7 @@ try
 
                 $result = Test-TargetResource @testTargetResourceParams
 
-                $result | Should Be $true
+                $result | Should -Be $true
             }
 
             It "Should fail when parameter 'ControllerType' is incorrect" {
@@ -176,7 +158,7 @@ try
 
                 $result = Test-TargetResource @testTargetResourceParams
 
-                $result | Should Be $false
+                $result | Should -Be $false
             }
 
             It "Should pass when parameter 'Ensure' is correct" {
@@ -188,7 +170,7 @@ try
 
                 $result = Test-TargetResource @testTargetResourceParams
 
-                $result | Should Be $true
+                $result | Should -Be $true
             }
 
             It "Should fail when parameter 'Ensure' is incorrect" {
@@ -200,7 +182,7 @@ try
 
                 $result = Test-TargetResource @testTargetResourceParams
 
-                $result | Should Be $false
+                $result | Should -Be $false
             }
 
             It 'Should throw when IDE controller number 2 is specified' {
@@ -211,7 +193,7 @@ try
                     ControllerNumber = 2
                 }
 
-                { Test-TargetResource @testTargetResourceParams } | Should Throw 'not valid'
+                { Test-TargetResource @testTargetResourceParams } | Should -Throw 'not valid'
             }
 
             It 'Should throw when IDE controller location 2 is specified' {
@@ -222,106 +204,17 @@ try
                     ControllerLocation = 2
                 }
 
-                { Test-TargetResource @testTargetResourceParams } | Should Throw 'not valid'
+                { Test-TargetResource @testTargetResourceParams } | Should -Throw 'not valid'
             }
         } # describe Test-TargetResource
 
         Describe 'MSFT_xVMHardDiskDrive\Set-TargetResource' {
-
-            function Get-VMHardDiskDrive {
-                [CmdletBinding()]
-                param
-                (
-                    [Parameter(ValueFromPipeline)]
-                    [System.String]
-                    $VMName,
-
-                    [System.String]
-                    $Path,
-
-                    [System.String]
-                    $ControllerType,
-
-                    [System.Int32]
-                    $ControllerNumber,
-
-                    [System.Int32]
-                    $ControllerLocation
-                )
-            }
-
-            function Set-VMHardDiskDrive {
-                [CmdletBinding()]
-                param
-                (
-                    [Parameter(ValueFromPipeline)]
-                    [System.String]
-                    $VMName,
-
-                    [System.String]
-                    $Path,
-
-                    [System.String]
-                    $ControllerType,
-
-                    [System.Int32]
-                    $ControllerNumber,
-
-                    [System.Int32]
-                    $ControllerLocation
-                )
-            }
-
-            function Add-VMHardDiskDrive {
-                [CmdletBinding()]
-                param
-                (
-                    [Parameter(ValueFromPipeline)]
-                    [System.String]
-                    $VMName,
-
-                    [System.String]
-                    $Path,
-
-                    [System.String]
-                    $ControllerType,
-
-                    [System.Int32]
-                    $ControllerNumber,
-
-                    [System.Int32]
-                    $ControllerLocation
-                )
-            }
-
-            function Remove-VMHardDiskDrive {
-                [CmdletBinding()]
-                param
-                (
-                    [Parameter(ValueFromPipeline)]
-                    [System.String]
-                    $VMName,
-
-                    [System.String]
-                    $Path,
-
-                    [System.String]
-                    $ControllerType,
-
-                    [System.Int32]
-                    $ControllerNumber,
-
-                    [System.Int32]
-                    $ControllerLocation
-                )
-            }
-
             # Guard mocks
-            Mock Assert-Module { }
-            Mock Get-VMHardDiskDrive { }
-            Mock Set-VMHardDiskDrive { }
-            Mock Add-VMHardDiskDrive { }
-            Mock Remove-VMHardDiskDrive { }
+            Mock -CommandName Assert-Module
+            Mock -CommandName Get-VMHardDiskDrive
+            Mock -CommandName Set-VMHardDiskDrive
+            Mock -CommandName Add-VMHardDiskDrive
+            Mock -CommandName Remove-VMHardDiskDrive
 
             $stubHardDiskDrive = @{
                 VMName             = $testVMName
@@ -332,43 +225,43 @@ try
             }
 
             It 'Should assert Hyper-V module is installed' {
-                Mock Get-VMHardDiskDrive { return $stubHardDiskDrive }
+                Mock -CommandName Get-VMHardDiskDrive { return $stubHardDiskDrive }
 
                 $null = Set-TargetResource -VMName $testVMName -Path $testHardDiskPath
 
-                Assert-MockCalled Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
             }
 
             It 'Should update existing hard disk' {
-                Mock Get-VMHardDiskDrive { return $stubHardDiskDrive }
+                Mock -CommandName Get-VMHardDiskDrive { return $stubHardDiskDrive }
 
                 $null = Set-TargetResource -VMName $testVMName -Path $testHardDiskPath
 
-                Assert-MockCalled Set-VMHardDiskDrive -Scope It
+                Assert-MockCalled -CommandName Set-VMHardDiskDrive -Scope It
             }
 
             It 'Should add hard disk when is not attached' {
-                Mock Get-VMHardDiskDrive { }
-                Mock Get-VMHardDiskDrive -ParameterFilter { $PSBoundParameters.ContainsKey('ControllerType') }
+                Mock -CommandName Get-VMHardDiskDrive
+                Mock -CommandName Get-VMHardDiskDrive -ParameterFilter { $PSBoundParameters.ContainsKey('ControllerType') }
 
                 $null = Set-TargetResource -VMName $testVMName -Path $testHardDiskPath
 
-                Assert-MockCalled Add-VMHardDiskDrive -Scope It
+                Assert-MockCalled -CommandName Add-VMHardDiskDrive -Scope It
             }
 
             It 'Should throw when an existing disk is attached to controller/location' {
-                Mock Get-VMHardDiskDrive { }
-                Mock Get-VMHardDiskDrive -ParameterFilter { $PSBoundParameters.ContainsKey('ControllerType') } { return $stubHardDiskDrive }
+                Mock -CommandName Get-VMHardDiskDrive
+                Mock -CommandName Get-VMHardDiskDrive -ParameterFilter { $PSBoundParameters.ContainsKey('ControllerType') } { return $stubHardDiskDrive }
 
-                { Set-TargetResource -VMName $testVMName -Path $testHardDiskPath } | Should Throw 'disk present'
+                { Set-TargetResource -VMName $testVMName -Path $testHardDiskPath } | Should -Throw 'disk present'
             }
 
             It 'Should remove attached hard disk when Ensure is "Absent"' {
-                Mock Get-VMHardDiskDrive { return $stubHardDiskDrive }
+                Mock -CommandName Get-VMHardDiskDrive { return $stubHardDiskDrive }
 
                 $null = Set-TargetResource -VMName $testVMName -Path $testHardDiskPath -Ensure 'Absent'
 
-                Assert-MockCalled Remove-VMHardDiskDrive -Scope It
+                Assert-MockCalled -CommandName Remove-VMHardDiskDrive -Scope It
             }
         } # describe Set-TargetResource
     } # InModuleScope

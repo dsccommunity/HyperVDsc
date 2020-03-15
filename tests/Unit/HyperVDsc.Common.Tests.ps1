@@ -23,141 +23,206 @@ Import-Module $script:subModuleFile -Force -ErrorAction 'Stop'
 #endregion HEADER
 
 # Import the stub functions.
+#Get-Module -Name 'Hyper-V' -All | Remove-Module -Force
 Import-Module -Name "$PSScriptRoot/Stubs/Hyper-V.stubs.psm1" -Force
 
 InModuleScope $script:subModuleName {
-    Describe 'HyperVCommon\Set-VMProperty' {
-        # Guard mocks
-        Mock Get-VM
-        Mock Set-VMState
-        Mock Get-VMProcessor
-        Mock Set-VMProcessor
-
+    Describe 'HyperVDsc.Common\Set-VMProperty' {
         It "Should throw if VM is running and 'RestartIfNeeded' is False" {
-            Mock Get-VM { return @{ State = 'Running' } }
+            $mockVMName = 'Test'
+
+            Mock -CommandName Get-VM -MockWith {
+                return @{
+                    State = 'Running'
+                }
+            }
 
             $setVMPropertyParams = @{
-                VMName         = 'Test';
-                VMCommand      = 'Set-VMProcessor';
-                ChangeProperty = @{ ResourcePoolName = 'Dummy' }
+                VMName         = $mockVMName
+                VMCommand      = 'Set-VMProcessor'
+                ChangeProperty = @{
+                    ResourcePoolName = 'Dummy'
+                }
             }
-            { Set-VMProperty @setVMPropertyParams } | Should Throw 'RestartIfNeeded'
+
+            { Set-VMProperty @setVMPropertyParams } | Should -Throw (
+                $script:localizedData.CannotUpdatePropertiesOnlineError -f $mockVMName, 'Running'
+            )
         }
 
         It "Should stop and restart VM when running and 'RestartIfNeeded' is True" {
-            Mock Get-VM { return @{ State = 'Running' } }
+            Mock -CommandName Stop-VM
+            Mock -CommandName Set-VMProcessor
+            Mock -CommandName Set-VMState
+            Mock -CommandName Get-VM -MockWith {
+                return @{
+                    State = 'Running'
+                }
+            }
 
             $setVMPropertyParams = @{
-                VMName          = 'Test';
-                VMCommand       = 'Set-VMProcessor';
-                ChangeProperty  = @{ ResourcePoolName = 'Dummy' }
-                RestartIfNeeded = $true;
+                VMName          = 'Test'
+                VMCommand       = 'Set-VMProcessor'
+                ChangeProperty  = @{
+                    ResourcePoolName = 'Dummy'
+                }
+                RestartIfNeeded = $true
             }
             Set-VMProperty @setVMPropertyParams
 
-            Assert-MockCalled Set-VMState -ParameterFilter { $State -eq 'Off' } -Scope It
-            Assert-MockCalled Set-VMState -ParameterFilter { $State -eq 'Running' } -Scope It
+            Assert-MockCalled -CommandName Set-VMState -ParameterFilter {
+                $State -eq 'Off'
+            } -Scope It
+
+            Assert-MockCalled -CommandName Set-VMState -ParameterFilter {
+                $State -eq 'Running'
+            } -Scope It
         }
 
     }
 
-    Describe 'HyperVCommon\Set-VMState' {
-        # Guard mocks
-        Mock Resume-VM
-        Mock Start-VM
-        Mock Stop-VM
-        Mock Suspend-VM
-        Mock Wait-VMIPAddress
-
+    Describe 'HyperVDsc.Common\Set-VMState' {
         It 'Should resume VM when current "State" is "Paused" and target state is "Running"' {
-            Mock Get-VM { return @{ State = 'Paused' } }
+            Mock -CommandName Resume-VM
+            Mock -CommandName Wait-VMIPAddress
+            Mock -CommandName Get-VM -MockWith {
+                return @{
+                    State = 'Paused'
+                }
+            }
 
             Set-VMState -Name 'TestVM' -State 'Running'
 
-            Assert-MockCalled Resume-VM -Scope It
-            Assert-MockCalled Wait-VMIPAddress -Scope It -Exactly 0
+            Assert-MockCalled -CommandName Resume-VM -Scope It
+            Assert-MockCalled -CommandName Wait-VMIPAddress -Scope It -Exactly 0
         }
 
         It 'Should resume VM and wait when current "State" is "Paused" and target state is "Running"' {
-            Mock Get-VM { return @{ State = 'Paused' } }
+            Mock -CommandName Resume-VM
+            Mock -CommandName Wait-VMIPAddress
+            Mock -CommandName Get-VM -MockWith {
+                return @{
+                    State = 'Paused'
+                }
+            }
 
             Set-VMState -Name 'TestVM' -State 'Running' -WaitForIP $true
 
-            Assert-MockCalled Resume-VM -Scope It
-            Assert-MockCalled Wait-VMIPAddress -Scope It
+            Assert-MockCalled -CommandName Resume-VM -Scope It
+            Assert-MockCalled -CommandName Wait-VMIPAddress -Scope It
         }
 
         It 'Should start VM when current "State" is "Off" and target state is "Running"' {
-            Mock Get-VM { return @{ State = 'Off' } }
+            Mock -CommandName Start-VM
+            Mock -CommandName Wait-VMIPAddress
+            Mock -CommandName Get-VM -MockWith {
+                return @{
+                    State = 'Off'
+                }
+            }
 
             Set-VMState -Name 'TestVM' -State 'Running'
 
-            Assert-MockCalled Start-VM -Scope It
-            Assert-MockCalled Wait-VMIPAddress -Scope It -Exactly 0
+            Assert-MockCalled -CommandName Start-VM -Scope It
+            Assert-MockCalled -CommandName Wait-VMIPAddress -Scope It -Exactly 0
         }
 
         It 'Should start VM and wait when current "State" is "Off" and target state is "Running"' {
-            Mock Get-VM { return @{ State = 'Off' } }
+            Mock -CommandName Start-VM
+            Mock -CommandName Wait-VMIPAddress
+            Mock -CommandName Get-VM -MockWith {
+                return @{
+                    State = 'Off'
+                }
+            }
 
             Set-VMState -Name 'TestVM' -State 'Running' -WaitForIP $true
 
-            Assert-MockCalled Start-VM -Scope It
-            Assert-MockCalled Wait-VMIPAddress -Scope It
+            Assert-MockCalled -CommandName Start-VM -Scope It
+            Assert-MockCalled -CommandName Wait-VMIPAddress -Scope It
         }
 
         It 'Should suspend VM when current "State" is "Running" and target state is "Paused"' {
-            Mock Get-VM { return @{ State = 'Running' } }
+            Mock -CommandName Suspend-VM
+            Mock -CommandName Get-VM -MockWith {
+                return @{
+                    State = 'Running'
+                }
+            }
 
             Set-VMState -Name 'TestVM' -State 'Paused'
 
-            Assert-MockCalled Suspend-VM -Scope It
+            Assert-MockCalled -CommandName Suspend-VM -Scope It
         }
 
         It 'Should stop VM when current "State" is "Running" and target state is "Off"' {
-            Mock Get-VM { return @{ State = 'Running' } }
+            Mock -CommandName Stop-VM
+            Mock -CommandName Get-VM -MockWith {
+                return @{
+                    State = 'Running'
+                }
+            }
 
             Set-VMState -Name 'TestVM' -State 'Off'
 
-            Assert-MockCalled Stop-VM -Scope It
+            Assert-MockCalled -CommandName Stop-VM -Scope It
         }
 
         It 'Should stop VM when current "State" is "Paused" and target state is "Off"' {
-            Mock Get-VM { return @{ State = 'Paused' } }
+            Mock -CommandName Stop-VM
+            Mock -CommandName Get-VM -MockWith {
+                return @{
+                    State = 'Paused'
+                }
+            }
 
             Set-VMState -Name 'TestVM' -State 'Off'
 
-            Assert-MockCalled Stop-VM -Scope It
+            Assert-MockCalled -CommandName Stop-VM -Scope It
         }
-    } # describe HyperVCommon\Set-VMState
+    } # describe HyperVDsc.Common\Set-VMState
 }
 
-Describe 'HyperVCommon\Wait-VMIPAddress' {
-    # Guard mocks
-    Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName
+Describe 'HyperVDsc.Common\Wait-VMIPAddress' {
+    Context 'When VM network adapter reports 2 IP addresses'{
+        BeforeAll {
+            Mock -CommandName Get-VMNetworkAdapter -ModuleName 'HyperVDsc.Common' -MockWith {
+                return @{
+                    IpAddresses = @('192.168.0.1', '172.16.0.1')
+                }
+            }
+        }
 
-    It 'Should return when VM network adapter reports 2 IP addresses' {
-        Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName { return @{ IpAddresses = @('192.168.0.1', '172.16.0.1') } }
+        It 'Should return without throwing an exception' {
+            $result = Wait-VMIPAddress -Name 'Test' -Verbose
 
-        $result = Wait-VMIPAddress -Name 'Test'
-
-        $result | Should BeNullOrEmpty
+            $result | Should -BeNullOrEmpty
+        }
     }
 
-    It 'Should throw when after timeout is exceeded' {
-        Mock Get-VMNetworkAdapter -ModuleName $script:DSCResourceName { return $null }
+    Context 'When VM network adapter reports 2 IP addresses'{
+        BeforeAll {
+            Mock -CommandName Start-Sleep -ModuleName 'HyperVDsc.Common'
+            Mock -CommandName Get-VMNetworkAdapter -ModuleName 'HyperVDsc.Common' -MockWith {
+                return $null
+            }
+        }
 
-        { Wait-VMIPAddress -Name 'Test' -Timeout 2 } | Should Throw 'timed out'
+        It 'Should throw the correct exception' {
+            { Wait-VMIPAddress -Name 'Test' -Timeout 2 -Verbose } | Should -Throw (
+                $script:localizedData.WaitForVMIPAddressTimeoutError -f 'Test', '2'
+            )
+        }
     }
-} # describe HyperVCommon\WaitVMIPAddress
+} # describe HyperVDsc.Common\WaitVMIPAddress
 
-Describe 'HyperVCommon\ConvertTo-TimeSpan' {
-
+Describe 'HyperVDsc.Common\ConvertTo-TimeSpan' {
     It 'Should convert 60 seconds to "System.TimeSpan" of 1 minute' {
         $testSeconds = 60
 
         $result = ConvertTo-TimeSpan -TimeInterval $testSeconds -TimeIntervalType Seconds
 
-        $result.TotalMinutes | Should Be 1
+        $result.TotalMinutes | Should -Be 1
     }
 
     It 'Should convert 60 minutes to "System.TimeSpan" of 60 minutes' {
@@ -165,7 +230,7 @@ Describe 'HyperVCommon\ConvertTo-TimeSpan' {
 
         $result = ConvertTo-TimeSpan -TimeInterval $testMinutes -TimeIntervalType Minutes
 
-        $result.TotalHours | Should Be 1
+        $result.TotalHours | Should -Be 1
     }
 
     It 'Should convert 48 hours to "System.TimeSpan" of 2 days' {
@@ -173,19 +238,18 @@ Describe 'HyperVCommon\ConvertTo-TimeSpan' {
 
         $result = ConvertTo-TimeSpan -TimeInterval $testHours -TimeIntervalType Hours
 
-        $result.TotalDays | Should Be 2
+        $result.TotalDays | Should -Be 2
     }
 
-} # describe HyperVCommon\ConvertTo-TimeSpan
+} # describe HyperVDsc.Common\ConvertTo-TimeSpan
 
-Describe 'HyperVCommon\ConvertFrom-TimeSpan' {
-
+Describe 'HyperVDsc.Common\ConvertFrom-TimeSpan' {
     It 'Should convert a "System.TimeSpan" of 1 minute to 60 seconds' {
         $testTimeSpan = New-TimeSpan -Minutes 1
 
         $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Seconds
 
-        $result | Should Be 60
+        $result | Should -Be 60
     }
 
     It 'Should convert a "System.TimeSpan" of 1 hour to 60 minutes' {
@@ -193,7 +257,7 @@ Describe 'HyperVCommon\ConvertFrom-TimeSpan' {
 
         $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Minutes
 
-        $result | Should Be 60
+        $result | Should -Be 60
     }
 
     It 'Should convert a "System.TimeSpan" of 2 dayes to 48 hours' {
@@ -201,43 +265,51 @@ Describe 'HyperVCommon\ConvertFrom-TimeSpan' {
 
         $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Hours
 
-        $result | Should Be 48
+        $result | Should -Be 48
     }
 
-} # describe HyperVCommon\ConvertFrom-TimeSpan
+} # describe HyperVDsc.Common\ConvertFrom-TimeSpan
 
-Describe 'HyperVCommon\Get-VMHyperV' {
+Describe 'HyperVDsc.Common\Get-VMHyperV' {
+    BeforeAll {
+        $mockVMName = 'TestVM'
+    }
+
     # Guard mocks
-    Mock Get-VM -ModuleName $script:DSCResourceName
-
     It 'Should not throw when no VM is found' {
-        Mock Get-VM -ModuleName $script:DSCResourceName
-        $testVMName = 'TestVM'
+        Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common'
 
-        $result = Get-VMHyperV -VMName $testVMName
+        $result = Get-VMHyperV -VMName $mockVMName
 
-        $result | Should BeNullOrEmpty
+        $result | Should -BeNullOrEmpty
     }
 
     It 'Should not throw when one VM is found' {
-        Mock Get-VM -ModuleName $script:DSCResourceName {
-            Write-Output -InputObject ([PSCustomObject] @{ Name = $VMName })
+        Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common' -MockWith {
+            [PSCustomObject] @{
+                Name = $VMName
+            }
         }
-        $testVMName = 'TestVM'
 
-        $result = Get-VMHyperV -VMName $testVMName
+        $result = Get-VMHyperV -VMName $mockVMName
 
-        $result.Name | Should Be $testVMName
+        $result.Name | Should -Be $mockVMName
     }
 
     It 'Should throw when more than one VM is found' {
-        Mock Get-VM -ModuleName $script:DSCResourceName {
-            Write-Output -InputObject ([PSCustomObject] @{ Name = $VMName })
-            Write-Output -InputObject ([PSCustomObject] @{ Name = $VMName })
+        Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common' -MockWith {
+            @(
+                [PSCustomObject] @{
+                    Name = $VMName
+                },
+                [PSCustomObject] @{
+                    Name = $VMName
+                }
+            )
         }
-        $testVMName = 'TestVM'
 
-        { Get-VMHyperV -VMName $testVMName } | Should Throw 'More than one VM'
+        { Get-VMHyperV -VMName $mockVMName } | Should -Throw (
+            $script:localizedData.MoreThanOneVMExistsError -f $mockVMName
+        )
     }
-
-} # describe HyperVCommon\Get-VMHyperV
+} # describe HyperVDsc.Common\Get-VMHyperV

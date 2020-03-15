@@ -113,7 +113,7 @@ function Set-VMProperty
     else
     {
         $errorMessage = $script:localizedData.CannotUpdatePropertiesOnlineError -f $Name, $vmOriginalState
-        New-InvalidOperationError -ErrorId RestartRequired -ErrorMessage $errorMessage
+        New-InvalidOperationException -Message $errorMessage
     }
 } #end function
 

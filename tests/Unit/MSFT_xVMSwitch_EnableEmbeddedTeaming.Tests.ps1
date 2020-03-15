@@ -101,37 +101,6 @@ try
         }
 
         Describe "MSFT_xVMSwitch" {
-            # Create empty functions to be able to mock the missing Hyper-V cmdlet
-            function Get-VMSwitch
-            {
-
-            }
-
-            function New-VMSwitch
-            {
-
-            }
-
-            function Set-VMSwitch
-            {
-
-            }
-
-            function Remove-VMSwitch
-            {
-
-            }
-
-            function Get-VMSwitchTeam
-            {
-
-            }
-
-            function Set-VMSwitchTeam
-            {
-
-            }
-
             <#
                 Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
@@ -282,11 +251,11 @@ try
                 }
 
                 It "Should return absent in the get method" {
-                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Absent"
+                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run the set method without exceptions" {
@@ -316,11 +285,11 @@ try
                 }
 
                 It "Should return present in the get method" {
-                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Present"
+                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should -Be "Present"
                 }
 
                 It "Should return true in the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -358,11 +327,11 @@ try
                 }
 
                 It "Should return present in the get method" {
-                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Present"
+                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run the set method without exceptions" {
@@ -407,11 +376,11 @@ try
                 }
 
                 It "Should return present in the get method" {
-                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Present"
+                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run the set method without exceptions" {
@@ -442,11 +411,11 @@ try
                 }
 
                 It "Should return present in the get method" {
-                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Present"
+                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run the set method without exceptions" {
@@ -473,11 +442,11 @@ try
                 }
 
                 It "Should return present in the get method" {
-                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Present"
+                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should -Be "Present"
                 }
 
                 It "Should return false in the test method" {
-                    Test-TargetResource @testParams | Should Be $false
+                    Test-TargetResource @testParams | Should -Be $false
                 }
 
                 It "Should run the set method without exceptions" {
@@ -496,11 +465,11 @@ try
                 }
 
                 It "Should return absent in the get method" {
-                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Absent"
+                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should -Be "Absent"
                 }
 
                 It "Should return true in the test method" {
-                    Test-TargetResource @testParams | Should Be $true
+                    Test-TargetResource @testParams | Should -Be $true
                 }
             }
 
@@ -522,7 +491,7 @@ try
                 }
 
                 It "Should return absent in the get method" {
-                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should Be "Absent"
+                    (Get-TargetResource -Name $testParams.Name -Type $testParams.Type).Ensure | Should -Be "Absent"
                 }
 
                 It "Should throw an error in the test method" {
@@ -530,7 +499,7 @@ try
                         -ErrorId 'SETServer2016Error' `
                         -ErrorMessage $script:localizedData.SETServer2016Error
 
-                    {Test-TargetResource @testParams} | Should Throw $errorRecord
+                    {Test-TargetResource @testParams} | Should -Throw $errorRecord
                 }
 
                 It "Should throw an error in the set method" {
@@ -538,7 +507,7 @@ try
                         -ErrorId 'SETServer2016Error' `
                         -ErrorMessage $script:localizedData.SETServer2016Error
 
-                    {Set-TargetResource @testParams} | Should Throw $errorRecord
+                    {Set-TargetResource @testParams} | Should -Throw $errorRecord
                 }
             }
         }

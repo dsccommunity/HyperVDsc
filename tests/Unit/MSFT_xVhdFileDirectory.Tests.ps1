@@ -89,35 +89,35 @@ try
 
         $script:vhdDriveLetter = Get-FreeDriveLetter
 
-        function Mount-Vhd {}
-        function Dismount-Vhd {}
-        function Get-Disk {}
-        function Get-Partition {}
-        function Get-Volume {}
+        # function Mount-Vhd {}
+        # function Dismount-Vhd {}
+        # function Get-Disk {}
+        # function Get-Partition {}
+        # function Get-Volume {}
 
         $script:dscFileDirClassName = 'MSFT_FileDirectoryConfiguration'
         $script:dscNamespace = 'root/microsoft/windows/desiredstateconfiguration'
 
-        Mock Mount-Vhd { [PSCustomObject] @{ Path = 'TestDrive:\VhdExists.vhdx'} }
+        Mock -CommandName Mount-Vhd { [PSCustomObject] @{ Path = 'TestDrive:\VhdExists.vhdx'} }
 
-        Mock Dismount-Vhd {}
+        Mock -CommandName Dismount-Vhd {}
 
-        Mock Get-Disk {
+        Mock -CommandName Get-Disk {
             New-CimInstance -ClassName MSFT_Disk -Namespace root/Microsoft/Windows/Storage -ClientOnly
         }
 
-        Mock Get-Partition {
+        Mock -CommandName Get-Partition {
             New-CimInstance -ClassName MSFT_Partitions -Namespace ROOT/Microsoft/Windows/Storage -ClientOnly |
                 Add-Member -MemberType NoteProperty -Name Type -Value 'Mocked' -Force -PassThru |
                 Add-Member -MemberType NoteProperty -Name DriveLetter -Value $script:vhdDriveLetter -PassThru
         }
 
-        Mock Get-Volume {
+        Mock -CommandName Get-Volume {
             New-CimInstance -ClassName MSFT_Volumes -Namespace ROOT/Microsoft/Windows/Storage -ClientOnly |
                 Add-Member -MemberType NoteProperty -Name DriveLetter -Value $script:vhdDriveLetter -PassThru
         }
 
-        Mock Get-Module {
+        Mock -CommandName Get-Module {
             $true
         } -ParameterFilter {$Name -and $Name -eq "Hyper-V"}
 
@@ -145,7 +145,7 @@ try
                 $result = Get-TargetResource -VhdPath TestDrive:\VhdExists.vhdx -FileDirectory $fileDirectory
 
                 $result -is [System.Collections.Hashtable] |
-                 Should Be $true
+                 Should -Be $true
             }
 
             #region Testcases for Get-TargetResource
@@ -250,10 +250,10 @@ try
                 $result = Get-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectoryProperties
 
                 $result['FileDirectory'].CimInstanceProperties.Value |
-                 Should Be $ExpectedResult['FileDirectory'].CimInstanceProperties.Value
+                 Should -Be $ExpectedResult['FileDirectory'].CimInstanceProperties.Value
 
                 $result['VhdPath'] |
-                 Should be $ExpectedResult['VhdPath']
+                 Should -be $ExpectedResult['VhdPath']
             }
         }
 
@@ -324,7 +324,7 @@ try
                     )
 
                     $result = Test-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectory
-                    $result | Should be $true
+                    $result | Should -be $true
                 }
             }
 
@@ -384,7 +384,7 @@ try
                     )
 
                     $result = Test-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectory
-                    $result | Should be $false
+                    $result | Should -be $false
                 }
 
                 It 'Should throw error when VhdPath does not exist' {
@@ -395,7 +395,7 @@ try
                                         Ensure = 'Present'
                                      }
                     { Test-TargetResource -VhdPath $vhdPath -FileDirectory $fileDirectory } |
-                     Should Throw "VHD does not exist in the specified path $vhdPath"
+                     Should -Throw "VHD does not exist in the specified path $vhdPath"
                 }
             }
         }
@@ -432,7 +432,7 @@ try
                         $ExpectedResult
                     )
 
-                    { Set-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectory } | Should Not Throw
+                    { Set-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectory } | Should -Not -Throw
                 }
             }
 
@@ -449,7 +449,7 @@ try
                     Set-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectory
 
                     (Get-FileHash TestDrive:\FileExists.txt).Hash |
-                     Should Be (Get-FileHash TestDrive:\MockVhdRoot\DestinationDirectoryExists\FileDoesNotExist.txt).hash
+                     Should -Be (Get-FileHash TestDrive:\MockVhdRoot\DestinationDirectoryExists\FileDoesNotExist.txt).hash
                 }
 
                 It 'Should Insert content into file when "Content" is specified' {
@@ -463,7 +463,7 @@ try
                     Set-TargetResource -VhdPath $vhdPath -FileDirectory $fileDirectory
 
                     Get-Content TestDrive:\MockVhdRoot\DestinationDirectoryExists\FileDoesNotExist2.txt |
-                     Should Be 'This is some text'
+                     Should -Be 'This is some text'
                 }
 
                 It 'Should set "hidden" attribute when specified for nonexistent file' {
@@ -478,7 +478,7 @@ try
                     Set-TargetResource -VhdPath $vhdPath -FileDirectory $fileDirectory
 
                     (Get-Item TestDrive:\MockVhdRoot\DestinationDirectoryExists\FileDoesNotExist3.txt -Force).Attributes |
-                     Should be 'Hidden'
+                     Should -be 'Hidden'
                 }
 
                 It 'Should remove the file when "Ensure" is set to "Absent"' {
@@ -492,7 +492,7 @@ try
                     Set-TargetResource -VhdPath $vhdPath -FileDirectory $fileDirectory
 
                     Test-Path TestDrive:\MockVhdRoot\DestinationDirectoryExists\FileExists.txt |
-                     Should be $false
+                     Should -be $false
                 }
 
                 It 'Should throw error when VhdPath does not exist' {
@@ -504,7 +504,7 @@ try
                                      }
 
                     { Set-TargetResource -VhdPath $vhdPath -FileDirectory $fileDirectory } |
-                     Should throw "Specified destination path $vhdPath does not exist!"
+                     Should -throw "Specified destination path $vhdPath does not exist!"
                 }
             }
         }

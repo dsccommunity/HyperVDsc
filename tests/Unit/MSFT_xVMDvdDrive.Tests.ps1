@@ -127,60 +127,6 @@ try
 
         #region Function Get-TargetResource
         Describe 'MSFT_xVMDvdDrive\Get-TargetResource' {
-            #region VM Functions
-            function Get-VM {
-                Param
-                (
-                    [String]
-                    $Name
-                )
-            }
-
-            function Get-VMScsiController {
-                Param
-                (
-                    [String]
-                    $VMName,
-
-                    [Uint32]
-                    $ControllerNumber
-                )
-            }
-
-            function Get-VMIdeController {
-                Param
-                (
-                    [String]
-                    $VMName,
-
-                    [Uint32]
-                    $ControllerNumber
-                )
-            }
-
-            function Get-VMHardDiskDrive {
-                Param
-                (
-                    [String]
-                    $VMName,
-
-                    [Uint32]
-                    $ControllerNumber,
-
-                    [Uint32]
-                    $ControllerLocation
-                )
-            }
-
-            function Get-VMDvdDrive {
-                Param
-                (
-                    [String]
-                    $VMName
-                )
-            }
-            #endregion
-
             Context 'DVD Drive does not exist' {
                 # Verifiable (should be called) mocks
                 Mock `
@@ -196,15 +142,15 @@ try
                 It 'should not throw exception' {
                     {
                         $script:resource = Get-TargetResource @script:splatGetDvdDrive
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'should return expected values' {
-                    $script:resource.VMName             | Should Be $script:splatGetDvdDrive.VMName
-                    $script:resource.ControllerNumber   | Should Be $script:splatGetDvdDrive.ControllerNumber
-                    $script:resource.ControllerLocation | Should Be $script:splatGetDvdDrive.ControllerLocation
-                    $script:resource.Path               | Should BeNullOrEmpty
-                    $script:resource.Ensure             | Should Be 'Absent'
+                    $script:resource.VMName             | Should -Be $script:splatGetDvdDrive.VMName
+                    $script:resource.ControllerNumber   | Should -Be $script:splatGetDvdDrive.ControllerNumber
+                    $script:resource.ControllerLocation | Should -Be $script:splatGetDvdDrive.ControllerLocation
+                    $script:resource.Path               | Should -BeNullOrEmpty
+                    $script:resource.Ensure             | Should -Be 'Absent'
                 }
 
                 It 'all the get mocks should be called' {
@@ -230,15 +176,15 @@ try
                 It 'should not throw exception' {
                     {
                         $script:resource = Get-TargetResource @script:splatGetDvdDrive
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'should return expected values' {
-                    $script:resource.VMName             | Should Be $script:splatGetDvdDrive.VMName
-                    $script:resource.ControllerNumber   | Should Be $script:splatGetDvdDrive.ControllerNumber
-                    $script:resource.ControllerLocation | Should Be $script:splatGetDvdDrive.ControllerLocation
-                    $script:resource.Path               | Should BeNullOrEmpty
-                    $script:resource.Ensure             | Should Be 'Present'
+                    $script:resource.VMName             | Should -Be $script:splatGetDvdDrive.VMName
+                    $script:resource.ControllerNumber   | Should -Be $script:splatGetDvdDrive.ControllerNumber
+                    $script:resource.ControllerLocation | Should -Be $script:splatGetDvdDrive.ControllerLocation
+                    $script:resource.Path               | Should -BeNullOrEmpty
+                    $script:resource.Ensure             | Should -Be 'Present'
                 }
 
                 It 'all the get mocks should be called' {
@@ -264,15 +210,15 @@ try
                 It 'should not throw exception' {
                     {
                         $script:resource = Get-TargetResource @script:splatGetDvdDrive
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'should return expected values' {
-                    $script:resource.VMName             | Should Be $script:splatGetDvdDrive.VMName
-                    $script:resource.ControllerNumber   | Should Be $script:splatGetDvdDrive.ControllerNumber
-                    $script:resource.ControllerLocation | Should Be $script:splatGetDvdDrive.ControllerLocation
-                    $script:resource.Path               | Should Be $script:TestISOPath
-                    $script:resource.Ensure             | Should Be 'Present'
+                    $script:resource.VMName             | Should -Be $script:splatGetDvdDrive.VMName
+                    $script:resource.ControllerNumber   | Should -Be $script:splatGetDvdDrive.ControllerNumber
+                    $script:resource.ControllerLocation | Should -Be $script:splatGetDvdDrive.ControllerLocation
+                    $script:resource.Path               | Should -Be $script:TestISOPath
+                    $script:resource.Ensure             | Should -Be 'Present'
                 }
 
                 It 'all the get mocks should be called' {
@@ -287,56 +233,6 @@ try
 
         #region Function Set-TargetResource
         Describe 'MSFT_xVMDvdDrive\Set-TargetResource' {
-            #region VM Functions
-            function Add-VMDvdDrive {
-                Param
-                (
-                    [String]
-                    $VMName,
-
-                    [Uint32]
-                    $ControllerNumber,
-
-                    [Uint32]
-                    $ControllerLocation,
-
-                    [String]
-                    $Path
-                )
-            }
-
-            function Set-VMDvdDrive {
-                Param
-                (
-                    [String]
-                    $VMName,
-
-                    [Uint32]
-                    $ControllerNumber,
-
-                    [Uint32]
-                    $ControllerLocation,
-
-                    [String]
-                    $Path
-                )
-            }
-
-            function Remove-VMDvdDrive {
-                Param
-                (
-                    [String]
-                    $VMName,
-
-                    [Uint32]
-                    $ControllerNumber,
-
-                    [Uint32]
-                    $ControllerLocation
-                )
-            }
-            #endregion
-
             Context 'DVD Drive does not exist but should' {
                 # Verifiable (should be called) mocks
                 Mock `
@@ -354,7 +250,7 @@ try
                 Mock -CommandName Remove-VMDvdDrive
 
                 It 'should not throw exception' {
-                    { Set-TargetResource @script:splatAddDvdDriveNoPath } | Should Not Throw
+                    { Set-TargetResource @script:splatAddDvdDriveNoPath } | Should -Not -Throw
                 }
 
                 It 'all the get mocks should be called' {
@@ -380,7 +276,7 @@ try
                 Mock -CommandName Remove-VMDvdDrive
 
                 It 'should not throw exception' {
-                    { Set-TargetResource @script:splatAddDvdDrive } | Should Not Throw
+                    { Set-TargetResource @script:splatAddDvdDrive } | Should -Not -Throw
                 }
 
                 It 'all the get mocks should be called' {
@@ -409,7 +305,7 @@ try
                 Mock -CommandName Remove-VMDvdDrive
 
                 It 'should not throw exception' {
-                    { Set-TargetResource @script:splatAddDvdDrive } | Should Not Throw
+                    { Set-TargetResource @script:splatAddDvdDrive } | Should -Not -Throw
                 }
 
                 It 'all the get mocks should be called' {
@@ -439,7 +335,7 @@ try
                 Mock -CommandName Set-VMDvdDrive
 
                 It 'should not throw exception' {
-                    { Set-TargetResource @script:splatRemoveDvdDrive } | Should Not Throw
+                    { Set-TargetResource @script:splatRemoveDvdDrive } | Should -Not -Throw
                 }
 
                 It 'all the get mocks should be called' {
@@ -465,7 +361,7 @@ try
                 Mock -CommandName Remove-VMDvdDrive
 
                 It 'should not throw exception' {
-                    { Set-TargetResource @script:splatRemoveDvdDrive } | Should Not Throw
+                    { Set-TargetResource @script:splatRemoveDvdDrive } | Should -Not -Throw
                 }
 
                 It 'all the get mocks should be called' {
@@ -489,7 +385,7 @@ try
                     -Verifiable
 
                 It 'should return false' {
-                    Test-TargetResource @script:splatAddDvdDriveNoPath | Should Be $False
+                    Test-TargetResource @script:splatAddDvdDriveNoPath | Should -Be $False
                 }
 
                 It 'all the get mocks should be called' {
@@ -506,7 +402,7 @@ try
                     -Verifiable
 
                 It 'should return true' {
-                    Test-TargetResource @script:splatAddDvdDrive | Should Be $True
+                    Test-TargetResource @script:splatAddDvdDrive | Should -Be $True
                 }
 
                 It 'all the get mocks should be called' {
@@ -523,7 +419,7 @@ try
                     -Verifiable
 
                 It 'should return false' {
-                    Test-TargetResource @script:splatAddDvdDrive | Should Be $False
+                    Test-TargetResource @script:splatAddDvdDrive | Should -Be $False
                 }
 
                 It 'all the get mocks should be called' {
@@ -540,7 +436,7 @@ try
                     -Verifiable
 
                 It 'should return false' {
-                    Test-TargetResource @script:splatRemoveDvdDrive | Should Be $False
+                    Test-TargetResource @script:splatRemoveDvdDrive | Should -Be $False
                 }
 
                 It 'all the get mocks should be called' {
@@ -557,7 +453,7 @@ try
                     -Verifiable
 
                 It 'should return true' {
-                    Test-TargetResource @script:splatRemoveDvdDrive | Should Be $True
+                    Test-TargetResource @script:splatRemoveDvdDrive | Should -Be $True
                 }
 
                 It 'all the get mocks should be called' {
@@ -570,60 +466,6 @@ try
 
         #region Function Test-ParameterValid
         Describe 'MSFT_xVMDvdDrive\Test-ParameterValid' {
-            #region VM Functions
-            function Get-VM {
-                Param
-                (
-                    [String]
-                    $Name
-                )
-            }
-
-            function Get-VMScsiController {
-                Param
-                (
-                    [String]
-                    $VMName,
-
-                    [Uint32]
-                    $ControllerNumber
-                )
-            }
-
-            function Get-VMIdeController {
-                Param
-                (
-                    [String]
-                    $VMName,
-
-                    [Uint32]
-                    $ControllerNumber
-                )
-            }
-
-            function Get-VMHardDiskDrive {
-                Param
-                (
-                    [String]
-                    $VMName,
-
-                    [Uint32]
-                    $ControllerNumber,
-
-                    [Uint32]
-                    $ControllerLocation
-                )
-            }
-
-            function Get-VMDvdDrive {
-                Param
-                (
-                    [String]
-                    $VMName
-                )
-            }
-            #endregion
-
             Context 'Hyper-V Module is not available' {
                 # Verifiable (should be called) mocks
                 Mock `
@@ -642,7 +484,7 @@ try
                         -ErrorMessage ($script:localizedData.RoleMissingError -f `
                             'Hyper-V')
 
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should Throw $errorRecord
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorRecord
                 }
 
                 It 'all the get mocks should be called' {
@@ -670,7 +512,7 @@ try
                 Mock -CommandName Get-VMHardDiskDrive
 
                 It 'should throw exception' {
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should Throw
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw
                 }
 
                 It 'all the get mocks should be called' {
@@ -713,7 +555,7 @@ try
                         -ErrorMessage ($script:localizedData.VMControllerDoesNotExistError -f `
                             $script:VMName,0)
 
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should Throw $errorRecord
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorRecord
                 }
 
                 It 'all the get mocks should be called' {
@@ -762,7 +604,7 @@ try
                         -ErrorMessage ($script:localizedData.ControllerConflictError -f `
                             $script:VMName,0,1)
 
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should Throw $errorRecord
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorRecord
                 }
 
                 It 'all the get mocks should be called' {
@@ -815,7 +657,7 @@ try
                         -ErrorMessage ($script:localizedData.PathDoesNotExistError -f `
                             $script:TestISOPath)
 
-                    { Test-ParameterValid @script:splatAddDvdDrive } | Should Throw $errorRecord
+                    { Test-ParameterValid @script:splatAddDvdDrive } | Should -Throw $errorRecord
                 }
 
                 It 'all the get mocks should be called' {
@@ -864,7 +706,7 @@ try
                 Mock -CommandName Get-VMIdeController
 
                 It 'should not throw exception' {
-                    Test-ParameterValid @script:splatAddDvdDrive | Should Be $True
+                    Test-ParameterValid @script:splatAddDvdDrive | Should -Be $True
                 }
 
                 It 'all the get mocks should be called' {

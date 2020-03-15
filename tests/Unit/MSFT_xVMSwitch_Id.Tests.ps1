@@ -98,16 +98,10 @@ try
             return $true
         }
 
-        function Get-VMSwitch
-        {
-        }
         Mock -CommandName Get-VMSwitch -MockWith {
             return $Global:MockedVMSwitch
         }
 
-        function Get-NetAdapter
-        {
-        }
         Mock -CommandName Get-NetAdapter -MockWith {
             return @(
                 [PSCustomObject]@{
@@ -121,9 +115,6 @@ try
             )
         }
 
-        function Get-VMSwitchTeam
-        {
-        }
         Mock -CommandName Get-VMSwitchTeam -MockWith {
             return [PSCustomObject]@{
                 Name                           = 'TestTeam'
@@ -134,12 +125,10 @@ try
             }
         }
 
-        function Remove-VMSwitch {}
         Mock -CommandName Remove-VMSwitch -MockWith {
             $Global:mockedVMSwitch = $null
         }
 
-        function New-VMSwitch {}
         Mock -CommandName New-VMSwitch -MockWith {
             Param(
                 [Parameter()]
@@ -181,9 +170,6 @@ try
             }
         }
 
-        function Get-OSVersion
-        {
-        }
         Mock -CommandName Get-OSVersion -MockWith {
             [PSCustomObject]@{
                 Major         = 10
@@ -201,7 +187,7 @@ try
                 $Global:MockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
 
                 It 'Should return "present"' {
-                    (Get-TargetResource -Name 'TestSwitch' -Type 'External').Ensure | Should Be 'Present'
+                    (Get-TargetResource -Name 'TestSwitch' -Type 'External').Ensure | Should -Be 'Present'
                     Assert-MockCalled -CommandName "Get-VMSwitch" -Times 1
                     Assert-MockCalled -CommandName "Get-VMSwitchTeam" -Times 1
                 }
@@ -212,7 +198,7 @@ try
                 $Global:mockedVMSwitch = $null
 
                 It 'Should return "absent"' {
-                    (Get-TargetResource -Name 'TestSwitch' -Type 'External').Ensure | Should Be 'Absent'
+                    (Get-TargetResource -Name 'TestSwitch' -Type 'External').Ensure | Should -Be 'Absent'
                     Assert-MockCalled -CommandName "Get-VMSwitch" -Times 1
                     Assert-MockCalled -CommandName "Get-VMSwitchTeam" -Times 0
                 }
