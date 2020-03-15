@@ -115,7 +115,8 @@ function Test-TargetResource
     if ($ControllerType -eq 'IDE' -and ($ControllerNumber -gt 1 -or $ControllerLocation -gt 1))
     {
         $errorMessage = $script:localizedData.IdeLocationError -f $ControllerNumber, $ControllerLocation
-        New-InvalidOperationError -ErrorId 'InvalidLocation' -ErrorMessage $errorMessage
+
+        New-InvalidArgumentException -ArgumentName 'ControllerType' -Message $errorMessage
     }
 
     $isCompliant = $true
@@ -222,18 +223,21 @@ function Set-TargetResource
         else
         {
             Write-Verbose -Message ($script:localizedData.CheckingExistingDiskLocation)
+
             $getVMHardDiskDriveParams = @{
                 VMName             = $VMName
                 ControllerType     = $ControllerType
                 ControllerNumber   = $ControllerNumber
                 ControllerLocation = $ControllerLocation
             }
+
             $existingHardDiskDrive = Get-VMHardDiskDrive @getVMHardDiskDriveParams
+
             if ($null -ne $existingHardDiskDrive)
             {
-                $errorMessage = $script:localizedData.DiskPresentError -f $ControllerNumber, `
-                                                                    $ControllerLocation
-                New-InvalidOperationError -ErrorId 'ControllerNotEmpty' -ErrorMessage $errorMessage
+                $errorMessage = $script:localizedData.DiskPresentError -f $ControllerNumber, $ControllerLocation
+
+                New-InvalidResultException -Message $errorMessage
             }
 
             Write-Verbose -Message ($script:localizedData.AddingDisk -f $Path, $VMName)

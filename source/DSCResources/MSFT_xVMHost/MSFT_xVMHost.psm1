@@ -416,16 +416,20 @@ function Set-TargetResource
             if ((Get-CimInstance -ClassName Win32_ComputerSystem).PartOfDomain)
             {
                 Write-Verbose -Message $script:localizedData.EnableLiveMigration
+
                 Enable-VMMigration
             }
             else
             {
-                New-InvalidOperationError -ErrorId InvalidState -ErrorMessage $script:localizedData.LiveMigrationDomainOnly
+                $errorMessage = $script:localizedData.LiveMigrationDomainOnly
+
+                New-InvalidOperationException -Message $errorMessage
             }
         }
         else
         {
             Write-Verbose -Message $script:localizedData.DisableLiveMigration
+
             Disable-VMMigration
         }
     }

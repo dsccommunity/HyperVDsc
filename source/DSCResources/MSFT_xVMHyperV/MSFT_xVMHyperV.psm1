@@ -5,7 +5,6 @@ Import-Module -Name $script:dscResourceCommonModulePath
 Import-Module -Name $script:hyperVDscCommonModulePath
 
 $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
-    -ChildPath '\HyperVCommon\HyperVCommon.psm1' )
 
 function Get-TargetResource
 {

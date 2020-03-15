@@ -37,9 +37,9 @@ function Get-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        New-InvalidOperationError `
-            -ErrorId 'HyperVNotInstalledError' `
-            -ErrorMessage $script:localizedData.HyperVNotInstalledError
+        $errorMessage = $script:localizedData.HyperVNotInstalledError
+
+        New-ObjectNotFoundException -Message $errorMessage
     }
 
     $switch = Get-VMSwitch -Name $Name -SwitchType $Type -ErrorAction SilentlyContinue
@@ -182,31 +182,31 @@ function Set-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        New-InvalidOperationError `
-            -ErrorId 'HyperVNotInstalledError' `
-            -ErrorMessage $script:localizedData.HyperVNotInstalledError
+        $errorMessage = $script:localizedData.HyperVNotInstalledError
+
+        New-ObjectNotFoundException -Message $errorMessage
     }
 
     # Check to see if the BandwidthReservationMode chosen is supported in the OS
     elseif (($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
     {
-        New-InvalidArgumentError `
-            -ErrorId 'BandwidthReservationModeError' `
-            -ErrorMessage $script:localizedData.BandwidthReservationModeError
+        $errorMessage = $script:localizedData.BandwidthReservationModeError
+
+        New-InvalidOperationException -Message $errorMessage
     }
 
     if ($EnableEmbeddedTeaming -eq $true -and (Get-OSVersion).Major -lt 10)
     {
-        New-InvalidArgumentError `
-            -ErrorId 'SETServer2016Error' `
-            -ErrorMessage $script:localizedData.SETServer2016Error
+        $errorMessage = $script:localizedData.SETServer2016Error
+
+        New-InvalidOperationException -Message $errorMessage
     }
 
     if (($PSBoundParameters.ContainsKey('Id')) -and (Get-OSVersion).Major -lt 10)
     {
-        New-InvalidArgumentError `
-            -ErrorId 'VMSwitchIDServer2016Error' `
-            -ErrorMessage $script:localizedData.VMSwitchIDServer2016Error
+        $errorMessage = $script:localizedData.VMSwitchIDServer2016Error
+
+        New-InvalidOperationException -Message $errorMessage
     }
 
     if ($Ensure -eq 'Present')
@@ -451,45 +451,44 @@ function Test-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        New-InvalidOperationError `
-            -ErrorId 'HyperVNotInstalledError' `
-            -ErrorMessage $script:localizedData.HyperVNotInstalledError
+        $errorMessage = $script:localizedData.HyperVNotInstalledError
+        New-ObjectNotFoundException -Message $errorMessage
     }
 
     #region input validation
     if ($Type -eq 'External' -and !($NetAdapterName))
     {
-        New-InvalidArgumentError `
-            -ErrorId 'NetAdapterNameRequiredError' `
-            -ErrorMessage $script:localizedData.NetAdapterNameRequiredError
+        $errorMessage = $script:localizedData.NetAdapterNameRequiredError
+
+        New-InvalidArgumentException -ArgumentName 'Type' -Message $errorMessage
     }
 
     if ($Type -ne 'External' -and $NetAdapterName)
     {
-        New-InvalidArgumentError `
-            -ErrorId 'NetAdapterNameNotRequiredError' `
-            -ErrorMessage $script:localizedData.NetAdapterNameNotRequiredError
+        $errorMessage = $script:localizedData.NetAdapterNameNotRequiredError
+
+        New-InvalidArgumentException -ArgumentName 'Type' -Message $errorMessage
     }
 
     if (($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
     {
-        New-InvalidArgumentError `
-            -ErrorId 'BandwidthReservationModeError' `
-            -ErrorMessage $script:localizedData.BandwidthReservationModeError
+        $errorMessage = $script:localizedData.BandwidthReservationModeError
+
+        New-InvalidArgumentException -ArgumentName 'BandwidthReservationMode' -Message $errorMessage
     }
 
     if ($EnableEmbeddedTeaming -eq $true -and (Get-OSVersion).Major -lt 10)
     {
-        New-InvalidArgumentError `
-            -ErrorId 'SETServer2016Error' `
-            -ErrorMessage $script:localizedData.SETServer2016Error
+        $errorMessage = $script:localizedData.SETServer2016Error
+
+        New-InvalidArgumentException -ArgumentName 'EnableEmbeddedTeaming' -Message $errorMessage
     }
 
     if (($PSBoundParameters.ContainsKey('Id')) -and (Get-OSVersion).Major -lt 10)
     {
-        New-InvalidArgumentError `
-            -ErrorId 'VMSwitchIDServer2016Error' `
-            -ErrorMessage $script:localizedData.VMSwitchIDServer2016Error
+        $errorMessage = $script:localizedData.VMSwitchIDServer2016Error
+
+        New-InvalidOperationException -Message $errorMessage
     }
     #endregion
 

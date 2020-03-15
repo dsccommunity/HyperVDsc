@@ -38,7 +38,7 @@ try
 
         Describe 'MSFT_xVMHardDiskDrive\Get-TargetResource' {
 
-            $stubHardDiskDrive = @{
+            $stubHardDiskDrive = [PSCustomObject] @{
                 VMName             = $testVMName
                 Path               = $testHardDiskPath
                 ControllerLocation = 0
@@ -216,13 +216,17 @@ try
             Mock -CommandName Add-VMHardDiskDrive
             Mock -CommandName Remove-VMHardDiskDrive
 
-            $stubHardDiskDrive = @{
-                VMName             = $testVMName
-                Path               = $testHardDiskPath
-                ControllerLocation = 0
-                ControllerNumber   = 0
-                ControllerType     = 'SCSI'
-            }
+            <#
+                Create a mock of a the class HardDiskDrive to support piping to
+                the cmdlet Set-VMHardDiskDrive.
+            #>
+            $stubHardDiskDrive = [Microsoft.HyperV.PowerShell.HardDiskDrive]::CreateTypeInstance()
+            $stubHardDiskDrive.CimSession = New-MockObject -Type CimSession
+            $stubHardDiskDrive.VMName = $testVMName
+            $stubHardDiskDrive.Path = $testHardDiskPath
+            $stubHardDiskDrive.ControllerLocation = 0
+            $stubHardDiskDrive.ControllerNumber = 0
+            $stubHardDiskDrive.ControllerType = 'SCSI'
 
             It 'Should assert Hyper-V module is installed' {
                 Mock -CommandName Get-VMHardDiskDrive { return $stubHardDiskDrive }

@@ -367,10 +367,9 @@ function Test-ParameterValid
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if(-not (Get-Module -ListAvailable -Name Hyper-V))
     {
-        New-InvalidArgumentError `
-            -ErrorId 'RoleMissingError' `
-            -ErrorMessage ($script:localizedData.RoleMissingError -f `
-                'Hyper-V')
+        $errorMessage = $script:localizedData.RoleMissingError -f 'Hyper-V'
+
+        New-ObjectNotFoundException -Message $errorMessage
     } # if
 
     # Does the VM exist?
@@ -381,10 +380,9 @@ function Test-ParameterValid
         -and -not (Get-VMIdeController -VMName $VMName -ControllerNumber $ControllerNumber))
     {
         # No it does not
-        New-InvalidArgumentError `
-            -ErrorId 'VMControllerDoesNotExistError' `
-            -ErrorMessage ($script:localizedData.VMControllerDoesNotExistError -f `
-                $VMName,$ControllerNumber)
+        $errorMessage = $script:localizedData.VMControllerDoesNotExistError -f $VMName, $ControllerNumber
+
+        New-ObjectNotFoundException -Message $errorMessage
     } # if
 
     # Is a Hard Drive assigned to this controller location/number?
@@ -394,10 +392,9 @@ function Test-ParameterValid
         -ControllerNumber $ControllerNumber)
     {
         # Yes, so don't even try and touch this
-        New-InvalidArgumentError `
-            -ErrorId 'ControllerConflictError' `
-            -ErrorMessage ($script:localizedData.ControllerConflictError -f `
-                $VMName,$ControllerNumber,$ControllerLocation)
+        $errorMessage = $script:localizedData.ControllerConflictError -f $VMName, $ControllerNumber, $ControllerLocation
+
+        New-ObjectNotFoundException -Message $errorMessage
     } # if
 
     if ($Ensure -eq 'Present')
@@ -408,10 +405,9 @@ function Test-ParameterValid
             if (-not (Test-Path -Path $Path))
             {
                 # Path does not exist
-                New-InvalidArgumentError `
-                    -ErrorId 'PathDoesNotExistError' `
-                    -ErrorMessage ($script:localizedData.PathDoesNotExistError -f `
-                        $Path)
+                $errorMessage = $script:localizedData.PathDoesNotExistError -f $Path
+
+                New-ObjectNotFoundException -Message $errorMessage
             } # if
         } # if
     } # if

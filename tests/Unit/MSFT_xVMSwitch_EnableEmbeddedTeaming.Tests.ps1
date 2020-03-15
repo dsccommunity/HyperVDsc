@@ -32,31 +32,6 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        # Function to create a exception object for testing output exceptions
-        function Get-InvalidArgumentError
-        {
-            [CmdletBinding()]
-            param
-            (
-                [Parameter(Mandatory = $true)]
-                [ValidateNotNullOrEmpty()]
-                [System.String]
-                $ErrorId,
-
-                [Parameter(Mandatory = $true)]
-                [ValidateNotNullOrEmpty()]
-                [System.String]
-                $ErrorMessage
-            )
-
-            $exception = New-Object -TypeName System.ArgumentException `
-                -ArgumentList $ErrorMessage
-            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
-            $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
-                -ArgumentList $exception, $ErrorId, $errorCategory, $null
-            return $errorRecord
-        } # end function Get-InvalidArgumentError
-
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch
         {
@@ -495,24 +470,21 @@ try
                 }
 
                 It "Should throw an error in the test method" {
-                    $errorRecord = Get-InvalidArgumentError `
-                        -ErrorId 'SETServer2016Error' `
-                        -ErrorMessage $script:localizedData.SETServer2016Error
+                    $errorMessage = $script:localizedData.SETServer2016Error
 
-                    {Test-TargetResource @testParams} | Should -Throw $errorRecord
+                    {Test-TargetResource @testParams} | Should -Throw $errorMessage
                 }
 
                 It "Should throw an error in the set method" {
-                    $errorRecord = Get-InvalidArgumentError `
-                        -ErrorId 'SETServer2016Error' `
-                        -ErrorMessage $script:localizedData.SETServer2016Error
+                    $errorMessage = $script:localizedData.SETServer2016Error
 
-                    {Set-TargetResource @testParams} | Should -Throw $errorRecord
+                    {Set-TargetResource @testParams} | Should -Throw $errorMessage
                 }
             }
         }
     }
 }
-finally {
+finally
+{
     Invoke-TestCleanup
 }

@@ -39,31 +39,6 @@ try
         #>
         New-Variable -Name 'BANDWIDTH_RESERVATION_MODES' -Option 'Constant' -Value @('Default', 'Weight', 'Absolute', 'None')
 
-        # Function to create a exception object for testing output exceptions
-        function Get-InvalidArgumentError
-        {
-            [CmdletBinding()]
-            param
-            (
-                [Parameter(Mandatory = $true)]
-                [ValidateNotNullOrEmpty()]
-                [System.String]
-                $ErrorId,
-
-                [Parameter(Mandatory = $true)]
-                [ValidateNotNullOrEmpty()]
-                [System.String]
-                $ErrorMessage
-            )
-
-            $exception = New-Object -TypeName System.ArgumentException `
-                -ArgumentList $ErrorMessage
-            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
-            $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
-                -ArgumentList $exception, $ErrorId, $errorCategory, $null
-            return $errorRecord
-        } # end function Get-InvalidArgumentError
-
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch
         {
@@ -309,10 +284,9 @@ try
 
             # Test Test-TargetResource when the version of Windows doesn't support BandwidthReservationMode
             It 'Invalid Operating System Exception' {
-                $errorRecord = Get-InvalidArgumentError `
-                    -ErrorId 'BandwidthReservationModeError' `
-                    -ErrorMessage $script:localizedData.BandwidthReservationModeError
-                {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorRecord
+                $errorMessage = $script:localizedData.BandwidthReservationModeError
+
+                {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorMessage
             }
 
             # Test Test-TargetResource when the version of Windows doesn't support BandwidthReservationMode and specifies NA for BandwidthReservationMode
@@ -501,10 +475,9 @@ try
                     return [Version]::Parse('6.1.7601')
                 }
 
-                $errorRecord = Get-InvalidArgumentError `
-                    -ErrorId 'BandwidthReservationModeError' `
-                    -ErrorMessage $script:localizedData.BandwidthReservationModeError
-                {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorRecord
+                $errorMessage = $script:localizedData.BandwidthReservationModeError
+
+                {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorMessage
             }
         }
     }

@@ -229,7 +229,8 @@ function Wait-VMIPAddress
         if ($elapsedSeconds -gt $Timeout)
         {
             $errorMessage = $script:localizedData.WaitForVMIPAddressTimeoutError -f $Name, $Timeout
-            New-InvalidOperationError -ErrorId 'WaitVmTimeout' -ErrorMessage $errorMessage
+
+            New-ObjectNotFoundException -Message $errorMessage
         }
     }
 } #end function
@@ -254,7 +255,8 @@ function Assert-Module
     if (-not (Get-Module -Name $Name -ListAvailable ))
     {
         $errorMessage = $script:localizedData.RoleMissingError -f $Name
-        New-InvalidOperationError -ErrorId MissingRole -ErrorMessage $errorMessage
+
+        New-ObjectNotFoundException -Message $errorMessage
     }
 } #end function
 
@@ -353,7 +355,7 @@ function Get-VMHyperV
     if ($vm.count -gt 1)
     {
         $errorMessage = $script:localizedData.MoreThanOneVMExistsError -f $VMName
-        New-InvalidArgumentError -ErrorId 'MultipleVMsFound' -ErrorMessage $errorMessage
+        New-InvalidResultException -Message $errorMessage
     }
 
     return $vm

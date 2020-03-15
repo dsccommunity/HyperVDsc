@@ -335,7 +335,8 @@ function Set-TargetResource
                 if (-not $RestartIfNeeded)
                 {
                     $errorMessage = $localized.CannotUpdateVmOnlineError -f $parameterName
-                    New-InvalidOperationError -ErrorId InvalidState -ErrorMessage $errorMessage
+
+                    New-InvalidOperationException -Message $errorMessage
                 }
                 else
                 {
@@ -424,7 +425,7 @@ function Assert-TargetResourceParameter
         if (($PSBoundParameters.ContainsKey($parameterName)) -and ($osBuildNumber -lt 14393))
         {
             $errorMessage = $script:localizedData.UnsupportedSystemError -f $parameterName, 14393
-            New-InvalidArgumentError -ErrorId SystemUnsupported -ErrorMessage $errorMessage
+            New-InvalidOperationException -Message $errorMessage
         }
     }
 } #end function

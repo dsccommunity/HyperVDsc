@@ -161,7 +161,8 @@ function Set-TargetResource
     if ((-not $RestartIfNeeded) -and ($existingVmState -ne 'Off'))
     {
         $errorMessage = $script:localizedData.CannotUpdateVmOnlineError -f $VMName
-        New-InvalidOperationError -ErrorId InvalidState -ErrorMessage $errorMessage
+
+        New-InvalidOperationException -Message $errorMessage
     }
 
     [System.Int32] $scsiControllerCount = @(Get-VMScsiController -VMName $VMName).Count
@@ -170,13 +171,14 @@ function Set-TargetResource
         if ($scsiControllerCount -lt $ControllerNumber)
         {
             <#
-            All intermediate controllers should be present on the system as we cannot create
-            a controller at a particular location. For example, we cannot explicitly create
-            controller #2 - it will only be controller #2 if controllers #0 and #1 are already
-            added/present in the VM.
+                All intermediate controllers should be present on the system as we cannot create
+                a controller at a particular location. For example, we cannot explicitly create
+                controller #2 - it will only be controller #2 if controllers #0 and #1 are already
+                added/present in the VM.
             #>
             $errorMessage = $script:localizedData.CannotAddScsiControllerError -f $ControllerNumber
-            New-InvalidArgumentError -ErrorId InvalidController -ErrorMessage $errorMessage
+
+            New-InvalidOperationException -Message $errorMessage
         }
 
         Set-VMState -Name $VMName -State 'Off'
@@ -194,7 +196,8 @@ function Set-TargetResource
                 that was at position #2 will become controller number #1.
             #>
             $errorMessage = $script:localizedData.CannotRemoveScsiControllerError -f $ControllerNumber
-            New-InvalidArgumentError -ErrorId InvalidController -ErrorMessage $errorMessage
+
+            New-InvalidOperationException -Message $errorMessage
         }
 
         Set-VMState -Name $VMName -State 'Off'

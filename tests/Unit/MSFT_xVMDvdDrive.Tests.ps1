@@ -32,31 +32,6 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        # Function to create a exception object for testing output exceptions
-        function Get-InvalidArgumentError
-        {
-            [CmdletBinding()]
-            param
-            (
-                [Parameter(Mandatory)]
-                [ValidateNotNullOrEmpty()]
-                [System.String]
-                $ErrorId,
-
-                [Parameter(Mandatory)]
-                [ValidateNotNullOrEmpty()]
-                [System.String]
-                $ErrorMessage
-            )
-
-            $exception = New-Object -TypeName System.ArgumentException `
-                -ArgumentList $ErrorMessage
-            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
-            $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
-                -ArgumentList $exception, $ErrorId, $errorCategory, $null
-            return $errorRecord
-        } # end function Get-InvalidArgumentError
-
         #region Pester Test Initialization
 
         $script:VMName = 'HyperVUnitTestsVM'
@@ -479,12 +454,9 @@ try
                 Mock -CommandName Get-VMHardDiskDrive
 
                 It 'should throw exception' {
-                    $errorRecord = Get-InvalidArgumentError `
-                        -ErrorId 'RoleMissingError' `
-                        -ErrorMessage ($script:localizedData.RoleMissingError -f `
-                            'Hyper-V')
+                    $errorMessage = $script:localizedData.RoleMissingError -f 'Hyper-V'
 
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorRecord
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorMessage
                 }
 
                 It 'all the get mocks should be called' {
@@ -550,12 +522,9 @@ try
                 Mock -CommandName Get-VMHardDiskDrive
 
                 It 'should throw exception' {
-                    $errorRecord = Get-InvalidArgumentError `
-                        -ErrorId 'VMControllerDoesNotExistError' `
-                        -ErrorMessage ($script:localizedData.VMControllerDoesNotExistError -f `
-                            $script:VMName,0)
+                    $errorMessage = $script:localizedData.VMControllerDoesNotExistError -f $script:VMName, 0
 
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorRecord
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorMessage
                 }
 
                 It 'all the get mocks should be called' {
@@ -570,7 +539,7 @@ try
                 }
             }
 
-            Context 'VM exists, SCSI contrller exists, HD assigned' {
+            Context 'VM exists, SCSI controller exists, HD assigned' {
                 # Verifiable (should be called) mocks
                 Mock `
                     -CommandName Get-Module `
@@ -599,12 +568,9 @@ try
                 Mock -CommandName Get-VMIdeController
 
                 It 'should throw exception' {
-                    $errorRecord = Get-InvalidArgumentError `
-                        -ErrorId 'ControllerConflictError' `
-                        -ErrorMessage ($script:localizedData.ControllerConflictError -f `
-                            $script:VMName,0,1)
+                    $errorMessage = $script:localizedData.ControllerConflictError -f $script:VMName, 0, 1
 
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorRecord
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorMessage
                 }
 
                 It 'all the get mocks should be called' {
@@ -619,7 +585,7 @@ try
                 }
             }
 
-            Context 'VM exists, SCSI contrller exists, HD not assigned, Path invalid' {
+            Context 'VM exists, SCSI controller exists, HD not assigned, Path invalid' {
                 # Verifiable (should be called) mocks
                 Mock `
                     -CommandName Get-Module `
@@ -652,12 +618,9 @@ try
                 Mock -CommandName Get-VMIdeController
 
                 It 'should throw exception' {
-                    $errorRecord = Get-InvalidArgumentError `
-                        -ErrorId 'PathDoesNotExistError' `
-                        -ErrorMessage ($script:localizedData.PathDoesNotExistError -f `
-                            $script:TestISOPath)
+                    $errorMessage = $script:localizedData.PathDoesNotExistError -f $script:TestISOPath
 
-                    { Test-ParameterValid @script:splatAddDvdDrive } | Should -Throw $errorRecord
+                    { Test-ParameterValid @script:splatAddDvdDrive } | Should -Throw $errorMessage
                 }
 
                 It 'all the get mocks should be called' {
@@ -727,7 +690,5 @@ try
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Invoke-TestCleanup
 }
