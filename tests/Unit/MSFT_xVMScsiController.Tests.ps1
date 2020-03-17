@@ -75,7 +75,7 @@ try
 
                 $null = Get-TargetResource -VMName $testVMName -ControllerNumber 0
 
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'Hyper-V' } -Scope It
             }
         } # describe Get-TargetResource
 
@@ -240,12 +240,39 @@ try
             }
 
             It 'Should remove controller when Ensure = "Absent"' {
-                Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
-                $fakeVMScsiControllers = @(
-                    [PSCustomObject] @{ ControllerNumber = 0 }
-                    [PSCustomObject] @{ ControllerNumber = 1 }
+                Mock -CommandName Get-VMHyperV {
+                    return @{
+                        State = 'Running'
+                    }
+                }
+
+                $stubHardDiskDrive = [Microsoft.HyperV.PowerShell.HardDiskDrive]::CreateTypeInstance()
+                $stubHardDiskDrive.CimSession = New-MockObject -Type CimSession
+                $stubHardDiskDrive.Path = 'TestDrive:\disk1.vhdx'
+                $stubHardDiskDrive.ControllerLocation = 0
+                $stubHardDiskDrive.ControllerNumber = 0
+                $stubHardDiskDrive.ControllerType = 'SCSI'
+
+                $mockVMScsiController = [Microsoft.HyperV.PowerShell.VMScsiController]::CreateTypeInstance()
+                $mockVMScsiController.Drives = @(
+                    $stubHardDiskDrive
                 )
-                Mock -CommandName Get-VMScsiController { return $fakeVMScsiControllers }
+
+                # Mock getting all the available controllers
+                Mock -CommandName Get-VMScsiController -MockWith {
+                    return @(
+                        'mockController1'
+                        'mockController2'
+                    )
+                }
+
+                # Mock getting the specific controller with ControllerNumber -eq 1
+                Mock -CommandName Get-VMScsiController -MockWith {
+                    return $mockVMScsiController
+                } -ParameterFilter {
+                    $ControllerNumber -eq 1
+                }
+
                 $setTargetResourceParams = @{
                     VMName           = $testVMName
                     ControllerNumber = 1
@@ -260,14 +287,31 @@ try
 
             It 'Should remove all attached disks when Ensure = "Absent"' {
                 Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
-                $fakeVMScsiController = [PSCustomObject] @{
-                    ControllerNumber = 0
-                    Drives = @(
-                        [PSCustomObject] @{ Name = 'Hard Drive on SCSI controller number 0 at location 0' }
-                        [PSCustomObject] @{ Name = 'Hard Drive on SCSI controller number 0 at location 1' }
-                    )
-                }
-                Mock -CommandName Get-VMScsiController { return $fakeVMScsiController }
+
+                $stubHardDiskDrive1 = [Microsoft.HyperV.PowerShell.HardDiskDrive]::CreateTypeInstance()
+                $stubHardDiskDrive1.CimSession = New-MockObject -Type CimSession
+                $stubHardDiskDrive1.Name = 'Hard Drive on SCSI controller number 0 at location 0'
+                $stubHardDiskDrive1.Path = 'TestDrive:\disk1.vhdx'
+                $stubHardDiskDrive1.ControllerLocation = 0
+                $stubHardDiskDrive1.ControllerNumber = 0
+                $stubHardDiskDrive1.ControllerType = 'SCSI'
+
+                $stubHardDiskDrive2 = [Microsoft.HyperV.PowerShell.HardDiskDrive]::CreateTypeInstance()
+                $stubHardDiskDrive2.CimSession = New-MockObject -Type CimSession
+                $stubHardDiskDrive2.Name = 'Hard Drive on SCSI controller number 0 at location 1'
+                $stubHardDiskDrive2.Path = 'TestDrive:\disk2.vhdx'
+                $stubHardDiskDrive2.ControllerLocation = 0
+                $stubHardDiskDrive2.ControllerNumber = 0
+                $stubHardDiskDrive2.ControllerType = 'SCSI'
+
+                $mockVMScsiController = [Microsoft.HyperV.PowerShell.VMScsiController]::CreateTypeInstance()
+                $mockVMScsiController.Drives = @(
+                    $stubHardDiskDrive1
+                    $stubHardDiskDrive2
+                )
+
+                Mock -CommandName Get-VMScsiController { return $mockVMScsiController }
+
                 $setTargetResourceParams = @{
                     VMName           = $testVMName
                     ControllerNumber = 0
@@ -277,7 +321,7 @@ try
 
                 $null = Set-TargetResource @setTargetResourceParams -WarningAction SilentlyContinue
 
-                Assert-MockCalled -CommandName Remove-VMHardDiskDrive -Scope It -Exactly ($fakeVMScsiController.Drives.Count)
+                Assert-MockCalled -CommandName Remove-VMHardDiskDrive -Scope It -Exactly ($mockVMScsiController.Drives.Count)
             }
 
             It 'Should throw removing a controller when additional/subsequent controller(s) exist' {

@@ -79,7 +79,7 @@ try
 
                 $null = Get-TargetResource -VMName $testVMName -Path $testhardDiskPath
 
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'Hyper-V' } -Scope It
             }
         } # descrive Get-TargetResource
 
@@ -233,7 +233,7 @@ try
 
                 $null = Set-TargetResource -VMName $testVMName -Path $testHardDiskPath
 
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'Hyper-V' } -Scope It
             }
 
             It 'Should update existing hard disk' {

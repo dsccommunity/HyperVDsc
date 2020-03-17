@@ -639,6 +639,17 @@ function Test-TargetResource
                 return $false
             }
         }
+        else
+        {
+            if ($Ensure -eq 'Present')
+            {
+                return $false
+            }
+            else
+            {
+                return $true
+            }
+        }
     }
 
     # If no switch was present

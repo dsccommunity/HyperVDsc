@@ -46,25 +46,27 @@ try
                 $Id
             )
 
-            $mockedVMSwitch = @{
-                Name                            = $Name
-                SwitchType                      = 'External'
-                AllowManagementOS               = $true
-                EmbeddedTeamingEnabled          = $true
-                LoadBalancingAlgorithm          = 'HyperVPort'
-                BandwidthReservationMode        = 'Default'
-                NetAdapterInterfaceDescriptions = @("Microsoft Network Adapter Multiplexor Driver #1", "Microsoft Network Adapter Multiplexor Driver #2")
-            }
+            $mockedVMSwitch = [Microsoft.HyperV.PowerShell.VMSwitch]::CreateTypeInstance()
+            $mockedVMSwitch.Name = $Name
+            $mockedVMSwitch.SwitchType = 'External'
+            $mockedVMSwitch.AllowManagementOS = $true
+            $mockedVMSwitch.EmbeddedTeamingEnabled = $true
+            $mockedVMSwitch.BandwidthReservationMode = 'Default'
+            $mockedVMSwitch.NetAdapterInterfaceDescriptions = @(
+                'Microsoft Network Adapter Multiplexor Driver #1', 
+                'Microsoft Network Adapter Multiplexor Driver #2'
+            )
 
             if ($PSBoundParameters.ContainsKey('Id'))
             {
-                $mockedVMSwitch['Id'] = $Id
+                $mockedVMSwitch.Id = $Id
             }
             else
             {
-                $mockedVMSwitch['Id'] = New-Guid
+                $mockedVMSwitch.Id = New-Guid
             }
-            return [PsObject]$mockedVMSwitch
+
+            return $mockedVMSwitch
         }
 
         # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
@@ -73,7 +75,7 @@ try
         }
 
         Mock -CommandName Get-VMSwitch -MockWith {
-            return $Global:MockedVMSwitch
+            return $script:MockedVMSwitch
         }
 
         Mock -CommandName Get-NetAdapter -MockWith {
@@ -100,7 +102,7 @@ try
         }
 
         Mock -CommandName Remove-VMSwitch -MockWith {
-            $Global:mockedVMSwitch = $null
+            $script:mockedVMSwitch = $null
         }
 
         Mock -CommandName New-VMSwitch -MockWith {
@@ -136,11 +138,11 @@ try
 
             if($PSBoundParameters.ContainsKey('Id'))
             {
-                $Global:MockedVMSwitch = New-MockedVMSwitch -Name $Name -Id $id
+                $script:MockedVMSwitch = New-MockedVMSwitch -Name $Name -Id $id
             }
             else
             {
-                $Global:MockedVMSwitch = New-MockedVMSwitch -Name $Name
+                $script:MockedVMSwitch = New-MockedVMSwitch -Name $Name
             }
         }
 
@@ -158,7 +160,7 @@ try
         Describe 'MSFT_xVMSwitch\Get-TargetResource' -Tag 'Get' {
 
             Context 'When the system is in the desired state (VMSwitch has the desired Id)' {
-                $Global:MockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
+                $script:MockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
 
                 It 'Should return "present"' {
                     (Get-TargetResource -Name 'TestSwitch' -Type 'External').Ensure | Should -Be 'Present'
@@ -169,7 +171,7 @@ try
 
             Context 'When the system is not in the desired state (VMSwitch has not the desired Id)' {
 
-                $Global:mockedVMSwitch = $null
+                $script:mockedVMSwitch = $null
 
                 It 'Should return "absent"' {
                     (Get-TargetResource -Name 'TestSwitch' -Type 'External').Ensure | Should -Be 'Absent'
@@ -184,7 +186,7 @@ try
             Context 'When the system is in the desired state (VMSwitch has the desired Id)' {
                 $desiredVMSwitchID = New-Guid
 
-                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch' -Id $desiredVMSwitchID
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch' -Id $desiredVMSwitchID
 
                 $testParams = @{
                     Name                     = 'TestSwitch'
@@ -205,7 +207,7 @@ try
 
             Context 'When the system is not in the desired state (VMSwitch has not the desired Id)' {
 
-                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
 
                 $testParams = @{
                     Name                     = 'TestSwitch'
@@ -228,7 +230,7 @@ try
 
             Context 'When the specified value for Id parameter is not a GUID' {
 
-                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
 
                 $testParams = @{
                     Name                     = 'TestSwitch'
@@ -249,7 +251,7 @@ try
 
                 $desiredVMSwitchID = New-Guid
 
-                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch' -Id $desiredVMSwitchID
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch' -Id $desiredVMSwitchID
 
                 $testParams = @{
                     Name                     = 'TestSwitch'
@@ -278,7 +280,7 @@ try
 
                 $desiredVMSwitchID = New-Guid
 
-                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch' -Id $desiredVMSwitchID
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch' -Id $desiredVMSwitchID
 
                 $testParams = @{
                     Name                  = 'TestSwitch'
@@ -299,7 +301,7 @@ try
 
             Context 'When the system is not in the desired state (VMSwitch has not the desired Id)' {
 
-                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
 
                 $testParams = @{
                     Name                  = 'TestSwitch'
@@ -320,7 +322,7 @@ try
 
             Context 'When the specified value for Id parameter is not a GUID' {
 
-                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
 
                 $testParams = @{
                     Name                     = 'TestSwitch'
@@ -341,7 +343,7 @@ try
 
                 $desiredVMSwitchID = New-Guid
 
-                $Global:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch' -Id $desiredVMSwitchID
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch' -Id $desiredVMSwitchID
 
                 $testParams = @{
                     Name                     = 'TestSwitch'

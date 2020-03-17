@@ -24,7 +24,7 @@ function Get-TargetResource
         $VMName
     )
 
-    Assert-Module -Name 'Hyper-V'
+    Assert-Module -ModuleName 'Hyper-V'
     Write-Verbose -Message ($script:localizedData.QueryingVMProcessor -f $VMName)
     $vmProcessor = Get-VMProcessor -VMName $VMName -ErrorAction Stop
     $configuration = @{
@@ -162,7 +162,7 @@ function Test-TargetResource
         $RestartIfNeeded
     )
 
-    Assert-Module -Name 'Hyper-V'
+    Assert-Module -ModuleName 'Hyper-V'
     Assert-TargetResourceParameter @PSBoundParameters
 
     $targetResource = Get-TargetResource -VMName $VMName
@@ -309,7 +309,7 @@ function Set-TargetResource
         $RestartIfNeeded
     )
 
-    Assert-Module -Name 'Hyper-V'
+    Assert-Module -ModuleName 'Hyper-V'
     Assert-TargetResourceParameter @PSBoundParameters
 
     # Parameters requiring shutdown.

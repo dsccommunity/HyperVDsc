@@ -32,35 +32,34 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-
         # Create the Mock -CommandName Objects that will be used for running tests
         $MockHostAdapter = [PSCustomObject] @{
-            Id                  = 'HostManagement1'
-            Name                = 'Management'
-            SwitchName          = 'HostSwitch'
-            VMName              = 'ManagementOS'
+            Id         = 'HostManagement1'
+            Name       = 'Management'
+            SwitchName = 'HostSwitch'
+            VMName     = 'ManagementOS'
         }
 
         $propertiesStatic = @{
             IpAddress = "192.168.0.1"
-            Subnet = "255.255.255.0"
+            Subnet    = "255.255.255.0"
         }
 
         $networkSettingsStatic = New-CimInstance -ClassName xNetworkSettings -Property $properties -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
 
         $TestAdapter = [PSObject]@{
-            Id                      = $MockHostAdapter.Id
-            Name                    = $MockHostAdapter.Name
-            SwitchName              = $MockHostAdapter.SwitchName
-            VMName                  = $MockHostAdapter.VMName
+            Id         = $MockHostAdapter.Id
+            Name       = $MockHostAdapter.Name
+            SwitchName = $MockHostAdapter.SwitchName
+            VMName     = $MockHostAdapter.VMName
         }
 
-        $MockAdapter = [PSObject]@{
-            Name                    = $TestAdapter.Name
-            SwitchName              = $MockHostAdapter.SwitchName
-            IsManagementOs          = $True
-            MacAddress              = '14FEB5C6CE98'
-        }
+        $MockAdapter = [Microsoft.HyperV.PowerShell.VMNetworkAdapterBase]::CreateTypeInstance()
+        $MockAdapter.Name = $MockHostAdapter.Name
+        $MockAdapter.SwitchName = $MockHostAdapter.SwitchName
+        $MockAdapter.VMName = $MockHostAdapter.VMName
+        $MockAdapter.IsManagementOs = $true
+        $MockAdapter.MacAddress = '14FEB5C6CE98'
 
         $MockAdapterVlanUntagged = [PSObject]@{
             OperationMode = 'Untagged'
@@ -68,10 +67,10 @@ try
 
         $MockAdapterVlanTagged = [PSObject]@{
             OperationMode = 'Access'
-            AccessVlanId = '1'
+            AccessVlanId  = '1'
         }
 
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
+        Describe 'MSFT_xVMNetworkAdapter\Get-TargetResource' {
             Context 'NetAdapter does not exist' {
                 Mock -CommandName Get-VMNetworkAdapter
                 Mock -CommandName Get-VMNetworkAdapterVlan
@@ -86,31 +85,32 @@ try
                 }
             }
 
-            Context 'NetAdapter exists' {
+            Context 'NetAdapter with untagged VLAN exists' {
                 Mock -CommandName Get-VMNetworkAdapter -MockWith {
                     $MockAdapter
                 }
+
                 Mock -CommandName Get-VMNetworkAdapterVlan -MockWith {
                     $MockAdapterVlanUntagged
                 }
                 Mock -CommandName Get-NetworkInformation -MockWith {
                     return @{
-                        IpAddress = '10.10.10.10'
-                        Subnet = '255.255.255.0'
+                        IpAddress      = '10.10.10.10'
+                        Subnet         = '255.255.255.0'
                         DefaultGateway = '10.10.10.1'
-                        DnsServer = '10.10.10.1'
+                        DnsServer      = '10.10.10.1'
                     }
                 }
 
                 It 'should return adapter properties' {
                     $Result = Get-TargetResource @TestAdapter
-                    $Result.Ensure                 | Should -Be 'Present'
-                    $Result.Name                   | Should -Be $TestAdapter.Name
-                    $Result.SwitchName             | Should -Be $TestAdapter.SwitchName
-                    $Result.VMName                 | Should -Be 'ManagementOS'
-                    $Result.Id                     | Should -Be $TestAdapter.Id
-                    $Result.VlanId                 | Should -BeNullOrEmpty
-                    $Result.NetworkSetting         | Should -Not -BeNullOrEmpty
+                    $Result.Ensure | Should -Be 'Present'
+                    $Result.Name | Should -Be $TestAdapter.Name
+                    $Result.SwitchName | Should -Be $TestAdapter.SwitchName
+                    $Result.VMName | Should -Be 'ManagementOS'
+                    $Result.Id | Should -Be $TestAdapter.Id
+                    $Result.VlanId | Should -BeNullOrEmpty
+                    $Result.NetworkSetting | Should -Not -BeNullOrEmpty
                 }
                 It 'should call the expected mocks' {
                     Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
@@ -118,22 +118,32 @@ try
                 }
             }
 
-            Context 'NetAdapter exists' {
+            Context 'NetAdapter with tagged VLAN exists' {
                 Mock -CommandName Get-VMNetworkAdapter -MockWith {
                     $MockAdapter
                 }
+
                 Mock -CommandName Get-VMNetworkAdapterVlan -MockWith {
                     $MockAdapterVlanTagged
                 }
 
+                Mock -CommandName Get-NetworkInformation -MockWith {
+                    return @{
+                        IpAddress      = '10.10.10.10'
+                        Subnet         = '255.255.255.0'
+                        DefaultGateway = '10.10.10.1'
+                        DnsServer      = '10.10.10.1'
+                    }
+                }
+
                 It 'should return adapter properties' {
                     $Result = Get-TargetResource @TestAdapter
-                    $Result.Ensure                 | Should -Be 'Present'
-                    $Result.Name                   | Should -Be $TestAdapter.Name
-                    $Result.SwitchName             | Should -Be $TestAdapter.SwitchName
-                    $Result.VMName                 | Should -Be 'ManagementOS'
-                    $Result.Id                     | Should -Be $TestAdapter.Id
-                    $Result.VlanId                 | Should -Be '1'
+                    $Result.Ensure | Should -Be 'Present'
+                    $Result.Name | Should -Be $TestAdapter.Name
+                    $Result.SwitchName | Should -Be $TestAdapter.SwitchName
+                    $Result.VMName | Should -Be 'ManagementOS'
+                    $Result.Id | Should -Be $TestAdapter.Id
+                    $Result.VlanId | Should -Be '1'
                 }
                 It 'should call the expected mocks' {
                     Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
@@ -142,23 +152,25 @@ try
             }
         }
 
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
+        Describe 'MSFT_xVMNetworkAdapter\Set-TargetResource' {
             $newAdapter = [PSObject]@{
-                Id                      = 'UniqueString'
-                Name                    = $TestAdapter.Name
-                SwitchName              = $TestAdapter.SwitchName
-                VMName                  = 'VMName'
-                NetworkSetting          = $networkSettingsStatic
-                Ensure                  = 'Present'
+                Id             = 'UniqueString'
+                Name           = $TestAdapter.Name
+                SwitchName     = $TestAdapter.SwitchName
+                VMName         = 'VMName'
+                NetworkSetting = $networkSettingsStatic
+                Ensure         = 'Present'
             }
 
             Context 'Adapter does not exist but should' {
-
                 Mock -CommandName Get-VMNetworkAdapter
                 Mock -CommandName Get-VMNetworkAdapterVlan
-                Mock -CommandName Add-VMNetworkAdapter
+                Mock -CommandName Add-VMNetworkAdapter -MockWith {
+                    $MockAdapter
+                }
                 Mock -CommandName Remove-VMNetworkAdapter
                 Mock -CommandName Set-VMNetworkAdapterVlan
+                Mock -CommandName Get-NetworkInformation
                 Mock -CommandName Set-NetworkInformation
 
                 It 'should not throw error' {
@@ -166,11 +178,13 @@ try
                         Set-TargetResource @newAdapter
                     } | Should -Not -Throw
                 }
+
                 It 'should call expected Mocks' {
                     Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
                     Assert-MockCalled -CommandName Set-VMNetworkAdapterVlan -Exactly 0
                     Assert-MockCalled -commandName Add-VMNetworkAdapter -Exactly 1
                     Assert-MockCalled -commandName Remove-VMNetworkAdapter -Exactly 0
+                    Assert-MockCalled -CommandName Get-NetworkInformation -Exactly 1
                     Assert-MockCalled -CommandName Set-NetworkInformation -Exactly 1
                 }
             }
@@ -197,13 +211,13 @@ try
             }
         }
 
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
+        Describe 'MSFT_xVMNetworkAdapter\Test-TargetResource' {
             $newAdapter = [PSObject]@{
-                Id                      = 'UniqueString'
-                Name                    = $TestAdapter.Name
-                SwitchName              = $TestAdapter.SwitchName
-                VMName                  = 'ManagementOS'
-                Ensure                  = 'Present'
+                Id         = 'UniqueString'
+                Name       = $TestAdapter.Name
+                SwitchName = $TestAdapter.SwitchName
+                VMName     = 'ManagementOS'
+                Ensure     = 'Present'
             }
 
             Context 'Adapter does not exist but should' {
@@ -211,7 +225,7 @@ try
                 Mock -CommandName Get-VMNetworkAdapterVlan
 
                 It 'should return false' {
-                        Test-TargetResource @newAdapter | Should -be $false
+                    Test-TargetResource @newAdapter | Should -be $false
                 }
                 It 'should call expected Mocks' {
                     Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
@@ -250,9 +264,9 @@ try
 
                 It 'should return true' {
                     $updateAdapter = $newAdapter.Clone()
-                    $updateAdapter.VMName     = "VMName"
+                    $updateAdapter.VMName = "VMName"
                     $updateAdapter.MacAddress = '14FEB5C6CE98'
-                    $updateAdapter.VlanId     = '1'
+                    $updateAdapter.VlanId = '1'
                     Test-TargetResource @updateAdapter | Should -Be $true
                 }
                 It 'should call expected Mocks' {
@@ -268,7 +282,7 @@ try
 
                 It 'should return false' {
                     $updateAdapter = $newAdapter.Clone()
-                    $updateAdapter.VMName     = "VMName"
+                    $updateAdapter.VMName = "VMName"
                     $updateAdapter.MacAddress = '14FEB5C6CE98'
                     $updateAdapter.VlanId = '1'
                     Test-TargetResource @updateAdapter | Should -Be $false
@@ -286,7 +300,7 @@ try
 
                 It 'should return false' {
                     $updateAdapter = $newAdapter.Clone()
-                    $updateAdapter.VMName     = "VMName"
+                    $updateAdapter.VMName = "VMName"
                     $updateAdapter.MacAddress = '14FEB5C6CE98'
                     $updateAdapter.VlanId = '2'
                     Test-TargetResource @updateAdapter | Should -Be $false
@@ -319,7 +333,7 @@ try
 
                 It 'should return false' {
                     $updateAdapter = $newAdapter.Clone()
-                    $updateAdapter.VMName     = "VMName"
+                    $updateAdapter.VMName = "VMName"
                     $updateAdapter.MacAddress = '14FEB5C6CE98'
                     Test-TargetResource @updateAdapter | Should -Be $false
                 }

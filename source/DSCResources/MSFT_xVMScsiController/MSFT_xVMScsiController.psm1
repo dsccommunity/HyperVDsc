@@ -33,7 +33,7 @@ function Get-TargetResource
         $ControllerNumber
     )
 
-    Assert-Module -Name 'Hyper-V'
+    Assert-Module -ModuleName 'Hyper-V'
 
     $controller = Get-VMScsiController -VMName $VMName -ControllerNumber $ControllerNumber
     if ($null -eq $controller)
@@ -153,7 +153,7 @@ function Set-TargetResource
         $Ensure = 'Present'
     )
 
-    Assert-Module -Name 'Hyper-V'
+    Assert-Module -ModuleName 'Hyper-V'
 
     # Getting the state of the VM so we can restore it later
     $existingVmState = (Get-VMHyperV -VMName $VMName).State

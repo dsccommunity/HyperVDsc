@@ -11,8 +11,24 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 - xHyper-V
   - Added automatic release with a new CI pipeline.
+  - Added stubs for the powershell module Hyper-V that are used for
+    all unit tests.
 - xVhdFileDirectory
   - Added initial set of unit tests
+
+### Deprecated
+
+- xHyper-V
+  - The resource will not be tested for Windows Server 2008 R2 since
+    that operating system has reach end-of-life.
+
+### Removed
+
+- xVMSwitch
+  - Removed the unit test that simulated functionality on Windows Server 2008 R2
+    since that operating system has reach end-of-life. No functionality was
+    removed from the resource, but in a future release the resource might stop
+    working for Windows Server 2008 R2.
 
 ### Fixed
 
@@ -20,3 +36,6 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Fixed VMName property in example.
 - xVMNetworkAdapter
   - Fixed MacAddress sample data.
+- xVMSwitch
+  - Correctly return the state as `$true` or `$false` depending on the
+    `Ensure` property when the switch does not exist.

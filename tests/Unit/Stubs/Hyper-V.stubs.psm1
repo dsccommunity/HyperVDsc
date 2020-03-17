@@ -117,7 +117,7 @@ namespace Microsoft.HyperV.PowerShell
         ManagementCollectionType = 1,
     }
 
-    public class HardDiskDrive
+    public class HardDiskDrive : Drive
     {
         // Property
         public System.String Path { get; set; }
@@ -1252,6 +1252,9 @@ namespace Microsoft.HyperV.PowerShell
 
     public class VMNetworkAdapterBase
     {
+        // Manually added properties
+        public System.String MacAddress { get; set; }
+
         // Property
         public System.String SwitchName { get; set; }
         public System.String AdapterId { get; set; }

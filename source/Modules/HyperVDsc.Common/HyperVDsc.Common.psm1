@@ -237,31 +237,6 @@ function Wait-VMIPAddress
 
 <#
     .SYNOPSIS
-    Ensures that the specified PowerShell module(s) are installed.
-
-    .PARAMETER Name
-    Name of the PowerShell module to check is installed.
-#>
-function Assert-Module
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.String[]]
-        $Name
-    )
-
-    if (-not (Get-Module -Name $Name -ListAvailable ))
-    {
-        $errorMessage = $script:localizedData.RoleMissingError -f $Name
-
-        New-ObjectNotFoundException -Message $errorMessage
-    }
-} #end function
-
-<#
-    .SYNOPSIS
     Converts a number of seconds, minutes, hours or days into a System.TimeSpan object.
 
     .PARAMETER TimeInterval

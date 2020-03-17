@@ -25,7 +25,7 @@ function Get-TargetResource
         $IsSingleInstance
     )
 
-    Assert-Module -Name 'Hyper-V'
+    Assert-Module -ModuleName 'Hyper-V'
 
     Write-Verbose -Message $script:localizedData.QueryingVMHost
     $vmHost = Get-VMHost
@@ -211,7 +211,7 @@ function Test-TargetResource
         $VirtualMachineMigrationEnabled
     )
 
-    Assert-Module -Name 'Hyper-V'
+    Assert-Module -ModuleName 'Hyper-V'
 
     $targetResource = Get-TargetResource -IsSingleInstance $IsSingleInstance
     $isTargetResourceCompliant = $true
@@ -389,7 +389,7 @@ function Set-TargetResource
         $VirtualMachineMigrationEnabled
     )
 
-    Assert-Module -Name 'Hyper-V'
+    Assert-Module -ModuleName 'Hyper-V'
 
     $null = $PSBoundParameters.Remove('IsSingleInstance')
 

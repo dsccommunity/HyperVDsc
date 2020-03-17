@@ -35,7 +35,8 @@ try
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch
         {
-            param (
+            param 
+            (
                 [Parameter(Mandatory = $true)]
                 [string]
                 $Name,
@@ -45,96 +46,89 @@ try
                 [string]
                 $BandwidthReservationMode,
 
-                [parameter()]
+                [Parameter()]
                 [ValidateSet('Dynamic','HyperVPort')]
                 [String]
                 $LoadBalancingAlgorithm,
 
                 [Parameter()]
-                [bool]
+                [Boolean]
                 $AllowManagementOS = $false
             )
 
-            $mockedVMSwitch = @{
-                Name = $Name
-                SwitchType = 'External'
-                AllowManagementOS = $AllowManagementOS
-                NetAdapterInterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
-            }
+            $mockedVMSwitch = [Microsoft.HyperV.PowerShell.VMSwitch]::CreateTypeInstance()
+            $mockedVMSwitch.Name = $Name
+            $mockedVMSwitch.SwitchType = 'External'
+            $mockedVMSwitch.AllowManagementOS = $AllowManagementOS
+            $mockedVMSwitch.NetAdapterInterfaceDescriptions = 'Microsoft Network Adapter Multiplexor Driver'
 
             if ($BandwidthReservationMode -ne 'NA')
             {
-                $mockedVMSwitch['BandwidthReservationMode'] = $BandwidthReservationMode
+                $mockedVMSwitch.BandwidthReservationMode = $BandwidthReservationMode
             }
 
-            if($PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
+            if ($PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
             {
-                $mockedVMSwitch['LoadBalancingAlgorithm'] = $LoadBalancingAlgorithm
+                $mockedVMSwitch.LoadBalancingAlgorithm = $LoadBalancingAlgorithm
             }
 
-            return [PsObject]$mockedVMSwitch
+            return $mockedVMSwitch
         }
 
         Describe "MSFT_xVMSwitch" {
             <#
-                Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
+                Mocks Get-VMSwitch and will return $script:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
             #>
             Mock -CommandName Get-VMSwitch -MockWith {
-                param
-                (
-                    [string]
-                    $Name,
-
-                    [string]
-                    $SwitchType,
-
-                    [string]
-                    $ErrorAction
-                )
-
-                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null)
+                if ($ErrorAction -eq 'Stop' -and $script:mockedVMSwitch -eq $null)
                 {
                     throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
                 }
 
-                return $global:mockedVMSwitch
+                return $script:mockedVMSwitch
             }
 
             <#
-                Mocks New-VMSwitch and will assign a mocked switch to $global:mockedVMSwitch. This returns $global:mockedVMSwitch
+                Mocks New-VMSwitch and will assign a mocked switch to $script:mockedVMSwitch. This returns $script:mockedVMSwitch
                 which is a variable that is created during most It statements to mock a VMSwitch
             #>
             Mock -CommandName New-VMSwitch -MockWith {
                 param
                 (
+                    [Parameter()]
                     [string]
                     $Name,
 
+                    [Parameter()]
                     [string[]]
                     $NetAdapterName,
 
+                    [Parameter()]
                     [string]
                     $MinimumBandwidthMode = 'NA',
 
-                    [bool]
+                    [Parameter()]
+                    [Boolean]
                     $EnableEmbeddedTeaming,
 
-                    [bool]
+                    [Parameter()]
+                    [Boolean]
                     $AllowManagementOS
                 )
 
-                $global:mockedVMSwitch = New-MockedVMSwitch -Name $Name -BandwidthReservationMode $MinimumBandwidthMode -AllowManagementOS $AllowManagementOS
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name $Name -BandwidthReservationMode $MinimumBandwidthMode -AllowManagementOS $AllowManagementOS
                 #is SET is enabled mok a VMSwitchTeam
-                if($EnableEmbeddedTeaming){
-                    $global:mockedVMSwitchTeam = [PSCustomObject]@{
+                if ($EnableEmbeddedTeaming)
+                {
+                    $script:mockedVMSwitchTeam = [PSCustomObject]@{
                         Name = "TestSwitch"
                         Id = [Guid]::NewGuid()
                         TeamingMode = 'SwitchIndependent'
                         LoadBalancingAlgorithm = 'Dynamic'
                     }
                 }
-                return $global:mockedVMSwitch
+                return $script:mockedVMSwitch
             }
 
             Mock -CommandName Get-OSVersion -MockWith {
@@ -144,54 +138,21 @@ try
             }
 
             <#
-                Mocks Set-VMSwitch and will modify $global:mockedVMSwitch which is
-                a variable that is created during most It statements to mock a VMSwitch
-            #>
-            Mock -CommandName Set-VMSwitch -MockWith {
-                param
-                (
-                    [bool]
-                    $AllowManagementOS
-                )
-
-                if ($AllowManagementOS)
-                {
-                    $global:mockedVMSwitch['AllowManagementOS'] = $AllowManagementOS
-                }
-            }
-
-            <#
-                Mocks Remove-VMSwitch and will remove the variable $global:mockedVMSwitch which is
+                Mocks Remove-VMSwitch and will remove the variable $script:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
             #>
             Mock -CommandName Remove-VMSwitch -MockWith {
-                $global:mockedVMSwitch = $null
+                $script:mockedVMSwitch = $null
             }
 
             <#
                 Mocks Get-VMSwitchTeam and will return a moked VMSwitchTeam
             #>
             Mock -CommandName Get-VMSwitchTeam -MockWith {
-                return $global:mockedVMSwitchTeam
+                return $script:mockedVMSwitchTeam
             }
 
-            <#
-                Mocks Set-VMSwitchTeam and will return a moked VMSwitchTeam
-            #>
-            Mock -CommandName Set-VMSwitchTeam -MockWith {
-                param
-                (
-                    [parameter(Mandatory=$true)]
-                    [ValidateSet('Dynamic','HyperVPort')]
-                    [String]
-                    $LoadBalancingAlgorithm,
-
-                    [String]
-                    $Name
-                )
-
-                $global:mockedVMSwitchTeam.LoadBalancingAlgorithm = $LoadBalancingAlgorithm
-            }
+            Mock -CommandName Set-VMSwitchTeam
 
             # Mocks Get-NetAdapter which returns a simplified network adapter
             Mock -CommandName Get-NetAdapter -MockWith {
@@ -213,7 +174,7 @@ try
             }
 
             Context "A virtual switch with embedded teaming does not exist but should" {
-                $global:mockedVMSwitch = $null
+                $script:mockedVMSwitch = $null
 
                 $testParams = @{
                     Name = "TestSwitch"
@@ -240,22 +201,29 @@ try
             }
 
             Context "A virtual switch with embedded teaming exists and should" {
-                $global:mockedVMSwitch = @{
-                    Name = "TestSwitch"
-                    SwitchType = "External"
-                    AllowManagementOS = $true
-                    EmbeddedTeamingEnabled = $true
-                    Id = [Guid]::NewGuid()
-                    NetAdapterInterfaceDescriptions = @("Microsoft Network Adapter Multiplexor Driver #1", "Microsoft Network Adapter Multiplexor Driver #2")
+                $mockVMSwitch = [Microsoft.HyperV.PowerShell.VMSwitch]::CreateTypeInstance()
+                $mockVMSwitch.Name = 'NewSwitch'
+                $mockVMSwitch.SwitchType = 'External'
+                $mockVMSwitch.AllowManagementOS = $true
+                $mockVMSwitch.EmbeddedTeamingEnabled = $true
+                $mockVMSwitch.Id = [Guid]::NewGuid()
+                $mockVMSwitch.NetAdapterInterfaceDescriptions = @(
+                    'Microsoft Network Adapter Multiplexor Driver #1', 
+                    'Microsoft Network Adapter Multiplexor Driver #2'
+                )
+
+                Mock -CommandName Get-VMSwitch -MockWith {
+                    return $mockVMSwitch
+                } -ParameterFilter {
+                    $Name -eq 'NewSwitch'
                 }
 
                 $testParams = @{
-                    Name = "TestSwitch"
+                    Name = "NewSwitch"
                     Type = "External"
                     NetAdapterName = @("NIC1", "NIC2")
                     AllowManagementOS = $true
                     EnableEmbeddedTeaming = $true
-                    BandwidthReservationMode = "NA"
                     Ensure = "Present"
                 }
 
@@ -269,15 +237,23 @@ try
             }
 
             Context "A virtual switch with embedded teaming exists but does not refer to the correct adapters" {
-                $global:mockedVMSwitch = @{
-                    Name = "TestSwitch"
-                    SwitchType = "External"
-                    AllowManagementOS = $true
-                    EmbeddedTeamingEnabled = $true
-                    Id = [Guid]::NewGuid()
-                    NetAdapterInterfaceDescriptions = @("Wrong adapter", "Microsoft Network Adapter Multiplexor Driver #2")
-                }
+                $mockVMSwitch = [Microsoft.HyperV.PowerShell.VMSwitch]::CreateTypeInstance()
+                $mockVMSwitch.Name = 'NewSwitch'
+                $mockVMSwitch.SwitchType = 'External'
+                $mockVMSwitch.AllowManagementOS = $true
+                $mockVMSwitch.EmbeddedTeamingEnabled = $true
+                $mockVMSwitch.Id = [Guid]::NewGuid()
+                $mockVMSwitch.NetAdapterInterfaceDescriptions = @(
+                    'Wrong adapter', 
+                    'Microsoft Network Adapter Multiplexor Driver #2'
+                )
 
+                Mock -CommandName Get-VMSwitch -MockWith {
+                    return $mockVMSwitch
+                } -ParameterFilter {
+                    $Name -eq 'NewSwitch'
+                }
+                
                 Mock -CommandName Get-NetAdapter -MockWith {
                     return @(
                         [PSCustomObject]@{
@@ -292,12 +268,11 @@ try
                 }
 
                 $testParams = @{
-                    Name = "TestSwitch"
+                    Name = "NewSwitch"
                     Type = "External"
                     NetAdapterName = @("NIC1", "NIC2")
                     AllowManagementOS = $true
                     EnableEmbeddedTeaming = $true
-                    BandwidthReservationMode = "NA"
                     Ensure = "Present"
                 }
 
@@ -317,14 +292,30 @@ try
             }
 
             Context "A virtual switch with embedded teaming exists but does not use the correct LB algorithm" {
-                $global:mockedVMSwitch = @{
-                    Name = "TestSwitch"
-                    SwitchType = "External"
-                    AllowManagementOS = $true
-                    EmbeddedTeamingEnabled = $true
-                    LoadBalancingAlgorithm = 'Dynamic'
-                    Id = [Guid]::NewGuid()
-                    NetAdapterInterfaceDescriptions = @("Microsoft Network Adapter Multiplexor Driver #1", "Microsoft Network Adapter Multiplexor Driver #2")
+                $mockVMSwitch = [Microsoft.HyperV.PowerShell.VMSwitch]::CreateTypeInstance()
+                $mockVMSwitch.Name = 'NewSwitch'
+                $mockVMSwitch.SwitchType = 'External'
+                $mockVMSwitch.AllowManagementOS = $true
+                $mockVMSwitch.EmbeddedTeamingEnabled = $true
+                $mockVMSwitch.Id = [Guid]::NewGuid()
+                $mockVMSwitch.NetAdapterInterfaceDescriptions = @(
+                    'Microsoft Network Adapter Multiplexor Driver #1', 
+                    'Microsoft Network Adapter Multiplexor Driver #2'
+                )
+
+                Mock -CommandName Get-VMSwitch -MockWith {
+                    return $mockVMSwitch
+                } -ParameterFilter {
+                    $Name -eq 'NewSwitch'
+                }
+
+                $mockVMSwitchTeam = [Microsoft.HyperV.PowerShell.VMSwitchTeam]::CreateTypeInstance()
+                $mockVMSwitchTeam.Name = 'SwitchTeam'
+                $mockVMSwitchTeam.LoadBalancingAlgorithm = 'Dynamic'
+                $mockVMSwitchTeam.Id = [Guid]::NewGuid()
+
+                Mock -CommandName Get-VMSwitchTeam -MockWith {
+                    return $mockVMSwitchTeam
                 }
 
                 Mock -CommandName Get-NetAdapter -MockWith {
@@ -341,7 +332,7 @@ try
                 }
 
                 $testParams = @{
-                    Name = "TestSwitch"
+                    Name = "NewSwitch"
                     Type = "External"
                     NetAdapterName = @("NIC1", "NIC2")
                     AllowManagementOS = $true
@@ -366,17 +357,22 @@ try
             }
 
             Context "A virtual switch without embedded teaming exists but should use embedded teaming" {
-                $global:mockedVMSwitch = @{
-                    Name = "TestSwitch"
-                    SwitchType = "External"
-                    AllowManagementOS = $true
-                    EmbeddedTeamingEnabled = $false
-                    Id = [Guid]::NewGuid()
-                    NetAdapterInterfaceDescription = "Microsoft Network Adapter Multiplexor Driver #1"
+                $mockVMSwitch = [Microsoft.HyperV.PowerShell.VMSwitch]::CreateTypeInstance()
+                $mockVMSwitch.Name = 'NewSwitch'
+                $mockVMSwitch.SwitchType = 'External'
+                $mockVMSwitch.AllowManagementOS = $true
+                $mockVMSwitch.EmbeddedTeamingEnabled = $false
+                $mockVMSwitch.Id = [Guid]::NewGuid()
+                $mockVMSwitch.NetAdapterInterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver #1'
+
+                Mock -CommandName Get-VMSwitch -MockWith {
+                    return $mockVMSwitch
+                } -ParameterFilter {
+                    $Name -eq 'NewSwitch'
                 }
 
                 $testParams = @{
-                    Name = "TestSwitch"
+                    Name = "NewSwitch"
                     Type = "External"
                     NetAdapterName = @("NIC1", "NIC2")
                     AllowManagementOS = $true
@@ -401,17 +397,25 @@ try
             }
 
             Context "A virtual switch with embedded teaming exists but shouldn't" {
-                $global:mockedVMSwitch = @{
-                    Name = "TestSwitch"
-                    SwitchType = "External"
-                    AllowManagementOS = $true
-                    EmbeddedTeamingEnabled = $true
-                    Id = [Guid]::NewGuid()
-                    NetAdapterInterfaceDescriptions = @("Microsoft Network Adapter Multiplexor Driver #1", "Microsoft Network Adapter Multiplexor Driver #2")
+                $mockVMSwitch = [Microsoft.HyperV.PowerShell.VMSwitch]::CreateTypeInstance()
+                $mockVMSwitch.Name = 'NewSwitch'
+                $mockVMSwitch.SwitchType = 'External'
+                $mockVMSwitch.AllowManagementOS = $true
+                $mockVMSwitch.EmbeddedTeamingEnabled = $true
+                $mockVMSwitch.Id = [Guid]::NewGuid()
+                $mockVMSwitch.NetAdapterInterfaceDescriptions = @(
+                    'Microsoft Network Adapter Multiplexor Driver #1',
+                    'Microsoft Network Adapter Multiplexor Driver #2'
+                )
+
+                Mock -CommandName Get-VMSwitch -MockWith {
+                    return $mockVMSwitch
+                } -ParameterFilter {
+                    $Name -eq 'NewSwitch'
                 }
 
                 $testParams = @{
-                    Name = "TestSwitch"
+                    Name = "NewSwitch"
                     Type = "Internal"
                     Ensure = "Absent"
                 }
@@ -431,7 +435,7 @@ try
             }
 
             Context "A virtual switch with embedded teaming does not exist and shouldn't" {
-                $global:mockedVMSwitch = $null
+                $script:mockedVMSwitch = $null
 
                 $testParams = @{
                     Name = "TestSwitch"
@@ -449,7 +453,7 @@ try
             }
 
             Context "A server is not running Server 2016 and attempts to use embedded teaming" {
-                $global:mockedVMSwitch = $null
+                $script:mockedVMSwitch = $null
 
                 $testParams = @{
                     Name = "TestSwitch"

@@ -37,7 +37,7 @@ try
 
         Describe 'MSFT_xVMHost\Get-TargetResource' {
             $fakeVMHost = @{
-                ResourceMeteringSaveInterval = 60;
+                ResourceMeteringSaveInterval = 60
             }
 
             It 'Should return a [System.Collections.Hashtable] object type' {
@@ -55,7 +55,7 @@ try
 
                 $result = Get-TargetResource -IsSingleInstance 'Yes'
 
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'Hyper-V' } -Scope It
             }
 
         } # describe Get-TargetResource
@@ -66,22 +66,22 @@ try
             Mock -CommandName Assert-Module
 
             $fakeTargetResource = @{
-                IsSingleInstance = 'Yes';
-                EnableEnhancedSessionMode = $true;
-                FibreChannelWwnn = 'C003FF0000FFFF00';
-                FibreChannelWwpnMaximum = 'C003FFFBEAE1FFFF';
-                FibreChannelWwpnMinimum = 'C003FFFBEAE10000';
-                MacAddressMinimum = '00155D327500';
-                MacAddressMaximum = '00155D3275FF';
-                MaximumStorageMigrations = 2;
-                MaximumVirtualMachineMigrations = 2;
-                NumaSpanningEnabled = $true;
-                ResourceMeteringSaveIntervalMinute = 60;
-                UseAnyNetworkForMigration = $false;
-                VirtualMachinePath ='C:\ProgramData\Microsoft\Windows\Hyper-V';
-                VirtualMachineMigrationAuthenticationType = 'CredSSP';
-                VirtualMachineMigrationPerformanceOption = 'TCPIP';
-                VirtualHardDiskPath = 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks';
+                IsSingleInstance = 'Yes'
+                EnableEnhancedSessionMode = $true
+                FibreChannelWwnn = 'C003FF0000FFFF00'
+                FibreChannelWwpnMaximum = 'C003FFFBEAE1FFFF'
+                FibreChannelWwpnMinimum = 'C003FFFBEAE10000'
+                MacAddressMinimum = '00155D327500'
+                MacAddressMaximum = '00155D3275FF'
+                MaximumStorageMigrations = 2
+                MaximumVirtualMachineMigrations = 2
+                NumaSpanningEnabled = $true
+                ResourceMeteringSaveIntervalMinute = 60
+                UseAnyNetworkForMigration = $false
+                VirtualMachinePath ='C:\ProgramData\Microsoft\Windows\Hyper-V'
+                VirtualMachineMigrationAuthenticationType = 'CredSSP'
+                VirtualMachineMigrationPerformanceOption = 'TCPIP'
+                VirtualHardDiskPath = 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks'
                 VirtualMachineMigrationEnabled = $true
             }
 
@@ -89,8 +89,8 @@ try
                 Mock -CommandName Get-TargetResource { return $fakeTargetResource }
 
                 $testTargetResourceParams = @{
-                    IsSingleInstance = 'Yes';
-                    EnableEnhancedSessionMode = $fakeTargetResource.EnableEnhancedSessionMode;
+                    IsSingleInstance = 'Yes'
+                    EnableEnhancedSessionMode = $fakeTargetResource.EnableEnhancedSessionMode
                     VirtualMachineMigrationEnabled = $fakeTargetResource.VirtualMachineMigrationEnabled
                 }
                 $result = Test-TargetResource @testTargetResourceParams
@@ -102,12 +102,12 @@ try
                 Mock -CommandName Get-TargetResource { return $fakeTargetResource }
 
                 $testTargetResourceParams = @{
-                    IsSingleInstance = 'Yes';
-                    EnableEnhancedSessionMode = $fakeTargetResource.EnableEnhancedSessionMode;
+                    IsSingleInstance = 'Yes'
+                    EnableEnhancedSessionMode = $fakeTargetResource.EnableEnhancedSessionMode
                 }
                 $result = Test-TargetResource @testTargetResourceParams
 
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'Hyper-V' } -Scope It
             }
 
             $parameterNames = @(
@@ -130,91 +130,122 @@ try
             # Test each individual parameter value separately
             foreach ($parameterName in $parameterNames)
             {
-                $parameterValue = $fakeTargetResource[$parameterName];
+                $parameterValue = $fakeTargetResource[$parameterName]
                 $testTargetResourceParams = @{
-                    IsSingleInstance = 'Yes';
+                    IsSingleInstance = 'Yes'
                 }
 
                 # Pass value verbatim so it should always pass first
                 It "Should pass when parameter '$parameterName' is correct" {
                     $testTargetResourceParams[$parameterName] = $parameterValue
 
-                    $result = Test-TargetResource @testTargetResourceParams;
+                    $result = Test-TargetResource @testTargetResourceParams
 
-                    $result | Should -Be $true;
+                    $result | Should -Be $true
                 }
 
-                if ($parameterValue -is [System.Boolean]) {
-
+                if ($parameterValue -is [System.Boolean])
+                {
                     # Invert parameter value to cause a test failure
                     $testTargetResourceParams[$parameterName] = -not $parameterValue
                 }
-                elseif ($parameterValue -is [System.String]) {
-
+                elseif ($parameterValue -is [System.String])
+                {
                     # Repeat string to cause a test failure
                     $testTargetResourceParams[$parameterName] = "$parameterValue$parameterValue"
                 }
-                elseif ($parameterValue -is [System.Int32] -or $parameterValue -is [System.Int64]) {
-
+                elseif ($parameterValue -is [System.Int32] -or $parameterValue -is [System.Int64])
+                {
                     # Add one to cause a test failure
                     $testTargetResourceParams[$parameterName] = $parameterValue + 1
                 }
 
                 It "Should fail when parameter '$parameterName' is incorrect" {
-                    $result = Test-TargetResource @testTargetResourceParams;
+                    $result = Test-TargetResource @testTargetResourceParams
 
-                    $result | Should -Be $false;
+                    $result | Should -Be $false
                 }
             }
 
             It "Should pass when parameter <Parameter> is correct" -TestCases @(
-                @{  Parameter = 'VirtualMachineMigrationAuthenticationType';
-                    Value = $fakeTargetResource.VirtualMachineMigrationAuthenticationType;
-                    Expected = $true; }
-                @{  Parameter = 'VirtualMachineMigrationPerformanceOption';
-                    Value = $fakeTargetResource.VirtualMachineMigrationPerformanceOption;
-                    Expected = $true; }
-                @{  Parameter = 'VirtualMachineMigrationEnabled';
-                    Value = $fakeTargetResource.VirtualMachineMigrationEnabled;
-                    Expected = $true; }
+                @{
+                    Parameter = 'VirtualMachineMigrationAuthenticationType'
+                    Value = $fakeTargetResource.VirtualMachineMigrationAuthenticationType
+                    Expected = $true
+                }
+                @{
+                    Parameter = 'VirtualMachineMigrationPerformanceOption'
+                    Value = $fakeTargetResource.VirtualMachineMigrationPerformanceOption
+                    Expected = $true
+                }
+                @{
+                    Parameter = 'VirtualMachineMigrationEnabled'
+                    Value = $fakeTargetResource.VirtualMachineMigrationEnabled
+                    Expected = $true
+                }
             ) -Test {
-                param (
-                    [System.String] $Parameter,
-                    [System.Object] $Value,
-                    [System.Boolean] $Expected
+                param
+                (
+                    [Parameter()]
+                    [System.String]
+                    $Parameter,
+
+                    [Parameter()]
+                    [System.Object]
+                    $Value,
+
+                    [Parameter()]
+                    [System.Boolean]
+                    $Expected
                 )
 
                 $testTargetResourceParams = @{
-                    IsSingleInstance = 'Yes';
-                    $Parameter = $Value;
+                    IsSingleInstance = 'Yes'
+                    $Parameter = $Value
                 }
-                $result = Test-TargetResource @testTargetResourceParams | Should -Be $Expected;
+
+                $result = Test-TargetResource @testTargetResourceParams | Should -Be $Expected
             }
 
             It "Should fail when parameter <Parameter> is incorrect" -TestCases @(
-                @{  Parameter = 'VirtualMachineMigrationAuthenticationType';
-                    Value = 'Kerberos';
-                    Expected = $false; }
-                @{  Parameter = 'VirtualMachineMigrationPerformanceOption';
-                    Value = 'Compression';
-                    Expected = $false; }
-                @{  Parameter = 'VirtualMachineMigrationEnabled';
-                    Value = $true;
-                    Expected = $true; }
-            ) -Test {
-                    param
-                    (
-                        [System.String] $Parameter,
-                        [System.Object] $Value,
-                        [System.Boolean] $Expected
-                    )
-
-                    $testTargetResourceParams = @{
-                        IsSingleInstance = 'Yes';
-                        $Parameter = $Value;
-                    }
-                    $result = Test-TargetResource @testTargetResourceParams | Should -Be $Expected;
+                @{
+                    Parameter = 'VirtualMachineMigrationAuthenticationType'
+                    Value = 'Kerberos'
+                    Expected = $false
                 }
+                @{
+                    Parameter = 'VirtualMachineMigrationPerformanceOption'
+                    Value = 'Compression'
+                    Expected = $false
+                }
+                @{
+                    Parameter = 'VirtualMachineMigrationEnabled'
+                    Value = $true
+                    Expected = $true
+                }
+            ) -Test {
+                param
+                (
+                    [Parameter()]
+                    [System.String]
+                    $Parameter,
+
+                    [Parameter()]
+                    [System.Object]
+                    $Value,
+
+                    [Parameter()]
+                    [System.Boolean]
+                    $Expected
+                )
+
+                $testTargetResourceParams = @{
+                    IsSingleInstance = 'Yes'
+                    $Parameter = $Value
+                }
+
+                $result = Test-TargetResource @testTargetResourceParams | Should -Be $Expected
+            }
 
         } # describe Test-TargetResource
 
@@ -228,19 +259,20 @@ try
 
             It 'Should assert Hyper-V module is installed' {
                 $setTargetResourceParams = @{
-                    IsSingleInstance = 'Yes';
+                    IsSingleInstance = 'Yes'
                 }
 
                 $result = Set-TargetResource @setTargetResourceParams
 
-                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $Name -eq 'Hyper-V' } -Scope It
+                Assert-MockCalled -CommandName Assert-Module -ParameterFilter { $ModuleName -eq 'Hyper-V' } -Scope It
             }
 
             It 'Should call "Set-VMHost" with [System.TimeSpan] object when "ResourceMeteringSaveIntervalMinute" specified' {
                 $setTargetResourceParams = @{
-                    IsSingleInstance = 'Yes';
-                    ResourceMeteringSaveIntervalMinute = 60;
+                    IsSingleInstance = 'Yes'
+                    ResourceMeteringSaveIntervalMinute = 60
                 }
+
                 $result = Set-TargetResource @setTargetResourceParams
 
                 Assert-MockCalled -CommandName Set-VMHost -ParameterFilter { $ResourceMeteringSaveInterval -is [System.TimeSpan] }
@@ -248,7 +280,7 @@ try
 
             It 'Should call "Enable-VMMigration" when "VirtualMachineMigrationEnabled" is set to true and computer is domain joined' {
                 Mock -CommandName 'Get-CimInstance' -MockWith {
-                    [pscustomobject]@{
+                    [pscustomobject] @{
                         PartOfDomain = $true
                     }
                 }
@@ -268,7 +300,7 @@ try
 
             It 'Should not call "Enable-VMMigration" and should throw when "VirtualMachineMigrationEnabled" is set to true and computer is not domain joined' {
                 Mock -CommandName 'Get-CimInstance' -MockWith {
-                    [pscustomobject]@{
+                    [pscustomobject] @{
                         PartOfDomain = $false
                     }
                 }

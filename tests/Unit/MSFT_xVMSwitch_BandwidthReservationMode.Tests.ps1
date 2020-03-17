@@ -57,24 +57,23 @@ try
                 $AllowManagementOS = $false
             )
 
-            $mockedVMSwitch = @{
-                Name = $Name
-                SwitchType = 'External'
-                AllowManagementOS = $AllowManagementOS
-                NetAdapterInterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
-            }
+            $mockedVMSwitch = [Microsoft.HyperV.PowerShell.VMSwitch]::CreateTypeInstance()
+            $mockedVMSwitch.Name = $Name
+            $mockedVMSwitch.SwitchType = 'External'
+            $mockedVMSwitch.AllowManagementOS = $AllowManagementOS
+            $mockedVMSwitch.NetAdapterInterfaceDescription = 'Microsoft Network Adapter Multiplexor Driver'
 
             if ($BandwidthReservationMode -ne 'NA')
             {
-                $mockedVMSwitch['BandwidthReservationMode'] = $BandwidthReservationMode
+                $mockedVMSwitch.BandwidthReservationMode = $BandwidthReservationMode
             }
 
-            return [PsObject]$mockedVMSwitch
+            return $mockedVMSwitch
         }
 
         Describe 'Validates Get-TargetResource Function' {
             <#
-                Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
+                Mocks Get-VMSwitch and will return $script:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
             #>
             Mock -CommandName Get-VMSwitch -MockWith {
@@ -84,12 +83,12 @@ try
                     $ErrorAction
                 )
 
-                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null)
+                if ($ErrorAction -eq 'Stop' -and $script:mockedVMSwitch -eq $null)
                 {
                     throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
                 }
 
-                return $global:mockedVMSwitch
+                return $script:mockedVMSwitch
             }
 
             # Mocks Get-NetAdapter which returns a simplified network adapter
@@ -128,13 +127,13 @@ try
                 )
 
                 # Set the mocked VMSwitch to be returned from Get-VMSwitch based on the input from $getTestCases
-                $global:mockedVMSwitch = New-MockedVMSwitch -Name $CurrentName -BandwidthReservationMode $CurrentBandwidthReservationMode
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name $CurrentName -BandwidthReservationMode $CurrentBandwidthReservationMode
 
                 $targetResource = Get-TargetResource -Name $CurrentName -Type 'External'
                 $targetResource -is [System.Collections.Hashtable] | Should -Be $true
                 $targetResource['BandwidthReservationMode'] | Should -Be $CurrentBandwidthReservationMode
 
-                Remove-Variable -Scope 'Global' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
+                Remove-Variable -Scope 'script' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
             }
 
             <#
@@ -143,13 +142,13 @@ try
             #>
             It 'BandwidthReservationMode is set to null' {
                 # Set the mocked VMSwitch to be returned from Get-VMSwitch
-                $global:mockedVMSwitch = New-MockedVMSwitch -Name 'NaBRM' -BandwidthReservationMode 'NA'
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name 'NaBRM' -BandwidthReservationMode 'NA'
 
                 $targetResource = Get-TargetResource -Name 'NaBRM' -Type 'External'
                 $targetResource -is [System.Collections.Hashtable] | Should -Be $true
-                $targetResource['BandwidthReservationMode'] | Should -Be "NA"
+                $targetResource['BandwidthReservationMode'] | Should -Be "Default"
 
-                Remove-Variable -Scope 'Global' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
+                Remove-Variable -Scope 'script' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
             }
         }
 
@@ -193,7 +192,7 @@ try
 
         Describe 'Validates Test-TargetResource Function' {
             <#
-                Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
+                Mocks Get-VMSwitch and will return $script:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
             #>
             Mock -CommandName Get-VMSwitch -MockWith {
@@ -202,12 +201,12 @@ try
                     $ErrorAction
                 )
 
-                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null)
+                if ($ErrorAction -eq 'Stop' -and $script:mockedVMSwitch -eq $null)
                 {
                     throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
                 }
 
-                return $global:mockedVMSwitch
+                return $script:mockedVMSwitch
             }
 
             # Mocks Get-NetAdapter which returns a simplified network adapter
@@ -269,13 +268,13 @@ try
                 # Set the mocked VMSwitch to be returned from Get-VMSwitch if the switch exists
                 if ($CurrentName)
                 {
-                    $global:mockedVMSwitch = New-MockedVMSwitch -Name $CurrentName -BandwidthReservationMode $CurrentBandwidthReservationMode -AllowManagementOS $true
+                    $script:mockedVMSwitch = New-MockedVMSwitch -Name $CurrentName -BandwidthReservationMode $CurrentBandwidthReservationMode -AllowManagementOS $true
                 }
 
                 $targetResource = Test-TargetResource -Name $DesiredName -BandwidthReservationMode $DesiredBandwidthReservationMode -Type 'External' -NetAdapterName 'SomeNIC' -Ensure $Ensure -AllowManagementOS $true
                 $targetResource | Should -Be $ExpectedResult
 
-                Remove-Variable -Scope 'Global' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
+                Remove-Variable -Scope 'script' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
             }
 
             Mock -CommandName Get-OSVersion -MockWith {
@@ -289,15 +288,8 @@ try
                 {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorMessage
             }
 
-            # Test Test-TargetResource when the version of Windows doesn't support BandwidthReservationMode and specifies NA for BandwidthReservationMode
-            It 'Simulates Windows Server 2008 R2 | Desired BandwidthReservationMode set to "NA" | Ensure Present | Expected Result is True' {
-                $global:mockedVMSwitch = New-MockedVMSwitch -Name 'SomeSwitch' -BandwidthReservationMode 'NA' -AllowManagementOS $true
-                $targetResource = Test-TargetResource -Name 'SomeSwitch' -BandwidthReservationMode 'NA' -Type 'External' -NetAdapterName 'SomeNIC' -Ensure 'Present' -AllowManagementOS $true
-                $targetResource | Should -Be $true
-            }
-
             It 'Passes when "BandwidthReservationMode" does not match but is not specified (#48)' {
-                $global:mockedVMSwitch = New-MockedVMSwitch -Name 'SomeSwitch' -BandwidthReservationMode 'Absolute'
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name 'SomeSwitch' -BandwidthReservationMode 'Absolute'
                 $targetResource = Test-TargetResource -Name 'SomeSwitch' -Type 'Internal' -Ensure 'Present'
                 $targetResource | Should -Be $true
             }
@@ -305,7 +297,7 @@ try
 
         Describe 'Validates Set-TargetResource Function' {
             <#
-                Mocks Get-VMSwitch and will return $global:mockedVMSwitch which is
+                Mocks Get-VMSwitch and will return $script:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
             #>
             Mock -CommandName Get-VMSwitch -MockWith {
@@ -321,16 +313,16 @@ try
                     $ErrorAction
                 )
 
-                if ($ErrorAction -eq 'Stop' -and $global:mockedVMSwitch -eq $null)
+                if ($ErrorAction -eq 'Stop' -and $script:mockedVMSwitch -eq $null)
                 {
                     throw [System.Management.Automation.ActionPreferenceStopException]'No switch can be found by given criteria.'
                 }
 
-                return $global:mockedVMSwitch
+                return $script:mockedVMSwitch
             }
 
             <#
-                Mocks New-VMSwitch and will assign a mocked switch to $global:mockedVMSwitch. This returns $global:mockedVMSwitch
+                Mocks New-VMSwitch and will assign a mocked switch to $script:mockedVMSwitch. This returns $script:mockedVMSwitch
                 which is a variable that is created during most It statements to mock a VMSwitch
             #>
             Mock -CommandName New-VMSwitch -MockWith {
@@ -349,12 +341,12 @@ try
                     $AllowManagementOS
                 )
 
-                $global:mockedVMSwitch = New-MockedVMSwitch -Name $Name -BandwidthReservationMode $MinimumBandwidthMode -AllowManagementOS $AllowManagementOS
-                return $global:mockedVMSwitch
+                $script:mockedVMSwitch = New-MockedVMSwitch -Name $Name -BandwidthReservationMode $MinimumBandwidthMode -AllowManagementOS $AllowManagementOS
+                return $script:mockedVMSwitch
             }
 
             <#
-                Mocks Set-VMSwitch and will modify $global:mockedVMSwitch which is
+                Mocks Set-VMSwitch and will modify $script:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
             #>
             Mock -CommandName Set-VMSwitch -MockWith {
@@ -366,16 +358,16 @@ try
 
                 if ($AllowManagementOS)
                 {
-                    $global:mockedVMSwitch['AllowManagementOS'] = $AllowManagementOS
+                    $script:mockedVMSwitch['AllowManagementOS'] = $AllowManagementOS
                 }
             }
 
             <#
-                Mocks Remove-VMSwitch and will remove the variable $global:mockedVMSwitch which is
+                Mocks Remove-VMSwitch and will remove the variable $script:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch
             #>
             Mock -CommandName Remove-VMSwitch -MockWith {
-                $global:mockedVMSwitch = $null
+                $script:mockedVMSwitch = $null
             }
 
             # Mocks Get-NetAdapter which returns a simplified network adapter
@@ -393,16 +385,6 @@ try
 
             Mock -CommandName Get-OSVersion -MockWith {
                 return [Version]::Parse('6.3.9600')
-            }
-
-            # Create all the test cases for Get-TargetResource
-            $getTestCases = @()
-            foreach ($brmMode in $BANDWIDTH_RESERVATION_MODES)
-            {
-                $getTestCases += @{
-                    CurrentName = $brmMode + 'BRM'
-                    CurrentBandwidthReservationMode = $brmMode
-                }
             }
 
             It 'Current Name "<CurrentName>" | Current BandwidthReservationMode set to "<CurrentBandwidthReservationMode>" | Desired BandwidthReservationMode set to "<DesiredBandwidthReservationMode>" | Ensure "<Ensure>"' -TestCases $testSetTestCases {
@@ -433,10 +415,18 @@ try
                     $ExpectedResult
                 )
 
-                # Set the mocked VMSwitch to be returned from Get-VMSwitch if the switch exists
                 if ($CurrentName)
                 {
-                    $global:mockedVMSwitch = New-MockedVMSwitch -Name $CurrentName -BandwidthReservationMode $CurrentBandwidthReservationMode -AllowManagementOS $true
+                    # Set the mocked VMSwitch to be returned from Get-VMSwitch if the switch exists
+                    $script:mockedVMSwitch = New-MockedVMSwitch -Name $CurrentName -BandwidthReservationMode $CurrentBandwidthReservationMode -AllowManagementOS $true
+                }
+                else
+                {
+                    if ($Ensure -eq 'Absent')
+                    {
+                        # This is called when Ensure = 'Absent'. TO make sure there is a VMSwitch to remove.
+                        $script:mockedVMSwitch = New-MockedVMSwitch -Name $DesiredName -BandwidthReservationMode $DesiredBandwidthReservationMode -AllowManagementOS $true
+                    }
                 }
 
                 $targetResource = Set-TargetResource -Name $DesiredName -BandwidthReservationMode $DesiredBandwidthReservationMode -Type 'External' -NetAdapterName 'SomeNIC' -Ensure $Ensure -AllowManagementOS $true
@@ -466,7 +456,7 @@ try
                     Assert-MockCalled -CommandName Get-VMSwitch -Times 1 -Scope 'It'
                     Assert-MockCalled -CommandName Remove-VMSwitch -Times 1 -Scope 'It'
                 }
-                Remove-Variable -Scope 'Global' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
+                Remove-Variable -Scope 'script' -Name 'mockedVMSwitch' -ErrorAction 'SilentlyContinue'
             }
 
             # Test Set-TargetResource when the version of Windows doesn't support BandwidthReservationMode

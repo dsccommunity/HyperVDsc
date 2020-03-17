@@ -84,7 +84,7 @@ New-StubModule -FromModule 'Hyper-V' -Path $destinationFolder -FunctionBody $fun
 >SwitchParameter : False
 >```
 
-## Post-changes due to bugs
+## Post-changes
 
 Must add a reference to the namespace `Microsoft.Management.Infrastructure` for
 the type `Microsoft.Management.Infrastructure.CimSession` to work.
@@ -99,3 +99,26 @@ Add-Type -IgnoreWarnings -ReferencedAssemblies 'C:\Program Files (x86)\Reference
 One of the namespaces for `Microsoft.HyperV.PowerShell.Commands` is wrongly
 generated twice. Remove the duplicate namespace and make sure the enums
 `WaitVMTypes` and `RestartType` is moved _inside_ the class `RestartVM`.
+
+The property `MacAddress` is not added to the class `VMNetworkAdapterBase`
+and is needed for the resource unit test `xVMNetworkAdapter`.
+Normally the class `VMNetworkAdapter` probably inherits from `VMNetworkAdapterBase`
+and the class `VMNetworkAdapter` should be used in the unit test instead
+of `VMNetworkAdapterBase` but instead of trying to solve the inheritance
+issue this property was just added to the class `VMNetworkAdapterBase`.
+
+```csharp
+    public class VMNetworkAdapterBase
+    {
+        // Manually added properties
+        public System.String MacAddress { get; set; }
+
+        ...
+    }
+```
+
+The class `HardDiskDrive` should inherit from the class `Drive`.
+
+```csharp
+public class HardDiskDrive : Drive
+```

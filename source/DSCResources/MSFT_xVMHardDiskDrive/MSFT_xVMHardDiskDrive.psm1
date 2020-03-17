@@ -29,7 +29,7 @@ function Get-TargetResource
         $Path
     )
 
-    Assert-Module -Name 'Hyper-V'
+    Assert-Module -ModuleName 'Hyper-V'
 
     $hardDiskDrive = Get-VMHardDiskDrive -VMName $VMName -ErrorAction Stop |
                         Where-Object -FilterScript { $_.Path -eq $Path }
@@ -187,7 +187,7 @@ function Set-TargetResource
         $Ensure = 'Present'
     )
 
-    Assert-Module -Name 'Hyper-V'
+    Assert-Module -ModuleName 'Hyper-V'
 
     $hardDiskDrive = Get-VMHardDiskDrive -VMName $VMName |
                         Where-Object -FilterScript { $_.Path -eq $Path }

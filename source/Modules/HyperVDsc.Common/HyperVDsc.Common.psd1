@@ -34,7 +34,6 @@
         'Set-VMProperty'
         'Set-VMState'
         'Wait-VMIPAddress'
-        'Assert-Module'
         'ConvertTo-TimeSpan'
         'ConvertFrom-TimeSpan'
         'Get-VMHyperV'
