@@ -53,7 +53,7 @@ try
             $mockedVMSwitch.EmbeddedTeamingEnabled = $true
             $mockedVMSwitch.BandwidthReservationMode = 'Default'
             $mockedVMSwitch.NetAdapterInterfaceDescriptions = @(
-                'Microsoft Network Adapter Multiplexor Driver #1', 
+                'Microsoft Network Adapter Multiplexor Driver #1',
                 'Microsoft Network Adapter Multiplexor Driver #2'
             )
 
@@ -106,7 +106,8 @@ try
         }
 
         Mock -CommandName New-VMSwitch -MockWith {
-            Param(
+            param
+            (
                 [Parameter()]
                 [String]
                 $Name,
@@ -136,7 +137,7 @@ try
                 $Id
             )
 
-            if($PSBoundParameters.ContainsKey('Id'))
+            if ($PSBoundParameters.ContainsKey('Id'))
             {
                 $script:MockedVMSwitch = New-MockedVMSwitch -Name $Name -Id $id
             }
@@ -199,7 +200,7 @@ try
                 }
 
                 It 'Should run without without exceptions' {
-                    {Set-TargetResource @testParams} | Should -Not -Throw
+                    {Set-TargetResource @testParams} | Should -Not -throw
                     Assert-MockCalled -CommandName "Get-VMSwitch" -Times 1
                     Assert-MockCalled -CommandName 'Get-NetAdapter' -Times 1
                 }
@@ -220,7 +221,7 @@ try
                 }
 
                 It 'Should run without exception while re-creating the VMSwitch' {
-                    {Set-TargetResource @testParams} | Should -Not -Throw
+                    {Set-TargetResource @testParams} | Should -Not -throw
                     Assert-MockCalled -CommandName "Get-VMSwitch" -Times 1
                     Assert-MockCalled -CommandName 'Get-NetAdapter' -Times 1
                     Assert-MockCalled -CommandName 'Remove-VMSwitch' -Times 1
@@ -243,7 +244,7 @@ try
                 }
 
                 It 'Should throw "The VMSwitch Id must be in GUID format!"' {
-                    {Set-TargetResource @testParams} | Should -Throw 'The VMSwitch Id must be in GUID format!'
+                    {Set-TargetResource @testParams} | Should -throw 'The VMSwitch Id must be in GUID format!'
                 }
             }
 
@@ -270,7 +271,7 @@ try
                 $errorMessage = $script:localizedData.VMSwitchIDServer2016Error
 
                 It 'Should throw "VMSwitchIDServer2016Error"' {
-                    {Set-TargetResource @testParams} | Should -Throw $errorMessage
+                    {Set-TargetResource @testParams} | Should -throw $errorMessage
                 }
             }
         }
@@ -293,7 +294,7 @@ try
                 }
 
                 It 'Should return $true' {
-                    {Test-TargetResource @testParams} | Should -Not -Throw
+                    {Test-TargetResource @testParams} | Should -Not -throw
                     Assert-MockCalled -CommandName "Get-VMSwitch" -Times 1
                     Assert-MockCalled -CommandName 'Get-NetAdapter' -Times 1
                 }
@@ -314,7 +315,7 @@ try
                 }
 
                 It 'Should return $false' {
-                    {Test-TargetResource @testParams} | Should -Not -Throw
+                    {Test-TargetResource @testParams} | Should -Not -throw
                     Assert-MockCalled -CommandName "Get-VMSwitch" -Times 1
                     Assert-MockCalled -CommandName 'Get-NetAdapter' -Times 1
                 }
@@ -335,7 +336,7 @@ try
                 }
 
                 It 'Should throw "The VMSwitch Id must be in GUID format!"' {
-                    {Test-TargetResource @testParams} | Should -Throw 'The VMSwitch Id must be in GUID format!'
+                    {Test-TargetResource @testParams} | Should -throw 'The VMSwitch Id must be in GUID format!'
                 }
             }
 
@@ -362,7 +363,7 @@ try
                 $errorMessage = $script:localizedData.VMSwitchIDServer2016Error
 
                 It 'Should throw "VMSwitchIDServer2016Error"' {
-                    {Test-TargetResource @testParams} | Should -Throw $errorMessage
+                    {Test-TargetResource @testParams} | Should -throw $errorMessage
                 }
             }
 

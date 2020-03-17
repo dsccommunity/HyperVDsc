@@ -24,29 +24,30 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 .PARAMETER IpAddress
     Specifies the IpAddress information for the network adapter.
 #>
-Function Get-TargetResource
+function Get-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
-    Param (
-        [Parameter(Mandatory)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [String] $Id,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $Name,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $SwitchName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $VMName
     )
 
     $configuration = @{
-        Id = $Id
-        Name = $Name
+        Id         = $Id
+        Name       = $Name
         SwitchName = $SwitchName
-        VMName = $VMName
+        VMName     = $VMName
     }
 
     $arguments = @{
@@ -55,7 +56,7 @@ Function Get-TargetResource
 
     if ($VMName -ne 'ManagementOS')
     {
-        $arguments.Add('VMName',$VMName)
+        $arguments.Add('VMName', $VMName)
     }
     else
     {
@@ -81,13 +82,13 @@ Function Get-TargetResource
         }
 
         $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
-        if($networkInfo)
+        if ($networkInfo)
         {
             $item = New-CimInstance -ClassName MSFT_xNetworkSettings -Property $networkInfo -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
             $configuration.Add('NetworkSetting', $item)
         }
 
-        $configuration.Add('Ensure','Present')
+        $configuration.Add('Ensure', 'Present')
 
         Write-Verbose -Message $script:localizedData.GetVMNetAdapterVlan
         $netAdapterVlan = Get-VMNetworkAdapterVlan -VMNetworkAdapter $netAdapter
@@ -99,7 +100,7 @@ Function Get-TargetResource
     else
     {
         Write-Verbose -Message $script:localizedData.NoVMNetAdapterFound
-        $configuration.Add('Ensure','Absent')
+        $configuration.Add('Ensure', 'Absent')
     }
 
     return $configuration
@@ -135,20 +136,21 @@ Function Get-TargetResource
 .PARAMETER Ensure
     Specifies if the network adapter should be Present or Absent.
 #>
-Function Set-TargetResource
+function Set-TargetResource
 {
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [String] $Id,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $Name,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $SwitchName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String] $VMName,
 
         [Parameter()]
@@ -162,8 +164,8 @@ Function Set-TargetResource
         [String] $VlanId,
 
         [Parameter()]
-        [ValidateSet('Present','Absent')]
-        [String] $Ensure='Present'
+        [ValidateSet('Present', 'Absent')]
+        [String] $Ensure = 'Present'
     )
 
     $arguments = @{
@@ -172,7 +174,7 @@ Function Set-TargetResource
 
     if ($VMName -ne 'ManagementOS')
     {
-        $arguments.Add('VMName',$VMName)
+        $arguments.Add('VMName', $VMName)
     }
     else
     {
@@ -223,10 +225,10 @@ Function Set-TargetResource
                     Write-Verbose -Message $script:localizedData.PerformVMNetModify
 
                     $setArguments = @{ }
-                    $setArguments.Add('VMNetworkAdapter',$netAdapterExists)
+                    $setArguments.Add('VMNetworkAdapter', $netAdapterExists)
                     if ($MacAddress)
                     {
-                        $setArguments.Add('StaticMacAddress',$MacAddress)
+                        $setArguments.Add('StaticMacAddress', $MacAddress)
                     }
                     else
                     {
@@ -242,13 +244,13 @@ Function Set-TargetResource
             {
                 if (-not $MacAddress)
                 {
-                    $arguments.Add('DynamicMacAddress',$true)
+                    $arguments.Add('DynamicMacAddress', $true)
                 }
                 else
                 {
-                    $arguments.Add('StaticMacAddress',$MacAddress)
+                    $arguments.Add('StaticMacAddress', $MacAddress)
                 }
-                $arguments.Add('SwitchName',$SwitchName)
+                $arguments.Add('SwitchName', $SwitchName)
             }
             Write-Verbose -Message $script:localizedData.AddVMNetAdapter
             $netAdapterExists = Add-VMNetworkAdapter @arguments -Passthru -ErrorAction Stop
@@ -259,7 +261,7 @@ Function Set-TargetResource
             $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
             if (-not $NetworkSetting)
             {
-                if($networkInfo)
+                if ($networkInfo)
                 {
                     Write-Verbose -Message $script:localizedData.EnableDhcp
                     Set-NetworkInformation -VMName $VMName -Name $Name -Dhcp
@@ -267,7 +269,7 @@ Function Set-TargetResource
             }
             else
             {
-                $parameters = @{}
+                $parameters = @{ }
                 if ($ipAddress = $NetworkSetting.CimInstanceProperties["IpAddress"].Value)
                 {
                     if (-not $ipAddress)
@@ -359,36 +361,44 @@ Function Set-TargetResource
 .PARAMETER Ensure
     Specifies if the network adapter should be Present or Absent.
 #>
-Function Test-TargetResource
+function Test-TargetResource
 {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
-    Param (
-        [Parameter(Mandatory)]
-        [String] $Id,
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Id,
 
-        [Parameter(Mandatory)]
-        [String] $Name,
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Name,
 
-        [Parameter(Mandatory)]
-        [String] $SwitchName,
+        [Parameter(Mandatory = $true)]
+        [String]
+        $SwitchName,
 
-        [Parameter(Mandatory)]
-        [String] $VMName,
+        [Parameter(Mandatory = $true)]
+        [String]
+        $VMName,
 
         [Parameter()]
-        [String] $MacAddress,
+        [String]
+        $MacAddress,
 
         [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $NetworkSetting,
 
         [Parameter()]
-        [String] $VlanId,
+        [String]
+        $VlanId,
 
         [Parameter()]
-        [ValidateSet('Present','Absent')]
-        [String] $Ensure='Present'
+        [ValidateSet('Present', 'Absent')]
+        [String]
+        $Ensure = 'Present'
     )
 
     $arguments = @{
@@ -397,7 +407,7 @@ Function Test-TargetResource
 
     if ($VMName -ne 'ManagementOS')
     {
-        $arguments.Add('VMName',$VMName)
+        $arguments.Add('VMName', $VMName)
     }
     else
     {
@@ -439,7 +449,7 @@ Function Test-TargetResource
                 $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
                 if (-not $NetworkSetting)
                 {
-                    if($networkInfo)
+                    if ($networkInfo)
                     {
                         Write-Verbose -Message $script:localizedData.NotDhcp
                         return $false
@@ -562,12 +572,15 @@ function Get-NetworkInformation
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
-    Param (
-        [Parameter(Mandatory)]
-        [String] $VMName,
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $VMName,
 
-        [Parameter(Mandatory)]
-        [String] $Name
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Name
     )
 
     $vm = Get-WmiObject -Namespace 'root\virtualization\v2' -Class 'Msvm_ComputerSystem' | Where-Object { $_.ElementName -ieq "$VmName" }
@@ -582,10 +595,10 @@ function Get-NetworkInformation
     else
     {
         return  @{
-            IpAddress = $networkSettings.IPAddresses -join ','
-            Subnet = $networkSettings.Subnets -join ','
+            IpAddress      = $networkSettings.IPAddresses -join ','
+            Subnet         = $networkSettings.Subnets -join ','
             DefaultGateway = $networkSettings.DefaultGateways -join ','
-            DnsServer = $networkSettings.DNSServers -join ','
+            DnsServer      = $networkSettings.DNSServers -join ','
         }
     }
 
@@ -594,27 +607,35 @@ function Get-NetworkInformation
 function Set-NetworkInformation
 {
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory)]
-        [String] $VMName,
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $VMName,
 
-        [Parameter(Mandatory)]
-        [String] $Name,
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Name,
 
-        [Parameter(ParameterSetName='Dhcp')]
-        [switch] $Dhcp,
+        [Parameter(ParameterSetName = 'Dhcp')]
+        [switch]
+        $Dhcp,
 
-        [Parameter(Mandatory, ParameterSetName='Static')]
-        [String] $IPAddress,
+        [Parameter(Mandatory = $true, ParameterSetName = 'Static')]
+        [String]
+        $IPAddress,
 
-        [Parameter(Mandatory, ParameterSetName='Static')]
-        [String] $Subnet,
+        [Parameter(Mandatory = $true, ParameterSetName = 'Static')]
+        [String]
+        $Subnet,
 
-        [Parameter(ParameterSetName='Static')]
-        [String] $DefaultGateway,
+        [Parameter(ParameterSetName = 'Static')]
+        [String]
+        $DefaultGateway,
 
-        [Parameter(ParameterSetName='Static')]
-        [String] $DnsServer
+        [Parameter(ParameterSetName = 'Static')]
+        [String]
+        $DnsServer
     )
 
     $vm = Get-WmiObject -Namespace 'root\virtualization\v2' -Class 'Msvm_ComputerSystem' | Where-Object { $_.ElementName -ieq "$VmName" }
@@ -632,6 +653,7 @@ function Set-NetworkInformation
             $networkSettings.DefaultGateways = @()
             $networkSettings.DNSServers = @()
         }
+
         'Static'
         {
             $networkSettings.IPAddresses = $IPAddress
@@ -641,13 +663,16 @@ function Set-NetworkInformation
             {
                 $networkSettings.DefaultGateways = $DefaultGateway
             }
+
             if ($DnsServer)
             {
                 $networkSettings.DNSServers = $DNSServer
             }
+
             $networkSettings.DHCPEnabled = $false
         }
     }
+
     $networkSettings.ProtocolIFType = 4096
 
     $service = Get-WmiObject -Class "Msvm_VirtualSystemManagementService" -Namespace "root\virtualization\v2"
@@ -663,7 +688,7 @@ function Set-NetworkInformation
             $job = [WMI]$setIP.job
         }
 
-        if($job.JobState -ne 7)
+        if ($job.JobState -ne 7)
         {
             throw $job.GetError().Error
         }

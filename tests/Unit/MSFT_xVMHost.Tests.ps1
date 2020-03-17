@@ -310,7 +310,7 @@ try
                     VirtualMachineMigrationEnabled = $true
                 }
 
-                { Set-TargetResource @setTargetResourceParams } | Should -Throw
+                { Set-TargetResource @setTargetResourceParams } | Should -throw
                 Assert-MockCalled -CommandName Enable-VMMigration -Times 0 -Exactly -Scope it
                 Assert-MockCalled -CommandName Disable-VMMigration -Times 0 -Exactly -Scope it
             }

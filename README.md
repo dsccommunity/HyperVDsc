@@ -138,7 +138,7 @@ None
 
 #### Examples xVhdFile
 
-* [Multiple examples](/source/Examples/Sample_xVhdFileExamples.ps1)
+* [Multiple examples](/source/Examples)
 
 ### xVMDvdDrive
 

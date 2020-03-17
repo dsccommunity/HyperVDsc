@@ -35,7 +35,7 @@ try
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch
         {
-            param 
+            param
             (
                 [Parameter(Mandatory = $true)]
                 [string]
@@ -208,7 +208,7 @@ try
                 $mockVMSwitch.EmbeddedTeamingEnabled = $true
                 $mockVMSwitch.Id = [Guid]::NewGuid()
                 $mockVMSwitch.NetAdapterInterfaceDescriptions = @(
-                    'Microsoft Network Adapter Multiplexor Driver #1', 
+                    'Microsoft Network Adapter Multiplexor Driver #1',
                     'Microsoft Network Adapter Multiplexor Driver #2'
                 )
 
@@ -244,7 +244,7 @@ try
                 $mockVMSwitch.EmbeddedTeamingEnabled = $true
                 $mockVMSwitch.Id = [Guid]::NewGuid()
                 $mockVMSwitch.NetAdapterInterfaceDescriptions = @(
-                    'Wrong adapter', 
+                    'Wrong adapter',
                     'Microsoft Network Adapter Multiplexor Driver #2'
                 )
 
@@ -253,7 +253,7 @@ try
                 } -ParameterFilter {
                     $Name -eq 'NewSwitch'
                 }
-                
+
                 Mock -CommandName Get-NetAdapter -MockWith {
                     return @(
                         [PSCustomObject]@{
@@ -299,7 +299,7 @@ try
                 $mockVMSwitch.EmbeddedTeamingEnabled = $true
                 $mockVMSwitch.Id = [Guid]::NewGuid()
                 $mockVMSwitch.NetAdapterInterfaceDescriptions = @(
-                    'Microsoft Network Adapter Multiplexor Driver #1', 
+                    'Microsoft Network Adapter Multiplexor Driver #1',
                     'Microsoft Network Adapter Multiplexor Driver #2'
                 )
 
@@ -476,13 +476,13 @@ try
                 It "Should throw an error in the test method" {
                     $errorMessage = $script:localizedData.SETServer2016Error
 
-                    {Test-TargetResource @testParams} | Should -Throw $errorMessage
+                    {Test-TargetResource @testParams} | Should -throw $errorMessage
                 }
 
                 It "Should throw an error in the set method" {
                     $errorMessage = $script:localizedData.SETServer2016Error
 
-                    {Set-TargetResource @testParams} | Should -Throw $errorMessage
+                    {Set-TargetResource @testParams} | Should -throw $errorMessage
                 }
             }
         }

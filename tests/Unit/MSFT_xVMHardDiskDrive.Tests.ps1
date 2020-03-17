@@ -193,7 +193,7 @@ try
                     ControllerNumber = 2
                 }
 
-                { Test-TargetResource @testTargetResourceParams } | Should -Throw 'not valid'
+                { Test-TargetResource @testTargetResourceParams } | Should -throw 'not valid'
             }
 
             It 'Should throw when IDE controller location 2 is specified' {
@@ -204,7 +204,7 @@ try
                     ControllerLocation = 2
                 }
 
-                { Test-TargetResource @testTargetResourceParams } | Should -Throw 'not valid'
+                { Test-TargetResource @testTargetResourceParams } | Should -throw 'not valid'
             }
         } # describe Test-TargetResource
 
@@ -257,7 +257,7 @@ try
                 Mock -CommandName Get-VMHardDiskDrive
                 Mock -CommandName Get-VMHardDiskDrive -ParameterFilter { $PSBoundParameters.ContainsKey('ControllerType') } { return $stubHardDiskDrive }
 
-                { Set-TargetResource -VMName $testVMName -Path $testHardDiskPath } | Should -Throw 'disk present'
+                { Set-TargetResource -VMName $testVMName -Path $testHardDiskPath } | Should -throw 'disk present'
             }
 
             It 'Should remove attached hard disk when Ensure is "Absent"' {

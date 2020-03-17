@@ -176,7 +176,7 @@ try
                 It 'should not throw error' {
                     {
                         Set-TargetResource @newAdapter
-                    } | Should -Not -Throw
+                    } | Should -Not -throw
                 }
 
                 It 'should call expected Mocks' {
@@ -200,7 +200,7 @@ try
                         $updateAdapter = $newAdapter.Clone()
                         $updateAdapter.Ensure = 'Absent'
                         Set-TargetResource @updateAdapter
-                    } | Should -Not -Throw
+                    } | Should -Not -throw
                 }
                 It 'should call expected Mocks' {
                     Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1

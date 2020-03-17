@@ -395,7 +395,7 @@ try
                                         Ensure = 'Present'
                                      }
                     { Test-TargetResource -VhdPath $vhdPath -FileDirectory $fileDirectory } |
-                     Should -Throw "VHD does not exist in the specified path $vhdPath"
+                     Should -throw "VHD does not exist in the specified path $vhdPath"
                 }
             }
         }
@@ -412,7 +412,7 @@ try
             Context 'When the system is in the desired state' {
                 $testCases_Set_InDesiredState = @(
                     @{
-                        TestName = 'not Throw'
+                        TestName = 'not throw'
                         VhdPath = 'TestDrive:\VhdExists.vhdx'
                         FileDirectory =  (
                             New-CimInstance -ClassName $script:dscFileDirClassName -Namespace  $script:dscNamespace -ClientOnly -Property @{
@@ -432,7 +432,7 @@ try
                         $ExpectedResult
                     )
 
-                    { Set-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectory } | Should -Not -Throw
+                    { Set-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectory } | Should -Not -throw
                 }
             }
 

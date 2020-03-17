@@ -65,7 +65,7 @@ try
             It 'Should throw when VM processor is not found' {
                 Mock -CommandName Get-Module { return $true }
                 Mock -CommandName Get-VMProcessor { Write-Error 'Not Found' }
-                { $null = Get-TargetResource -VMName $testVMName } | Should -Throw 'Not Found'
+                { $null = Get-TargetResource -VMName $testVMName } | Should -throw 'Not Found'
             }
         } # descrive Get-TargetResource
 
@@ -209,13 +209,13 @@ try
                 It "Should not throw when VM is off, '$($parameter.Name)' is specified and 'RestartIfNeeded' is False" {
                     Mock -CommandName Get-VM { return @{ State = 'Off' } }
 
-                    { Set-TargetResource @setTargetResourceParams } | Should -Not -Throw
+                    { Set-TargetResource @setTargetResourceParams } | Should -Not -throw
                 }
 
                 It "Should throw when VM is running, '$($parameter.Name)' is specified and 'RestartIfNeeded' is False" {
                     Mock -CommandName Get-VM { return @{ State = 'Running' } }
 
-                    { Set-TargetResource @setTargetResourceParams } | Should -Throw
+                    { Set-TargetResource @setTargetResourceParams } | Should -throw
                 }
 
                 It "Should shutdown VM when running, '$($parameter.Name)' is specified and 'RestartIfNeeded' is True" {
@@ -258,7 +258,7 @@ try
             Mock -CommandName Get-CimInstance { return @{ BuildNumber = '9600' } }
 
             It "Should not throw when parameter 'ResourcePoolName' is specified on 2012 R2 host" {
-                { Assert-TargetResourceParameter -ResourcePoolName 'TestPool' } | Should -Not -Throw
+                { Assert-TargetResourceParameter -ResourcePoolName 'TestPool' } | Should -Not -throw
             }
 
             $server2016OnlyParameters = @{
@@ -274,7 +274,7 @@ try
                 }
 
                 It "Should throw when parameter '$($parameter.Name)' is specified on 2012 R2 host" {
-                    { Assert-TargetResourceParameter @assertTargetResourceParameterParams } | Should -Throw '14393'
+                    { Assert-TargetResourceParameter @assertTargetResourceParameterParams } | Should -throw '14393'
                 }
             }
         } # describe Assert-TargetResourceParameter

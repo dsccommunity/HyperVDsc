@@ -4,19 +4,19 @@ configuration Sample_xVMHyperV_DynamicMemory
     (
         [string[]]$NodeName = 'localhost',
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string]$VMName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string]$VhdPath,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [Uint64]$StartupMemory,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [Uint64]$MinimumMemory,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [Uint64]$MaximumMemory
     )
 

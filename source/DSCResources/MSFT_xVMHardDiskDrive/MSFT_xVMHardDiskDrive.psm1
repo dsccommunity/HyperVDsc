@@ -32,7 +32,7 @@ function Get-TargetResource
     Assert-Module -ModuleName 'Hyper-V'
 
     $hardDiskDrive = Get-VMHardDiskDrive -VMName $VMName -ErrorAction Stop |
-                        Where-Object -FilterScript { $_.Path -eq $Path }
+        Where-Object -FilterScript { $_.Path -eq $Path }
 
     if ($null -eq $hardDiskDrive)
     {
@@ -111,7 +111,7 @@ function Test-TargetResource
 
     $resource = Get-TargetResource -VMName $VMName -Path $Path
 
-    # Throw exception when the ControllerNumber or ControllerLocation are out of bounds for IDE
+    # throw exception when the ControllerNumber or ControllerLocation are out of bounds for IDE
     if ($ControllerType -eq 'IDE' -and ($ControllerNumber -gt 1 -or $ControllerLocation -gt 1))
     {
         $errorMessage = $script:localizedData.IdeLocationError -f $ControllerNumber, $ControllerLocation
@@ -126,8 +126,8 @@ function Test-TargetResource
         if ($resource.ContainsKey($key))
         {
             Write-Verbose -Message ($script:localizedData.ComparingParameter -f $key,
-                                                                    $PSBoundParameters[$key],
-                                                                    $resource[$key])
+                $PSBoundParameters[$key],
+                $resource[$key])
             $isCompliant = $isCompliant -and ($PSBoundParameters[$key] -eq $resource[$key])
         }
     }
@@ -190,7 +190,7 @@ function Set-TargetResource
     Assert-Module -ModuleName 'Hyper-V'
 
     $hardDiskDrive = Get-VMHardDiskDrive -VMName $VMName |
-                        Where-Object -FilterScript { $_.Path -eq $Path }
+        Where-Object -FilterScript { $_.Path -eq $Path }
 
     if ($Ensure -eq 'Present')
     {

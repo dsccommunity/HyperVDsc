@@ -4,28 +4,28 @@ configuration Sample_xVMHyperV_Complete
     (
         [string[]]$NodeName = 'localhost',
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string]$VMName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [uint64]$VhdSizeBytes,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [Uint64]$StartupMemory,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [Uint64]$MinimumMemory,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [Uint64]$MaximumMemory,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$SwitchName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [String]$Path,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [Uint32]$ProcessorCount,
 
         [ValidateSet('Off','Paused','Running')]

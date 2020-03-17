@@ -40,7 +40,7 @@ try
 
                 It 'Should throw when the module is missing' {
                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-                        Should -Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
+                        Should -throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
                 }
             }
 
@@ -90,7 +90,7 @@ try
 
                 It 'Should not throw' {
                     { GetNameWithExtension -Name 'server' -Generation 'vhd' } |
-                        Should -Not -Throw
+                        Should -Not -throw
                 }
             }
 
@@ -102,7 +102,7 @@ try
 
                 It 'Should throw with mismatch with extension from name and generation' {
                     { GetNameWithExtension -Name 'server.vhdx' -Generation 'vhd' } |
-                        Should -Throw 'the extension vhdx on the name does not match the generation vhd'
+                        Should -throw 'the extension vhdx on the name does not match the generation vhd'
                 }
             }
         }
@@ -121,7 +121,7 @@ try
 
                 It 'Should throw when the module is missing' {
                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-                        Should -Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
+                        Should -throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
                 }
             }
 
@@ -133,17 +133,17 @@ try
             Context 'Parameter validation' {
                 It 'Fixed and Dynamic VHDs need MaximumSizeBytes specified' {
                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Dynamic' } |
-                        Should -Throw 'Specify MaximumSizeBytes property for Fixed and Dynamic VHDs.'
+                        Should -throw 'Specify MaximumSizeBytes property for Fixed and Dynamic VHDs.'
                 }
 
                 It 'Parent Path is passed for a non Differencing disk' {
                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -ParentPath 'C:\VMs\Parent' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-                        Should -Throw 'Parent path is only supported for Differencing disks'
+                        Should -throw 'Parent path is only supported for Differencing disks'
                 }
 
                 It 'Differencing disk needs a Parent Path' {
                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' } |
-                        Should -Throw 'Differencing requires a parent path'
+                        Should -throw 'Differencing requires a parent path'
                 }
             }
 
@@ -152,7 +152,7 @@ try
                     Mock -CommandName Test-Path -MockWith { $false }
 
                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' -ParentPath 'c:\boguspath' } |
-                        Should -Throw 'c:\boguspath does not exists'
+                        Should -throw 'c:\boguspath does not exists'
                 }
 
                 # "Generation $Generation should match ParentPath extension $($ParentPath.Split('.')[-1])"
@@ -160,7 +160,7 @@ try
                     Mock -CommandName Test-Path -MockWith { $true }
 
                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' -ParentPath 'c:\boguspath.vhd' -Generation 'Vhdx' } |
-                        Should -Throw 'Generation Vhdx should match ParentPath extension vhd'
+                        Should -throw 'Generation Vhdx should match ParentPath extension vhd'
                 }
             }
 
@@ -169,7 +169,7 @@ try
                     Mock -CommandName Test-Path -MockWith { $false }
 
                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-                        Should -Throw 'C:\VMs does not exists'
+                        Should -throw 'C:\VMs does not exists'
                 }
             }
 
@@ -182,7 +182,7 @@ try
 
                 It 'Should not throw' {
                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-                        Should -not -Throw
+                        Should -not -throw
                 }
 
                 It 'Should return a boolean and it should be true' {
@@ -201,7 +201,7 @@ try
 
                 It 'Should not throw' {
                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-                        Should -not -Throw
+                        Should -not -throw
                 }
 
                 It 'Should return a boolean and it should be false' {

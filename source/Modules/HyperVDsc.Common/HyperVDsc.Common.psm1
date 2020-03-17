@@ -1,4 +1,4 @@
-﻿$script:dscResourceCommonModulePath = Join-Path -Path $PSScriptRoot -ChildPath '../DscResource.Common'
+$script:dscResourceCommonModulePath = Join-Path -Path $PSScriptRoot -ChildPath '../DscResource.Common'
 
 Import-Module -Name $script:dscResourceCommonModulePath
 
@@ -64,7 +64,9 @@ function Set-VMProperty
         $ChangeProperty['VMName'] = $VMName
 
         # Set the common parameters for splatting against Get-VM and Set-VMState
-        $vmCommonProperty = @{ Name = $VMName; }
+        $vmCommonProperty = @{
+            Name = $VMName
+        }
 
         # Ensure that the name parameter is set for verbose messages
         $Name = $VMName
@@ -75,7 +77,9 @@ function Set-VMProperty
         $ChangeProperty['Name'] = $Name
 
         # Set the common parameters for splatting against Get-VM and Set-VMState
-        $vmCommonProperty = @{ Name = $Name; }
+        $vmCommonProperty = @{
+            Name = $Name
+        }
     }
 
     $vmObject = Get-VM @vmCommonProperty

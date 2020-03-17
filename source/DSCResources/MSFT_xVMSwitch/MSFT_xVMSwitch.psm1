@@ -27,7 +27,7 @@ function Get-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("External","Internal","Private")]
+        [ValidateSet("External", "Internal", "Private")]
         [String]
         $Type
     )
@@ -76,14 +76,14 @@ function Get-TargetResource
     }
 
     $returnValue = @{
-        Name                    = $switch.Name
-        Type                    = $switch.SwitchType
-        NetAdapterName          = [string[]]$netAdapterName
-        AllowManagementOS       = $switch.AllowManagementOS
-        EnableEmbeddedTeaming   = $switch.EmbeddedTeamingEnabled
-        LoadBalancingAlgorithm  = $loadBalancingAlgorithm
-        Ensure                  = $ensure
-        Id                      = $switch.Id
+        Name                           = $switch.Name
+        Type                           = $switch.SwitchType
+        NetAdapterName                 = [string[]]$netAdapterName
+        AllowManagementOS              = $switch.AllowManagementOS
+        EnableEmbeddedTeaming          = $switch.EmbeddedTeamingEnabled
+        LoadBalancingAlgorithm         = $loadBalancingAlgorithm
+        Ensure                         = $ensure
+        Id                             = $switch.Id
         NetAdapterInterfaceDescription = $description
     }
 
@@ -140,7 +140,7 @@ function Set-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("External","Internal","Private")]
+        [ValidateSet("External", "Internal", "Private")]
         [String]
         $Type,
 
@@ -158,23 +158,30 @@ function Set-TargetResource
         $EnableEmbeddedTeaming = $false,
 
         [Parameter()]
-        [ValidateSet("Default","Weight","Absolute","None","NA")]
+        [ValidateSet("Default", "Weight", "Absolute", "None", "NA")]
         [String]
         $BandwidthReservationMode = "NA",
 
         [Parameter()]
-        [ValidateSet('Dynamic','HyperVPort')]
+        [ValidateSet('Dynamic', 'HyperVPort')]
         [String]
         $LoadBalancingAlgorithm,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [ValidateScript({$testGuid = New-Guid; if([guid]::TryParse($_,[ref]$testGuid)){return $true}else{Throw 'The VMSwitch Id must be in GUID format!'}})]
+        [ValidateScript( { $testGuid = New-Guid; if ([guid]::TryParse($_, [ref]$testGuid))
+                {
+                    return $true
+                }
+                else
+                {
+                    throw 'The VMSwitch Id must be in GUID format!'
+                } })]
         [String]
         $Id,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure = "Present"
     )
@@ -267,7 +274,7 @@ function Set-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.RemoveAndReaddSwitchMessage -f $Name)
                 $switch | Remove-VMSwitch -Force
-                $parameters = @{}
+                $parameters = @{ }
                 $parameters["Name"] = $Name
                 $parameters["NetAdapterName"] = $NetAdapterName
 
@@ -318,7 +325,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message ($script:localizedData.PresentNotCorrect -f $Name, $Ensure)
             Write-Verbose -Message $script:localizedData.CreatingSwitch
-            $parameters = @{}
+            $parameters = @{ }
             $parameters["Name"] = $Name
 
             if ($BandwidthReservationMode -ne "NA")
@@ -354,7 +361,7 @@ function Set-TargetResource
         }
 
         # Set the load balancing algorithm if it's a SET Switch and the parameter is specified
-        if($EnableEmbeddedTeaming -eq $true -and $PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
+        if ($EnableEmbeddedTeaming -eq $true -and $PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
         {
             Write-Verbose -Message ($script:localizedData.SetLoadBalancingAlgorithmMessage -f $Name, $LoadBalancingAlgorithm)
             Set-VMSwitchTeam -Name $switch.Name -LoadBalancingAlgorithm $LoadBalancingAlgorithm -Verbose
@@ -409,7 +416,7 @@ function Test-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("External","Internal","Private")]
+        [ValidateSet("External", "Internal", "Private")]
         [String]
         $Type,
 
@@ -427,23 +434,30 @@ function Test-TargetResource
         $EnableEmbeddedTeaming = $false,
 
         [Parameter()]
-        [ValidateSet("Default","Weight","Absolute","None","NA")]
+        [ValidateSet("Default", "Weight", "Absolute", "None", "NA")]
         [String]
         $BandwidthReservationMode = "NA",
 
         [Parameter()]
-        [ValidateSet('Dynamic','HyperVPort')]
+        [ValidateSet('Dynamic', 'HyperVPort')]
         [String]
         $LoadBalancingAlgorithm,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [ValidateScript({$testGuid = New-Guid; if([guid]::TryParse($_,[ref]$testGuid)){return $true}else{Throw 'The VMSwitch Id must be in GUID format!'}})]
+        [ValidateScript( { $testGuid = New-Guid; if ([guid]::TryParse($_, [ref]$testGuid))
+                {
+                    return $true
+                }
+                else
+                {
+                    throw 'The VMSwitch Id must be in GUID format!'
+                } })]
         [String]
         $Id,
 
         [Parameter()]
-        [ValidateSet("Present","Absent")]
+        [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure = "Present"
     )
@@ -586,11 +600,11 @@ function Test-TargetResource
                         }
                     }
 
-                    if($PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
+                    if ($PSBoundParameters.ContainsKey('LoadBalancingAlgorithm'))
                     {
                         Write-Verbose -Message ($script:localizedData.CheckingLoadBalancingAlgorithm -f $Name)
                         $loadBalancingAlgorithm = ($switch | Get-VMSwitchTeam).LoadBalancingAlgorithm.toString()
-                        if($loadBalancingAlgorithm -ne $LoadBalancingAlgorithm)
+                        if ($loadBalancingAlgorithm -ne $LoadBalancingAlgorithm)
                         {
                             return $false
                         }

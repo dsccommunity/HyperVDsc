@@ -4,10 +4,10 @@ configuration Sample_xVMHyperV_SimpleWithDvdDrive
     (
         [string[]]$NodeName = 'localhost',
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string]$VMName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string]$VhdPath,
 
         [string]$ISOPath

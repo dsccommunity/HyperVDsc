@@ -26,7 +26,7 @@ function Get-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw ($script:localizedData.RoleMissingError -f 'Hyper-V')
+        throw ($script:localizedData.RoleMissingError -f 'Hyper-V')
     }
 
     $vmobj = Get-VM -Name $Name -ErrorAction SilentlyContinue
@@ -34,7 +34,7 @@ function Get-TargetResource
     # Check if 1 or 0 VM with name = $name exist
     if ($vmobj.count -gt 1)
     {
-        Throw ($script:localizedData.MoreThanOneVMExistsError -f $Name)
+        throw ($script:localizedData.MoreThanOneVMExistsError -f $Name)
     }
 
     <#
@@ -75,29 +75,43 @@ function Get-TargetResource
     }
 
     @{
-        Name               = $Name
+        Name                        = $Name
         # Return the Vhd specified if it exists in the Vhd chain
-        VhdPath            = if ($vhdChain -contains $VhdPath) { $VhdPath } else { $null }
-        SwitchName         = $switchName
-        State              = $vmobj.State
-        Path               = $vmobj.Path
-        Generation         = $vmobj.Generation
-        SecureBoot         = $vmSecureBootState
-        StartupMemory      = $vmobj.MemoryStartup
-        MinimumMemory      = $vmobj.MemoryMinimum
-        MaximumMemory      = $vmobj.MemoryMaximum
-        MACAddress         = $macAddress
-        ProcessorCount     = $vmobj.ProcessorCount
-        Ensure             = if ($vmobj) { 'Present'} else { 'Absent' }
-        ID                 = $vmobj.Id
-        Status             = $vmobj.Status
-        CPUUsage           = $vmobj.CPUUsage
-        MemoryAssigned     = $vmobj.MemoryAssigned
-        Uptime             = $vmobj.Uptime
-        CreationTime       = $vmobj.CreationTime
-        HasDynamicMemory   = $vmobj.DynamicMemoryEnabled
-        NetworkAdapters    = $ipAddress
-        EnableGuestService = ($vmobj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}).Enabled
+        VhdPath                     = if ($vhdChain -contains $VhdPath)
+        {
+            $VhdPath
+        }
+        else
+        {
+            $null
+        }
+        SwitchName                  = $switchName
+        State                       = $vmobj.State
+        Path                        = $vmobj.Path
+        Generation                  = $vmobj.Generation
+        SecureBoot                  = $vmSecureBootState
+        StartupMemory               = $vmobj.MemoryStartup
+        MinimumMemory               = $vmobj.MemoryMinimum
+        MaximumMemory               = $vmobj.MemoryMaximum
+        MACAddress                  = $macAddress
+        ProcessorCount              = $vmobj.ProcessorCount
+        Ensure                      = if ($vmobj)
+        {
+            'Present'
+        }
+        else
+        {
+            'Absent'
+        }
+        ID                          = $vmobj.Id
+        Status                      = $vmobj.Status
+        CPUUsage                    = $vmobj.CPUUsage
+        MemoryAssigned              = $vmobj.MemoryAssigned
+        Uptime                      = $vmobj.Uptime
+        CreationTime                = $vmobj.CreationTime
+        HasDynamicMemory            = $vmobj.DynamicMemoryEnabled
+        NetworkAdapters             = $ipAddress
+        EnableGuestService          = ($vmobj | Get-VMIntegrationService | Where-Object -FilterScript { $_.Id -eq $guestServiceId }).Enabled
         AutomaticCheckpointsEnabled = $vmobj.AutomaticCheckpointsEnabled
     }
 }
@@ -206,7 +220,7 @@ function Set-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw ($script:localizedData.RoleMissingError -f 'Hyper-V')
+        throw ($script:localizedData.RoleMissingError -f 'Hyper-V')
     }
 
     # Check if AutomaticCheckpointsEnabled is set in configuration
@@ -218,7 +232,7 @@ function Set-TargetResource
         #>
         if (-Not (Get-Command -Name Set-VM -Module Hyper-V).Parameters.ContainsKey('AutomaticCheckpointsEnabled'))
         {
-            Throw ($script:localizedData.AutomaticCheckpointsUnsupported)
+            throw ($script:localizedData.AutomaticCheckpointsUnsupported)
         }
     }
 
@@ -252,7 +266,7 @@ function Set-TargetResource
                 Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'State', $State)
             }
 
-            $changeProperty = @{}
+            $changeProperty = @{ }
             # If the VM does not have the right startup memory
             if ($PSBoundParameters.ContainsKey('StartupMemory') -and ($vmObj.MemoryStartup -ne $StartupMemory))
             {
@@ -323,13 +337,13 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'DynamicMemoryEnabled', $false, $vmObj.DynamicMemoryEnabled)
                     $setVMPropertyParams = @{
-                        VMName = $Name
-                        VMCommand = 'Set-VM'
-                        ChangeProperty = @{
-                            StaticMemory = $true
+                        VMName          = $Name
+                        VMCommand       = 'Set-VM'
+                        ChangeProperty  = @{
+                            StaticMemory  = $true
                             DynamicMemory = $false
                         }
-                        WaitForIP = $WaitForIP
+                        WaitForIP       = $WaitForIP
                         RestartIfNeeded = $RestartIfNeeded
                     }
                     Set-VMProperty @setVMPropertyParams
@@ -401,9 +415,11 @@ function Set-TargetResource
 
                     # Cannot change the secure boot state whilst the VM is powered on.
                     $setVMPropertyParams = @{
-                        VMName = $Name
-                        VMCommand = 'Set-VMFirmware'
-                        ChangeProperty = @{ EnableSecureBoot = $enableSecureBoot }
+                        VMName          = $Name
+                        VMCommand       = 'Set-VMFirmware'
+                        ChangeProperty  = @{
+                            EnableSecureBoot = $enableSecureBoot
+                        }
                         RestartIfNeeded = $RestartIfNeeded
                     }
                     Set-VMProperty @setVMPropertyParams
@@ -423,7 +439,7 @@ function Set-TargetResource
             # If the VM doesn't have Guest Service Interface correctly configured, update it.
             $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
 
-            $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
+            $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript { $_.Id -eq $guestServiceId }
             if ($guestService.Enabled -eq $false -and $EnableGuestService)
             {
                 Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)
@@ -456,7 +472,7 @@ function Set-TargetResource
         {
             Write-Verbose -Message ($script:localizedData.CreatingVM -f $Name)
 
-            $parameters = @{}
+            $parameters = @{ }
             $parameters['Name'] = $Name
             $parameters['VHDPath'] = $VhdPath
             $parameters['Generation'] = $Generation
@@ -485,7 +501,7 @@ function Set-TargetResource
             }
             $null = New-VM @parameters
 
-            $parameters = @{}
+            $parameters = @{ }
             $parameters['Name'] = $Name
             $parameters['StaticMemory'] = $true
             $parameters['DynamicMemory'] = $false
@@ -539,7 +555,7 @@ function Set-TargetResource
             for ($i = 1; $i -lt $SwitchName.Count; $i++)
             {
                 $addVMNetworkAdapterParams = @{
-                    VMName = $Name
+                    VMName     = $Name
                     SwitchName = $SwitchName[$i]
                 }
                 if ($MACAddress -and (-not [System.String]::IsNullOrEmpty($MACAddress[$i])))
@@ -565,7 +581,7 @@ function Set-TargetResource
             if ($EnableGuestService)
             {
                 $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f (Get-VM -Name $Name).Id
-                Get-VMIntegrationService -VMName $Name | Where-Object -FilterScript {$_.Id -eq $guestServiceId} | Enable-VMIntegrationService
+                Get-VMIntegrationService -VMName $Name | Where-Object -FilterScript { $_.Id -eq $guestServiceId } | Enable-VMIntegrationService
             }
 
             Write-Verbose -Message ($script:localizedData.VMCreated -f $Name)
@@ -684,13 +700,13 @@ function Test-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw ($script:localizedData.RoleMissingError -f 'Hyper-V')
+        throw ($script:localizedData.RoleMissingError -f 'Hyper-V')
     }
 
     # Check if 1 or 0 VM with name = $name exist
     if ((Get-VM -Name $Name -ErrorAction SilentlyContinue).count -gt 1)
     {
-        Throw ($script:localizedData.MoreThanOneVMExistsError -f $Name)
+        throw ($script:localizedData.MoreThanOneVMExistsError -f $Name)
     }
 
     # Check if AutomaticCheckpointsEnabled is set in configuration
@@ -702,7 +718,7 @@ function Test-TargetResource
         #>
         if (-Not (Get-Command -Name Set-VM -Module Hyper-V).Parameters.ContainsKey('AutomaticCheckpointsEnabled'))
         {
-            Throw ($script:localizedData.AutomaticCheckpointsUnsupported)
+            throw ($script:localizedData.AutomaticCheckpointsUnsupported)
         }
     }
 
@@ -714,7 +730,7 @@ function Test-TargetResource
             # Check if $VhdPath exist
             if (!(Test-Path $VhdPath))
             {
-                Throw ($script:localizedData.VhdPathDoesNotExistError -f $VhdPath)
+                throw ($script:localizedData.VhdPathDoesNotExistError -f $VhdPath)
             }
 
             # Check if Minimum memory is less than StartUpmemory
@@ -722,7 +738,7 @@ function Test-TargetResource
                 $PSBoundParameters.ContainsKey('MinimumMemory') -and
                 ($MinimumMemory -gt $StartupMemory))
             {
-                Throw ($script:localizedData.MinMemGreaterThanStartupMemError -f $MinimumMemory, $StartupMemory)
+                throw ($script:localizedData.MinMemGreaterThanStartupMemError -f $MinimumMemory, $StartupMemory)
             }
 
             # Check if Minimum memory is greater than Maximummemory
@@ -730,7 +746,7 @@ function Test-TargetResource
                 $PSBoundParameters.ContainsKey('MinimumMemory') -and
                 ($MinimumMemory -gt $MaximumMemory))
             {
-                Throw ($script:localizedData.MinMemGreaterThanMaxMemError -f $MinimumMemory, $MaximumMemory)
+                throw ($script:localizedData.MinMemGreaterThanMaxMemError -f $MinimumMemory, $MaximumMemory)
             }
 
             # Check if Startup memory is greater than Maximummemory
@@ -738,7 +754,7 @@ function Test-TargetResource
                 $PSBoundParameters.ContainsKey('StartupMemory') -and
                 ($StartupMemory -gt $MaximumMemory))
             {
-                Throw ($script:localizedData.StartUpMemGreaterThanMaxMemError -f $StartupMemory, $MaximumMemory)
+                throw ($script:localizedData.StartUpMemGreaterThanMaxMemError -f $StartupMemory, $MaximumMemory)
             }
 
             <#
@@ -747,13 +763,13 @@ function Test-TargetResource
             #>
             if (($Generation -eq 2) -and ($VhdPath.Split('.')[-1] -eq 'vhd'))
             {
-                Throw ($script:localizedData.VhdUnsupportedOnGen2VMError)
+                throw ($script:localizedData.VhdUnsupportedOnGen2VMError)
             }
 
             # Check if $Path exist
             if ($Path -and !(Test-Path -Path $Path))
             {
-                Throw ($script:localizedData.PathDoesNotExistError -f $Path)
+                throw ($script:localizedData.PathDoesNotExistError -f $Path)
             }
 
             $vhdChain = @(Get-VhdHierarchy -VhdPath ($vmObj.HardDrives[0].Path))
@@ -851,7 +867,7 @@ function Test-TargetResource
             }
 
             $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
-            $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript {$_.Id -eq $guestServiceId}
+            $guestService = $vmObj | Get-VMIntegrationService | Where-Object -FilterScript { $_.Id -eq $guestServiceId }
             if ($guestService.Enabled -ne $EnableGuestService)
             {
                 Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'EnableGuestService', $EnableGuestService, $guestService.Enabled)

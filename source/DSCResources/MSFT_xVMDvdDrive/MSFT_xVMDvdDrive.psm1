@@ -25,15 +25,15 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VMName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerNumber,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerLocation
     )
@@ -41,7 +41,7 @@ function Get-TargetResource
     Write-Verbose -Message ( @(
             "$($MyInvocation.MyCommand): "
             $($script:localizedData.GettingVMDVDDriveMessage `
-                -f $VMName,$ControllerNumber,$ControllerLocation)
+                    -f $VMName, $ControllerNumber, $ControllerLocation)
         ) -join '' )
 
     Test-ParameterValid @PSBoundParameters
@@ -97,22 +97,24 @@ function Set-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VMName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerLocation,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerNumber,
 
+        [Parameter()]
         [System.String]
         $Path,
 
-        [ValidateSet("Present","Absent")]
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present'
     )
@@ -120,7 +122,7 @@ function Set-TargetResource
     Write-Verbose -Message ( @(
             "$($MyInvocation.MyCommand): "
             $($script:localizedData.SettingVMDVDDriveMessage `
-                -f $VMName,$ControllerNumber,$ControllerLocation)
+                    -f $VMName, $ControllerNumber, $ControllerLocation)
         ) -join '' )
 
     $null = $PSBoundParameters.Remove('Path')
@@ -136,13 +138,13 @@ function Set-TargetResource
         {
             # The DVD Drive already exists
             if (-not [String]::IsNullOrWhiteSpace($Path) `
-                -and ($Path -ne $dvdDrive.Path))
+                    -and ($Path -ne $dvdDrive.Path))
             {
                 # The current path assigned to the DVD Drive needs to be changed.
                 Write-Verbose -Message ( @(
-                    "$($MyInvocation.MyCommand): "
-                    $($script:localizedData.VMDVDDriveChangePathMessage) `
-                        -f $VMName,$ControllerNumber,$ControllerLocation,$Path `
+                        "$($MyInvocation.MyCommand): "
+                        $($script:localizedData.VMDVDDriveChangePathMessage) `
+                            -f $VMName, $ControllerNumber, $ControllerLocation, $Path `
                     ) -join '' )
 
                 Set-VMDvdDrive @PSBoundParameters -Path $Path
@@ -152,13 +154,14 @@ function Set-TargetResource
         {
             # The DVD Drive does not exist but should. Change required.
             Write-Verbose -Message ( @(
-                "$($MyInvocation.MyCommand): "
-                 $($script:localizedData.VMDVDDriveAddMessage) `
-                    -f $VMName,$ControllerNumber,$ControllerLocation,$Path `
+                    "$($MyInvocation.MyCommand): "
+                    $($script:localizedData.VMDVDDriveAddMessage) `
+                        -f $VMName, $ControllerNumber, $ControllerLocation, $Path `
                 ) -join '' )
 
-            if (-not [String]::IsNullOrWhiteSpace($Path)) {
-                $PSBoundParameters.Add('Path',$Path)
+            if (-not [String]::IsNullOrWhiteSpace($Path))
+            {
+                $PSBoundParameters.Add('Path', $Path)
             } # if
 
             Add-VMDvdDrive @PSBoundParameters
@@ -171,9 +174,9 @@ function Set-TargetResource
         {
             # The DVD Drive does exist, but should not. Change required.
             Write-Verbose -Message ( @(
-                "$($MyInvocation.MyCommand): "
-                 $($script:localizedData.VMDVDDriveRemoveMessage) `
-                    -f $VMName,$ControllerNumber,$ControllerLocation `
+                    "$($MyInvocation.MyCommand): "
+                    $($script:localizedData.VMDVDDriveRemoveMessage) `
+                        -f $VMName, $ControllerNumber, $ControllerLocation `
                 ) -join '' )
 
             Remove-VMDvdDrive @PSBoundParameters
@@ -207,22 +210,24 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VMName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerLocation,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerNumber,
 
+        [Parameter()]
         [System.String]
         $Path,
 
-        [ValidateSet("Present","Absent")]
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present'
     )
@@ -230,7 +235,7 @@ function Test-TargetResource
     Write-Verbose -Message ( @(
             "$($MyInvocation.MyCommand): "
             $($script:localizedData.TestingVMDVDDriveMessage `
-                -f $VMName,$ControllerNumber,$ControllerLocation)
+                    -f $VMName, $ControllerNumber, $ControllerLocation)
         ) -join '' )
 
     $null = $PSBoundParameters.Remove('Path')
@@ -249,13 +254,13 @@ function Test-TargetResource
         {
             # The DVD Drive already exists
             if (-not [String]::IsNullOrWhiteSpace($Path) `
-                -and ($Path -ne $dvdDrive.Path))
+                    -and ($Path -ne $dvdDrive.Path))
             {
                 # The current path assigned to the DVD drive is wrong. Change required.
                 Write-Verbose -Message ( @(
-                    "$($MyInvocation.MyCommand): "
-                    $($script:localizedData.VMDVDDriveExistsAndShouldPathMismatchMessage) `
-                        -f $VMName,$ControllerNumber,$ControllerLocation,$Path,$dvdDrive.Path `
+                        "$($MyInvocation.MyCommand): "
+                        $($script:localizedData.VMDVDDriveExistsAndShouldPathMismatchMessage) `
+                            -f $VMName, $ControllerNumber, $ControllerLocation, $Path, $dvdDrive.Path `
                     ) -join '' )
 
                 $desiredConfigurationMatch = $false
@@ -264,9 +269,9 @@ function Test-TargetResource
             {
                 # The DVD drive exists and should. Change not required.
                 Write-Verbose -Message ( @(
-                    "$($MyInvocation.MyCommand): "
-                    $($script:localizedData.VMDVDDriveExistsAndShouldMessage) `
-                        -f $VMName,$ControllerNumber,$ControllerLocation,$Path `
+                        "$($MyInvocation.MyCommand): "
+                        $($script:localizedData.VMDVDDriveExistsAndShouldMessage) `
+                            -f $VMName, $ControllerNumber, $ControllerLocation, $Path `
                     ) -join '' )
             } # if
         }
@@ -274,9 +279,9 @@ function Test-TargetResource
         {
             # The DVD Drive does not exist but should. Change required.
             Write-Verbose -Message ( @(
-                "$($MyInvocation.MyCommand): "
-                 $($script:localizedData.VMDVDDriveDoesNotExistButShouldMessage) `
-                    -f $VMName,$ControllerNumber,$ControllerLocation `
+                    "$($MyInvocation.MyCommand): "
+                    $($script:localizedData.VMDVDDriveDoesNotExistButShouldMessage) `
+                        -f $VMName, $ControllerNumber, $ControllerLocation `
                 ) -join '' )
 
             $desiredConfigurationMatch = $false
@@ -289,9 +294,9 @@ function Test-TargetResource
         {
             # The DVD Drive does exist, but should not. Change required.
             Write-Verbose -Message ( @(
-                "$($MyInvocation.MyCommand): "
-                 $($script:localizedData.VMDVDDriveDoesExistButShouldNotMessage) `
-                    -f $VMName,$ControllerNumber,$ControllerLocation `
+                    "$($MyInvocation.MyCommand): "
+                    $($script:localizedData.VMDVDDriveDoesExistButShouldNotMessage) `
+                        -f $VMName, $ControllerNumber, $ControllerLocation `
                 ) -join '' )
 
             $desiredConfigurationMatch = $false
@@ -300,9 +305,9 @@ function Test-TargetResource
         {
             # The DVD Drive does not exist and should not. Change not required.
             Write-Verbose -Message ( @(
-                "$($MyInvocation.MyCommand): "
-                 $($script:localizedData.VMDVDDriveDoesNotExistAndShouldNotMessage) `
-                    -f $VMName,$ControllerNumber,$ControllerLocation `
+                    "$($MyInvocation.MyCommand): "
+                    $($script:localizedData.VMDVDDriveDoesNotExistAndShouldNotMessage) `
+                        -f $VMName, $ControllerNumber, $ControllerLocation `
                 ) -join '' )
         } # if
     } # if
@@ -344,28 +349,30 @@ function Test-ParameterValid
     [OutputType([Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $VMName,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerLocation,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [System.Uint32]
         $ControllerNumber,
 
+        [Parameter()]
         [System.String]
         $Path,
 
-        [ValidateSet("Present","Absent")]
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present'
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
-    if(-not (Get-Module -ListAvailable -Name Hyper-V))
+    if (-not (Get-Module -ListAvailable -Name Hyper-V))
     {
         $errorMessage = $script:localizedData.RoleMissingError -f 'Hyper-V'
 
@@ -377,7 +384,7 @@ function Test-ParameterValid
 
     # Does the controller exist?
     if (-not (Get-VMScsiController -VMName $VMName -ControllerNumber $ControllerNumber) `
-        -and -not (Get-VMIdeController -VMName $VMName -ControllerNumber $ControllerNumber))
+            -and -not (Get-VMIdeController -VMName $VMName -ControllerNumber $ControllerNumber))
     {
         # No it does not
         $errorMessage = $script:localizedData.VMControllerDoesNotExistError -f $VMName, $ControllerNumber
@@ -387,9 +394,9 @@ function Test-ParameterValid
 
     # Is a Hard Drive assigned to this controller location/number?
     if (Get-VMHardDiskDrive `
-        -VMName $VMName `
-        -ControllerLocation $ControllerLocation `
-        -ControllerNumber $ControllerNumber)
+            -VMName $VMName `
+            -ControllerLocation $ControllerLocation `
+            -ControllerNumber $ControllerNumber)
     {
         # Yes, so don't even try and touch this
         $errorMessage = $script:localizedData.ControllerConflictError -f $VMName, $ControllerNumber, $ControllerLocation

@@ -1,4 +1,4 @@
-﻿Configuration Sample_xVMNetworkAdapter_MultipleVM
+Configuration Sample_xVMNetworkAdapter_MultipleVM
 {
     Import-DscResource -ModuleName 'xHyper-V' -Name xVMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration

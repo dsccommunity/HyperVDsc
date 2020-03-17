@@ -28,19 +28,19 @@ function Get-TargetResource
     Write-Verbose -Message ($script:localizedData.QueryingVMProcessor -f $VMName)
     $vmProcessor = Get-VMProcessor -VMName $VMName -ErrorAction Stop
     $configuration = @{
-        VMName = $VMName
-        EnableHostResourceProtection = $vmProcessor.EnableHostResourceProtection
-        ExposeVirtualizationExtensions = $vmProcessor.ExposeVirtualizationExtensions
-        HwThreadCountPerCore = $vmProcessor.HwThreadCountPerCore
-        Maximum = $vmProcessor.Maximum
-        MaximumCountPerNumaNode = $vmProcessor.MaximumCountPerNumaNode
-        MaximumCountPerNumaSocket = $vmProcessor.MaximumCountPerNumaSocket
-        RelativeWeight = $vmProcessor.RelativeWeight
-        Reserve = $vmProcessor.Reserve
-        ResourcePoolName = $vmProcessor.ResourcePoolName
-        CompatibilityForMigrationEnabled = $vmProcessor.CompatibilityForMigrationEnabled
+        VMName                                       = $VMName
+        EnableHostResourceProtection                 = $vmProcessor.EnableHostResourceProtection
+        ExposeVirtualizationExtensions               = $vmProcessor.ExposeVirtualizationExtensions
+        HwThreadCountPerCore                         = $vmProcessor.HwThreadCountPerCore
+        Maximum                                      = $vmProcessor.Maximum
+        MaximumCountPerNumaNode                      = $vmProcessor.MaximumCountPerNumaNode
+        MaximumCountPerNumaSocket                    = $vmProcessor.MaximumCountPerNumaSocket
+        RelativeWeight                               = $vmProcessor.RelativeWeight
+        Reserve                                      = $vmProcessor.Reserve
+        ResourcePoolName                             = $vmProcessor.ResourcePoolName
+        CompatibilityForMigrationEnabled             = $vmProcessor.CompatibilityForMigrationEnabled
         CompatibilityForOlderOperatingSystemsEnabled = $vmProcessor.CompatibilityForOlderOperatingSystemsEnabled
-        RestartIfNeeded = $false
+        RestartIfNeeded                              = $false
     }
     return $configuration
 }
@@ -123,7 +123,7 @@ function Test-TargetResource
         $HwThreadCountPerCore,
 
         [Parameter()]
-        [ValidateRange(0,100)]
+        [ValidateRange(0, 100)]
         [System.UInt64]
         $Maximum,
 
@@ -136,12 +136,12 @@ function Test-TargetResource
         $MaximumCountPerNumaSocket,
 
         [Parameter()]
-        [ValidateRange(0,10000)]
+        [ValidateRange(0, 10000)]
         [System.UInt32]
         $RelativeWeight,
 
         [Parameter()]
-        [ValidateRange(0,100)]
+        [ValidateRange(0, 100)]
         [System.UInt64]
         $Reserve,
 
@@ -177,7 +177,7 @@ function Test-TargetResource
         {
             $isTargetResourceCompliant = $false
             Write-Verbose -Message ($script:localizedData.PropertyMismatch -f $parameter.Key,
-                                    $parameter.Value, $targetResource[$parameter.Key])
+                $parameter.Value, $targetResource[$parameter.Key])
         }
     }
 
@@ -270,7 +270,7 @@ function Set-TargetResource
         $HwThreadCountPerCore,
 
         [Parameter()]
-        [ValidateRange(0,100)]
+        [ValidateRange(0, 100)]
         [System.UInt64]
         $Maximum,
 
@@ -283,12 +283,12 @@ function Set-TargetResource
         $MaximumCountPerNumaSocket,
 
         [Parameter()]
-        [ValidateRange(0,10000)]
+        [ValidateRange(0, 10000)]
         [System.UInt32]
         $RelativeWeight,
 
         [Parameter()]
-        [ValidateRange(0,100)]
+        [ValidateRange(0, 100)]
         [System.UInt64]
         $Reserve,
 
@@ -360,11 +360,11 @@ function Set-TargetResource
     {
         # Restart is required and that requires turning VM off
         $setVMPropertyParameters = @{
-            VMName = $VMName
-            VMCommand = 'Set-VMProcessor'
-            ChangeProperty = $PSBoundParameters
+            VMName          = $VMName
+            VMCommand       = 'Set-VMProcessor'
+            ChangeProperty  = $PSBoundParameters
             RestartIfNeeded = $true
-            Verbose = $Verbose
+            Verbose         = $Verbose
         }
         Set-VMProperty @setVMPropertyParameters
     }

@@ -104,8 +104,8 @@ function Test-TargetResource
     foreach ($key in $resource.Keys)
     {
         Write-Verbose -Message ($script:localizedData.ComparingParameter -f $key,
-                                                                    $PSBoundParameters[$key],
-                                                                    $resource[$key])
+            $PSBoundParameters[$key],
+            $resource[$key])
         $isCompliant = $isCompliant -and ($PSBoundParameters[$key] -eq $resource[$key])
     }
 
@@ -187,7 +187,7 @@ function Set-TargetResource
     }
     else
     {
-        if ($scsiControllerCount -ne ($ControllerNumber +1))
+        if ($scsiControllerCount -ne ($ControllerNumber + 1))
         {
             <#
                 All intermediate controllers should be present on the system. Whilst we can remove

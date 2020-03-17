@@ -42,7 +42,8 @@ try
         # A helper function to mock a VMSwitch
         function New-MockedVMSwitch
         {
-            Param (
+            param
+            (
                 [Parameter(Mandatory = $true)]
                 [string]
                 $Name,
@@ -285,7 +286,7 @@ try
             It 'Invalid Operating System Exception' {
                 $errorMessage = $script:localizedData.BandwidthReservationModeError
 
-                {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorMessage
+                {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -throw $errorMessage
             }
 
             It 'Passes when "BandwidthReservationMode" does not match but is not specified (#48)' {
@@ -467,7 +468,7 @@ try
 
                 $errorMessage = $script:localizedData.BandwidthReservationModeError
 
-                {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorMessage
+                {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -throw $errorMessage
             }
         }
     }

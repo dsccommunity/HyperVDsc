@@ -32,7 +32,7 @@ function Get-TargetResource
         $Path,
 
         [Parameter()]
-        [ValidateSet("Vhd","Vhdx")]
+        [ValidateSet("Vhd", "Vhdx")]
         [String]
         $Generation = "Vhd"
     )
@@ -40,7 +40,7 @@ function Get-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
+        throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
     }
 
     # Construct the full path for the vhdFile
@@ -210,9 +210,9 @@ function Set-TargetResource
             else
             {
                 $params = @{
-                    Path = $vhdFilePath
+                    Path      = $vhdFilePath
                     SizeBytes = $MaximumSizeBytes
-                    $Type = $True
+                    $Type     = $True
                 }
                 $null = New-VHD @params
             }
@@ -288,42 +288,42 @@ function Test-TargetResource
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        Throw "Please ensure that Hyper-V role is installed with its PowerShell module"
+        throw "Please ensure that Hyper-V role is installed with its PowerShell module"
     }
 
     # input validation
     if ($Type -ne 'Differencing' -and -not $MaximumSizeBytes)
     {
-       Throw 'Specify MaximumSizeBytes property for Fixed and Dynamic VHDs.'
+        throw 'Specify MaximumSizeBytes property for Fixed and Dynamic VHDs.'
     }
 
     if ($ParentPath -and $Type -ne 'Differencing')
     {
-        Throw 'Parent path is only supported for Differencing disks'
+        throw 'Parent path is only supported for Differencing disks'
     }
 
     if (-not $ParentPath -and $Type -eq 'Differencing')
     {
-        Throw 'Differencing requires a parent path'
+        throw 'Differencing requires a parent path'
     }
 
     if ($ParentPath)
     {
         if (!(Test-Path -Path $ParentPath))
         {
-            Throw "$ParentPath does not exists"
+            throw "$ParentPath does not exists"
         }
 
         # Check if the generation matches parenting disk
         if ($Generation -and ($ParentPath.Split('.')[-1] -ne $Generation))
         {
-            Throw "Generation $Generation should match ParentPath extension $($ParentPath.Split('.')[-1])"
+            throw "Generation $Generation should match ParentPath extension $($ParentPath.Split('.')[-1])"
         }
     }
 
     if (!(Test-Path -Path $Path))
     {
-        Throw "$Path does not exists"
+        throw "$Path does not exists"
     }
 
     # Construct the full path for the vhdFile
@@ -360,7 +360,7 @@ function GetNameWithExtension
         $Generation = 'Vhd'
     )
 
-     # If the name ends with vhd or vhdx don't append the generation to the vhdname.
+    # If the name ends with vhd or vhdx don't append the generation to the vhdname.
     if ($Name -like '*.vhd' -or $Name -like '*.vhdx')
     {
         $extension = $Name.Split('.')[-1]

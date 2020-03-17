@@ -4,10 +4,10 @@ configuration Sample_xVMSwitch_External
     (
         [string[]]$NodeName = 'localhost',
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string]$SwitchName,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string]$NetAdapterName
     )
 

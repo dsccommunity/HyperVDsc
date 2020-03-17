@@ -24,7 +24,7 @@ Import-Module -Name ( Join-Path `
 # Ensure that the tests can be performed on this computer
 if (-not (Test-HyperVInstalled))
 {
-    Return
+    return
 } # if
 
 # Using try/finally to always cleanup even if something awful happens.

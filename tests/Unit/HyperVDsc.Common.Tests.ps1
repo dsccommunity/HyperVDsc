@@ -45,7 +45,7 @@ InModuleScope $script:subModuleName {
                 }
             }
 
-            { Set-VMProperty @setVMPropertyParams } | Should -Throw (
+            { Set-VMProperty @setVMPropertyParams } | Should -throw (
                 $script:localizedData.CannotUpdatePropertiesOnlineError -f $mockVMName, 'Running'
             )
         }
@@ -209,7 +209,7 @@ Describe 'HyperVDsc.Common\Wait-VMIPAddress' {
         }
 
         It 'Should throw the correct exception' {
-            { Wait-VMIPAddress -Name 'Test' -Timeout 2 -Verbose } | Should -Throw (
+            { Wait-VMIPAddress -Name 'Test' -Timeout 2 -Verbose } | Should -throw (
                 $script:localizedData.WaitForVMIPAddressTimeoutError -f 'Test', '2'
             )
         }
@@ -308,7 +308,7 @@ Describe 'HyperVDsc.Common\Get-VMHyperV' {
             )
         }
 
-        { Get-VMHyperV -VMName $mockVMName } | Should -Throw (
+        { Get-VMHyperV -VMName $mockVMName } | Should -throw (
             $script:localizedData.MoreThanOneVMExistsError -f $mockVMName
         )
     }

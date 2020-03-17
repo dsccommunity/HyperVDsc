@@ -4,7 +4,7 @@ configuration Sample_xVMSwitch_Internal
     (
         [string[]]$NodeName = 'localhost',
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [string]$SwitchName
     )
 

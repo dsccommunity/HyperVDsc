@@ -1,4 +1,4 @@
-﻿Configuration Sample_xVMNetworkAdapter_VMStaticNetworkSettings
+Configuration Sample_xVMNetworkAdapter_VMStaticNetworkSettings
 {
     Import-DscResource -ModuleName 'xHyper-V'
 

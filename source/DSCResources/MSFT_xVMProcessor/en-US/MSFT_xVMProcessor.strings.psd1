@@ -5,8 +5,5 @@ ConvertFrom-StringData @'
     VMProcessorNotInDesiredState = VM '{0}' processor(s) not in desired state.
     UpdatingVMProperties         = Updating VM '{0}' properties.
     VMPropertiesUpdated          = VM '{0}' properties have been updated.
-
-    VMNotFoundError              = VM '{0}' was not found.
     UnsupportedSystemError       = Parameter '{0}' is not supported on operating system builds earlier than '{1}'.
-    CannotUpdateVmOnlineError    = Cannot change online property '{0}' unless 'RestartIfNeeded' is set to true.
 '@
