@@ -18,19 +18,19 @@ Configuration Sample_EndToEndXHyperV_RunningVM
     # Create a switch to be used by the VM
     xVMSwitch switch
     {
-        Name   = "Test-Switch"
-        Ensure = "Present"
-        Type   = "Internal"
+        Name   = 'Test-Switch'
+        Ensure = 'Present'
+        Type   = 'Internal'
     }
 
     # Create new VHD file.
     xVHD NewVHD1
     {
 
-        Ensure     = "Present"
+        Ensure     = 'Present'
         Name       = $name
         Path       = (Split-Path $vhdPath)
-        Generation = "vhd"
+        Generation = 'vhd'
         ParentPath = $vhdPath
     }
 
@@ -42,7 +42,7 @@ Configuration Sample_EndToEndXHyperV_RunningVM
         FileDirectory = MSFT_xFileDirectory
         {
             SourcePath      = $unattendedFilePathToCopy
-            DestinationPath = "unattended.xml"
+            DestinationPath = 'unattended.xml'
         }
     }
 
@@ -50,13 +50,13 @@ Configuration Sample_EndToEndXHyperV_RunningVM
     xVMHyperV testvm
     {
         Name            = "$($name)_vm"
-        SwitchName      = "Test-Switch"
+        SwitchName      = 'Test-Switch'
         VhdPath         = Join-path (Split-Path $vhdPath) "$name.vhd"
         ProcessorCount  = 2
         MaximumMemory   = 1GB
         MinimumMemory   = 512MB
         RestartIfNeeded = $true
-        DependsOn       = "[xVHD]NewVHD1", "[xVMSwitch]switch", "[xVhdFile]CopyUnattendxml"
-        State           = "Running"
+        DependsOn       = '[xVHD]NewVHD1', '[xVMSwitch]switch', '[xVhdFile]CopyUnattendxml'
+        State           = 'Running'
     }
 }

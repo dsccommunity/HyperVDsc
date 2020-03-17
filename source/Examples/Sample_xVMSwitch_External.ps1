@@ -2,13 +2,16 @@ configuration Sample_xVMSwitch_External
 {
     param
     (
-        [string[]]$NodeName = 'localhost',
+        [System.String[]]
+        $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]$SwitchName,
+        [System.String]
+        $SwitchName,
 
         [Parameter(Mandatory = $true)]
-        [string]$NetAdapterName
+        [System.String]
+        $NetAdapterName
     )
 
     Import-DscResource -ModuleName 'xHyper-V'

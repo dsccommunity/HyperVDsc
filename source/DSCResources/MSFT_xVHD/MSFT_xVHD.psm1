@@ -24,17 +24,17 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Path,
 
         [Parameter()]
-        [ValidateSet("Vhd", "Vhdx")]
-        [String]
-        $Generation = "Vhd"
+        [ValidateSet('Vhd', 'Vhdx')]
+        [System.String]
+        $Generation = 'Vhd'
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
@@ -101,34 +101,34 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Path,
 
         [Parameter()]
-        [String]
+        [System.String]
         $ParentPath,
 
         [Parameter()]
-        [Uint64]
+        [System.UInt64]
         $MaximumSizeBytes,
 
         [Parameter()]
         [ValidateSet('Dynamic', 'Fixed', 'Differencing')]
-        [String]
+        [System.String]
         $Type = 'Dynamic',
 
         [Parameter()]
         [ValidateSet('Vhd', 'Vhdx')]
-        [String]
+        [System.String]
         $Generation = 'Vhd',
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present'
     )
 
@@ -254,41 +254,41 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Path,
 
         [Parameter()]
-        [String]
+        [System.String]
         $ParentPath,
 
         [Parameter()]
-        [Uint64]
+        [System.UInt64]
         $MaximumSizeBytes,
 
         [Parameter()]
         [ValidateSet('Vhd', 'Vhdx')]
-        [String]
+        [System.String]
         $Generation = 'Vhd',
 
         [Parameter()]
         [ValidateSet('Dynamic', 'Fixed', 'Differencing')]
-        [String]
+        [System.String]
         $Type = 'Dynamic',
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present'
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
     if (!(Get-Module -ListAvailable -Name Hyper-V))
     {
-        throw "Please ensure that Hyper-V role is installed with its PowerShell module"
+        throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
     }
 
     # input validation
@@ -334,7 +334,7 @@ function Test-TargetResource
     # Add the logic here and at the end return either $true or $false.
     $result = Test-VHD -Path $vhdFilePath -ErrorAction SilentlyContinue
     Write-Verbose -Message "Vhd $vhdFilePath is present:$result and Ensure is $Ensure"
-    return ($result -and ($Ensure -eq "Present"))
+    return ($result -and ($Ensure -eq 'Present'))
 }
 
 <#
@@ -352,11 +352,11 @@ function GetNameWithExtension
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Generation = 'Vhd'
     )
 

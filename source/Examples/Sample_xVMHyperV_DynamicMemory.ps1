@@ -2,22 +2,28 @@ configuration Sample_xVMHyperV_DynamicMemory
 {
     param
     (
-        [string[]]$NodeName = 'localhost',
+        [System.String[]]
+        $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]$VMName,
+        [System.String]
+        $VMName,
 
         [Parameter(Mandatory = $true)]
-        [string]$VhdPath,
+        [System.String]
+        $VhdPath,
 
         [Parameter(Mandatory = $true)]
-        [Uint64]$StartupMemory,
+        [System.UInt64]
+        $StartupMemory,
 
         [Parameter(Mandatory = $true)]
-        [Uint64]$MinimumMemory,
+        [System.UInt64]
+        $MinimumMemory,
 
         [Parameter(Mandatory = $true)]
-        [Uint64]$MaximumMemory
+        [System.UInt64]
+        $MaximumMemory
     )
 
     Import-DscResource -ModuleName 'xHyper-V'

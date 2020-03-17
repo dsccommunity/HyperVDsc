@@ -3,15 +3,15 @@ Configuration Sample_xVMSwitch_ExternalSET
     param
     (
         [Parameter()]
-        [string[]]
+        [System.String[]]
         $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $SwitchName,
 
         [Parameter(Mandatory = $true)]
-        [string[]]
+        [System.String[]]
         $NetAdapterNames
     )
 

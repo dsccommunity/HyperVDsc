@@ -3,20 +3,24 @@ Configuration Sample_xVMHyperV_MultipleNICs
     param
     (
         [Parameter()]
-        [string[]]
+        [System.String[]]
         $NodeName = 'localhost',
 
         [Parameter()]
-        [string]$VMName = 'TestVM',
+        [System.String]
+        $VMName = 'TestVM',
 
         [Parameter()]
-        [string]$VhdPath = 'C:\temp\disk.vhdx',
+        [System.String]
+        $VhdPath = 'C:\temp\disk.vhdx',
 
         [Parameter()]
-        [string[]]$SwitchName = @('MySwitch'),
+        [System.String[]]
+        $SwitchName = @('MySwitch'),
 
         [Parameter()]
-        [string[]]$MACAddress = '0000000'
+        [System.String[]]
+        $MACAddress = '0000000'
     )
 
     Import-DscResource -ModuleName 'xHyper-V'

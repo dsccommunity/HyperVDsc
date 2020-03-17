@@ -2,38 +2,50 @@ configuration Sample_xVMHyperV_Complete
 {
     param
     (
-        [string[]]$NodeName = 'localhost',
+        [System.String[]]
+        $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]$VMName,
+        [System.String]
+        $VMName,
 
         [Parameter(Mandatory = $true)]
-        [uint64]$VhdSizeBytes,
+        [System.UInt64]
+        $VhdSizeBytes,
 
         [Parameter(Mandatory = $true)]
-        [Uint64]$StartupMemory,
+        [System.UInt64]
+        $StartupMemory,
 
         [Parameter(Mandatory = $true)]
-        [Uint64]$MinimumMemory,
+        [System.UInt64]
+        $MinimumMemory,
 
         [Parameter(Mandatory = $true)]
-        [Uint64]$MaximumMemory,
+        [System.UInt64]
+        $MaximumMemory,
 
         [Parameter(Mandatory = $true)]
-        [String]$SwitchName,
+        [System.String]
+        $SwitchName,
 
         [Parameter(Mandatory = $true)]
-        [String]$Path,
+        [System.String]
+        $Path,
 
         [Parameter(Mandatory = $true)]
-        [Uint32]$ProcessorCount,
+        [System.UInt32]
+        $ProcessorCount,
 
         [ValidateSet('Off','Paused','Running')]
-        [String]$State = 'Off',
+        [System.String]
+        $State = 'Off',
 
-        [Switch]$WaitForIP,
+        [Switch]
+        $WaitForIP,
 
-        [bool]$AutomaticCheckpointsEnabled
+        [System.Boolean]
+        $AutomaticCheckpointsEnabled
     )
 
     Import-DscResource -ModuleName 'xHyper-V'

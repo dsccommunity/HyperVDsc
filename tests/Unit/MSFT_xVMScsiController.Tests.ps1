@@ -158,7 +158,7 @@ try
                     ControllerNumber = 0
                 }
 
-                { Set-TargetResource @setTargetResourceParams } | Should -throw 'RestartIfNeeded'
+                { Set-TargetResource @setTargetResourceParams } | Should -Throw 'RestartIfNeeded'
             }
 
             It 'Should not throw if "RestartIfNeeded" is not specified and VM is "Off"' {
@@ -236,7 +236,7 @@ try
                     RestartIfNeeded  = $true
                 }
 
-                { Set-TargetResource @setTargetResourceParams } | Should -throw 'Cannot add controller'
+                { Set-TargetResource @setTargetResourceParams } | Should -Throw 'Cannot add controller'
             }
 
             It 'Should remove controller when Ensure = "Absent"' {
@@ -338,7 +338,7 @@ try
                     Ensure           = 'Absent'
                 }
 
-                { Set-TargetResource @setTargetResourceParams } | Should -throw 'Cannot remove controller'
+                { Set-TargetResource @setTargetResourceParams } | Should -Throw 'Cannot remove controller'
             }
 
         } # describe Set-TargetResource

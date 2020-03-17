@@ -8,7 +8,7 @@
 function Test-HyperVInstalled
 {
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([System.String])]
     param ()
 
     # Ensure that the tests can be performed on this computer
@@ -45,14 +45,14 @@ function Test-HyperVInstalled
         default
         {
             # Unsupported OS type for testing
-            Write-Verbose -Message "Integration tests cannot be run on this operating system." -Verbose
+            Write-Verbose -Message 'Integration tests cannot be run on this operating system.' -Verbose
             Break
         }
     }
 
     if ($HyperVInstalled -eq $false)
     {
-        Write-Warning -Message "Integration tests cannot be run because Hyper-V Components not installed." -Verbose
+        Write-Warning -Message 'Integration tests cannot be run because Hyper-V Components not installed.' -Verbose
 
         return $false
     }

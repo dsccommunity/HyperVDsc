@@ -30,11 +30,11 @@ function Get-TargetResource
         $VMName,
 
         [Parameter(Mandatory = $true)]
-        [System.Uint32]
+        [System.UInt32]
         $ControllerNumber,
 
         [Parameter(Mandatory = $true)]
-        [System.Uint32]
+        [System.UInt32]
         $ControllerLocation
     )
 
@@ -102,11 +102,11 @@ function Set-TargetResource
         $VMName,
 
         [Parameter(Mandatory = $true)]
-        [System.Uint32]
+        [System.UInt32]
         $ControllerLocation,
 
         [Parameter(Mandatory = $true)]
-        [System.Uint32]
+        [System.UInt32]
         $ControllerNumber,
 
         [Parameter()]
@@ -137,7 +137,7 @@ function Set-TargetResource
         if ($dvdDrive.Ensure -eq 'Present')
         {
             # The DVD Drive already exists
-            if (-not [String]::IsNullOrWhiteSpace($Path) `
+            if (-not [System.String]::IsNullOrWhiteSpace($Path) `
                     -and ($Path -ne $dvdDrive.Path))
             {
                 # The current path assigned to the DVD Drive needs to be changed.
@@ -159,7 +159,7 @@ function Set-TargetResource
                         -f $VMName, $ControllerNumber, $ControllerLocation, $Path `
                 ) -join '' )
 
-            if (-not [String]::IsNullOrWhiteSpace($Path))
+            if (-not [System.String]::IsNullOrWhiteSpace($Path))
             {
                 $PSBoundParameters.Add('Path', $Path)
             } # if
@@ -215,11 +215,11 @@ function Test-TargetResource
         $VMName,
 
         [Parameter(Mandatory = $true)]
-        [System.Uint32]
+        [System.UInt32]
         $ControllerLocation,
 
         [Parameter(Mandatory = $true)]
-        [System.Uint32]
+        [System.UInt32]
         $ControllerNumber,
 
         [Parameter()]
@@ -245,7 +245,7 @@ function Test-TargetResource
     $dvdDrive = Get-TargetResource @PSBoundParameters
 
     # Flag to signal whether settings are correct
-    [Boolean] $desiredConfigurationMatch = $true
+    [System.Boolean] $desiredConfigurationMatch = $true
 
     if ($Ensure -eq 'Present')
     {
@@ -253,7 +253,7 @@ function Test-TargetResource
         if ($dvdDrive.Ensure -eq 'Present')
         {
             # The DVD Drive already exists
-            if (-not [String]::IsNullOrWhiteSpace($Path) `
+            if (-not [System.String]::IsNullOrWhiteSpace($Path) `
                     -and ($Path -ne $dvdDrive.Path))
             {
                 # The current path assigned to the DVD drive is wrong. Change required.
@@ -346,7 +346,7 @@ function Test-TargetResource
 function Test-ParameterValid
 {
     [CmdletBinding()]
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -354,11 +354,11 @@ function Test-ParameterValid
         $VMName,
 
         [Parameter(Mandatory = $true)]
-        [System.Uint32]
+        [System.UInt32]
         $ControllerLocation,
 
         [Parameter(Mandatory = $true)]
-        [System.Uint32]
+        [System.UInt32]
         $ControllerNumber,
 
         [Parameter()]
@@ -407,7 +407,7 @@ function Test-ParameterValid
     if ($Ensure -eq 'Present')
     {
         # If the path is not blank does it exist?
-        if (-not ([String]::IsNullOrWhiteSpace($Path)))
+        if (-not ([System.String]::IsNullOrWhiteSpace($Path)))
         {
             if (-not (Test-Path -Path $Path))
             {

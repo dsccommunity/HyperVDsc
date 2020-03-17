@@ -37,7 +37,7 @@ try
         {
             param (
                 [Parameter(Mandatory = $true)]
-                [String]
+                [System.String]
                 $Name,
 
                 [Parameter()]
@@ -109,27 +109,27 @@ try
             param
             (
                 [Parameter()]
-                [String]
+                [System.String]
                 $Name,
 
                 [Parameter()]
-                [String[]]
+                [System.String[]]
                 $NetAdapterName,
 
                 [Parameter()]
-                [String]
+                [System.String]
                 $MinimumBandwidthMode,
 
                 [Parameter()]
-                [bool]
+                [System.Boolean]
                 $AllowManagementOS,
 
                 [Parameter()]
-                [String]
+                [System.String]
                 $SwitchType,
 
                 [Parameter()]
-                [bool]
+                [System.Boolean]
                 $EnableEmbeddedTeaming,
 
                 [Parameter()]
@@ -244,7 +244,7 @@ try
                 }
 
                 It 'Should throw "The VMSwitch Id must be in GUID format!"' {
-                    {Set-TargetResource @testParams} | Should -throw 'The VMSwitch Id must be in GUID format!'
+                    {Set-TargetResource @testParams} | Should -Throw 'The VMSwitch Id must be in GUID format!'
                 }
             }
 
@@ -271,7 +271,7 @@ try
                 $errorMessage = $script:localizedData.VMSwitchIDServer2016Error
 
                 It 'Should throw "VMSwitchIDServer2016Error"' {
-                    {Set-TargetResource @testParams} | Should -throw $errorMessage
+                    {Set-TargetResource @testParams} | Should -Throw $errorMessage
                 }
             }
         }
@@ -336,7 +336,7 @@ try
                 }
 
                 It 'Should throw "The VMSwitch Id must be in GUID format!"' {
-                    {Test-TargetResource @testParams} | Should -throw 'The VMSwitch Id must be in GUID format!'
+                    {Test-TargetResource @testParams} | Should -Throw 'The VMSwitch Id must be in GUID format!'
                 }
             }
 
@@ -363,7 +363,7 @@ try
                 $errorMessage = $script:localizedData.VMSwitchIDServer2016Error
 
                 It 'Should throw "VMSwitchIDServer2016Error"' {
-                    {Test-TargetResource @testParams} | Should -throw $errorMessage
+                    {Test-TargetResource @testParams} | Should -Throw $errorMessage
                 }
             }
 

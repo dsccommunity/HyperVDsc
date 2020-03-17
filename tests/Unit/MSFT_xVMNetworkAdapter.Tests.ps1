@@ -225,7 +225,7 @@ try
                 Mock -CommandName Get-VMNetworkAdapterVlan
 
                 It 'should return false' {
-                    Test-TargetResource @newAdapter | Should -be $false
+                    Test-TargetResource @newAdapter | Should -Be $false
                 }
                 It 'should call expected Mocks' {
                     Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1

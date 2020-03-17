@@ -3,30 +3,30 @@ configuration Sample_xVhd_FixedVhd
     param
     (
         [Parameter()]
-        [string[]]
+        [System.String[]]
         $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $Path,
 
         [Parameter()]
         [ValidateSet('Vhd', 'Vhdx')]
-        [string]
+        [System.String]
         $Generation = 'Vhd',
 
         [Parameter()]
         [ValidateSet('Dynamic', 'Fixed', 'Differencing')]
-        [string]
+        [System.String]
         $Type = 'Fixed',
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [string]
+        [System.String]
         $Ensure = 'Present'
     )
 

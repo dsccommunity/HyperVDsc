@@ -12,10 +12,10 @@ Configuration Sample_xVMNetworkAdapter_VMStaticNetworkSettings
         VMName = 'MyVM01'
         NetworkSetting = xNetworkSettings
         {
-            IpAddress = "192.168.0.100"
-            Subnet = "255.255.255.255"
-            DefaultGateway = "192.168.0.1"
-            DnsServer = "192.168.0.1"
+            IpAddress = '192.168.0.100'
+            Subnet = '255.255.255.255'
+            DefaultGateway = '192.168.0.1'
+            DnsServer = '192.168.0.1'
         }
     }
 }

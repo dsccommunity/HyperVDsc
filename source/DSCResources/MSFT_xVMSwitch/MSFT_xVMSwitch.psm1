@@ -23,12 +23,12 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("External", "Internal", "Private")]
-        [String]
+        [ValidateSet('External', 'Internal', 'Private')]
+        [System.String]
         $Type
     )
 
@@ -78,7 +78,7 @@ function Get-TargetResource
     $returnValue = @{
         Name                           = $switch.Name
         Type                           = $switch.SwitchType
-        NetAdapterName                 = [string[]]$netAdapterName
+        NetAdapterName                 = [System.String[]] $netAdapterName
         AllowManagementOS              = $switch.AllowManagementOS
         EnableEmbeddedTeaming          = $switch.EmbeddedTeamingEnabled
         LoadBalancingAlgorithm         = $loadBalancingAlgorithm
@@ -136,54 +136,59 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("External", "Internal", "Private")]
-        [String]
+        [ValidateSet('External', 'Internal', 'Private')]
+        [System.String]
         $Type,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String[]]
+        [System.String[]]
         $NetAdapterName,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $AllowManagementOS = $false,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $EnableEmbeddedTeaming = $false,
 
         [Parameter()]
-        [ValidateSet("Default", "Weight", "Absolute", "None", "NA")]
-        [String]
-        $BandwidthReservationMode = "NA",
+        [ValidateSet('Default', 'Weight', 'Absolute', 'None', 'NA')]
+        [System.String]
+        $BandwidthReservationMode = 'NA',
 
         [Parameter()]
         [ValidateSet('Dynamic', 'HyperVPort')]
-        [String]
+        [System.String]
         $LoadBalancingAlgorithm,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [ValidateScript( { $testGuid = New-Guid; if ([guid]::TryParse($_, [ref]$testGuid))
+        [ValidateScript(
+            {
+                $testGuid = New-Guid
+                if ([guid]::TryParse($_, [ref]$testGuid))
                 {
                     return $true
                 }
                 else
                 {
                     throw 'The VMSwitch Id must be in GUID format!'
-                } })]
-        [String]
+                }
+            }
+        )]
+        [System.String]
         $Id,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
-        $Ensure = "Present"
+        [System.String]
+        $Ensure = 'Present'
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
@@ -195,7 +200,7 @@ function Set-TargetResource
     }
 
     # Check to see if the BandwidthReservationMode chosen is supported in the OS
-    elseif (($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
+    elseif (($BandwidthReservationMode -ne 'NA') -and ((Get-OSVersion) -lt [version]'6.2.0'))
     {
         $errorMessage = $script:localizedData.BandwidthReservationModeError
 
@@ -244,7 +249,7 @@ function Set-TargetResource
                 }
             }
 
-            if (($BandwidthReservationMode -ne "NA") -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
+            if (($BandwidthReservationMode -ne 'NA') -and ($switch.BandwidthReservationMode -ne $BandwidthReservationMode))
             {
                 Write-Verbose -Message ($script:localizedData.BandwidthReservationModeIncorrect -f $Name)
                 $removeReaddSwitch = $true
@@ -275,27 +280,27 @@ function Set-TargetResource
                 Write-Verbose -Message ($script:localizedData.RemoveAndReaddSwitchMessage -f $Name)
                 $switch | Remove-VMSwitch -Force
                 $parameters = @{ }
-                $parameters["Name"] = $Name
-                $parameters["NetAdapterName"] = $NetAdapterName
+                $parameters['Name'] = $Name
+                $parameters['NetAdapterName'] = $NetAdapterName
 
-                if ($BandwidthReservationMode -ne "NA")
+                if ($BandwidthReservationMode -ne 'NA')
                 {
-                    $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
+                    $parameters['MinimumBandwidthMode'] = $BandwidthReservationMode
                 }
 
-                if ($PSBoundParameters.ContainsKey("AllowManagementOS"))
+                if ($PSBoundParameters.ContainsKey('AllowManagementOS'))
                 {
-                    $parameters["AllowManagementOS"] = $AllowManagementOS
+                    $parameters['AllowManagementOS'] = $AllowManagementOS
                 }
 
-                if ($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming"))
+                if ($PSBoundParameters.ContainsKey('EnableEmbeddedTeaming'))
                 {
-                    $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
+                    $parameters['EnableEmbeddedTeaming'] = $EnableEmbeddedTeaming
                 }
 
                 if ($PSBoundParameters.ContainsKey('Id'))
                 {
-                    $parameters["Id"] = $Id.ToString()
+                    $parameters['Id'] = $Id.ToString()
                 }
 
                 $null = New-VMSwitch @parameters
@@ -308,7 +313,7 @@ function Set-TargetResource
             }
 
             Write-Verbose -Message ($script:localizedData.CheckAllowManagementOS -f $Name)
-            if ($PSBoundParameters.ContainsKey("AllowManagementOS") -and ($switch.AllowManagementOS -ne $AllowManagementOS))
+            if ($PSBoundParameters.ContainsKey('AllowManagementOS') -and ($switch.AllowManagementOS -ne $AllowManagementOS))
             {
                 Write-Verbose -Message ($script:localizedData.AllowManagementOSIncorrect -f $Name)
                 $switch | Set-VMSwitch -AllowManagementOS $AllowManagementOS
@@ -326,34 +331,34 @@ function Set-TargetResource
             Write-Verbose -Message ($script:localizedData.PresentNotCorrect -f $Name, $Ensure)
             Write-Verbose -Message $script:localizedData.CreatingSwitch
             $parameters = @{ }
-            $parameters["Name"] = $Name
+            $parameters['Name'] = $Name
 
-            if ($BandwidthReservationMode -ne "NA")
+            if ($BandwidthReservationMode -ne 'NA')
             {
-                $parameters["MinimumBandwidthMode"] = $BandwidthReservationMode
+                $parameters['MinimumBandwidthMode'] = $BandwidthReservationMode
             }
 
             if ($NetAdapterName)
             {
-                $parameters["NetAdapterName"] = $NetAdapterName
-                if ($PSBoundParameters.ContainsKey("AllowManagementOS"))
+                $parameters['NetAdapterName'] = $NetAdapterName
+                if ($PSBoundParameters.ContainsKey('AllowManagementOS'))
                 {
-                    $parameters["AllowManagementOS"] = $AllowManagementOS
+                    $parameters['AllowManagementOS'] = $AllowManagementOS
                 }
             }
             else
             {
-                $parameters["SwitchType"] = $Type
+                $parameters['SwitchType'] = $Type
             }
 
-            if ($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming"))
+            if ($PSBoundParameters.ContainsKey('EnableEmbeddedTeaming'))
             {
-                $parameters["EnableEmbeddedTeaming"] = $EnableEmbeddedTeaming
+                $parameters['EnableEmbeddedTeaming'] = $EnableEmbeddedTeaming
             }
 
             if ($PSBoundParameters.ContainsKey('Id'))
             {
-                $parameters["Id"] = $Id
+                $parameters['Id'] = $Id
             }
 
             $switch = New-VMSwitch @parameters
@@ -367,7 +372,7 @@ function Set-TargetResource
             Set-VMSwitchTeam -Name $switch.Name -LoadBalancingAlgorithm $LoadBalancingAlgorithm -Verbose
         }
     }
-    # Ensure is set to "Absent", remove the switch
+    # Ensure is set to 'Absent', remove the switch
     else
     {
         Get-VMSwitch $Name -ErrorAction SilentlyContinue | Remove-VMSwitch -Force
@@ -412,54 +417,60 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet("External", "Internal", "Private")]
-        [String]
+        [ValidateSet('External', 'Internal', 'Private')]
+        [System.String]
         $Type,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String[]]
+        [System.String[]]
         $NetAdapterName,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $AllowManagementOS = $false,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $EnableEmbeddedTeaming = $false,
 
         [Parameter()]
-        [ValidateSet("Default", "Weight", "Absolute", "None", "NA")]
-        [String]
-        $BandwidthReservationMode = "NA",
+        [ValidateSet('Default', 'Weight', 'Absolute', 'None', 'NA')]
+        [System.String]
+        $BandwidthReservationMode = 'NA',
 
         [Parameter()]
         [ValidateSet('Dynamic', 'HyperVPort')]
-        [String]
+        [System.String]
         $LoadBalancingAlgorithm,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [ValidateScript( { $testGuid = New-Guid; if ([guid]::TryParse($_, [ref]$testGuid))
+        [ValidateScript(
+            {
+                $testGuid = New-Guid
+
+                if ([guid]::TryParse($_, [ref]$testGuid))
                 {
                     return $true
                 }
                 else
                 {
                     throw 'The VMSwitch Id must be in GUID format!'
-                } })]
-        [String]
+                }
+            }
+        )]
+        [System.String]
         $Id,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
-        $Ensure = "Present"
+        [System.String]
+        $Ensure = 'Present'
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
@@ -484,7 +495,7 @@ function Test-TargetResource
         New-InvalidArgumentException -ArgumentName 'Type' -Message $errorMessage
     }
 
-    if (($BandwidthReservationMode -ne "NA") -and ((Get-OSVersion) -lt [version]'6.2.0'))
+    if (($BandwidthReservationMode -ne 'NA') -and ((Get-OSVersion) -lt [version]'6.2.0'))
     {
         $errorMessage = $script:localizedData.BandwidthReservationModeError
 
@@ -587,7 +598,7 @@ function Test-TargetResource
                         }
                     }
 
-                    if ($PSBoundParameters.ContainsKey("AllowManagementOS"))
+                    if ($PSBoundParameters.ContainsKey('AllowManagementOS'))
                     {
                         Write-Verbose -Message ($script:localizedData.CheckAllowManagementOS -f $Name)
                         if (($switch.AllowManagementOS -ne $AllowManagementOS))
@@ -616,7 +627,7 @@ function Test-TargetResource
                 }
 
                 # Only check embedded teaming if specified
-                if ($PSBoundParameters.ContainsKey("EnableEmbeddedTeaming") -eq $true)
+                if ($PSBoundParameters.ContainsKey('EnableEmbeddedTeaming') -eq $true)
                 {
                     Write-Verbose -Message ($script:localizedData.CheckEnableEmbeddedTeaming -f $Name)
                     if ($switch.EmbeddedTeamingEnabled -eq $EnableEmbeddedTeaming -or $null -eq $switch.EmbeddedTeamingEnabled)
@@ -631,7 +642,7 @@ function Test-TargetResource
                 }
 
                 # Check if the Switch has the desired ID
-                if ($PSBoundParameters.ContainsKey("Id") -eq $true)
+                if ($PSBoundParameters.ContainsKey('Id') -eq $true)
                 {
                     Write-Verbose -Message ($script:localizedData.CheckID -f $Name)
                     if ($switch.Id.Guid -eq $Id)

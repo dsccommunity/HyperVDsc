@@ -2,13 +2,16 @@ configuration Sample_xVMHyperV_Simple
 {
     param
     (
-        [string[]]$NodeName = 'localhost',
+        [System.String[]]
+        $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]$VMName,
+        [System.String]
+        $VMName,
 
         [Parameter(Mandatory = $true)]
-        [string]$VhdPath
+        [System.String]
+        $VhdPath
     )
 
     Import-DscResource -ModuleName 'xHyper-V'

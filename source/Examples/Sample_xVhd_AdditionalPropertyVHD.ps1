@@ -3,29 +3,29 @@ configuration Sample_xVHD_AdditionalPropertyVHD
     param
     (
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $Path,
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $ParentPath,
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $MaximumSizeBytes,
 
         [Parameter()]
         [ValidateSet('Vhd', 'Vhdx')]
-        [string]
+        [System.String]
         $Generation = 'Vhd',
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [string]
+        [System.String]
         $Ensure = 'Present'
     )
 

@@ -3,15 +3,15 @@ Configuration Sample_xVMSwitch_ExternalSET_LBMode
     param
     (
         [Parameter()]
-        [string[]]
+        [System.String[]]
         $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $SwitchName,
 
         [Parameter(Mandatory = $true)]
-        [string[]]
+        [System.String[]]
         $NetAdapterNames
     )
 
@@ -33,7 +33,7 @@ Configuration Sample_xVMSwitch_ExternalSET_LBMode
             DependsOn = '[WindowsFeature]HyperV'
         }
 
-        # Ensures a VM with Load Balancing Algorithm "Hyper-V Port"
+        # Ensures a VM with Load Balancing Algorithm 'Hyper-V Port"
         xVMSwitch ExternalSwitch
         {
             Ensure                  = 'Present'

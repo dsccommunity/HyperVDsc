@@ -31,16 +31,20 @@ function Get-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String] $Id,
+        [System.String]
+        $Id,
 
         [Parameter(Mandatory = $true)]
-        [String] $Name,
+        [System.String]
+        $Name,
 
         [Parameter(Mandatory = $true)]
-        [String] $SwitchName,
+        [System.String]
+        $SwitchName,
 
         [Parameter(Mandatory = $true)]
-        [String] $VMName
+        [System.String]
+        $VMName
     )
 
     $configuration = @{
@@ -142,30 +146,37 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String] $Id,
+        [System.String]
+        $Id,
 
         [Parameter(Mandatory = $true)]
-        [String] $Name,
+        [System.String]
+        $Name,
 
         [Parameter(Mandatory = $true)]
-        [String] $SwitchName,
+        [System.String]
+        $SwitchName,
 
         [Parameter(Mandatory = $true)]
-        [String] $VMName,
+        [System.String]
+        $VMName,
 
         [Parameter()]
-        [String] $MacAddress,
+        [System.String]
+        $MacAddress,
 
         [Parameter()]
         [Microsoft.Management.Infrastructure.CimInstance]
         $NetworkSetting,
 
         [Parameter()]
-        [String] $VlanId,
+        [System.String]
+        $VlanId,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String] $Ensure = 'Present'
+        [System.String]
+        $Ensure = 'Present'
     )
 
     $arguments = @{
@@ -270,7 +281,7 @@ function Set-TargetResource
             else
             {
                 $parameters = @{ }
-                if ($ipAddress = $NetworkSetting.CimInstanceProperties["IpAddress"].Value)
+                if ($ipAddress = $NetworkSetting.CimInstanceProperties['IpAddress'].Value)
                 {
                     if (-not $ipAddress)
                     {
@@ -278,7 +289,7 @@ function Set-TargetResource
                     }
                     $parameters.Add('IPAddress', $ipAddress)
                 }
-                if ($subnet = $NetworkSetting.CimInstanceProperties["Subnet"].Value)
+                if ($subnet = $NetworkSetting.CimInstanceProperties['Subnet'].Value)
                 {
                     if (-not $subnet)
                     {
@@ -286,11 +297,11 @@ function Set-TargetResource
                     }
                     $parameters.Add('Subnet', $subnet)
                 }
-                if ($defaultGateway = $NetworkSetting.CimInstanceProperties["DefaultGateway"].Value)
+                if ($defaultGateway = $NetworkSetting.CimInstanceProperties['DefaultGateway'].Value)
                 {
                     $parameters.Add('DefaultGateway', $defaultGateway)
                 }
-                if ($dnsServer = $NetworkSetting.CimInstanceProperties["DnsServer"].Value)
+                if ($dnsServer = $NetworkSetting.CimInstanceProperties['DnsServer'].Value)
                 {
                     $parameters.Add('DnsServer', $dnsServer)
                 }
@@ -368,23 +379,23 @@ function Test-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Id,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $SwitchName,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $VMName,
 
         [Parameter()]
-        [String]
+        [System.String]
         $MacAddress,
 
         [Parameter()]
@@ -392,12 +403,12 @@ function Test-TargetResource
         $NetworkSetting,
 
         [Parameter()]
-        [String]
+        [System.String]
         $VlanId,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present'
     )
 
@@ -464,10 +475,10 @@ function Test-TargetResource
                     }
                     else
                     {
-                        $ipAddress = $NetworkSetting.CimInstanceProperties["IpAddress"].Value
-                        $subnet = $NetworkSetting.CimInstanceProperties["Subnet"].Value
-                        $defaultGateway = $NetworkSetting.CimInstanceProperties["DefaultGateway"].Value
-                        $dnsServer = $NetworkSetting.CimInstanceProperties["DnsServer"].Value
+                        $ipAddress = $NetworkSetting.CimInstanceProperties['IpAddress'].Value
+                        $subnet = $NetworkSetting.CimInstanceProperties['Subnet'].Value
+                        $defaultGateway = $NetworkSetting.CimInstanceProperties['DefaultGateway'].Value
+                        $dnsServer = $NetworkSetting.CimInstanceProperties['DnsServer'].Value
 
                         if (-not $IpAddress -or -not $subnet)
                         {
@@ -575,18 +586,18 @@ function Get-NetworkInformation
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $VMName,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name
     )
 
     $vm = Get-WmiObject -Namespace 'root\virtualization\v2' -Class 'Msvm_ComputerSystem' | Where-Object { $_.ElementName -ieq "$VmName" }
     $vmSettings = $vm.GetRelated('Msvm_VirtualSystemSettingData') | Where-Object { $_.VirtualSystemType -eq 'Microsoft:Hyper-V:System:Realized' }
     $vmNetAdapter = $vmSettings.GetRelated('Msvm_SyntheticEthernetPortSettingData') | Where-Object { $_.ElementName -ieq "$Name" }
-    $networkSettings = $vmNetAdapter.GetRelated("Msvm_GuestNetworkAdapterConfiguration")
+    $networkSettings = $vmNetAdapter.GetRelated('Msvm_GuestNetworkAdapterConfiguration')
 
     if ($networkSettings.DHCPEnabled)
     {
@@ -610,11 +621,11 @@ function Set-NetworkInformation
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $VMName,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(ParameterSetName = 'Dhcp')]
@@ -622,26 +633,26 @@ function Set-NetworkInformation
         $Dhcp,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Static')]
-        [String]
+        [System.String]
         $IPAddress,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Static')]
-        [String]
+        [System.String]
         $Subnet,
 
         [Parameter(ParameterSetName = 'Static')]
-        [String]
+        [System.String]
         $DefaultGateway,
 
         [Parameter(ParameterSetName = 'Static')]
-        [String]
+        [System.String]
         $DnsServer
     )
 
     $vm = Get-WmiObject -Namespace 'root\virtualization\v2' -Class 'Msvm_ComputerSystem' | Where-Object { $_.ElementName -ieq "$VmName" }
     $vmSettings = $vm.GetRelated('Msvm_VirtualSystemSettingData') | Where-Object { $_.VirtualSystemType -eq 'Microsoft:Hyper-V:System:Realized' }
     $vmNetAdapter = $vmSettings.GetRelated('Msvm_SyntheticEthernetPortSettingData') | Where-Object { $_.ElementName -ieq $Name }
-    $networkSettings = $vmNetAdapter.GetRelated("Msvm_GuestNetworkAdapterConfiguration") | Select-Object -First 1
+    $networkSettings = $vmNetAdapter.GetRelated('Msvm_GuestNetworkAdapterConfiguration') | Select-Object -First 1
 
     switch ($PSCmdlet.ParameterSetName)
     {
@@ -675,7 +686,7 @@ function Set-NetworkInformation
 
     $networkSettings.ProtocolIFType = 4096
 
-    $service = Get-WmiObject -Class "Msvm_VirtualSystemManagementService" -Namespace "root\virtualization\v2"
+    $service = Get-WmiObject -Class 'Msvm_VirtualSystemManagementService' -Namespace 'root\virtualization\v2'
     $setIP = $service.SetGuestNetworkAdapterConfiguration($vm, $networkSettings.GetText(1))
 
     if ($setIP.ReturnValue -eq 4096)

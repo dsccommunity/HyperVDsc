@@ -3,15 +3,15 @@ configuration Sample_xVMHardDiskDrive_VMWith4AdditionalDisks
     param
     (
         [Parameter()]
-        [string[]]
+        [System.String[]]
         $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $VMName,
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $VhdPath
     )
 

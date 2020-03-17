@@ -63,7 +63,7 @@ function Get-TargetResource
     {
         $macAddress += $networkAdapter.MacAddress
 
-        if (-Not ([string]::IsNullOrEmpty($networkAdapter.SwitchName)))
+        if (-Not ([System.String]::IsNullOrEmpty($networkAdapter.SwitchName)))
         {
             $switchName += $networkAdapter.SwitchName
         }
@@ -123,78 +123,78 @@ function Set-TargetResource
     (
         # Name of the VM
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         # VHD associated with the VM
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $VhdPath,
 
         # Virtual switch associated with the VM
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $SwitchName,
 
         # State of the VM
         [Parameter()]
         [ValidateSet('Running', 'Paused', 'Off')]
-        [String]
+        [System.String]
         $State,
 
         # Folder where the VM data will be stored
         [Parameter()]
-        [String]
+        [System.String]
         $Path,
 
         # Virtual machine generation
         [Parameter()]
         [ValidateRange(1, 2)]
-        [UInt32]
+        [System.UInt32]
         $Generation = 1,
 
         # Startup RAM for the VM
         [Parameter()]
         [ValidateRange(32MB, 65536MB)]
-        [UInt64]
+        [System.UInt64]
         $StartupMemory,
 
         # Minimum RAM for the VM. This enables dynamic memory
         [Parameter()]
         [ValidateRange(32MB, 65536MB)]
-        [UInt64]
+        [System.UInt64]
         $MinimumMemory,
 
         # Maximum RAM for the VM. This enables dynamic memory
         [Parameter()]
         [ValidateRange(32MB, 1048576MB)]
-        [UInt64]
+        [System.UInt64]
         $MaximumMemory,
 
         # MAC address of the VM
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $MACAddress,
 
         # Processor count for the VM
         [Parameter()]
-        [UInt32]
+        [System.UInt32]
         $ProcessorCount,
 
         # Waits for VM to get valid IP address
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $WaitForIP,
 
         # If specified, shutdowns and restarts the VM as needed for property changes
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $RestartIfNeeded,
 
         # Should the VM be created or deleted
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
         [Parameter()]
@@ -203,17 +203,17 @@ function Set-TargetResource
 
         # Enable secure boot for Generation 2 VMs
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $SecureBoot = $true,
 
         # Enable Guest Services
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $EnableGuestService = $false,
 
         # Enable AutomaticCheckpoints
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $AutomaticCheckpointsEnabled
     )
 
@@ -604,78 +604,78 @@ function Test-TargetResource
     (
         # Name of the VM
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         # VHD associated with the VM
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $VhdPath,
 
         # Virtual switch associated with the VM
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $SwitchName,
 
         # State of the VM
         [Parameter()]
         [ValidateSet('Running', 'Paused', 'Off')]
-        [String]
+        [System.String]
         $State,
 
         # Folder where the VM data will be stored
         [Parameter()]
-        [String]
+        [System.String]
         $Path,
 
         # Virtual machine generation
         [Parameter()]
         [ValidateRange(1, 2)]
-        [UInt32]
+        [System.UInt32]
         $Generation = 1,
 
         # Startup RAM for the VM
         [Parameter()]
         [ValidateRange(32MB, 65536MB)]
-        [UInt64]
+        [System.UInt64]
         $StartupMemory,
 
         # Minimum RAM for the VM. This enables dynamic memory
         [Parameter()]
         [ValidateRange(32MB, 65536MB)]
-        [UInt64]
+        [System.UInt64]
         $MinimumMemory,
 
         # Maximum RAM for the VM. This enables dynamic memory
         [Parameter()]
         [ValidateRange(32MB, 1048576MB)]
-        [UInt64]
+        [System.UInt64]
         $MaximumMemory,
 
         # MAC address of the VM
         [Parameter()]
-        [String[]]
+        [System.String[]]
         $MACAddress,
 
         # Processor count for the VM
         [Parameter()]
-        [UInt32]
+        [System.UInt32]
         $ProcessorCount,
 
         # Waits for VM to get valid IP address
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $WaitForIP,
 
         # If specified, shutdowns and restarts the VM as needed for property changes
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $RestartIfNeeded,
 
         # Should the VM be created or deleted
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
         [Parameter()]
@@ -684,16 +684,16 @@ function Test-TargetResource
 
         # Enable secure boot for Generation 2 VMs
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $SecureBoot = $true,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $EnableGuestService = $false,
 
         # Enable AutomaticCheckpoints
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $AutomaticCheckpointsEnabled
     )
 
@@ -927,11 +927,11 @@ function Set-VMMACAddress
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $MACAddress,
 
         [Parameter(Mandatory = $true)]
@@ -939,11 +939,11 @@ function Set-VMMACAddress
         $NICIndex,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $WaitForIP,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $RestartIfNeeded
     )
     $vmObj = Get-VM -Name $Name
@@ -981,7 +981,7 @@ function Test-VMSecureBoot
     param
     (
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $Name
     )
     $vm = Get-VM -Name $Name

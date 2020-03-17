@@ -45,16 +45,16 @@ try
             param
             (
                 [Parameter(Mandatory = $true)]
-                [string]
+                [System.String]
                 $Name,
 
                 [Parameter(Mandatory = $true)]
                 [ValidateSet('Default', 'Weight', 'Absolute', 'None', 'NA')]
-                [string]
+                [System.String]
                 $BandwidthReservationMode,
 
                 [Parameter()]
-                [bool]
+                [System.Boolean]
                 $AllowManagementOS = $false
             )
 
@@ -80,7 +80,7 @@ try
             Mock -CommandName Get-VMSwitch -MockWith {
                 param
                 (
-                    [string]
+                    [System.String]
                     $ErrorAction
                 )
 
@@ -119,11 +119,11 @@ try
                 param
                 (
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $CurrentName,
 
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $CurrentBandwidthReservationMode
                 )
 
@@ -198,7 +198,7 @@ try
             #>
             Mock -CommandName Get-VMSwitch -MockWith {
                 param (
-                    [string]
+                    [System.String]
                     $ErrorAction
                 )
 
@@ -242,27 +242,27 @@ try
                 param
                 (
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $CurrentName,
 
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $CurrentBandwidthReservationMode,
 
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $DesiredName,
 
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $DesiredBandwidthReservationMode,
 
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $Ensure,
 
                     [Parameter()]
-                    [bool]
+                    [System.Boolean]
                     $ExpectedResult
                 )
 
@@ -286,7 +286,7 @@ try
             It 'Invalid Operating System Exception' {
                 $errorMessage = $script:localizedData.BandwidthReservationModeError
 
-                {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -throw $errorMessage
+                {Test-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorMessage
             }
 
             It 'Passes when "BandwidthReservationMode" does not match but is not specified (#48)' {
@@ -304,13 +304,13 @@ try
             Mock -CommandName Get-VMSwitch -MockWith {
                 param
                 (
-                    [string]
+                    [System.String]
                     $Name,
 
-                    [string]
+                    [System.String]
                     $SwitchType,
 
-                    [string]
+                    [System.String]
                     $ErrorAction
                 )
 
@@ -329,16 +329,16 @@ try
             Mock -CommandName New-VMSwitch -MockWith {
                 param
                 (
-                    [string]
+                    [System.String]
                     $Name,
 
-                    [string]
+                    [System.String]
                     $NetAdapterName,
 
-                    [string]
+                    [System.String]
                     $MinimumBandwidthMode,
 
-                    [bool]
+                    [System.Boolean]
                     $AllowManagementOS
                 )
 
@@ -353,7 +353,7 @@ try
             Mock -CommandName Set-VMSwitch -MockWith {
                 param
                 (
-                    [bool]
+                    [System.Boolean]
                     $AllowManagementOS
                 )
 
@@ -392,27 +392,27 @@ try
                 param
                 (
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $CurrentName,
 
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $CurrentBandwidthReservationMode,
 
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $DesiredName,
 
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $DesiredBandwidthReservationMode,
 
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $Ensure,
 
                     [Parameter()]
-                    [bool]
+                    [System.Boolean]
                     $ExpectedResult
                 )
 
@@ -468,7 +468,7 @@ try
 
                 $errorMessage = $script:localizedData.BandwidthReservationModeError
 
-                {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -throw $errorMessage
+                {Set-TargetResource -Name 'WeightBRM' -Type 'External' -NetAdapterName 'SomeNIC' -AllowManagementOS $true -BandwidthReservationMode 'Weight' -Ensure 'Present'} | Should -Throw $errorMessage
             }
         }
     }

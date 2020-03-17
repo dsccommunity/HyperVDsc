@@ -52,11 +52,11 @@ try
                     -EnableEnhancedSessionMode (-not $currentEnableEnhancedSessionMode)
 
                 $startDscConfigurationParams = @{
-                    Path         = $TestDrive;
-                    ComputerName = 'localhost';
-                    Wait         = $true;
-                    Verbose      = $true;
-                    Force        = $true;
+                    Path         = $TestDrive
+                    ComputerName = 'localhost'
+                    Wait         = $true
+                    Verbose      = $true
+                    Force        = $true
                 }
                 Start-DscConfiguration @startDscConfigurationParams
 

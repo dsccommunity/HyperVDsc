@@ -227,7 +227,7 @@ function Wait-VMIPAddress
     while ((Get-VMNetworkAdapter -VMName $Name).IpAddresses.Count -lt 2)
     {
         Write-Verbose -Message ($script:localizedData.WaitingForVMIPAddress -f $Name)
-        Start-Sleep -Seconds 3;
+        Start-Sleep -Seconds 3
 
         $elapsedSeconds += 3
         if ($elapsedSeconds -gt $Timeout)

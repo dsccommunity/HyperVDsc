@@ -456,7 +456,7 @@ try
                 It 'should throw exception' {
                     $errorMessage = $script:localizedData.RoleMissingError -f 'Hyper-V'
 
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -throw $errorMessage
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorMessage
                 }
 
                 It 'all the get mocks should be called' {
@@ -484,7 +484,7 @@ try
                 Mock -CommandName Get-VMHardDiskDrive
 
                 It 'should throw exception' {
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -throw
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw
                 }
 
                 It 'all the get mocks should be called' {
@@ -524,7 +524,7 @@ try
                 It 'should throw exception' {
                     $errorMessage = $script:localizedData.VMControllerDoesNotExistError -f $script:VMName, 0
 
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -throw $errorMessage
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorMessage
                 }
 
                 It 'all the get mocks should be called' {
@@ -570,7 +570,7 @@ try
                 It 'should throw exception' {
                     $errorMessage = $script:localizedData.ControllerConflictError -f $script:VMName, 0, 1
 
-                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -throw $errorMessage
+                    { Test-ParameterValid @script:splatAddDvdDriveNoPath } | Should -Throw $errorMessage
                 }
 
                 It 'all the get mocks should be called' {
@@ -620,7 +620,7 @@ try
                 It 'should throw exception' {
                     $errorMessage = $script:localizedData.PathDoesNotExistError -f $script:TestISOPath
 
-                    { Test-ParameterValid @script:splatAddDvdDrive } | Should -throw $errorMessage
+                    { Test-ParameterValid @script:splatAddDvdDrive } | Should -Throw $errorMessage
                 }
 
                 It 'all the get mocks should be called' {

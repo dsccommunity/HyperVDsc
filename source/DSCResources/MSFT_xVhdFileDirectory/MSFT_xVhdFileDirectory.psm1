@@ -57,7 +57,7 @@ function Get-TargetResource
                     } |
                         Get-Volume
 
-        $letterDrive = (-join $mountedDrive.DriveLetter) + ":\"
+        $letterDrive = (-join $mountedDrive.DriveLetter) + ':\'
 
         # show the drive letters.
         Get-PSDrive | Write-Verbose
@@ -131,7 +131,7 @@ function Set-TargetResource
         foreach ($item in $FileDirectory)
         {
             $itemToCopy = GetItemToCopy -item $item
-            $letterDrive = (-join $mountedDrive.DriveLetter) + ":\"
+            $letterDrive = (-join $mountedDrive.DriveLetter) + ':\'
             $finalDestinationPath = $letterDrive
             $finalDestinationPath = Join-Path  $letterDrive  $itemToCopy.DestinationPath
 
@@ -213,7 +213,7 @@ function Test-TargetResource
         Get-PSDrive | Write-Verbose
 
         $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Where-Object -FilterScript { $_.Type -ne 'Recovery' } | Get-Volume
-        $letterDrive = (-join $mountedDrive.DriveLetter) + ":\"
+        $letterDrive = (-join $mountedDrive.DriveLetter) + ':\'
         Write-Verbose $letterDrive
 
         # return test result equal to true unless one of the tests in the loop below fails.
@@ -233,7 +233,7 @@ function Test-TargetResource
                 if ( -not ($itemToCopy.Ensure))
                 {
                     $result = $false
-                    break;
+                    break
                 }
                 else
                 {
@@ -253,13 +253,13 @@ function Test-TargetResource
                         $result = $result -and -not(ItemHasChanged -sourcePath $itemToCopy.SourcePath -destinationPath (Join-Path $finalDestinationPath $fileName) -CheckSum $CheckSum)
                     }
 
-                    if (($itemToCopy.Type -eq "Directory") -and ($itemToCopy.Recurse))
+                    if (($itemToCopy.Type -eq 'Directory') -and ($itemToCopy.Recurse))
                     {
                         $result = $result -and -not(ItemHasChanged -sourcePath $itemToCopy.SourcePath -destinationPath $finalDestinationPath -CheckSum $CheckSum)
 
                         if (-not ($result))
                         {
-                            break;
+                            break
                         }
                     }
                 }
@@ -295,13 +295,13 @@ function Test-TargetResource
 # Assert the state of the VHD.
 function EnsureVHDState
 {
-    [CmdletBinding(DefaultParameterSetName = "Mounted")]
+    [CmdletBinding(DefaultParameterSetName = 'Mounted')]
     param
     (
-        [Parameter(ParameterSetName = "Mounted")]
+        [Parameter(ParameterSetName = 'Mounted')]
         [switch]$Mounted,
 
-        [Parameter(ParameterSetName = "Dismounted")]
+        [Parameter(ParameterSetName = 'Dismounted')]
         [switch]$Dismounted,
 
         [Parameter(Mandatory = $true)]
@@ -310,7 +310,7 @@ function EnsureVHDState
 
     if (-not (Get-Module -ListAvailable 'Hyper-V'))
     {
-        throw "Hyper-v-Powershell Windows Feature is required to run this resource. Please install Hyper-v feature and try again"
+        throw 'Hyper-v-Powershell Windows Feature is required to run this resource. Please install Hyper-v feature and try again'
     }
 
     if ($PSCmdlet.ParameterSetName -eq 'Mounted')
@@ -321,7 +321,7 @@ function EnsureVHDState
         # If mounting the VHD failed. Dismount the VHD and mount it again.
         if ($var)
         {
-            Write-Verbose "Mounting Failed. Attempting to dismount and mount it back"
+            Write-Verbose 'Mounting Failed. Attempting to dismount and mount it back'
             Dismount-VHD $vhdPath
             $mountedVHD = Mount-VHD -Path $vhdPath -Passthru -ErrorAction SilentlyContinue
 
@@ -365,7 +365,7 @@ function GetItemToCopy
         'Type'            = 'Directory'
     }
 
-    [string[]] ($DesiredProperties.Keys) | Foreach-Object -Process {
+    [System.String[]] ($DesiredProperties.Keys) | Foreach-Object -Process {
         #Get Property Value
         $thisItem = $item.CimInstanceProperties[$_].Value
 
@@ -416,10 +416,10 @@ function GetItemToCopy
 # This is the main function that gets called after the file is mounted to perform copy, set or new operations on the mounted drive.
 function SetVHDFile
 {
-    [CmdletBinding(DefaultParameterSetName = "Copy")]
+    [CmdletBinding(DefaultParameterSetName = 'Copy')]
     param
     (
-        [Parameter(Mandatory = $true, ParameterSetName = "Copy")]
+        [Parameter(Mandatory = $true, ParameterSetName = 'Copy')]
         $sourcePath,
 
         [Parameter()]
@@ -430,19 +430,19 @@ function SetVHDFile
         [switch]
         $force,
 
-        [Parameter(ParameterSetName = "New")]
+        [Parameter(ParameterSetName = 'New')]
         $type,
 
-        [Parameter(ParameterSetName = "New")]
+        [Parameter(ParameterSetName = 'New')]
         $content,
 
         [Parameter(Mandatory = $true)]
         $destinationPath,
 
-        [Parameter(Mandatory = $true, ParameterSetName = "Set")]
+        [Parameter(Mandatory = $true, ParameterSetName = 'Set')]
         $attribute,
 
-        [Parameter(Mandatory = $true, ParameterSetName = "Delete")]
+        [Parameter(Mandatory = $true, ParameterSetName = 'Delete')]
         [switch]
         $ensure
     )

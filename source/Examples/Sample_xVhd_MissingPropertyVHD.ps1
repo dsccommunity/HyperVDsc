@@ -3,21 +3,21 @@ configuration Sample_xVHD_MissingPropertyVHD
     param
     (
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $Path,
 
         [Parameter()]
         [ValidateSet('Vhd', 'Vhdx')]
-        [string]
+        [System.String]
         $Generation = 'Vhd',
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [string]
+        [System.String]
         $Ensure = 'Present'
     )
 

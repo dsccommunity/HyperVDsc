@@ -38,21 +38,21 @@ try
             param
             (
                 [Parameter(Mandatory = $true)]
-                [string]
+                [System.String]
                 $Name,
 
                 [Parameter(Mandatory = $true)]
                 [ValidateSet('Default', 'Weight', 'Absolute', 'None', 'NA')]
-                [string]
+                [System.String]
                 $BandwidthReservationMode,
 
                 [Parameter()]
                 [ValidateSet('Dynamic','HyperVPort')]
-                [String]
+                [System.String]
                 $LoadBalancingAlgorithm,
 
                 [Parameter()]
-                [Boolean]
+                [System.Boolean]
                 $AllowManagementOS = $false
             )
 
@@ -97,23 +97,23 @@ try
                 param
                 (
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $Name,
 
                     [Parameter()]
-                    [string[]]
+                    [System.String[]]
                     $NetAdapterName,
 
                     [Parameter()]
-                    [string]
+                    [System.String]
                     $MinimumBandwidthMode = 'NA',
 
                     [Parameter()]
-                    [Boolean]
+                    [System.Boolean]
                     $EnableEmbeddedTeaming,
 
                     [Parameter()]
-                    [Boolean]
+                    [System.Boolean]
                     $AllowManagementOS
                 )
 
@@ -476,13 +476,13 @@ try
                 It "Should throw an error in the test method" {
                     $errorMessage = $script:localizedData.SETServer2016Error
 
-                    {Test-TargetResource @testParams} | Should -throw $errorMessage
+                    {Test-TargetResource @testParams} | Should -Throw $errorMessage
                 }
 
                 It "Should throw an error in the set method" {
                     $errorMessage = $script:localizedData.SETServer2016Error
 
-                    {Set-TargetResource @testParams} | Should -throw $errorMessage
+                    {Set-TargetResource @testParams} | Should -Throw $errorMessage
                 }
             }
         }

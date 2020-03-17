@@ -65,7 +65,7 @@ try
             It 'Should throw when VM processor is not found' {
                 Mock -CommandName Get-Module { return $true }
                 Mock -CommandName Get-VMProcessor { Write-Error 'Not Found' }
-                { $null = Get-TargetResource -VMName $testVMName } | Should -throw 'Not Found'
+                { $null = Get-TargetResource -VMName $testVMName } | Should -Throw 'Not Found'
             }
         } # descrive Get-TargetResource
 
@@ -190,24 +190,28 @@ try
             }
 
             $restartRequiredParameters = @{
-                'ExposeVirtualizationExtensions' = $false;
-                'CompatibilityForMigrationEnabled' = $true;
-                'CompatibilityForOlderOperatingSystemsEnabled' = $true;
-                'HwThreadCountPerCore' = 2;
+                'ExposeVirtualizationExtensions' = $false
+                'CompatibilityForMigrationEnabled' = $true
+                'CompatibilityForOlderOperatingSystemsEnabled' = $true
+                'HwThreadCountPerCore' = 2
                 'MaximumCountPerNumaNode' = 2
                 'MaximumCountPerNumaSocket' = 2
-                'ResourcePoolName' = $testResourcePoolName;
+                'ResourcePoolName' = $testResourcePoolName
             }
 
             foreach ($parameter in $restartRequiredParameters.GetEnumerator())
             {
                 $setTargetResourceParams = @{
-                    VMName = $testVMName;
-                    $parameter.Name = $parameter.Value;
+                    VMName = $testVMName
+                    $parameter.Name = $parameter.Value
                 }
 
                 It "Should not throw when VM is off, '$($parameter.Name)' is specified and 'RestartIfNeeded' is False" {
-                    Mock -CommandName Get-VM { return @{ State = 'Off' } }
+                    Mock -CommandName Get-VM -MockWith {
+                        return @{
+                            State = 'Off'
+                        }
+                    }
 
                     { Set-TargetResource @setTargetResourceParams } | Should -Not -throw
                 }
@@ -215,7 +219,7 @@ try
                 It "Should throw when VM is running, '$($parameter.Name)' is specified and 'RestartIfNeeded' is False" {
                     Mock -CommandName Get-VM { return @{ State = 'Running' } }
 
-                    { Set-TargetResource @setTargetResourceParams } | Should -throw
+                    { Set-TargetResource @setTargetResourceParams } | Should -Throw
                 }
 
                 It "Should shutdown VM when running, '$($parameter.Name)' is specified and 'RestartIfNeeded' is True" {
@@ -228,21 +232,25 @@ try
             }
 
             $noRestartRequiredParameters = @{
-                'EnableHostResourceProtection' = $true;
-                'Maximum' = 50;
-                'RelativeWeight' = 50;
-                'Reserve' = 50;
+                'EnableHostResourceProtection' = $true
+                'Maximum' = 50
+                'RelativeWeight' = 50
+                'Reserve' = 50
             }
 
             foreach ($parameter in $noRestartRequiredParameters.GetEnumerator())
             {
                 $setTargetResourceParams = @{
-                    VMName = $testVMName;
-                    $parameter.Name = $parameter.Value;
+                    VMName = $testVMName
+                    $parameter.Name = $parameter.Value
                 }
 
                 It "Should not shutdown VM running and '$($parameter.Name) is specified" {
-                    Mock -CommandName Get-VM { return @{ State = 'Running' } }
+                    Mock -CommandName Get-VM -MockWith {
+                        return @{
+                            State = 'Running'
+                        }
+                    }
 
                     Set-TargetResource @setTargetResourceParams
 
@@ -262,19 +270,19 @@ try
             }
 
             $server2016OnlyParameters = @{
-                EnableHostResourceProtection = $true;
-                ExposeVirtualizationExtensions = $true;
-                HwThreadCountPerCore = 1;
+                EnableHostResourceProtection = $true
+                ExposeVirtualizationExtensions = $true
+                HwThreadCountPerCore = 1
             }
 
             foreach ($parameter in $server2016OnlyParameters.GetEnumerator())
             {
                 $assertTargetResourceParameterParams = @{
-                    $parameter.Name = $parameter.Value;
+                    $parameter.Name = $parameter.Value
                 }
 
                 It "Should throw when parameter '$($parameter.Name)' is specified on 2012 R2 host" {
-                    { Assert-TargetResourceParameter @assertTargetResourceParameterParams } | Should -throw '14393'
+                    { Assert-TargetResourceParameter @assertTargetResourceParameterParams } | Should -Throw '14393'
                 }
             }
         } # describe Assert-TargetResourceParameter

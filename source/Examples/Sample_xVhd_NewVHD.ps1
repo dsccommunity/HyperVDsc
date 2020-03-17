@@ -3,28 +3,28 @@ configuration Sample_xVHD_NewVhd
     param
     (
         [Parameter()]
-        [string[]]
+        [System.String[]]
         $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $Path,
 
         [Parameter(Mandatory = $true)]
-        [Uint64]
+        [System.UInt64]
         $MaximumSizeBytes,
 
         [Parameter()]
         [ValidateSet('Vhd', 'Vhdx')]
-        [string]$Generation = 'Vhd',
+        [System.String]$Generation = 'Vhd',
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [string]
+        [System.String]
         $Ensure = 'Present'
     )
 

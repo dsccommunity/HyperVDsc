@@ -3,19 +3,19 @@ configuration Sample_xVMHyperV_SimpleWithNestedVirtualization
     param
     (
         [Parameter()]
-        [string[]]
+        [System.String[]]
         $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $VMName,
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $VhdPath,
 
         [Parameter(Mandatory = $true)]
-        [Uint64]
+        [System.UInt64]
         $Memory
     )
 

@@ -2,15 +2,19 @@ configuration Sample_xVMHyperV_SimpleWithDvdDrive
 {
     param
     (
-        [string[]]$NodeName = 'localhost',
+        [System.String[]]
+        $NodeName = 'localhost',
 
         [Parameter(Mandatory = $true)]
-        [string]$VMName,
+        [System.String]
+        $VMName,
 
         [Parameter(Mandatory = $true)]
-        [string]$VhdPath,
+        [System.String]
+        $VhdPath,
 
-        [string]$ISOPath
+        [System.String]
+        $ISOPath
     )
 
     Import-DscResource -ModuleName 'xHyper-V'

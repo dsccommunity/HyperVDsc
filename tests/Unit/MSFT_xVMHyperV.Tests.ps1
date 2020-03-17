@@ -376,7 +376,7 @@ try
                 }
 
                 It 'throws when multiple VMs are present' {
-                    { Get-TargetResource -Name 'DuplicateVM' -VhdPath $stubVhdxDisk.Path } | Should -throw
+                    { Get-TargetResource -Name 'DuplicateVM' -VhdPath $stubVhdxDisk.Path } | Should -Throw
                 }
 
                 It 'Does not call Get-VMFirmware if a generation 1 VM' {
@@ -402,7 +402,7 @@ try
                 It 'throws when Hyper-V Tools are not installed' {
                     # This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
                     Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) }
-                    { Get-TargetResource -Name 'RunningVM' @testParams } | Should -throw
+                    { Get-TargetResource -Name 'RunningVM' @testParams } | Should -Throw
                 }
             } #end context Validates Get-TargetResource Method
 
@@ -478,7 +478,7 @@ try
                 }
 
                 It 'throws when a VM .vhd file is specified with a generation 2 VM' {
-                    { Test-TargetResource -Name 'Gen2VM' -VhdPath $stubVhdDisk.Path -Generation 2 } | Should -throw
+                    { Test-TargetResource -Name 'Gen2VM' -VhdPath $stubVhdDisk.Path -Generation 2 } | Should -Throw
                 }
 
                 It 'Returns $true when multiple NICs are assigned in the correct order' {
@@ -509,20 +509,22 @@ try
 
                 It 'Returns $false when SecureBoot is On and requested "SecureBoot" = "$false"' {
                     Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
-                    Test-TargetResource -Name 'Generation2VM' -SecureBoot $false -Generation 2 @testParams | Should -be $false
+                    Test-TargetResource -Name 'Generation2VM' -SecureBoot $false -Generation 2 @testParams | Should -Be $false
                 }
 
                 It 'Returns $true when VM has snapshot chain' {
-                    Mock -CommandName Get-VhdHierarchy -MockWith { Write-Host $VhdPath; return @($studVhdxDiskSnapshot, $stubVhdxDisk) }
+                    Mock -CommandName Get-VhdHierarchy -MockWith {
+                        return @($studVhdxDiskSnapshot, $stubVhdxDisk)
+                    }
                     Test-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk.Path -Verbose | Should -Be $true
                 }
 
                 It 'Returns $false when EnableGuestService is off and requested "EnableGuestService" = "$true"' {
-                    Test-TargetResource -Name 'RunningVM' -EnableGuestService $true @testParams | Should -be $false
+                    Test-TargetResource -Name 'RunningVM' -EnableGuestService $true @testParams | Should -Be $false
                 }
 
                 It 'Returns $true when EnableGuestService is off and "EnableGuestService" is not requested"' {
-                    Test-TargetResource -Name 'RunningVM'  @testParams | Should -be $true
+                    Test-TargetResource -Name 'RunningVM'  @testParams | Should -Be $true
                 }
 
                 Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'Set-VM' -and $Module -eq 'Hyper-V' } -MockWith {
@@ -533,7 +535,7 @@ try
                     }
                 }
                 It 'throws when AutomaticCheckpointsEnabled is configured but not supported' {
-                    { Test-TargetResource -Name 'VMAutomaticCheckpoinstUnsupported' -AutomaticCheckpointsEnabled $true @testParams } | Should -throw
+                    { Test-TargetResource -Name 'VMAutomaticCheckpoinstUnsupported' -AutomaticCheckpointsEnabled $true @testParams } | Should -Throw
                 }
 
                 Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'Set-VM' -and $Module -eq 'Hyper-V' } -MockWith {
@@ -544,19 +546,19 @@ try
                     }
                 }
                 It 'Returns $true when AutomaticCheckpointsEnabled is on and requested "AutomaticCheckpointsEnabled" is not requested' {
-                    Test-TargetResource -Name 'VMWithAutomaticCheckpoints' @testParams | Should -be $true
+                    Test-TargetResource -Name 'VMWithAutomaticCheckpoints' @testParams | Should -Be $true
                 }
                 It 'Returns $true when AutomaticCheckpointsEnabled is on and requested "AutomaticCheckpointsEnabled" = "$true"' {
-                    Test-TargetResource -Name 'VMWithAutomaticCheckpoints' -AutomaticCheckpointsEnabled $true @testParams | Should -be $true
+                    Test-TargetResource -Name 'VMWithAutomaticCheckpoints' -AutomaticCheckpointsEnabled $true @testParams | Should -Be $true
                 }
                 It 'Returns $true when AutomaticCheckpointsEnabled is off and requested "AutomaticCheckpointsEnabled" = "$false"' {
-                    Test-TargetResource -Name 'VMWithoutAutomaticCheckpoints' -AutomaticCheckpointsEnabled $false @testParams | Should -be $true
+                    Test-TargetResource -Name 'VMWithoutAutomaticCheckpoints' -AutomaticCheckpointsEnabled $false @testParams | Should -Be $true
                 }
                 It 'Returns $false when AutomaticCheckpointsEnabled is off and requested "AutomaticCheckpointsEnabled" = "$true"' {
-                    Test-TargetResource -Name 'VMWithoutAutomaticCheckpoints' -AutomaticCheckpointsEnabled $true @testParams | Should -be $false
+                    Test-TargetResource -Name 'VMWithoutAutomaticCheckpoints' -AutomaticCheckpointsEnabled $true @testParams | Should -Be $false
                 }
                 It 'Returns $false when AutomaticCheckpointsEnabled is on and requested "AutomaticCheckpointsEnabled" = "$false"' {
-                    Test-TargetResource -Name 'VMWithAutomaticCheckpoints' -AutomaticCheckpointsEnabled $false @testParams | Should -be $false
+                    Test-TargetResource -Name 'VMWithAutomaticCheckpoints' -AutomaticCheckpointsEnabled $false @testParams | Should -Be $false
                 }
 
                 It 'Returns $true when EnableGuestService is on and requested "EnableGuestService" = "$true"' {
@@ -568,13 +570,13 @@ try
                         return $guestServiceInterface
                     }
 
-                    Test-TargetResource -Name 'RunningVM' -EnableGuestService $true @testParams | Should -be $true
+                    Test-TargetResource -Name 'RunningVM' -EnableGuestService $true @testParams | Should -Be $true
                 }
 
                 It 'throws when Hyper-V Tools are not installed' {
                     # This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
                     Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) }
-                    { Test-TargetResource -Name 'RunningVM' @testParams } | Should -throw
+                    { Test-TargetResource -Name 'RunningVM' @testParams } | Should -Throw
                 }
 
             } #end context Validates Test-TargetResource Method
@@ -725,7 +727,7 @@ try
                 }
 
                 It 'Errors when updating MAC addresses on a running VM and "RestartIfNeeded" = "$false"' {
-                    { Set-TargetResource -Name 'RunningVM' @testParams -MACAddress 'AABBCCDDEEFE', 'AABBCCDDEEFF' -ErrorAction Stop } | Should -throw
+                    { Set-TargetResource -Name 'RunningVM' @testParams -MACAddress 'AABBCCDDEEFE', 'AABBCCDDEEFF' -ErrorAction Stop } | Should -Throw
                 }
 
                 It 'Does not change MAC addresses if no MAC addresses assignments are specified' {
@@ -804,7 +806,7 @@ try
                     }
                 }
                 It 'throws when AutomaticCheckpointsEnabled is configured but not supported' {
-                    { Set-TargetResource -Name 'VMAutomaticCheckpointsUnsupported' -AutomaticCheckpointsEnabled $true @testParams } | Should -throw
+                    { Set-TargetResource -Name 'VMAutomaticCheckpointsUnsupported' -AutomaticCheckpointsEnabled $true @testParams } | Should -Throw
                 }
                 It 'Does not call "Set-VM" when "AutomaticCheckpointsEnabled" is unsupported and unspecified' {
                     Set-TargetResource -Name 'VMAutomaticCheckpointsUnsupported' @testParams
@@ -897,7 +899,7 @@ try
 
                 It 'throws when Hyper-V Tools are not installed' {
                     Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) }
-                    { Set-TargetResource -Name 'RunningVM' @testParams } | Should -throw
+                    { Set-TargetResource -Name 'RunningVM' @testParams } | Should -Throw
                 }
             } #end context Validates Set-TargetResource Method
 
