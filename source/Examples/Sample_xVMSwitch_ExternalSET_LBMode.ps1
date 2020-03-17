@@ -1,4 +1,4 @@
-Configuration Sample_xVMSwitch_External
+Configuration Sample_xVMSwitch_ExternalSET_LBMode
 {
     param
     (
@@ -15,7 +15,7 @@ Configuration Sample_xVMSwitch_External
         $NetAdapterNames
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node $NodeName
     {

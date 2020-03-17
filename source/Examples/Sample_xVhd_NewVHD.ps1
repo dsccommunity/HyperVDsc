@@ -1,4 +1,4 @@
-configuration Sample_xVhd_FixedVhd
+configuration Sample_xVHD_NewVhd
 {
     param
     (
@@ -14,15 +14,13 @@ configuration Sample_xVhd_FixedVhd
         [string]
         $Path,
 
-        [Parameter()]
-        [ValidateSet('Vhd', 'Vhdx')]
-        [string]
-        $Generation = 'Vhd',
+        [Parameter(Mandatory = $true)]
+        [Uint64]
+        $MaximumSizeBytes,
 
         [Parameter()]
-        [ValidateSet('Dynamic', 'Fixed', 'Differencing')]
-        [string]
-        $Type = 'Fixed',
+        [ValidateSet('Vhd', 'Vhdx')]
+        [string]$Generation = 'Vhd',
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -30,7 +28,7 @@ configuration Sample_xVhd_FixedVhd
         $Ensure = 'Present'
     )
 
-    Import-DscResource -ModuleName xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node $NodeName
     {
@@ -47,14 +45,14 @@ configuration Sample_xVhd_FixedVhd
             Name   = 'Hyper-V-PowerShell'
         }
 
-        xVhd DiffVhd
+        xVhd NewVhd
         {
-            Ensure     = $Ensure
-            Name       = $Name
-            Path       = $Path
-            Generation = $Generation
-            Type       = $Type
-            DependsOn  = '[WindowsFeature]HyperV', '[WindowsFeature]HyperVPowerShell'
+            Ensure           = $Ensure
+            Name             = $Name
+            Path             = $Path
+            Generation       = $Generation
+            MaximumSizeBytes = $MaximumSizeBytes
+            DependsOn        = '[WindowsFeature]HyperV', '[WindowsFeature]HyperVPowerShell'
         }
     }
 }

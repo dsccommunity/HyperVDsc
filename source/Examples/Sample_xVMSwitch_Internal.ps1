@@ -8,7 +8,7 @@ configuration Sample_xVMSwitch_Internal
         [string]$SwitchName
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node $NodeName
     {

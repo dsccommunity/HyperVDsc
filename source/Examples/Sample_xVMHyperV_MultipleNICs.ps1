@@ -2,22 +2,24 @@ Configuration Sample_xVMHyperV_MultipleNICs
 {
     param
     (
-        [string[]]$NodeName = 'localhost',
-
-        [Parameter(Mandatory)]
-        [string]$VMName,
-
-        [Parameter(Mandatory)]
-        [string]$VhdPath,
-
-        [Parameter(Mandatory)]
-        [string[]]$SwitchName,
+        [Parameter()]
+        [string[]]
+        $NodeName = 'localhost',
 
         [Parameter()]
-        [string[]]$MACAddress
+        [string]$VMName = 'TestVM',
+
+        [Parameter()]
+        [string]$VhdPath = 'C:\temp\disk.vhdx',
+
+        [Parameter()]
+        [string[]]$SwitchName = @('MySwitch'),
+
+        [Parameter()]
+        [string[]]$MACAddress = '0000000'
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node $NodeName
     {
@@ -44,7 +46,7 @@ Configuration Sample_xVMHyperV_MultipleNICs
             # Remove spaces and hyphens from the identifier
             $vmSwitchName = $vmSwitch -replace ' ','' -replace '-',''
             # Add the virtual switch dependency
-            $xVMHyperVDependsOn += "[xVMHyperV]$vmSwitchName"
+            $xVMHyperVDependsOn += "[xVMSwitch]$vmSwitchName"
 
             xVMSwitch $vmSwitchName
             {
@@ -68,5 +70,3 @@ Configuration Sample_xVMHyperV_MultipleNICs
         }
     }
 }
-
-Sample_xVMHyperV_MultipleNICs -VMName 'MultiNICVM' -VhdPath 'C:\VMs\MultiNICVM.vhdx' -SwitchName 'Switch 1','Switch-2'

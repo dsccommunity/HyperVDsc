@@ -21,7 +21,7 @@ configuration Sample_xVHD_MissingPropertyVHD
         $Ensure = 'Present'
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node localhost
     {

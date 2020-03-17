@@ -36,7 +36,7 @@ configuration Sample_xVMHyperV_Complete
         [bool]$AutomaticCheckpointsEnabled
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node $NodeName
     {

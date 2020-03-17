@@ -1,6 +1,6 @@
-﻿Configuration HostOSAdapter
+﻿Configuration Sample_xVMNetworkAdapter_MultipleManagementOS
 {
-    Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
+    Import-DscResource -ModuleName 'xHyper-V' -Name xVMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     xVMNetworkAdapter ManagementAdapter {

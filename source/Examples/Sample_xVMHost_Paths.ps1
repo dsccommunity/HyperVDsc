@@ -1,17 +1,15 @@
-Configuration HyperVHostPaths
+Configuration Sample_xVMHost_Paths
 {
     param
     (
-        [Parameter(Mandatory=$true, Position=0)]
-        [ValidateScript({Test-Path $_})]
-        $VirtualHardDiskPath,
+        [Parameter()]
+        $VirtualHardDiskPath = 'C:\VMDisks',
 
-        [Parameter(Mandatory=$true, Position=1)]
-        [ValidateScript({Test-Path $_})]
-        $VirtualMachinePath
+        [Parameter()]
+        $VirtualMachinePath = 'C:\VMs'
     )
 
-    Import-DscResource -moduleName xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     xVMHost HyperVHostPaths
     {

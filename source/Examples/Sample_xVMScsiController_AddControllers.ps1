@@ -1,4 +1,4 @@
-configuration Sample_xVMScsiController
+configuration Sample_xVMScsiController_AddControllers
 {
     param
     (
@@ -61,8 +61,3 @@ configuration Sample_xVMScsiController
 
     }
 }
-
-$mofPath = "C:\temp\Sample_xVMScsiController"
-
-Sample_xVMScsiController -VMName "test1" -VhdPath "C:\temp\Tests" -OutputPath $mofPath
-Start-DscConfiguration -Path $mofPath -Verbose -Wait -Force

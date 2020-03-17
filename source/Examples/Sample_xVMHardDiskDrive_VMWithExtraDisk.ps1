@@ -1,4 +1,4 @@
-configuration Sample_xVMHardDiskDrive
+configuration Sample_xVMHardDiskDrive_VMWithExtraDisk
 {
     param
     (

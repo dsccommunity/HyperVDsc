@@ -6,12 +6,12 @@ configuration Sample_xVMHyperV_Simple
 
         [Parameter(Mandatory)]
         [string]$VMName,
-        
+
         [Parameter(Mandatory)]
-        [string]$VhdPath        
+        [string]$VhdPath
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node $NodeName
     {

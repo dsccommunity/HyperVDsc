@@ -1,6 +1,6 @@
-﻿Configuration VMAdapter
+﻿Configuration Sample_xVMNetworkAdapter_VMVlanTagging
 {
-    Import-DscResource -ModuleName xHyper-V -Name xVMNetworkAdapter
+    Import-DscResource -ModuleName 'xHyper-V' -Name xVMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     xVMNetworkAdapter MyVM01NIC {

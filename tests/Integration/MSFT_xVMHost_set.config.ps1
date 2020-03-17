@@ -1,4 +1,4 @@
-configuration MSFT_xVMHost_Set_Config 
+configuration MSFT_xVMHost_Set_Config
 {
     param
     (
@@ -15,7 +15,7 @@ configuration MSFT_xVMHost_Set_Config
         $EnableEnhancedSessionMode
     )
 
-    Import-DscResource -ModuleName xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     node localhost {
         xVMHost Integration_Test {

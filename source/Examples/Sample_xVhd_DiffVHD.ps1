@@ -33,7 +33,7 @@ configuration Sample_xVhd_DiffVhd
         $Ensure = 'Present'
     )
 
-    Import-DscResource -ModuleName xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node $NodeName
     {

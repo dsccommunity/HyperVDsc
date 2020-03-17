@@ -6,7 +6,7 @@ configuration Sample_xVMHyperV_DynamicMemory
 
         [Parameter(Mandatory)]
         [string]$VMName,
-        
+
         [Parameter(Mandatory)]
         [string]$VhdPath,
 
@@ -20,7 +20,7 @@ configuration Sample_xVMHyperV_DynamicMemory
         [Uint64]$MaximumMemory
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node $NodeName
     {

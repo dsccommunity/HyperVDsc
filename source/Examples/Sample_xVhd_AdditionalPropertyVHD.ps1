@@ -29,7 +29,7 @@ configuration Sample_xVHD_AdditionalPropertyVHD
         $Ensure = 'Present'
     )
 
-    Import-DscResource -ModuleName xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node localhost
     {

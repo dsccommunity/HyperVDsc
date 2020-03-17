@@ -13,7 +13,7 @@ configuration Sample_xVMHyperV_SimpleWithDvdDrive
         [string]$ISOPath
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node $NodeName
     {

@@ -6,12 +6,12 @@ configuration Sample_xVMSwitch_External
 
         [Parameter(Mandatory)]
         [string]$SwitchName,
-        
+
         [Parameter(Mandatory)]
-        [string]$NetAdapterName        
+        [string]$NetAdapterName
     )
 
-    Import-DscResource -module xHyper-V
+    Import-DscResource -ModuleName 'xHyper-V'
 
     Node $NodeName
     {
@@ -28,7 +28,7 @@ configuration Sample_xVMSwitch_External
             Ensure         = 'Present'
             Name           = $SwitchName
             Type           = 'External'
-            NetAdapterName = $NetAdapterName 
+            NetAdapterName = $NetAdapterName
             DependsOn      = '[WindowsFeature]HyperV'
         }
     }
