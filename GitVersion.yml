@@ -1,0 +1,34 @@
+mode: ContinuousDelivery
+next-version: 3.18.0
+major-version-bump-message: '\s?(breaking|major|breaking\schange)'
+minor-version-bump-message: '\s?(add|feature|minor)'
+patch-version-bump-message: '\s?(fix|patch)'
+no-bump-message: '\+semver:\s?(none|skip)'
+assembly-informational-format: "{NuGetVersionV2}+Sha.{Sha}.Date.{CommitDate}"
+branches:
+  master:
+    tag: preview
+  pull-request:
+    tag: PR
+  feature:
+    tag: useBranchName
+    increment: Minor
+    regex: f(eature(s)?)?[\/-]
+    source-branches: ["master"]
+  hotfix:
+    tag: fix
+    increment: Patch
+    regex: (hot)?fix(es)?[\/-]
+    source-branches: ["master"]
+
+ignore:
+  # Ignored these SHA to prevent wrongly raising major version
+  # when module was converted to new CI pipeline.
+  sha:
+    [
+      47725eb4a8db5857ce134d66cb355cf2e7544017,
+      c0224e8821e6098bf09c4d08be878f2fabe778d5,
+      c55655f98b81b6e1e9a058da3e1a6cc2f5f33917,
+      11555429e61770c46af67860df87008a17c3df0,
+    ]
+merge-message-formats: {}

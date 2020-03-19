@@ -1,35 +1,29 @@
 # xHyper-V
 
-The **xHyper-V** module contains DSC resources for deployment and configuration of
- Hyper-V hosts, virtual machines and related resources.
+[![Build Status](https://dev.azure.com/dsccommunity/xHyper-V/_apis/build/status/dsccommunity.xHyper-V?branchName=master)](https://dev.azure.com/dsccommunity/xHyper-V/_build/latest?definitionId=25&branchName=master)
+![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/xHyper-V/25/master)
+[![codecov](https://codecov.io/gh/dsccommunity/xHyper-V/branch/master/graph/badge.svg)](https://codecov.io/gh/dsccommunity/xHyper-V)
+[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/xHyper-V/25/master)](https://dsccommunity.visualstudio.com/xHyper-V/_test/analytics?definitionId=25&contextType=build)
+[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/xHyper-V?label=xHyper-V%20Preview)](https://www.powershellgallery.com/packages/xHyper-V/)
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xHyper-V?label=xHyper-V)](https://www.powershellgallery.com/packages/xHyper-V/)
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
- or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any
- additional questions or comments.
+The **xHyper-V** module contains DSC resources for deployment and configuration
+of Hyper-V hosts, virtual machines and related resources.
 
-## Branches
+## Code of Conduct
 
-### master
+This project has adopted this [Code of Conduct](CODE_OF_CONDUCT.md).
 
-[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/master)
-[![codecov](https://codecov.io/gh/PowerShell/xHyper-V/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/xHyper-V/branch/master)
+## Releases
 
-This is the branch containing the latest release - no contributions should be
-made directly to this branch.
-
-### dev
-
-[![Build status](https://ci.appveyor.com/api/projects/status/tsdbv0hgrxvmbo5y/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xhyper-v/branch/dev)
-[![codecov](https://codecov.io/gh/PowerShell/xHyper-V/branch/dev/graph/badge.svg)](https://codecov.io/gh/PowerShell/xHyper-V/branch/dev)
-
-This is the development branch to which contributions should be proposed by
-contributors as pull requests. This development branch will periodically be
-merged to the master branch, and be released to [PowerShell Gallery](https://www.powershellgallery.com/).
+For each merge to the branch `master` a preview release will be
+deployed to [PowerShell Gallery](https://www.powershellgallery.com/).
+Periodically a release version tag will be pushed which will deploy a
+full release to [PowerShell Gallery](https://www.powershellgallery.com/).
 
 ## Contributing
 
-Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
+Please check out common DSC Community [contributing guidelines](https://dsccommunity.org/guidelines/contributing).
 
 ## Change log
 
@@ -86,9 +80,9 @@ Manages VHDs in a Hyper-V host.
 
 #### Examples xVHD
 
-* [Create a new VHD](/Examples/Sample_xVHD_NewVHD.ps1)
-* [Create a new Fixed VHD](/Examples/Sample_xVHD_FixedVHD.ps1)
-* [Create a differencing VHD](/Examples/Sample_xVHD_DiffVHD.ps1)
+* [Create a new VHD](/source/Examples/Sample_xVHD_NewVHD.ps1)
+* [Create a new Fixed VHD](/source/Examples/Sample_xVHD_FixedVHD.ps1)
+* [Create a differencing VHD](/source/Examples/Sample_xVHD_DiffVHD.ps1)
 
 ### xVhdFile
 
@@ -144,7 +138,7 @@ None
 
 #### Examples xVhdFile
 
-* [Multiple examples](/Examples/Sample_xVhdFileExamples.ps1)
+* [Multiple examples](/source/Examples)
 
 ### xVMDvdDrive
 
@@ -174,7 +168,7 @@ None
 
 #### Examples xVMDvdDrive
 
-* [Create a VM, given a VHDX and add a DVD Drives](/Examples/Sample_xVMHyperV_SimpleWithDVDDrive.ps1)
+* [Create a VM, given a VHDX and add a DVD Drives](/source/Examples/Sample_xVMHyperV_SimpleWithDVDDrive.ps1)
 
 ### xVMHardDiskDrive
 
@@ -212,8 +206,8 @@ None
 
 #### Examples xVMHardDiskDrive
 
-* [Create a VM, with an OS drive and an additional data drive](/Examples/Sample_xVMHardDiskDrive_VMWithExtraDisk.ps1)
-* [Create a VM, with an OS drive and 4 data drives](/Examples/Sample_xVMHardDiskDrive_VMWith4AdditionalDisks.ps1)
+* [Create a VM, with an OS drive and an additional data drive](/source/Examples/Sample_xVMHardDiskDrive_VMWithExtraDisk.ps1)
+* [Create a VM, with an OS drive and 4 data drives](/source/Examples/Sample_xVMHardDiskDrive_VMWith4AdditionalDisks.ps1)
 
 ### xVMHost
 
@@ -281,7 +275,7 @@ None
 
 #### Examples xVMHost
 
-* [Change VM Host paths](/Examples/Sample_xVMHost_Paths.ps1)
+* [Change VM Host paths](/source/Examples/Sample_xVMHost_Paths.ps1)
 
 ### xVMHyperV
 
@@ -347,10 +341,10 @@ The following properties **cannot** be changed after VM creation:
 
 #### Examples xVMHyperV
 
-* [Create a VM (Simple)](/Examples/Sample_xVMHyperV_Simple.ps1)
-* [Create a VM with dynamic memory](/Examples/Sample_xVMHyperV_DynamicMemory.ps1)
-* [Create a VM (Complete)](/Examples/Sample_xVMHyperV_Complete.ps1)
-* [Create a VM with multiple NICs attached to multiple switches](/Examples/Sample_xVMHyperV_MultipleNICs.ps1)
+* [Create a VM (Simple)](/source/Examples/Sample_xVMHyperV_Simple.ps1)
+* [Create a VM with dynamic memory](/source/Examples/Sample_xVMHyperV_DynamicMemory.ps1)
+* [Create a VM (Complete)](/source/Examples/Sample_xVMHyperV_Complete.ps1)
+* [Create a VM with multiple NICs attached to multiple switches](/source/Examples/Sample_xVMHyperV_MultipleNICs.ps1)
 
 ### xVMNetworkAdapter
 
@@ -397,12 +391,12 @@ Manages VMNetadapters attached to a Hyper-V virtual machine or the management OS
 
 #### Examples xVMNetworkAdapter
 
-* [Add a new VM Network adapter in the management OS](/Examples/Sample_xVMNetworkAdapter_ManagementOS.ps1)
-* [Add multiple VM Network adapters to a VM](/Examples/Sample_xVMNetworkAdapter_MultipleVM.ps1)
-* [Add a couple of VM Network adapters in the management OS](/Examples/Sample_xVMNetworkAdapter_MultipleManagementOS.ps1)
-* [Add multiple VM Network adapters to a VM using status MAC addresses](/Examples/Sample_xVMNetworkAdapter_MultipleVMMACAddress.ps1)
-* [Add VM Network adapters to a VM with a Vlan tag](/Examples/Sample_xVMNetworkAdapter_VMVlanTagging.ps1)
-* [Add VM Network adapters to a VM with a static IpAddress](/Examples/Sample_xVMNetworkAdapter_VMStaticNetworkSettings.ps1)
+* [Add a new VM Network adapter in the management OS](/source/Examples/Sample_xVMNetworkAdapter_ManagementOS.ps1)
+* [Add multiple VM Network adapters to a VM](/source/Examples/Sample_xVMNetworkAdapter_MultipleVM.ps1)
+* [Add a couple of VM Network adapters in the management OS](/source/Examples/Sample_xVMNetworkAdapter_MultipleManagementOS.ps1)
+* [Add multiple VM Network adapters to a VM using status MAC addresses](/source/Examples/Sample_xVMNetworkAdapter_MultipleVMMACAddress.ps1)
+* [Add VM Network adapters to a VM with a Vlan tag](/source/Examples/Sample_xVMNetworkAdapter_VMVlanTagging.ps1)
+* [Add VM Network adapters to a VM with a static IpAddress](/source/Examples/Sample_xVMNetworkAdapter_VMStaticNetworkSettings.ps1)
 
 ### xVMProcessor
 
@@ -453,7 +447,7 @@ None
 
 #### Examples xVMProcessor
 
-* [Create a secure boot gen 2 VM for a given VHD with nested virtualisation enabled](/Examples/Sample_xVMHyperV_SimpleWithNestedVirtualization.ps1)
+* [Create a secure boot gen 2 VM for a given VHD with nested virtualisation enabled](/source/Examples/Sample_xVMHyperV_SimpleWithNestedVirtualization.ps1)
 
 ### xVMScsiController
 
@@ -480,7 +474,7 @@ None
 
 #### Examples xVMScsiController
 
-* [Add a secondary SCSI controller](/Examples/Sample_xVMScsiController_AddControllers.ps1)
+* [Add a secondary SCSI controller](/source/Examples/Sample_xVMScsiController_AddControllers.ps1)
 
 ### xVMSwitch
 
@@ -518,6 +512,6 @@ Manages virtual switches in a Hyper-V host.
 
 #### Examples xVMSwitch
 
-* [Create an internal VM Switch](/Examples/Sample_xVMSwitch_Internal.ps1)
-* [Create an external VM Switch](/Examples/Sample_xVMSwitch_External.ps1)
-* [Create an external VM Switch with embedded teaming](/Examples/Sample_xVMSwitch_ExternalSET.ps1)
+* [Create an internal VM Switch](/source/Examples/Sample_xVMSwitch_Internal.ps1)
+* [Create an external VM Switch](/source/Examples/Sample_xVMSwitch_External.ps1)
+* [Create an external VM Switch with embedded teaming](/source/Examples/Sample_xVMSwitch_ExternalSET.ps1)
