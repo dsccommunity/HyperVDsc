@@ -1,0 +1,106 @@
+---
+####################################################
+#          ModuleBuilder Configuration             #
+####################################################
+CopyDirectories:
+  - en-US
+  - DSCResources
+  - Modules
+Encoding: UTF8
+VersionedOutputDirectory: true
+
+####################################################
+#   ModuleBuilder Dependent Modules Configuration  #
+####################################################
+
+NestedModule:
+  DscResource.Common:
+    CopyOnly: true
+    Path: ./output/RequiredModules/DscResource.Common
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
+
+####################################################
+#       Sampler Pipeline Configuration             #
+####################################################
+BuildWorkflow:
+  '.':
+    - build
+    - test
+
+  build:
+    - Clean
+    - Build_Module_ModuleBuilder
+    - Build_NestedModules_ModuleBuilder
+    - Create_changelog_release_output
+    - Generate_Conceptual_Help
+
+  pack:
+    - build
+    - package_module_nupkg
+
+  hqrmtest:
+    - DscResource_Tests_Stop_On_Fail
+
+  test:
+    - Pester_Tests_Stop_On_Fail
+    - Pester_if_Code_Coverage_Under_Threshold
+
+  publish:
+    - Publish_release_to_GitHub
+    - publish_module_to_gallery
+
+
+####################################################
+#       PESTER  Configuration                      #
+####################################################
+
+Pester:
+  OutputFormat: NUnitXML
+  ExcludeFromCodeCoverage:
+    - Modules/DscResource.Common
+  Script:
+    - tests/Unit
+  ExcludeTag:
+  Tag:
+  CodeCoverageThreshold: 83
+  CodeCoverageOutputFile: JaCoCo_coverage.xml
+  CodeCoverageOutputFileEncoding: ascii
+
+DscTest:
+  ExcludeTag:
+    - "Common Tests - New Error-Level Script Analyzer Rules"
+  Tag:
+  ExcludeSourceFile:
+    - output
+  ExcludeModuleFile:
+    - Modules/DscResource.Common
+
+Resolve-Dependency:
+  Gallery: ''
+  AllowPrerelease: false
+  Verbose: false
+
+ModuleBuildTasks:
+  Sampler:
+    - '*.build.Sampler.ib.tasks'
+  DscResource.DocGenerator:
+    - 'Task.*'
+
+TaskHeader: |
+  param($Path)
+  ""
+  "=" * 79
+  Write-Build Cyan "`t`t`t$($Task.Name.replace("_"," ").ToUpper())"
+  Write-Build DarkGray  "$(Get-BuildSynopsis $Task)"
+  "-" * 79
+  Write-Build DarkGray "  $Path"
+  Write-Build DarkGray "  $($Task.InvocationInfo.ScriptName):$($Task.InvocationInfo.ScriptLineNumber)"
+  ""
+
+GitHubConfig:
+  GitHubFilesToAdd:
+    - 'CHANGELOG.md'
+  GitHubConfigUserName: dscbot
+  GitHubConfigUserEmail: dsccommunity@outlook.com
+  UpdateChangelogOnPrerelease: false
