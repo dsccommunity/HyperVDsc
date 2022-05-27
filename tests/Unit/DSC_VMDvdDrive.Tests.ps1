@@ -1,4 +1,4 @@
-$script:dscModuleName = 'xHyper-V'
+$script:dscModuleName = 'HyperVDsc'
 $script:dscResourceName = 'DSC_VMDvdDrive'
 
 function Invoke-TestSetup
