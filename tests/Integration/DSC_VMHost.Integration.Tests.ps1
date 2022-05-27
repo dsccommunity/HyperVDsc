@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMHost'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMHost'
 
 try
 {

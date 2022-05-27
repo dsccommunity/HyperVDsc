@@ -1,9 +1,9 @@
-configuration MSFT_xVMDvdDrive_Add_Config {
+configuration DSC_VMDvdDrive_Add_Config {
 
-    Import-DscResource -ModuleName 'xHyper-V'
+    Import-DscResource -ModuleName 'HyperVDsc'
 
     node localhost {
-        xVMDvdDrive Integration_Test {
+        VMDvdDrive Integration_Test {
             VMName             = $Node.VMName
             ControllerNumber   = $Node.ControllerNumber
             ControllerLocation = $Node.ControllerLocation

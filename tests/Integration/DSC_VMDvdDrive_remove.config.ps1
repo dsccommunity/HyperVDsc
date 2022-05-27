@@ -1,9 +1,9 @@
-configuration MSFT_xVMDvdDrive_Remove_Config {
+configuration MSFT_VMDvdDrive_Remove_Config {
 
-    Import-DscResource -ModuleName 'xHyper-V'
+    Import-DscResource -ModuleName 'HyperVDsc'
 
     node localhost {
-        xVMDvdDrive Integration_Test {
+        VMDvdDrive Integration_Test {
             VMName             = $Node.VMName
             ControllerNumber   = $Node.ControllerNumber
             ControllerLocation = $Node.ControllerLocation

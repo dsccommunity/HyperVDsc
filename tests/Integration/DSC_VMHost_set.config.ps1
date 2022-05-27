@@ -1,4 +1,4 @@
-configuration MSFT_xVMHost_Set_Config
+configuration DSC_VMHost_Set_Config
 {
     param
     (
@@ -15,10 +15,10 @@ configuration MSFT_xVMHost_Set_Config
         $EnableEnhancedSessionMode
     )
 
-    Import-DscResource -ModuleName 'xHyper-V'
+    Import-DscResource -ModuleName 'xHyperV'
 
     node localhost {
-        xVMHost Integration_Test {
+        VMHost Integration_Test {
             IsSingleInstance          = 'Yes'
             VirtualHardDiskPath       = $VirtualHardDiskPath
             VirtualMachinePath        = $VirtualMachinePath

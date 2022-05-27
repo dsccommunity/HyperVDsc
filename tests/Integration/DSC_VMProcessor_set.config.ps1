@@ -1,6 +1,6 @@
-configuration MSFT_xVMProcessor_Set_Config {
+configuration DSC_VMProcessor_Set_Config {
 
-    Import-DscResource -ModuleName 'xHyper-V'
+    Import-DscResource -ModuleName 'HyperVDsc'
 
     node localhost {
         xVMProcessor Integration_Test {

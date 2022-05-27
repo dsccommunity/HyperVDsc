@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMDvdDrive'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMDvdDrive'
 
 try
 {
