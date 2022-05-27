@@ -35,18 +35,7 @@
     # Aliases to export from this module
     AliasesToExport = @()
 
-    DscResourcesToExport = @(
-        'xVHD'
-        'xVhdFile'
-        'xVMDvdDrive'
-        'xVMHardDiskDrive'
-        'xVMHost'
-        'xVMHyperV'
-        'xVMNetworkAdapter'
-        'xVMProcessor'
-        'xVMScsiController'
-        'xVMSwitch'
-    )
+    DscResourcesToExport = @()
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData       = @{
@@ -58,10 +47,10 @@
             Tags         = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource')
 
             # A URL to the license for this module.
-            LicenseUri   = 'https://github.com/dsccommunity/xHyper-V/blob/master/LICENSE'
+            LicenseUri   = 'https://github.com/dsccommunity/HyperVDsc/blob/master/LICENSE'
 
             # A URL to the main website for this project.
-            ProjectUri   = 'https://github.com/dsccommunity/xHyper-V'
+            ProjectUri   = 'https://github.com/dsccommunity/HyperVDsc'
 
             # A URL to an icon representing this module.
             IconUri = 'https://dsccommunity.org/images/DSC_Logo_300p.png'

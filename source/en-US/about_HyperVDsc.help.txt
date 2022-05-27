@@ -1,5 +1,5 @@
 TOPIC
-    about_xHyper-V
+    about_HyperVDsc
 
 SHORT DESCRIPTION
     DSC resources for deployment and configuration of Microsoft Hyper-V.
@@ -8,7 +8,7 @@ LONG DESCRIPTION
     This module contains DSC resources for deployment and configuration of Microsoft Hyper-V.
 
 EXAMPLES
-    PS C:\> Get-DscResource -Module xHyper-V
+    PS C:\> Get-DscResource -Module HyperVDsc
 
 NOTE:
     Thank you to the DSC Community contributors who contributed to this module by
@@ -16,10 +16,10 @@ NOTE:
 
 TROUBLESHOOTING NOTE:
     Go to the Github repository for read about issues, submit a new issue, and read
-    about new releases. https://github.com/dsccommunity/xHyper-V
+    about new releases. https://github.com/dsccommunity/HyperVDsc
 
 SEE ALSO
-    - https://github.com/dsccommunity/xHyper-V
+    - https://github.com/dsccommunity/HyperVDsc
 
 KEYWORDS
     DSC, DscResource, Hyper-V, HyperV
