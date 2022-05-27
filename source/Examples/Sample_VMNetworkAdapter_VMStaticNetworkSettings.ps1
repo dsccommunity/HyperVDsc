@@ -10,7 +10,7 @@ Configuration Sample_VMNetworkAdapter_VMStaticNetworkSettings
         SwitchName = 'SETSwitch'
         MacAddress = '001523be0c00'
         VMName = 'MyVM01'
-        NetworkSetting = xNetworkSettings
+        NetworkSetting = NetworkSettings
         {
             IpAddress = '192.168.0.100'
             Subnet = '255.255.255.255'

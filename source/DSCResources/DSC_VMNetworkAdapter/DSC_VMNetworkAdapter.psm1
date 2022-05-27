@@ -88,7 +88,7 @@ function Get-TargetResource
         $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
         if ($networkInfo)
         {
-            $item = New-CimInstance -ClassName MSFT_xNetworkSettings -Property $networkInfo -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+            $item = New-CimInstance -ClassName MSFT_NetworkSettings -Property $networkInfo -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
             $configuration.Add('NetworkSetting', $item)
         }
 

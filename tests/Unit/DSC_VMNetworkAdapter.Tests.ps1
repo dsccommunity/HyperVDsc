@@ -45,7 +45,7 @@ try
             Subnet    = "255.255.255.0"
         }
 
-        $networkSettingsStatic = New-CimInstance -ClassName xNetworkSettings -Property $properties -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+        $networkSettingsStatic = New-CimInstance -ClassName NetworkSettings -Property $properties -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
 
         $TestAdapter = [PSObject]@{
             Id         = $MockHostAdapter.Id
