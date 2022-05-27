@@ -80,9 +80,9 @@ Manages VHDs in a Hyper-V host.
 
 #### Examples VHD
 
-* [Create a new VHD](/source/Examples/Sample_VHD_NewVHD.ps1)
-* [Create a new Fixed VHD](/source/Examples/Sample_VHD_FixedVHD.ps1)
-* [Create a differencing VHD](/source/Examples/Sample_VHD_DiffVHD.ps1)
+* [Create a new VHD](/source/Examples/Sample_Vhd_NewVHD.ps1)
+* [Create a new Fixed VHD](/source/Examples/Sample_Vhd_FixedVHD.ps1)
+* [Create a differencing VHD](/source/Examples/Sample_Vhd_DiffVHD.ps1)
 
 ### VhdFile
 
