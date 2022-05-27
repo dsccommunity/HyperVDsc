@@ -6,7 +6,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 <#
 .SYNOPSIS
-    Gets MSFT_xVHD resource current state.
+    Gets DSC_VHD resource current state.
 
 .PARAMETER Name
     The desired VHD file name.
@@ -72,7 +72,7 @@ function Get-TargetResource
 
 <#
 .SYNOPSIS
-    Configures MSFT_xVHD resource state.
+    Configures DSC_VHD resource state.
 
 .PARAMETER Name
     The desired VHD file name.
@@ -224,7 +224,7 @@ function Set-TargetResource
 
 <#
 .SYNOPSIS
-    Tests if MSFT_xVHD resource state is in the desired state or not.
+    Tests if DSC_VHD resource state is in the desired state or not.
 
 .PARAMETER Name
     The desired VHD file name.
