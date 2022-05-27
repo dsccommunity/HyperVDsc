@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMHost'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMHost'
 
 function Invoke-TestSetup
 {
@@ -35,7 +35,7 @@ try
 
         $testVMName = 'UnitTestVM'
 
-        Describe 'MSFT_xVMHost\Get-TargetResource' {
+        Describe 'DSC_VMHost\Get-TargetResource' {
             $fakeVMHost = @{
                 ResourceMeteringSaveInterval = 60
             }
@@ -60,7 +60,7 @@ try
 
         } # describe Get-TargetResource
 
-        Describe 'MSFT_xVMHost\Test-TargetResource' {
+        Describe 'DSC_VMHost\Test-TargetResource' {
 
             # Guard mocks
             Mock -CommandName Assert-Module
@@ -249,7 +249,7 @@ try
 
         } # describe Test-TargetResource
 
-        Describe 'MSFT_xVMHost\Set-TargetResource' {
+        Describe 'DSC_VMHost\Set-TargetResource' {
             # Guard mocks
             Mock -CommandName Assert-Module
             Mock -CommandName Get-VMHost

@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMDvdDrive'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMDvdDrive'
 
 function Invoke-TestSetup
 {
@@ -101,7 +101,7 @@ try
         #endregion
 
         #region function Get-TargetResource
-        Describe 'MSFT_xVMDvdDrive\Get-TargetResource' {
+        Describe 'DSC_VMDvdDrive\Get-TargetResource' {
             Context 'DVD Drive does not exist' {
                 # Verifiable (should be called) mocks
                 Mock `
@@ -207,7 +207,7 @@ try
         #endregion
 
         #region function Set-TargetResource
-        Describe 'MSFT_xVMDvdDrive\Set-TargetResource' {
+        Describe 'DSC_VMDvdDrive\Set-TargetResource' {
             Context 'DVD Drive does not exist but should' {
                 # Verifiable (should be called) mocks
                 Mock `
@@ -351,7 +351,7 @@ try
         #endregion
 
         #region function Test-TargetResource
-        Describe 'MSFT_xVMDvdDrive\Test-TargetResource' {
+        Describe 'DSC_VMDvdDrive\Test-TargetResource' {
             Context 'DVD Drive does not exist but should' {
                 # Verifiable (should be called) mocks
                 Mock `
@@ -440,7 +440,7 @@ try
         #endregion
 
         #region function Test-ParameterValid
-        Describe 'MSFT_xVMDvdDrive\Test-ParameterValid' {
+        Describe 'DSC_VMDvdDrive\Test-ParameterValid' {
             Context 'Hyper-V Module is not available' {
                 # Verifiable (should be called) mocks
                 Mock `

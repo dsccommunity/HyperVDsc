@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMNetworkAdapter'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMNetworkAdapter'
 
 function Invoke-TestSetup
 {
@@ -70,7 +70,7 @@ try
             AccessVlanId  = '1'
         }
 
-        Describe 'MSFT_xVMNetworkAdapter\Get-TargetResource' {
+        Describe 'DSC_VMNetworkAdapter\Get-TargetResource' {
             Context 'NetAdapter does not exist' {
                 Mock -CommandName Get-VMNetworkAdapter
                 Mock -CommandName Get-VMNetworkAdapterVlan
@@ -152,7 +152,7 @@ try
             }
         }
 
-        Describe 'MSFT_xVMNetworkAdapter\Set-TargetResource' {
+        Describe 'DSC_VMNetworkAdapter\Set-TargetResource' {
             $newAdapter = [PSObject]@{
                 Id             = 'UniqueString'
                 Name           = $TestAdapter.Name
@@ -211,7 +211,7 @@ try
             }
         }
 
-        Describe 'MSFT_xVMNetworkAdapter\Test-TargetResource' {
+        Describe 'DSC_VMNetworkAdapter\Test-TargetResource' {
             $newAdapter = [PSObject]@{
                 Id         = 'UniqueString'
                 Name       = $TestAdapter.Name

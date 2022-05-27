@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVhdFileDirectory'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VhdFileDirectory'
 
 function Invoke-TestSetup
 {
@@ -95,7 +95,7 @@ $script:vhdDriveLetter = Get-FreeDriveLetter
 # function Get-Partition {}
 # function Get-Volume {}
 
-$script:dscFileDirClassName = 'MSFT_FileDirectoryConfiguration'
+$script:dscFileDirClassName = 'DSC_FileDirectoryConfiguration'
 $script:dscNamespace = 'root/microsoft/windows/desiredstateconfiguration'
 
 Mock -CommandName Mount-Vhd { [PSCustomObject] @{ Path = 'TestDrive:\VhdExists.vhdx' } }
@@ -103,17 +103,17 @@ Mock -CommandName Mount-Vhd { [PSCustomObject] @{ Path = 'TestDrive:\VhdExists.v
 Mock -CommandName Dismount-Vhd { }
 
 Mock -CommandName Get-Disk {
-    New-CimInstance -ClassName MSFT_Disk -Namespace root/Microsoft/Windows/Storage -ClientOnly
+    New-CimInstance -ClassName DSC_Disk -Namespace root/Microsoft/Windows/Storage -ClientOnly
 }
 
 Mock -CommandName Get-Partition {
-    New-CimInstance -ClassName MSFT_Partitions -Namespace ROOT/Microsoft/Windows/Storage -ClientOnly |
+    New-CimInstance -ClassName DSC_Partitions -Namespace ROOT/Microsoft/Windows/Storage -ClientOnly |
         Add-Member -MemberType NoteProperty -Name Type -Value 'Mocked' -Force -PassThru |
             Add-Member -MemberType NoteProperty -Name DriveLetter -Value $script:vhdDriveLetter -PassThru
 }
 
 Mock -CommandName Get-Volume {
-    New-CimInstance -ClassName MSFT_Volumes -Namespace ROOT/Microsoft/Windows/Storage -ClientOnly |
+    New-CimInstance -ClassName DSC_Volumes -Namespace ROOT/Microsoft/Windows/Storage -ClientOnly |
         Add-Member -MemberType NoteProperty -Name DriveLetter -Value $script:vhdDriveLetter -PassThru
 }
 
@@ -123,7 +123,7 @@ Mock -CommandName Get-Module {
 
 #endregion
 
-Describe 'MSFT_xVhdFileDirectory\Get-TargetResource' -Tag 'Get' {
+Describe 'DSC_VhdFileDirectory\Get-TargetResource' -Tag 'Get' {
 
     BeforeAll {
         New-TestDriveLayout -DriveLetter $script:vhdDriveLetter
@@ -272,7 +272,7 @@ Describe 'MSFT_xVhdFileDirectory\Get-TargetResource' -Tag 'Get' {
     }
 }
 
-Describe "MSFT_xVhdFileDirectory\Test-TargetResource" -Tag 'Test' {
+Describe "DSC_VhdFileDirectory\Test-TargetResource" -Tag 'Test' {
 
     BeforeAll {
         New-TestDriveLayout -DriveLetter $script:vhdDriveLetter
@@ -415,7 +415,7 @@ Describe "MSFT_xVhdFileDirectory\Test-TargetResource" -Tag 'Test' {
     }
 }
 
-Describe "MSFT_xVhdFileDirectory\Set-TargetResource" -Tag 'Set' {
+Describe "DSC_VhdFileDirectory\Set-TargetResource" -Tag 'Set' {
     BeforeAll {
         New-TestDriveLayout -DriveLetter $script:vhdDriveLetter
     }

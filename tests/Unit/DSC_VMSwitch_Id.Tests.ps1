@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMSwitch'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMSwitch'
 
 function Invoke-TestSetup
 {
@@ -158,7 +158,7 @@ try
             }
         }
 
-        Describe 'MSFT_xVMSwitch\Get-TargetResource' -Tag 'Get' {
+        Describe 'DSC_VMSwitch\Get-TargetResource' -Tag 'Get' {
 
             Context 'When the system is in the desired state (VMSwitch has the desired Id)' {
                 $script:MockedVMSwitch = New-MockedVMSwitch -Name 'TestSwitch'
@@ -182,7 +182,7 @@ try
             }
         }
 
-        Describe 'MSFT_xVMSwitch\Set-TargetResource' -Tag 'Set' {
+        Describe 'DSC_VMSwitch\Set-TargetResource' -Tag 'Set' {
 
             Context 'When the system is in the desired state (VMSwitch has the desired Id)' {
                 $desiredVMSwitchID = New-Guid
@@ -276,7 +276,7 @@ try
             }
         }
 
-        Describe 'MSFT_xVMSwitch\Test-TargetResource' -Tag 'Test' {
+        Describe 'DSC_VMSwitch\Test-TargetResource' -Tag 'Test' {
             Context 'When the system is in the desired state (VMSwitch has the desired Id)' {
 
                 $desiredVMSwitchID = New-Guid

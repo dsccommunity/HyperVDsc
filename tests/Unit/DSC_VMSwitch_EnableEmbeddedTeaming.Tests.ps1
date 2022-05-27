@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMSwitch'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMSwitch'
 
 function Invoke-TestSetup
 {
@@ -75,7 +75,7 @@ try
             return $mockedVMSwitch
         }
 
-        Describe "MSFT_xVMSwitch" {
+        Describe "DSC_VMSwitch" {
             <#
                 Mocks Get-VMSwitch and will return $script:mockedVMSwitch which is
                 a variable that is created during most It statements to mock a VMSwitch

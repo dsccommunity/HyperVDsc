@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMSwitch'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMSwitch'
 
 function Invoke-TestSetup
 {

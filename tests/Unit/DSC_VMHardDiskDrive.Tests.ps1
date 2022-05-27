@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMHardDiskDrive'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMHardDiskDrive'
 
 function Invoke-TestSetup
 {
@@ -36,7 +36,7 @@ try
         $testVMName = 'UnitTestVM'
         $testHardDiskPath = 'TestDrive:\{0}.vhdx' -f $testVMName
 
-        Describe 'MSFT_xVMHardDiskDrive\Get-TargetResource' {
+        Describe 'DSC_VMHardDiskDrive\Get-TargetResource' {
 
             $stubHardDiskDrive = [PSCustomObject] @{
                 VMName             = $testVMName
@@ -83,7 +83,7 @@ try
             }
         } # descrive Get-TargetResource
 
-        Describe 'MSFT_xVMHardDiskDrive\Test-TargetResource' {
+        Describe 'DSC_VMHardDiskDrive\Test-TargetResource' {
 
             # Guard mocks
             Mock -CommandName Assert-Module
@@ -208,7 +208,7 @@ try
             }
         } # describe Test-TargetResource
 
-        Describe 'MSFT_xVMHardDiskDrive\Set-TargetResource' {
+        Describe 'DSC_VMHardDiskDrive\Set-TargetResource' {
             # Guard mocks
             Mock -CommandName Assert-Module
             Mock -CommandName Get-VMHardDiskDrive

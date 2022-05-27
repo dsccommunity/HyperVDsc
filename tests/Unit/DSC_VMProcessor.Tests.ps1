@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMProcessor'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMProcessor'
 
 function Invoke-TestSetup
 {
@@ -36,7 +36,7 @@ try
         $testVMName = 'UnitTestVM'
         $testResourcePoolName = 'Unit Test Resource Pool'
 
-        Describe 'MSFT_xVMProcessor\Get-TargetResource' {
+        Describe 'DSC_VMProcessor\Get-TargetResource' {
 
             $fakeVMProcessor = @{
                 EnableHostResourceProtection = $true
@@ -69,7 +69,7 @@ try
             }
         } # descrive Get-TargetResource
 
-        Describe 'MSFT_xVMProcessor\Test-TargetResource' {
+        Describe 'DSC_VMProcessor\Test-TargetResource' {
 
             # Guard mocks
             Mock -CommandName Assert-Module
@@ -169,7 +169,7 @@ try
             }
         } # describe Test-TargetResource
 
-        Describe 'MSFT_xVMProcessor\Set-TargetResource' {
+        Describe 'DSC_VMProcessor\Set-TargetResource' {
             # Guard mocks
             Mock -CommandName Assert-Module
             Mock -CommandName Assert-TargetResourceParameter
@@ -260,7 +260,7 @@ try
             }
         } # describe Set-TargetResource
 
-        Describe 'MSFT_xVMProcessor\Assert-TargetResourceParameter' {
+        Describe 'DSC_VMProcessor\Assert-TargetResourceParameter' {
 
             # Return Windows Server 2012 R2/Windows 8.1 Update 1
             Mock -CommandName Get-CimInstance { return @{ BuildNumber = '9600' } }

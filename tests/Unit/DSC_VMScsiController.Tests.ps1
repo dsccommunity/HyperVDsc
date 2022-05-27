@@ -1,5 +1,5 @@
-$script:dscModuleName = 'xHyper-V'
-$script:dscResourceName = 'MSFT_xVMScsiController'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_VMScsiController'
 
 function Invoke-TestSetup
 {
@@ -35,7 +35,7 @@ try
 
         $testVMName = 'UnitTestVM'
 
-        Describe 'MSFT_xVMScsiController\Get-TargetResource' {
+        Describe 'DSC_VMScsiController\Get-TargetResource' {
 
             $stubScsiController = @{
                 VMName           = $testVMName
@@ -79,7 +79,7 @@ try
             }
         } # describe Get-TargetResource
 
-        Describe 'MSFT_xVMScsiController\Test-TargetResource' {
+        Describe 'DSC_VMScsiController\Test-TargetResource' {
 
             # Guard mocks
             Mock -CommandName Assert-Module
@@ -129,7 +129,7 @@ try
             }
         } # describe Test-TargetResource
 
-        Describe 'MSFT_xVMScsiController\Set-TargetResource' {
+        Describe 'DSC_VMScsiController\Set-TargetResource' {
             # Guard mocks
             Mock -CommandName Assert-Module
             Mock -CommandName Get-VMScsiController
