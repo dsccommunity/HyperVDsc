@@ -103,7 +103,7 @@ Mock -CommandName Mount-Vhd { [PSCustomObject] @{ Path = 'TestDrive:\VhdExists.v
 Mock -CommandName Dismount-Vhd { }
 
 Mock -CommandName Get-Disk {
-    New-CimInstance -ClassName DSC_Disk -Namespace root/Microsoft/Windows/Storage -ClientOnly
+    New-CimInstance -ClassName MSFT_Disk -Namespace root/Microsoft/Windows/Storage -ClientOnly
 }
 
 Mock -CommandName Get-Partition {
@@ -141,7 +141,7 @@ Describe 'DSC_VhdFileDirectory\Get-TargetResource' -Tag 'Get' {
             Ensure          = 'Present'
         }
 
-        $fileDirectory = New-CimInstance -Property $fdProperties -ClassName $script:dscFileDirClassName -Namespace $script:dscNamespace  -ClientOnly
+        $fileDirectory = New-CimInstance -Property $fdProperties -ClassName $script:dscFileDirClassName -Namespace $script:dscNamespace -ClientOnly
         $result = Get-TargetResource -VhdPath TestDrive:\VhdExists.vhdx -FileDirectory $fileDirectory
 
         $result -is [System.Collections.Hashtable] |
