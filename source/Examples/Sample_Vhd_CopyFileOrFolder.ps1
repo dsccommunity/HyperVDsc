@@ -17,7 +17,7 @@ Configuration Sample_Vhd_CopyFileOrFolder
     VhdFile FileCopy
     {
         VhdPath       = $vhdPath
-        FileDirectory = MSFT_xFileDirectory
+        FileDirectory = DSC_FileDirectory
         {
             SourcePath      = $itemToCopy
             DestinationPath = $relativeDestinationPath

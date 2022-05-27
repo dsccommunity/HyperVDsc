@@ -8,7 +8,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 <#
 .SYNOPSIS
-    Gets MSFT_xVMProcessor resource current state.
+    Gets DSC_VMProcessor resource current state.
 
 .PARAMETER VMName
     Specifies the name of the virtual machine on which the processor is to be configured.
@@ -47,7 +47,7 @@ function Get-TargetResource
 
 <#
 .SYNOPSIS
-    Tests if MSFT_xVMProcessor resource state is in the desired state or not.
+    Tests if DSC_VMProcessor resource state is in the desired state or not.
 
 .PARAMETER VMName
     Specifies the name of the virtual machine on which the processor is to be configured.
@@ -195,7 +195,7 @@ function Test-TargetResource
 
 <#
 .SYNOPSIS
-    Configures MSFT_xVMProcessor resource state.
+    Configures DSC_VMProcessor resource state.
 
 .PARAMETER VMName
     Specifies the name of the virtual machine on which the processor is to be configured.

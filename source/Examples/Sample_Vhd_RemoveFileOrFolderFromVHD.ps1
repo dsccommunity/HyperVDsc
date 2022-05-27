@@ -17,7 +17,7 @@ Configuration Sample_Vhd_RemoveFileOrFolderFromVHD
     VhdFile RemoveFile
     {
         VhdPath       = $vhdPath
-        FileDirectory = MSFT_xFileDirectory
+        FileDirectory = DSC_FileDirectory
         {
             DestinationPath = $relativeDestinationPath
             Ensure          = $Ensure

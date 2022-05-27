@@ -6,7 +6,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 <#
 .SYNOPSIS
-    Gets MSFT_xVMNetworkAdapter resource current state.
+    Gets DSC_VMNetworkAdapter resource current state.
 
 .PARAMETER Id
     Specifies an unique identifier for the network adapter.
@@ -112,7 +112,7 @@ function Get-TargetResource
 
 <#
 .SYNOPSIS
-    Sets MSFT_xVMNetworkAdapter resource state.
+    Sets DSC_VMNetworkAdapter resource state.
 
 .PARAMETER Id
     Specifies an unique identifier for the network adapter.
@@ -344,7 +344,7 @@ function Set-TargetResource
 
 <#
 .SYNOPSIS
-    Tests if MSFT_xVMNetworkAdapter resource state is indeed desired state or not.
+    Tests if DSC_VMNetworkAdapter resource state is indeed desired state or not.
 
 .PARAMETER Id
     Specifies an unique identifier for the network adapter.

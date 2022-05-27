@@ -8,7 +8,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 <#
 .SYNOPSIS
-    Gets MSFT_xVMHost resource current state.
+    Gets DSC_VMHost resource current state.
 
 .PARAMETER IsSingleInstance
     Specifies the resource is a single instance, the value must be 'Yes'.
@@ -62,7 +62,7 @@ function Get-TargetResource
 
 <#
 .SYNOPSIS
-    Tests if MSFT_xVMHost resource state is in the desired state or not.
+    Tests if DSC_VMHost resource state is in the desired state or not.
 
 .PARAMETER IsSingleInstance
     Specifies the resource is a single instance, the value must be 'Yes'.
@@ -241,7 +241,7 @@ function Test-TargetResource
 
 <#
 .SYNOPSIS
-    Configures MSFT_xVMHost resource state.
+    Configures DSC_VMHost resource state.
 
 .PARAMETER IsSingleInstance
     Specifies the resource is a single instance, the value must be 'Yes'.

@@ -8,7 +8,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 <#
 .SYNOPSIS
-    Gets MSFT_xVMSwitch resource current state.
+    Gets DSC_VMSwitch resource current state.
 
 .PARAMETER Name
     Name of the VM Switch.
@@ -101,7 +101,7 @@ function Get-TargetResource
 
 <#
 .SYNOPSIS
-    Configures MSFT_xVMSwitch resource state.
+    Configures DSC_VMSwitch resource state.
 
 .PARAMETER Name
     Name of the VM Switch.
@@ -381,7 +381,7 @@ function Set-TargetResource
 
 <#
 .SYNOPSIS
-    Tests if MSFT_xVMSwitch resource state is in the desired state or not.
+    Tests if DSC_VMSwitch resource state is in the desired state or not.
 
 .PARAMETER Name
     Name of the VM Switch.

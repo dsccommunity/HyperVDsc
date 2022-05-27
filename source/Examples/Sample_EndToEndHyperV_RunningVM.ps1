@@ -24,7 +24,7 @@ Configuration Sample_EndToEndHyperV_RunningVM
     }
 
     # Create new VHD file.
-    VHD NewVHD1
+    Vhd NewVHD1
     {
 
         Ensure     = 'Present'
@@ -39,7 +39,7 @@ Configuration Sample_EndToEndHyperV_RunningVM
     VhdFile CopyUnattendxml
     {
         VhdPath       = $vhdPath
-        FileDirectory = MSFT_xFileDirectory
+        FileDirectory = DSC_FileDirectory
         {
             SourcePath      = $unattendedFilePathToCopy
             DestinationPath = 'unattended.xml'

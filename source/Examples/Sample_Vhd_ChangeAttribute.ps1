@@ -18,7 +18,7 @@ Configuration Sample_Vhd_ChangeAttribute
     VhdFile Change-Attribute
     {
         VhdPath       = $vhdPath
-        FileDirectory = MSFT_xFileDirectory
+        FileDirectory = DSC_FileDirectory
         {
             DestinationPath = $relativeDestinationPath
             Attributes      = $attribute
