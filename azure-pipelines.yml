@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-    - main
+    - master
   paths:
     include:
     - source/*
@@ -267,7 +267,7 @@ stages:
       and(
         succeeded(),
         or(
-          eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+          eq(variables['Build.SourceBranch'], 'refs/heads/master'),
           startsWith(variables['Build.SourceBranch'], 'refs/tags/')
         ),
         contains(variables['System.TeamFoundationCollectionUri'], 'dsccommunity')
@@ -295,8 +295,8 @@ stages:
             env:
               GitHubToken: $(GitHubToken)
               GalleryApiToken: $(GalleryApiToken)
-              ReleaseBranch: main
-              MainGitBranch: main
+              ReleaseBranch: master
+              MainGitBranch: master
 
           - task: PowerShell@2
             name: sendChangelogPR
@@ -307,5 +307,5 @@ stages:
               pwsh: true
             env:
               GitHubToken: $(GitHubToken)
-              ReleaseBranch: main
-              MainGitBranch: main
+              ReleaseBranch: master
+              MainGitBranch: master
