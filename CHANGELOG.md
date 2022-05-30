@@ -12,8 +12,6 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     - Changed all MSFT_xResourceName to DSC_ResourceName.
     - Updated DSCResources, Examples, Modules and Tests for new naming.
     - Updated README.md from _xHyper-V_ to _HyperVDsc
-    - Removed deprecated resource `xIISHandler`
-    - Removed deprecated resource `xWebConfigKeyValue`
 
 ### Added
 
