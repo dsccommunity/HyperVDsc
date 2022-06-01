@@ -1,4 +1,4 @@
-configuration MSFT_VMDvdDrive_Remove_Config {
+configuration DSC_VMDvdDrive_Remove_Config {
 
     Import-DscResource -ModuleName 'HyperVDsc'
 
