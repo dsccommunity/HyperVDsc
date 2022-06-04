@@ -1,4 +1,4 @@
-# Change log for xHyper-V
+# Changelog for xHyper-V
 
 The format is based on and uses the types of changes according to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -29,6 +29,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     since that operating system has reach end-of-life. No functionality was
     removed from the resource, but in a future release the resource might stop
     working for Windows Server 2008 R2.
+
+### Changed
+
+- Update the pipeline files to the lates from Sampler.
 
 ### Fixed
 
