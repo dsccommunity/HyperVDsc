@@ -237,10 +237,6 @@ stages:
               buildType: 'current'
               artifactName: $(buildArtifactName)
               targetPath: '$(Build.SourcesDirectory)/$(buildArtifactName)'
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
           - task: PowerShell@2
             name: publishRelease
             displayName: 'Publish Release'
