@@ -18,6 +18,13 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Deprecated
 
+- **The module _xHyper-V_ will be renamed to _HyperVDsc_
+  ([issue #62](https://github.com/dsccommunity/xHyper-V/issues/62)).
+  The version `v3.18.0` will be the the last release of _xHyper-V_.
+  Version `v4.0.0` will be released as _HyperVDsc_, it will be
+  released shortly after the `v3.18.0` release to be able to start transition
+  to the new module. The prefix 'x' will be removed from all resources in
+  _HyperVDsc_.**
 - xHyper-V
   - The resource will not be tested for Windows Server 2008 R2 since
     that operating system has reach end-of-life.
