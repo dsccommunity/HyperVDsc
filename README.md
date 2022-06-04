@@ -1,14 +1,14 @@
 # xHyper-V
 
+This module contains DSC resources for the management and
+configuration of Hyper-V hosts, virtual machines and related resources.
+
 [![Build Status](https://dev.azure.com/dsccommunity/xHyper-V/_apis/build/status/dsccommunity.xHyper-V?branchName=master)](https://dev.azure.com/dsccommunity/xHyper-V/_build/latest?definitionId=25&branchName=master)
 ![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/xHyper-V/25/master)
 [![codecov](https://codecov.io/gh/dsccommunity/xHyper-V/branch/master/graph/badge.svg)](https://codecov.io/gh/dsccommunity/xHyper-V)
 [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/xHyper-V/25/master)](https://dsccommunity.visualstudio.com/xHyper-V/_test/analytics?definitionId=25&contextType=build)
 [![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/xHyper-V?label=xHyper-V%20Preview)](https://www.powershellgallery.com/packages/xHyper-V/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xHyper-V?label=xHyper-V)](https://www.powershellgallery.com/packages/xHyper-V/)
-
-The **xHyper-V** module contains DSC resources for deployment and configuration
-of Hyper-V hosts, virtual machines and related resources.
 
 ## Code of Conduct
 
@@ -28,6 +28,19 @@ Please check out common DSC Community [contributing guidelines](https://dsccommu
 ## Change log
 
 A full list of changes in each version can be found in the [change log](CHANGELOG.md).
+
+## Documentation
+
+The documentation can be found in the [xHyper-V Wiki](https://github.com/dsccommunity/xHyper-V/wiki).
+The DSC resources schema files is used to automatically update the
+documentation on each PR merge.
+
+### Examples
+
+You can review the [Examples](/source/Examples) directory in the xHyper-V module
+for some general use scenarios for all of the resources that are in the module.
+
+The resource examples are also available in the [xHyper-V Wiki](https://github.com/dsccommunity/xHyper-V/wiki).
 
 ## Resources
 

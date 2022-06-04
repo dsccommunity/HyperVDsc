@@ -35,18 +35,7 @@
     # Aliases to export from this module
     AliasesToExport = @()
 
-    DscResourcesToExport = @(
-        'xVHD'
-        'xVhdFile'
-        'xVMDvdDrive'
-        'xVMHardDiskDrive'
-        'xVMHost'
-        'xVMHyperV'
-        'xVMNetworkAdapter'
-        'xVMProcessor'
-        'xVMScsiController'
-        'xVMSwitch'
-    )
+    DscResourcesToExport = @()
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData       = @{
@@ -71,19 +60,3 @@
         } # End of PSData hashtable
     } # End of PrivateData hashtable
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
