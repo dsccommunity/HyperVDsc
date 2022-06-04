@@ -1,25 +1,26 @@
 mode: ContinuousDelivery
 next-version: 3.18.0
-major-version-bump-message: '\s?(breaking|major|breaking\schange)'
-minor-version-bump-message: '\s?(add|feature|minor)'
+major-version-bump-message: '(breaking\schange|breaking|major)\b'
+minor-version-bump-message: '(adds?|features?|minor)\b'
 patch-version-bump-message: '\s?(fix|patch)'
 no-bump-message: '\+semver:\s?(none|skip)'
-assembly-informational-format: "{NuGetVersionV2}+Sha.{Sha}.Date.{CommitDate}"
+assembly-informational-format: '{NuGetVersionV2}+Sha.{Sha}.Date.{CommitDate}'
 branches:
   master:
     tag: preview
+    regex: ^master$
   pull-request:
     tag: PR
   feature:
     tag: useBranchName
     increment: Minor
     regex: f(eature(s)?)?[\/-]
-    source-branches: ["master"]
+    source-branches: ['master']
   hotfix:
     tag: fix
     increment: Patch
     regex: (hot)?fix(es)?[\/-]
-    source-branches: ["master"]
+    source-branches: ['master']
 
 ignore:
   # Ignored these SHA to prevent wrongly raising major version

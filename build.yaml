@@ -2,6 +2,10 @@
 ####################################################
 #          ModuleBuilder Configuration             #
 ####################################################
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/master
 CopyPaths:
   - en-US
   - DSCResources
@@ -10,15 +14,15 @@ Encoding: UTF8
 VersionedOutputDirectory: true
 
 ####################################################
-#   ModuleBuilder Dependent Modules Configuration  #
+#      ModuleBuilder Submodules Configuration      #
 ####################################################
 
 NestedModule:
-  DscResource.Common:
-    CopyOnly: true
-    Path: ./output/RequiredModules/DscResource.Common
-    AddToManifest: false
-    Exclude: PSGetModuleInfo.xml
+    DscResource.Common:
+      CopyOnly: true
+      Path: ./output/RequiredModules/DscResource.Common
+      AddToManifest: false
+      Exclude: PSGetModuleInfo.xml
 
 ####################################################
 #       Pipeline Configuration                     #
@@ -62,7 +66,6 @@ Pester:
     - Modules/DscResource.Common
   Script:
     - tests/Unit
-  ExcludeTag:
   Tag:
   CodeCoverageOutputFile: JaCoCo_coverage.xml
   CodeCoverageOutputFileEncoding: ascii
@@ -77,11 +80,6 @@ DscTest:
   ExcludeModuleFile:
     - Modules/DscResource.Common
   MainGitBranch: master
-
-Resolve-Dependency:
-  Gallery: 'PSGallery'
-  AllowPrerelease: false
-  Verbose: false
 
 ModuleBuildTasks:
   Sampler:

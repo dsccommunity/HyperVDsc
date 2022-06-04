@@ -1,4 +1,4 @@
-# Change log for xHyper-V
+# Changelog for xHyper-V
 
 The format is based on and uses the types of changes according to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -13,6 +13,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     - Updated DSCResources, Examples, Modules and Tests for new naming.
     - Updated README.md from _xHyper-V_ to _HyperVDsc
 
+## [3.18.0] - 2022-06-04
+
 ### Added
 
 - xHyper-V
@@ -24,6 +26,13 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ### Deprecated
 
+- **The module _xHyper-V_ will be renamed to _HyperVDsc_
+  ([issue #62](https://github.com/dsccommunity/xHyper-V/issues/62)).
+  The version `v3.18.0` will be the the last release of _xHyper-V_.
+  Version `v4.0.0` will be released as _HyperVDsc_, it will be
+  released shortly after the `v3.18.0` release to be able to start transition
+  to the new module. The prefix 'x' will be removed from all resources in
+  _HyperVDsc_.**
 - xHyper-V
   - The resource will not be tested for Windows Server 2008 R2 since
     that operating system has reach end-of-life.
@@ -35,6 +44,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     since that operating system has reach end-of-life. No functionality was
     removed from the resource, but in a future release the resource might stop
     working for Windows Server 2008 R2.
+
+### Changed
+
+- Update the pipeline files to the lates from Sampler.
 
 ### Fixed
 
