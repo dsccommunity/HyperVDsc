@@ -196,12 +196,12 @@ stages:
               buildType: 'current'
               artifactName: $(buildArtifactName)
               targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)'
-          - task: DownloadPipelineArtifact@2
-            displayName: 'Download Test Artifact'
-            inputs:
-              buildType: 'current'
-              artifactName: $(testArtifactName)
-              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
+          # - task: DownloadPipelineArtifact@2
+          #   displayName: 'Download Test Artifact'
+          #   inputs:
+          #     buildType: 'current'
+          #     artifactName: $(testArtifactName)
+          #     targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
           - task: PublishCodeCoverageResults@1
             displayName: 'Publish Code Coverage to Azure DevOps'
             condition: succeededOrFailed()
