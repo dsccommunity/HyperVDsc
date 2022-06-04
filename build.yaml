@@ -2,10 +2,6 @@
 ####################################################
 #          ModuleBuilder Configuration             #
 ####################################################
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
 CopyPaths:
   - en-US
   - DSCResources
