@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+## [3.18.0] - 2022-06-04
+
 ### Added
 
 - xHyper-V
