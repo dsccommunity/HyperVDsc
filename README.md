@@ -3,10 +3,10 @@
 This module contains DSC resources for the management and
 configuration of Hyper-V hosts, virtual machines and related resources.
 
-[![Build Status](https://dev.azure.com/dsccommunity/HyperVDsc/_apis/build/status/dsccommunity.HyperVDsc?branchName=master)](https://dev.azure.com/dsccommunity/HyperVDsc/_build/latest?definitionId=25&branchName=master)
-![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/HyperVDsc/25/master)
-[![codecov](https://codecov.io/gh/dsccommunity/HyperVDsc/branch/master/graph/badge.svg)](https://codecov.io/gh/dsccommunity/HyperVDsc)
-[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/HyperVDsc/25/master)](https://dsccommunity.visualstudio.com/HyperVDsc/_test/analytics?definitionId=25&contextType=build)
+[![Build Status](https://dev.azure.com/dsccommunity/HyperVDsc/_apis/build/status/dsccommunity.HyperVDsc?branchName=main)](https://dev.azure.com/dsccommunity/HyperVDsc/_build/latest?definitionId=25&branchName=main)
+![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/HyperVDsc/25/main)
+[![codecov](https://codecov.io/gh/dsccommunity/HyperVDsc/branch/main/graph/badge.svg)](https://codecov.io/gh/dsccommunity/HyperVDsc)
+[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/HyperVDsc/25/main)](https://dsccommunity.visualstudio.com/HyperVDsc/_test/analytics?definitionId=25&contextType=build)
 [![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/HyperVDsc?label=HyperVDsc%20Preview)](https://www.powershellgallery.com/packages/HyperVDsc/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/HyperVDsc?label=HyperVDsc)](https://www.powershellgallery.com/packages/HyperVDsc/)
 
@@ -16,7 +16,7 @@ This project has adopted this [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Releases
 
-For each merge to the branch `master` a preview release will be
+For each merge to the branch `main` a preview release will be
 deployed to [PowerShell Gallery](https://www.powershellgallery.com/).
 Periodically a release version tag will be pushed which will deploy a
 full release to [PowerShell Gallery](https://www.powershellgallery.com/).
