@@ -23,6 +23,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     all unit tests.
 - xVhdFileDirectory
   - Added initial set of unit tests
+- xVMNetworkAdapter
+  - add parameter IgnoreNetworkSetting
 
 ### Deprecated
 

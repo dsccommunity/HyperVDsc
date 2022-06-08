@@ -16,6 +16,7 @@ class DSC_VMNetworkAdapter : OMI_BaseResource
     [Required] String SwitchName;
     [Required] String VMName;
     [Write] String MacAddress;
+    [Write] Boolean IgnoreNetworkSetting;
     [Write, EmbeddedInstance("NetworkSettings")] String NetworkSetting;
     [Write] String VlanId;
     [Write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
