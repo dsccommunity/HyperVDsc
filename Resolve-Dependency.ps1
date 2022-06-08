@@ -241,7 +241,7 @@ try
 
         $installPowerShellGetParameters = @{
             Name               = 'PowerShellGet'
-            Force              = $True
+            Force              = $true
             SkipPublisherCheck = $true
             AllowClobber       = $true
             Scope              = $Scope

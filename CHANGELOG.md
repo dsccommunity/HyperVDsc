@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md).
 
 ## [Unreleased]
+- xHyper-V
+  - BREAKING CHANGE
+    - Renamed _xHyper-V_ to _HyperVDsc - fixes [Issue #69](https://github.com/PowerShell/xHyper-V/issues/213).
+    - Changed all MSFT_xResourceName to DSC_ResourceName.
+    - Updated DSCResources, Examples, Modules and Tests for new naming.
+    - Updated README.md from _xHyper-V_ to _HyperVDsc
 
 ## [3.18.0] - 2022-06-04
 

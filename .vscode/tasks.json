@@ -84,7 +84,11 @@
             "label": "test",
             "type": "shell",
             "command": "&${cwd}/build.ps1",
-            "args": ["-AutoRestore","-Tasks","test"],
+            "args": [
+                "-AutoRestore",
+                "-Tasks",
+                "test"
+            ],
             "presentation": {
                 "echo": true,
                 "reveal": "always",

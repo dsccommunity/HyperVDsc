@@ -356,8 +356,7 @@ Begin
 
             $BuildConfig = $config[0]
         }
-        else
-        {
+        else {
             $BuildConfig = $config
         }
     }

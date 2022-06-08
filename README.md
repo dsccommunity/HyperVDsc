@@ -1,14 +1,14 @@
-# xHyper-V
+# HyperVDsc
 
 This module contains DSC resources for the management and
 configuration of Hyper-V hosts, virtual machines and related resources.
 
-[![Build Status](https://dev.azure.com/dsccommunity/xHyper-V/_apis/build/status/dsccommunity.xHyper-V?branchName=master)](https://dev.azure.com/dsccommunity/xHyper-V/_build/latest?definitionId=25&branchName=master)
-![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/xHyper-V/25/master)
-[![codecov](https://codecov.io/gh/dsccommunity/xHyper-V/branch/master/graph/badge.svg)](https://codecov.io/gh/dsccommunity/xHyper-V)
-[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/xHyper-V/25/master)](https://dsccommunity.visualstudio.com/xHyper-V/_test/analytics?definitionId=25&contextType=build)
-[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/xHyper-V?label=xHyper-V%20Preview)](https://www.powershellgallery.com/packages/xHyper-V/)
-[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xHyper-V?label=xHyper-V)](https://www.powershellgallery.com/packages/xHyper-V/)
+[![Build Status](https://dev.azure.com/dsccommunity/HyperVDsc/_apis/build/status/dsccommunity.HyperVDsc?branchName=master)](https://dev.azure.com/dsccommunity/HyperVDsc/_build/latest?definitionId=25&branchName=master)
+![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/HyperVDsc/25/master)
+[![codecov](https://codecov.io/gh/dsccommunity/HyperVDsc/branch/master/graph/badge.svg)](https://codecov.io/gh/dsccommunity/HyperVDsc)
+[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/HyperVDsc/25/master)](https://dsccommunity.visualstudio.com/HyperVDsc/_test/analytics?definitionId=25&contextType=build)
+[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/HyperVDsc?label=HyperVDsc%20Preview)](https://www.powershellgallery.com/packages/HyperVDsc/)
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/HyperVDsc?label=HyperVDsc)](https://www.powershellgallery.com/packages/HyperVDsc/)
 
 ## Code of Conduct
 
@@ -31,47 +31,47 @@ A full list of changes in each version can be found in the [change log](CHANGELO
 
 ## Documentation
 
-The documentation can be found in the [xHyper-V Wiki](https://github.com/dsccommunity/xHyper-V/wiki).
+The documentation can be found in the [HyperVDsc Wiki](https://github.com/dsccommunity/HyperVDsc/wiki).
 The DSC resources schema files is used to automatically update the
 documentation on each PR merge.
 
 ### Examples
 
-You can review the [Examples](/source/Examples) directory in the xHyper-V module
+You can review the [Examples](/source/Examples) directory in the HyperVDsc module
 for some general use scenarios for all of the resources that are in the module.
 
-The resource examples are also available in the [xHyper-V Wiki](https://github.com/dsccommunity/xHyper-V/wiki).
+The resource examples are also available in the [HyperVDsc Wiki](https://github.com/dsccommunity/HyperVDsc/wiki).
 
 ## Resources
 
-* [**xVHD**](#xvhd) manages VHDs in a Hyper-V host.
-* [**xVhdFile**](#xvhdfile) manages files or directories in a VHD.
+* [**VHD**](#Vhd) manages VHDs in a Hyper-V host.
+* [**VhdFile**](#Vhdfile) manages files or directories in a VHD.
  You can use it to copy files/folders to the VHD, remove files/folders from a VHD,
  and change attributes of a file in a VHD (e.g. change a file attribute to
  'ReadOnly' or 'Hidden').
  This resource is particularly useful when bootstrapping DSC Configurations
  into a VM.
-* [**xVMDvdDrive**](#xvmdvddrive) manages DVD drives attached to a Hyper-V
+* [**VMDvdDrive**](#Vmdvddrive) manages DVD drives attached to a Hyper-V
  virtual machine.
-* [**xVMHardDiskDrive**](#xvmharddiskdrive) manages VHD(X)s attached to a Hyper-V virtual machine.
-* [**xVMHost**](#xvmhost) manages Hyper-V host settings.
-* [**xVMHyperV**](#xvmhyperv) manages VMs in a Hyper-V host.
-* [**xVMNetworkAdapter**](#xvmnetworkadapter) manages VMNetadapters attached to
+* [**VMHardDiskDrive**](#Vmharddiskdrive) manages VHD(X)s attached to a Hyper-V virtual machine.
+* [**VMHost**](#Vmhost) manages Hyper-V host settings.
+* [**VMHyperV**](#Vmhyperv) manages VMs in a Hyper-V host.
+* [**VMNetworkAdapter**](#Vmnetworkadapter) manages VMNetadapters attached to
  a Hyper-V virtual machine or the management OS.
-* [**xVMProcessor**](#xvmprocessor) manages Hyper-V virtual machine processor options.
-* [**xVMScsiController**](#xvmscsicontroller) manages the SCSI controllers attached to a Hyper-V virtual machine.
-* [**xVMSwitch**](#xvmswitch) manages virtual switches in a Hyper-V host.
+* [**VMProcessor**](#Vmprocessor) manages Hyper-V virtual machine processor options.
+* [**VMScsiController**](#Vmscsicontroller) manages the SCSI controllers attached to a Hyper-V virtual machine.
+* [**VMSwitch**](#Vmswitch) manages virtual switches in a Hyper-V host.
 
-### xVHD
+### VHD
 
 Manages VHDs in a Hyper-V host.
 
-#### Requirements for xVHD
+#### Requirements for VHD
 
 * The Hyper-V Role has to be installed on the machine.
 * The Hyper-V PowerShell module has to be installed on the machine.
 
-#### Parameters for xVHD
+#### Parameters for VHD
 
 * **`[String]` Name** _(Key)_: The desired VHD file name.
 * **`[String]` Path** _(Key)_: The desired Path where the VHD will be created.
@@ -84,20 +84,20 @@ Manages VHDs in a Hyper-V host.
 * **`[String]` Ensure** _(Write)_: Ensures that the VHD is Present or Absent.
  The default value is Present. { *Present* | Absent }.
 
-#### Read-Only Properties from Get-TargetResource for xVHD
+#### Read-Only Properties from Get-TargetResource for VHD
 
 * **`[String]` ID** _(Read)_: Virtual Disk Identifier.
 * **`[String]` Type** _(Read)_: Type of Vhd - Dynamic, Fixed, Differencing.
 * **`[Uint64]` FileSizeBytes** _(Read)_: Current size of the VHD.
 * **`[Boolean]` IsAttached** _(Read)_: Is the VHD attached to a VM or not.
 
-#### Examples xVHD
+#### Examples VHD
 
-* [Create a new VHD](/source/Examples/Sample_xVHD_NewVHD.ps1)
-* [Create a new Fixed VHD](/source/Examples/Sample_xVHD_FixedVHD.ps1)
-* [Create a differencing VHD](/source/Examples/Sample_xVHD_DiffVHD.ps1)
+* [Create a new VHD](/source/Examples/Sample_Vhd_NewVHD.ps1)
+* [Create a new Fixed VHD](/source/Examples/Sample_Vhd_FixedVHD.ps1)
+* [Create a differencing VHD](/source/Examples/Sample_Vhd_DiffVHD.ps1)
 
-### xVhdFile
+### VhdFile
 
 Manages files or directories in a VHD.
  You can use it to copy files/folders to the VHD, remove files/folders from a VHD,
@@ -106,22 +106,22 @@ Manages files or directories in a VHD.
  This resource is particularly useful when bootstrapping DSC Configurations
  into a VM.
 
-#### Requirements for xVhdFile
+#### Requirements for VhdFile
 
 * The Hyper-V Role has to be installed on the machine.
 * The Hyper-V PowerShell module has to be installed on the machine.
 
-#### Parameters for xVhdFile
+#### Parameters for VhdFile
 
 * **`[String]` VhdPath** _(Key)_: Path to the VHD.
-* **`[MSFT_xFileDirectory[]]` FileDirectory** _(Required)_: The FileDirectory objects
+* **`[DSC_FileDirectory[]]` FileDirectory** _(Required)_: The FileDirectory objects
  to copy to the VHD (as used in the "File" resource).
  Please see the Examples section for more details.
 * **`[String]` CheckSum** _(Write)_: Indicates the checksum type to use when determining
  whether two files are the same. The default value is ModifiedDate.
  { *ModifiedDate* | SHA-1 | SHA-256 | SHA-512 }.
 
-##### MSFT_xFileDirectory Class
+##### DSC_FileDirectory Class
 
 * **`[String]` DestinationPath** _(Required)_: Indicates the location where you want
  to ensure the state for a file or directory.
@@ -145,24 +145,24 @@ Manages files or directories in a VHD.
 * **`[String[]]` Attributes** _(Write)_: Specifies the desired state of the attributes
  for the targeted file or directory. { ReadOnly | Hidden | System | Archive }.
 
-#### Read-Only Properties from Get-TargetResource for xVhdFile
+#### Read-Only Properties from Get-TargetResource for VhdFile
 
 None
 
-#### Examples xVhdFile
+#### Examples VhdFile
 
 * [Multiple examples](/source/Examples)
 
-### xVMDvdDrive
+### VMDvdDrive
 
 Manages DVD drives attached to a Hyper-V virtual machine.
 
-#### Requirements for xVMDvdDrive
+#### Requirements for VMDvdDrive
 
 * The Hyper-V Role has to be installed on the machine.
 * The Hyper-V PowerShell module has to be installed on the machine.
 
-#### Parameters for xVMDvdDrive
+#### Parameters for VMDvdDrive
 
 * **`[String]` VMName** _(Key)_: Specifies the name of the virtual machine
  to which the DVD drive is to be added.
@@ -175,26 +175,26 @@ Manages DVD drives attached to a Hyper-V virtual machine.
 * **`[String]` Ensure** _(Write)_: Specifies if the DVD Drive should exist or not.
   The default value is Present. { *Present* | Absent }.
 
-#### Read-Only Properties from Get-TargetResource for xVMDvdDrive
+#### Read-Only Properties from Get-TargetResource for VMDvdDrive
 
 None
 
-#### Examples xVMDvdDrive
+#### Examples VMDvdDrive
 
-* [Create a VM, given a VHDX and add a DVD Drives](/source/Examples/Sample_xVMHyperV_SimpleWithDVDDrive.ps1)
+* [Create a VM, given a VHDX and add a DVD Drives](/source/Examples/Sample_VMHyperV_SimpleWithDVDDrive.ps1)
 
-### xVMHardDiskDrive
+### VMHardDiskDrive
 
 Manages VHD(X)s attached to a Hyper-V virtual machine.
 When ControllerNumber or ControllerLocation is not provided, the same logic as
  Set-VMHardDiskDrive cmdlet is used.
 
-#### Requirements for xVMHardDiskDrive
+#### Requirements for VMHardDiskDrive
 
 * The Hyper-V Role has to be installed on the machine.
 * The Hyper-V PowerShell module has to be installed on the machine.
 
-#### Parameters for xVMHardDiskDrive
+#### Parameters for VMHardDiskDrive
 
 * **`[String]` VMName** _(Key)_: Specifies the name of the virtual machine
  whose hard disk drive is to be manipulated.
@@ -213,25 +213,25 @@ When ControllerNumber or ControllerLocation is not provided, the same logic as
 * **`[String]` Ensure** _(Write)_: Specifies if the hard disk drive should exist or
  not. The default value is Present. { *Present* | Absent }.
 
-#### Read-Only Properties from Get-TargetResource for xVMHardDiskDrive
+#### Read-Only Properties from Get-TargetResource for VMHardDiskDrive
 
 None
 
-#### Examples xVMHardDiskDrive
+#### Examples VMHardDiskDrive
 
-* [Create a VM, with an OS drive and an additional data drive](/source/Examples/Sample_xVMHardDiskDrive_VMWithExtraDisk.ps1)
-* [Create a VM, with an OS drive and 4 data drives](/source/Examples/Sample_xVMHardDiskDrive_VMWith4AdditionalDisks.ps1)
+* [Create a VM, with an OS drive and an additional data drive](/source/Examples/Sample_VMHardDiskDrive_VMWithExtraDisk.ps1)
+* [Create a VM, with an OS drive and 4 data drives](/source/Examples/Sample_VMHardDiskDrive_VMWith4AdditionalDisks.ps1)
 
-### xVMHost
+### VMHost
 
 Manages Hyper-V host settings.
 
-#### Requirements for xVMHost
+#### Requirements for VMHost
 
 * The Hyper-V Role has to be installed on the machine.
 * The Hyper-V PowerShell module has to be installed on the machine.
 
-#### Parameters for xVMHost
+#### Parameters for VMHost
 
 * **`[String]` IsSingleInstance** _(Key)_: Specifies the resource is a single instance,
  the value must be 'Yes'. { *Yes* }.
@@ -282,15 +282,15 @@ Manages Hyper-V host settings.
 * **`[Boolean]` VirtualMachineMigrationEnabled** _(Write)_: Indicates whether Live
  Migration should be enabled or disabled on the Hyper-V host.
 
-#### Read-Only Properties from Get-TargetResource for xVMHost
+#### Read-Only Properties from Get-TargetResource for VMHost
 
 None
 
-#### Examples xVMHost
+#### Examples VMHost
 
-* [Change VM Host paths](/source/Examples/Sample_xVMHost_Paths.ps1)
+* [Change VM Host paths](/source/Examples/Sample_VMHost_Paths.ps1)
 
-### xVMHyperV
+### VMHyperV
 
 Manages VMs in a Hyper-V host.
 
@@ -300,12 +300,12 @@ The following properties **cannot** be changed after VM creation:
 * Path
 * Generation
 
-#### Requirements for xVMHyperV
+#### Requirements for VMHyperV
 
 * The Hyper-V Role has to be installed on the machine.
 * The Hyper-V PowerShell module has to be installed on the machine.
 
-#### Parameters for xVMHyperV
+#### Parameters for VMHyperV
 
 * **`[String]` Name** _(Key)_: The desired VM name.
 * **`[String]` VhdPath** _(Required)_: The desired VHD associated with the VM.
@@ -340,7 +340,7 @@ The following properties **cannot** be changed after VM creation:
 * **`[Boolean]` EnableGuestService** _(Write)_: Enable Guest Service Interface
  for the VM. The default value is $false.
 
-#### Read-Only Properties from Get-TargetResource for xVMHyperV
+#### Read-Only Properties from Get-TargetResource for VMHyperV
 
 * **`[String]` ID** _(Read)_: VM unique ID.
 * **`[String]` Status** _(Read)_: Status of the VM.
@@ -352,23 +352,23 @@ The following properties **cannot** be changed after VM creation:
 * **`[String[]]` NetworkAdapters** _(Read)_: Network adapters' IP addresses of
  the VM".
 
-#### Examples xVMHyperV
+#### Examples VMHyperV
 
-* [Create a VM (Simple)](/source/Examples/Sample_xVMHyperV_Simple.ps1)
-* [Create a VM with dynamic memory](/source/Examples/Sample_xVMHyperV_DynamicMemory.ps1)
-* [Create a VM (Complete)](/source/Examples/Sample_xVMHyperV_Complete.ps1)
-* [Create a VM with multiple NICs attached to multiple switches](/source/Examples/Sample_xVMHyperV_MultipleNICs.ps1)
+* [Create a VM (Simple)](/source/Examples/Sample_VMHyperV_Simple.ps1)
+* [Create a VM with dynamic memory](/source/Examples/Sample_VMHyperV_DynamicMemory.ps1)
+* [Create a VM (Complete)](/source/Examples/Sample_VMHyperV_Complete.ps1)
+* [Create a VM with multiple NICs attached to multiple switches](/source/Examples/Sample_VMHyperV_MultipleNICs.ps1)
 
-### xVMNetworkAdapter
+### VMNetworkAdapter
 
 Manages VMNetadapters attached to a Hyper-V virtual machine or the management OS.
 
-#### Requirements for xVMNetworkAdapter
+#### Requirements for VMNetworkAdapter
 
 * The Hyper-V Role has to be installed on the machine.
 * The Hyper-V PowerShell module has to be installed on the machine.
 
-#### Parameters for xVMNetworkAdapter
+#### Parameters for VMNetworkAdapter
 
 * **`[String]` Id** _(Key)_: Unique string for identifying the resource instance.
 * **`[String]` Name** _(Required)_: Name of the network adapter as it appears either
@@ -377,7 +377,7 @@ Manages VMNetadapters attached to a Hyper-V virtual machine or the management OS
 * **`[String]` VMName** _(Required)_: Name of the VM to attach to.
   If you want to attach new VM Network adapter to the management OS,
   set this property to 'Management OS'.
-* **`[xNetworkSettings]` NetworkSetting** _(Write)_: Network Settings of the network adapter.
+* **`[NetworkSettings]` NetworkSetting** _(Write)_: Network Settings of the network adapter.
   If this parameter is not supplied, DHCP will be used.
 * **`[String]` MacAddress** _(Write)_: Use this to specify a Static MAC Address.
   If this parameter is not specified, dynamic MAC Address will be set.
@@ -386,7 +386,7 @@ Manages VMNetadapters attached to a Hyper-V virtual machine or the management OS
 * **`[String]` Ensure** _(Write)_: Ensures that the VM Network Adapter is
   Present or Absent. The default value is Present. { *Present* | Absent }.
 
-##### xNetworkSettings Class
+##### NetworkSettings Class
 
 * **`[String]` IpAddress** _(Write)_: IpAddress to give the network adapter.
   Only used if not Dhcp. Required if not Dhcp.
@@ -397,30 +397,30 @@ Manages VMNetadapters attached to a Hyper-V virtual machine or the management OS
 * **`[String]` DnsServer** _(Write)_: DNSServer to give the network adapter.
   Only used if not Dhcp.
 
-#### Read-Only Properties from Get-TargetResource for xVMNetworkAdapter
+#### Read-Only Properties from Get-TargetResource for VMNetworkAdapter
 
 * **`[Boolean]` DynamicMacAddress** _(Read)_: Does the VMNetworkAdapter use a
  Dynamic MAC Address.
 
-#### Examples xVMNetworkAdapter
+#### Examples VMNetworkAdapter
 
-* [Add a new VM Network adapter in the management OS](/source/Examples/Sample_xVMNetworkAdapter_ManagementOS.ps1)
-* [Add multiple VM Network adapters to a VM](/source/Examples/Sample_xVMNetworkAdapter_MultipleVM.ps1)
-* [Add a couple of VM Network adapters in the management OS](/source/Examples/Sample_xVMNetworkAdapter_MultipleManagementOS.ps1)
-* [Add multiple VM Network adapters to a VM using status MAC addresses](/source/Examples/Sample_xVMNetworkAdapter_MultipleVMMACAddress.ps1)
-* [Add VM Network adapters to a VM with a Vlan tag](/source/Examples/Sample_xVMNetworkAdapter_VMVlanTagging.ps1)
-* [Add VM Network adapters to a VM with a static IpAddress](/source/Examples/Sample_xVMNetworkAdapter_VMStaticNetworkSettings.ps1)
+* [Add a new VM Network adapter in the management OS](/source/Examples/Sample_VMNetworkAdapter_ManagementOS.ps1)
+* [Add multiple VM Network adapters to a VM](/source/Examples/Sample_VMNetworkAdapter_MultipleVM.ps1)
+* [Add a couple of VM Network adapters in the management OS](/source/Examples/Sample_VMNetworkAdapter_MultipleManagementOS.ps1)
+* [Add multiple VM Network adapters to a VM using status MAC addresses](/source/Examples/Sample_VMNetworkAdapter_MultipleVMMACAddress.ps1)
+* [Add VM Network adapters to a VM with a Vlan tag](/source/Examples/Sample_VMNetworkAdapter_VMVlanTagging.ps1)
+* [Add VM Network adapters to a VM with a static IpAddress](/source/Examples/Sample_VMNetworkAdapter_VMStaticNetworkSettings.ps1)
 
-### xVMProcessor
+### VMProcessor
 
 Manages Hyper-V virtual machine processor options.
 
-#### Requirements for xVMProcessor
+#### Requirements for VMProcessor
 
 * The Hyper-V Role has to be installed on the machine.
 * The Hyper-V PowerShell module has to be installed on the machine.
 
-#### Parameters for xVMProcessor
+#### Parameters for VMProcessor
 
 * **`[String]` VMName** _(Key)_: Specifies the name of the virtual machine
  on which the processor is to be configured.
@@ -454,25 +454,25 @@ Manages Hyper-V virtual machine processor options.
 * **`[Boolean]` RestartIfNeeded** _(Write)_: If specified, shutdowns and restarts
  the VM if needed for property changes.
 
-#### Read-Only Properties from Get-TargetResource for xVMProcessor
+#### Read-Only Properties from Get-TargetResource for VMProcessor
 
 None
 
-#### Examples xVMProcessor
+#### Examples VMProcessor
 
-* [Create a secure boot gen 2 VM for a given VHD with nested virtualisation enabled](/source/Examples/Sample_xVMHyperV_SimpleWithNestedVirtualization.ps1)
+* [Create a secure boot gen 2 VM for a given VHD with nested virtualisation enabled](/source/Examples/Sample_VMHyperV_SimpleWithNestedVirtualization.ps1)
 
-### xVMScsiController
+### VMScsiController
 
 Manages the SCSI controllers attached to a Hyper-V virtual machine.
 When removing a controller, all the disks still connected to the controller will be detached.
 
-#### Requirements for xVMScsiController
+#### Requirements for VMScsiController
 
 * The Hyper-V Role has to be installed on the machine.
 * The Hyper-V PowerShell module has to be installed on the machine.
 
-#### Parameters for xVMScsiController
+#### Parameters for VMScsiController
 
 * **`[String]` VMName** _(Key)_: Specifies the name of the virtual machine whose SCSI
  controller is to be manipulated.
@@ -481,24 +481,24 @@ When removing a controller, all the disks still connected to the controller will
 * **`[String]` Ensure** _(Write)_: Specifies if the SCSI controller should exist or
  not. The default value is Present. { *Present* | Absent }.
 
-#### Read-Only Properties from Get-TargetResource for xVMScsiController
+#### Read-Only Properties from Get-TargetResource for VMScsiController
 
 None
 
-#### Examples xVMScsiController
+#### Examples VMScsiController
 
-* [Add a secondary SCSI controller](/source/Examples/Sample_xVMScsiController_AddControllers.ps1)
+* [Add a secondary SCSI controller](/source/Examples/Sample_VMScsiController_AddControllers.ps1)
 
-### xVMSwitch
+### VMSwitch
 
 Manages virtual switches in a Hyper-V host.
 
-#### Requirements for xVMSwitch
+#### Requirements for VMSwitch
 
 * The Hyper-V Role has to be installed on the machine.
 * The Hyper-V PowerShell module has to be installed on the machine.
 
-#### Parameters for xVMSwitch
+#### Parameters for VMSwitch
 
 * **`[String]` Name** _(Key)_: The desired VM Switch name.
 * **`[String]` Type** _(Key)_: The desired type of switch.
@@ -518,13 +518,13 @@ Manages virtual switches in a Hyper-V host.
 * **`[String]` Ensure** _(Write)_: Ensures that the VM Switch is Present or Absent.
  The default value is Present. { *Present* | Absent }.
 
-#### Read-Only Properties from Get-TargetResource for xVMSwitch
+#### Read-Only Properties from Get-TargetResource for VMSwitch
 
 * **`[String]` NetAdapterInterfaceDescription** _(Read)_: Description of the
  network interface.
 
-#### Examples xVMSwitch
+#### Examples VMSwitch
 
-* [Create an internal VM Switch](/source/Examples/Sample_xVMSwitch_Internal.ps1)
-* [Create an external VM Switch](/source/Examples/Sample_xVMSwitch_External.ps1)
-* [Create an external VM Switch with embedded teaming](/source/Examples/Sample_xVMSwitch_ExternalSET.ps1)
+* [Create an internal VM Switch](/source/Examples/Sample_VMSwitch_Internal.ps1)
+* [Create an external VM Switch](/source/Examples/Sample_VMSwitch_External.ps1)
+* [Create an external VM Switch with embedded teaming](/source/Examples/Sample_VMSwitch_ExternalSET.ps1)
