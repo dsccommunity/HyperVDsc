@@ -19,8 +19,8 @@ change log short.
   - Fixed code styling issues.
   - Fixed bug where StartupMemory was not evaluated in Test-TargetResource.
   - Redo of abandoned PRs:
-    - [PR #148](https://github.com/PowerShell/xHyper-V/pull/148), Fixes [Issue #149](https://github.com/PowerShell/xHyper-V/issues/149).
-    - [PR #67](https://github.com/PowerShell/xHyper-V/pull/67), Fixes [Issue #145](https://github.com/PowerShell/xHyper-V/issues/145).
+    - [PR #148](https://github.com/dsccommunity/HyperVDsc/pull/148), Fixes [Issue #149](https://github.com/dsccommunity/HyperVDsc/issues/149).
+    - [PR #67](https://github.com/dsccommunity/HyperVDsc/pull/67), Fixes [Issue #145](https://github.com/dsccommunity/HyperVDsc/issues/145).
   - Fixed Get throws error when NetworkAdapters are not attached or missing
     properties.
 
@@ -31,7 +31,7 @@ change log short.
 ## [3.14.0.0] - 2018-11-28
 
 - MSFT_xVMHost:
-  - Added support to Enable / Disable VM Live Migration. Fixes [Issue #155](https://github.com/PowerShell/xHyper-V/issues/155).
+  - Added support to Enable / Disable VM Live Migration. Fixes [Issue #155](https://github.com/dsccommunity/HyperVDsc/issues/155).
 
 ## [3.13.0.0] - 2018-10-24
 
