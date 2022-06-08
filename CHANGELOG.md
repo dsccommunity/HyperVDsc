@@ -7,9 +7,9 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
-- xHyper-V
+- HyperVDsc
   - BREAKING CHANGE
-    - Renamed _xHyper-V_ to _HyperVDsc - fixes [Issue #69](https://github.com/PowerShell/HyperVDsc/issues/213).
+    - Renamed _xHyper-V_ to _HyperVDsc - fixes [Issue #69](https://github.com/dsccommunity/HyperVDsc/issues/213).
     - Changed all MSFT_xResourceName to DSC_ResourceName.
     - Updated DSCResources, Examples, Modules and Tests for new naming.
     - Updated README.md from _xHyper-V_ to _HyperVDsc
