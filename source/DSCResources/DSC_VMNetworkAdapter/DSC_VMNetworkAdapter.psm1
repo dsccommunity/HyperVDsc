@@ -473,7 +473,7 @@ function Test-TargetResource
                     }
                 }
 
-                if( $IgnoreNetworkSetting -ne $true )
+                if ($IgnoreNetworkSetting -ne $true)
                 {
                     $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
                     if (-not $NetworkSetting)
