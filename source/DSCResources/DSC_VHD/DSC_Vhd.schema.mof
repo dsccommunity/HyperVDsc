@@ -2,7 +2,7 @@
 class DSC_Vhd : OMI_BaseResource
 {
     [Key, Description("The desired VHD file name.")] String Name;
-    [Key, Description("he desired Path where the VHD will be created.")] String Path;
+    [Key, Description("The desired Path where the VHD will be created.")] String Path;
     [Write, Description("Parent VHD file path, for differencing disk.")] String ParentPath;
     [Write, Description("Maximum size of VHD to be created.")] Uint64 MaximumSizeBytes;
     [Write, Description("Virtual disk format. The default value is `Vhd`."), ValueMap{"Vhd","Vhdx"}, Values{"Vhd","Vhdx"}] String Generation;
