@@ -1,6 +1,6 @@
 # Description
 
-Manages VM net adapters attached to a Hyper-V virtual machine or the
+Manages VM network adapters attached to a Hyper-V virtual machine or the
 management OS.
 
 ## Requirements

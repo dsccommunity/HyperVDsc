@@ -2,23 +2,20 @@
 [ClassVersion("1.0.0.0")]
 Class DSC_FileDirectory
 {
-  [Required] string DestinationPath;
-  [Write] string SourcePath;
-  [Write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
-  [Write,ValueMap{"File", "Directory"},Values{"File", "Directory"}] string Type;
-  [Write] boolean Recurse;
-  [Write] boolean Force ;
-  [write] string Content;
-  [Write,ValueMap{"ReadOnly", "Hidden", "System", "Archive"},Values{"ReadOnly", "Hidden", "System", "Archive"}] string Attributes[];
+  [Required, Description("Indicates the location where you want to ensure the state for a file or directory.")] string DestinationPath;
+  [Write, Description("Indicates the path from which to copy the file or folder resource.")] string SourcePath;
+  [Write, Description("Indicates if the file or directory exists. Set this property to `Absent` to ensure that the file or directory does not exist. Set it to `Present` to ensure that the file or directory does exist."), ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+  [Write, Description("Indicates if the resource being configured is a directory or a file. Set this property to `Directory` to indicate that the resource is a directory. Set it to `File` to indicate that the resource is a file."), ValueMap{"File", "Directory"},Values{"File", "Directory"}] string Type;
+  [Write, Description("Indicates if subdirectories are included. Set this property to `$true` to indicate that you want subdirectories to be included.")] boolean Recurse;
+  [Write, Description("Certain file operations (such as overwriting a file or deleting a directory that is not empty) will result in an error. Using the Force property overrides such errors.")] boolean Force;
+  [Write, Description("Specifies the contents of a file, such as a particular string.")] string Content;
+  [Write, Description("Specifies the desired state of the attributes for the targeted file or directory."), ValueMap{"ReadOnly", "Hidden", "System", "Archive"},Values{"ReadOnly", "Hidden", "System", "Archive"}] string Attributes[];
 };
 
 [ClassVersion("1.0.0.0"), FriendlyName("VhdFile")]
 class DSC_VhdFileDirectory : OMI_BaseResource
 {
-    [Key, Description("Path to the VHD")] String VhdPath;
-    [Required, EmbeddedInstance("DSC_FileDirectory"), Description("The FileDirectory objects to copy to the VHD")] String FileDirectory[];
-        [Write,ValueMap{"ModifiedDate","SHA-1","SHA-256","SHA-512"},Values{"ModifiedDate","SHA-1","SHA-256","SHA-512"}] string CheckSum;
+    [Key, Description("Path to the VHD.")] String VhdPath;
+    [Required, EmbeddedInstance("DSC_FileDirectory"), Description("The FileDirectory objects to copy to the VHD (as used in the _File_ resource).")] String FileDirectory[];
+    [Write, Description("Indicates the checksum type to use when determining whether two files are the same. The default value is `ModifiedDate`."), ValueMap{"ModifiedDate","SHA-1","SHA-256","SHA-512"},Values{"ModifiedDate","SHA-1","SHA-256","SHA-512"}] string CheckSum;
 };
-
-
-

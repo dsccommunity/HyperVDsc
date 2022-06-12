@@ -1,15 +1,14 @@
 [ClassVersion("1.0.0"), FriendlyName("Vhd")]
 class DSC_Vhd : OMI_BaseResource
 {
-    [Key, Description("Name of the VHD File")] String Name;
-    [Key, Description("Folder where the VHD will be created")] String Path;
-    [Write, Description("Parent VHD file path, for differencing disk")] String ParentPath;
-    [Write, Description("Maximum size of Vhd to be created")] Uint64 MaximumSizeBytes;
-    [Write, Description("Virtual disk format - Vhd or Vhdx"), ValueMap{"Vhd","Vhdx"}, Values{"Vhd","Vhdx"}] String Generation;
-    [Write, Description("Should the VHD be created or deleted"), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
-    [Read, Description("Virtual Disk Identifier")] String ID;
-    [Write, Description("Type of Vhd - Dynamic, Fixed, Differencing"), ValueMap{"Dynamic","Fixed","Differencing"}, Values{"Dynamic","Fixed","Differencing"}] String Type;
-    [Read, Description("Current size of the VHD")] Uint64 FileSizeBytes;
-    [Read, Description("Is the VHD attached to a VM or not")] Boolean IsAttached;
+    [Key, Description("The desired VHD file name.")] String Name;
+    [Key, Description("he desired Path where the VHD will be created.")] String Path;
+    [Write, Description("Parent VHD file path, for differencing disk.")] String ParentPath;
+    [Write, Description("Maximum size of VHD to be created.")] Uint64 MaximumSizeBytes;
+    [Write, Description("Virtual disk format. The default value is `Vhd`."), ValueMap{"Vhd","Vhdx"}, Values{"Vhd","Vhdx"}] String Generation;
+    [Write, Description("Specifies if the virtual disk should be present (if not it will be created) or absent (if present it will be removed). Default value is `Present`."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [Read, Description("Returns the virtual disk identifier.")] String ID;
+    [Write, Description("The type of virtual disk. The default value is `Dynamic`."), ValueMap{"Dynamic","Fixed","Differencing"}, Values{"Dynamic","Fixed","Differencing"}] String Type;
+    [Read, Description("Returns the current size of the virtual disk.")] Uint64 FileSizeBytes;
+    [Read, Description("Returns if the virtual disk is attached to a VM.")] Boolean IsAttached;
 };
-
