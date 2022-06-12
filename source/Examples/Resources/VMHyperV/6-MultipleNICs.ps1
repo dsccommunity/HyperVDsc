@@ -2,7 +2,7 @@
     .DESCRIPTION
         Description not yet written.
 #>
-Configuration Sample_VMHyperV_MultipleNICs
+Configuration Example
 {
     param
     (

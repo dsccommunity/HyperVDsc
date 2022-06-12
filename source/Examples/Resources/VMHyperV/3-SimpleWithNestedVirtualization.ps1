@@ -2,7 +2,7 @@
     .DESCRIPTION
         Create a VM with nested virtualization.
 #>
-configuration Sample_VMHyperV_SimpleWithNestedVirtualization
+configuration Example
 {
     param
     (

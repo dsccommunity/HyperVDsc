@@ -2,7 +2,7 @@
     .DESCRIPTION
         VM using dynamic memory.
 #>
-configuration Sample_VMHyperV_DynamicMemory
+configuration Example
 {
     param
     (

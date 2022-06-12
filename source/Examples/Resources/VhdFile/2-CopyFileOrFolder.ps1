@@ -20,9 +20,9 @@ Configuration Example
 
     VhdFile FileCopy
     {
+        VhdPath       = $vhdPath
         FileDirectory = DSC_FileDirectory
         {
-            VhdPath         = $vhdPath
             SourcePath      = $itemToCopy
             DestinationPath = $relativeDestinationPath
         }

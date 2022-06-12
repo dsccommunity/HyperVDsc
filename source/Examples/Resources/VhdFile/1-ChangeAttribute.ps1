@@ -6,10 +6,10 @@ Configuration Example
 {
     param
     (
-        [Parameter(Mandatory = $true, Position = 0)]
+        [Parameter()]
         $vhdPath = 'C:\temp\disk.vhdx',
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         $relativeDestinationPath = 'Temp',
 
         [Parameter()]
@@ -21,12 +21,11 @@ Configuration Example
 
     VhdFile Change-Attribute
     {
+        VhdPath       = $vhdPath
         FileDirectory = DSC_FileDirectory
         {
-            VhdPath         = $vhdPath
             DestinationPath = $relativeDestinationPath
             Attributes      = $attribute
         }
-
     }
 }

@@ -2,7 +2,7 @@
     .DESCRIPTION
         Create a new VM.
 #>
-configuration Sample_VMHyperV_Simple
+configuration Example
 {
     param
     (

@@ -2,7 +2,7 @@
     .DESCRIPTION
         Complete example.
 #>
-configuration Sample_VMHyperV_Complete
+configuration Example
 {
     param
     (

@@ -20,9 +20,9 @@ Configuration Example
 
     VhdFile RemoveFile
     {
+        VhdPath       = $vhdPath
         FileDirectory = DSC_FileDirectory
         {
-            VhdPath         = $vhdPath
             DestinationPath = $relativeDestinationPath
             Ensure          = $Ensure
         }

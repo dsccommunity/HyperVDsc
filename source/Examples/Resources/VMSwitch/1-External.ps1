@@ -2,7 +2,7 @@
     .DESCRIPTION
         Creates a switch of the type External.
 #>
-configuration Sample_VMSwitch_External
+configuration Example
 {
     param
     (

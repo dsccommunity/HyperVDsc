@@ -2,7 +2,7 @@
     .DESCRIPTION
         Description not yet written.
 #>
-Configuration Sample_VMNetworkAdapter_MultipleManagementOS
+Configuration Example
 {
     Import-DscResource -ModuleName 'HyperVDsc' -Name VMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration

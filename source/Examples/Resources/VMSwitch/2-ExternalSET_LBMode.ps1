@@ -2,7 +2,7 @@
     .DESCRIPTION
         Creates a switch that is of type External and using load balancing.
 #>
-Configuration Sample_VMSwitch_ExternalSET_LBMode
+Configuration Example
 {
     param
     (

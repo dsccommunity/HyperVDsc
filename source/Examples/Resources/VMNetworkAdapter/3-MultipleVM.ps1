@@ -2,7 +2,7 @@
     .DESCRIPTION
         Add three network adapters to the same switch.
 #>
-Configuration Sample_VMNetworkAdapter_MultipleVM
+Configuration Example
 {
     Import-DscResource -ModuleName 'HyperVDsc' -Name VMNetworkAdapter
     Import-DscResource -ModuleName PSDesiredStateConfiguration
