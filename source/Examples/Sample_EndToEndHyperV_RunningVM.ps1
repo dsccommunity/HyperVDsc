@@ -1,5 +1,8 @@
-# End to end sample for x-Hyper-v
-Configuration Sample_EndToEndHyperV_RunningVM
+<#
+    .DESCRIPTION
+        End to end sample for running a VM in HyperV
+#>
+Configuration Example
 {
     param
     (
@@ -36,7 +39,7 @@ Configuration Sample_EndToEndHyperV_RunningVM
 
     # Customize VHD by copying a folders/files to the VHD before a VM can be created
     # Example below shows copying unattended.xml before a VM can be created
-    VhdFile CopyUnattendxml
+    VhdFile CopyUnattendedXml
     {
         VhdPath       = $vhdPath
         FileDirectory = DSC_FileDirectory
@@ -47,7 +50,7 @@ Configuration Sample_EndToEndHyperV_RunningVM
     }
 
     # create the testVM out of the vhd.
-    VMHyperV testvm
+    VMHyperV TestVM
     {
         Name            = "$($name)_vm"
         SwitchName      = 'Test-Switch'

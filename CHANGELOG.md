@@ -15,6 +15,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     - Updated README.md from _xHyper-V_ to _HyperVDsc
   - Renamed default branch to `main` - Fixes [Issue #198](https://github.com/dsccommunity/HyperVDsc/issues/198).
   - Moved documentation to the HyperVDsc GitHub Wiki.
+  - Updated all examples to correct folders and naming so they show up
+    in the GitHub Wiki documentation and conceptual help.
 
 ## [3.18.0] - 2022-06-04
 
