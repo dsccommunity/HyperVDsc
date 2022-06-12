@@ -16,6 +16,6 @@ Class DSC_FileDirectory
 class DSC_VhdFileDirectory : OMI_BaseResource
 {
     [Key, Description("Path to the VHD.")] String VhdPath;
-    [Required, EmbeddedInstance("DSC_FileDirectory"), Description("The FileDirectory objects to copy to the VHD (as used in the "File" resource).")] String FileDirectory[];
+    [Required, EmbeddedInstance("DSC_FileDirectory"), Description("The FileDirectory objects to copy to the VHD (as used in the _File_ resource).")] String FileDirectory[];
     [Write, Description("Indicates the checksum type to use when determining whether two files are the same. The default value is `ModifiedDate`."), ValueMap{"ModifiedDate","SHA-1","SHA-256","SHA-512"},Values{"ModifiedDate","SHA-1","SHA-256","SHA-512"}] string CheckSum;
 };
