@@ -4,7 +4,7 @@ Class VMNetworkAdapterNetworkSettings
   [Write, Description("IpAddress to give the network adapter. Only used if not Dhcp. Required if not Dhcp.")] string IpAddress;
   [Write, Description("Subnet to give the network adapter. Only used if not Dhcp. Required if not Dhcp.")] string Subnet;
   [Write, Description("DefaultGateway to give the network adapter. Only used if not Dhcp.")] string DefaultGateway;
-  [Write, Description("DNS server to give the network adapter. Only used if not Dhcp.")] string DnsServer;
+  [Write, Description("DNS servers to give the network adapter. Only used if not Dhcp.")] string DnsServers[];
 };
 
 [ClassVersion("2.0.0.0"), FriendlyName("VMNetworkAdapter")]

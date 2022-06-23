@@ -19,7 +19,7 @@ Configuration Example
             IpAddress = '192.168.0.100'
             Subnet = '255.255.255.255'
             DefaultGateway = '192.168.0.1'
-            DnsServer = '192.168.0.1'
+            DnsServers = @( '192.168.0.1', '192.168.0.2' )
         }
     }
 }
