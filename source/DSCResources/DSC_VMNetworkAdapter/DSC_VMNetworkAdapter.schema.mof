@@ -1,5 +1,5 @@
 [ClassVersion("2.0.0.0")]
-Class NetworkSettings
+Class VMNetworkAdapterNetworkSettings
 {
   [Write, Description("IpAddress to give the network adapter. Only used if not Dhcp. Required if not Dhcp.")] string IpAddress;
   [Write, Description("Subnet to give the network adapter. Only used if not Dhcp. Required if not Dhcp.")] string Subnet;
@@ -15,7 +15,7 @@ class DSC_VMNetworkAdapter : OMI_BaseResource
     [Required, Description("Virtual Switch name to connect to.")] String SwitchName;
     [Required, Description("Name of the VM to attach to. If you want to attach new VM Network adapter to the management OS, set this property to 'ManagementOS'.")] String VMName;
     [Write, Description("Use this to specify a Static MAC Address. If this parameter is not specified, dynamic MAC Address will be set.")] String MacAddress;
-    [Write, Description("Network Settings of the network adapter. If this parameter is not supplied, DHCP will be used."), EmbeddedInstance("NetworkSettings")] String NetworkSetting;
+    [Write, Description("Network Settings of the network adapter. If this parameter is not supplied, DHCP will be used."), EmbeddedInstance("VMNetworkAdapterNetworkSettings")] String NetworkSetting;
     [Write, Description("Use this to specify a Vlan id on the Network Adapter.")] String VlanId;
     [Write, Description("Ensures that the VM Network Adapter is Present or Absent. The default value is `Present`."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
     [Read, Description("Returns `$true` if the network adapter uses a dynamic MAC address.")] Boolean DynamicMacAddress;

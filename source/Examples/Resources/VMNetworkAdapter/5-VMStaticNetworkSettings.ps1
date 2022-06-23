@@ -14,7 +14,7 @@ Configuration Example
         SwitchName = 'SETSwitch'
         MacAddress = '001523be0c00'
         VMName = 'MyVM01'
-        NetworkSetting = NetworkSettings
+        NetworkSetting = VMNetworkAdapterNetworkSettings
         {
             IpAddress = '192.168.0.100'
             Subnet = '255.255.255.255'
