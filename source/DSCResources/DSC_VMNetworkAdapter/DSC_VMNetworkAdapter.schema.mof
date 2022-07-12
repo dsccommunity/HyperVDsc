@@ -1,10 +1,11 @@
 [ClassVersion("2.0.0.0")]
 Class VMNetworkAdapterNetworkSettings
 {
-  [Write, Description("IpAddress to give the network adapter. Only used if not Dhcp. Required if not Dhcp.")] string IpAddress;
-  [Write, Description("Subnet to give the network adapter. Only used if not Dhcp. Required if not Dhcp.")] string Subnet;
-  [Write, Description("DefaultGateway to give the network adapter. Only used if not Dhcp.")] string DefaultGateway;
-  [Write, Description("DNS servers to give the network adapter. Only used if not Dhcp.")] string DnsServers[];
+  [Write, Description("Specifies whether DHCP is enabled on the network adapter within the guest operating system.")] boolean DHCPEnabled;
+  [Write, Description("IPAddress configured on the network adapter within the guest operating system.")] string IPAddress;
+  [Write, Description("Subnets configured on the network adapter within the guest operating system.")] string Subnet;
+  [Write, Description("Default IP gateways configured on the network adapter within the guest operating system.")] string DefaultGateway;
+  [Write, Description("DNS servers configured on the network adapter within the guest operating system.")] string DnsServers[];
 };
 
 [ClassVersion("2.0.0.0"), FriendlyName("VMNetworkAdapter")]

@@ -41,11 +41,12 @@ try
         }
 
         $propertiesStatic = @{
-            IpAddress = "192.168.0.1"
-            Subnet    = "255.255.255.0"
+            DHCPEnabled = $false
+            IpAddress   = "192.168.0.1"
+            Subnet      = "255.255.255.0"
         }
 
-        $networkSettingsStatic = New-CimInstance -ClassName NetworkSettings -Property $properties -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+        $networkSettingsStatic = New-CimInstance -ClassName VMNetworkAdapterNetworkSettings -Property $propertiesStatic -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
 
         $TestAdapter = [PSObject]@{
             Id         = $MockHostAdapter.Id
@@ -170,7 +171,6 @@ try
                 }
                 Mock -CommandName Remove-VMNetworkAdapter
                 Mock -CommandName Set-VMNetworkAdapterVlan
-                Mock -CommandName Get-NetworkInformation
                 Mock -CommandName Set-NetworkInformation
 
                 It 'should not throw error' {
@@ -184,7 +184,6 @@ try
                     Assert-MockCalled -CommandName Set-VMNetworkAdapterVlan -Exactly 0
                     Assert-MockCalled -commandName Add-VMNetworkAdapter -Exactly 1
                     Assert-MockCalled -commandName Remove-VMNetworkAdapter -Exactly 0
-                    Assert-MockCalled -CommandName Get-NetworkInformation -Exactly 1
                     Assert-MockCalled -CommandName Set-NetworkInformation -Exactly 1
                 }
             }
@@ -324,11 +323,11 @@ try
                 }
             }
 
-            Context 'Adapter exists but network settings are not correct' {
+            Context 'Adapter exists and network settings are not specified' {
                 Mock -CommandName Get-VMNetworkAdapter -MockWith { $MockAdapter }
                 Mock -CommandName Get-VMNetworkAdapterVlan -MockWith { $MockAdapterVlanTagged }
                 Mock -CommandName Get-NetworkInformation -MockWith {
-                    @{ Dhcp = $false }
+                    @{ DHCPEnabled = $false }
                 }
 
                 It 'should return false' {
@@ -339,7 +338,7 @@ try
                 }
                 It 'should call expected Mocks' {
                     Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
-                    Assert-MockCalled -commandName Get-NetworkInformation -Exactly 1
+                    Assert-MockCalled -commandName Get-NetworkInformation -Exactly 0
                 }
             }
         }
