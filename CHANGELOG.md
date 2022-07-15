@@ -17,6 +17,10 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Moved documentation to the HyperVDsc GitHub Wiki.
   - Updated all examples to correct folders and naming so they show up
     in the GitHub Wiki documentation and conceptual help.
+  - VMNetworkAdapter
+    - Rename embedded instance class #203
+    - Fix multiple DNS IP adresses does not work #190
+    - NetworkSetting parameter is now optional and no default actions are taken if not specified
 
 ## [3.18.0] - 2022-06-04
 
