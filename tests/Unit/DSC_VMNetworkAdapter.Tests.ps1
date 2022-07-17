@@ -99,7 +99,7 @@ try
                         IpAddress      = '10.10.10.10'
                         Subnet         = '255.255.255.0'
                         DefaultGateway = '10.10.10.1'
-                        DnsServers     = @( '10.10.10.1' )
+                        DnsServer      = @( '10.10.10.1' )
                     }
                 }
 
@@ -133,7 +133,7 @@ try
                         IpAddress      = '10.10.10.10'
                         Subnet         = '255.255.255.0'
                         DefaultGateway = '10.10.10.1'
-                        DnsServers     = @( '10.10.10.1', '10.10.10.2' )
+                        DnsServer      = @( '10.10.10.1', '10.10.10.2' )
                     }
                 }
 

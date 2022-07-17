@@ -3,9 +3,9 @@ Class VMNetworkAdapterNetworkSettings
 {
   [Write, Description("Specifies whether DHCP is enabled on the network adapter within the guest operating system.")] boolean DHCPEnabled;
   [Write, Description("IPAddress configured on the network adapter within the guest operating system.")] string IPAddress;
-  [Write, Description("Subnets configured on the network adapter within the guest operating system.")] string Subnet;
-  [Write, Description("Default IP gateways configured on the network adapter within the guest operating system.")] string DefaultGateway;
-  [Write, Description("DNS servers configured on the network adapter within the guest operating system.")] string DnsServers[];
+  [Write, Description("Subnet configured on the network adapter within the guest operating system.")] string Subnet;
+  [Write, Description("Default IP gateway configured on the network adapter within the guest operating system.")] string DefaultGateway;
+  [Write, Description("One or more DNS servers configured on the network adapter within the guest operating system.")] string DnsServer[];
 };
 
 [ClassVersion("2.0.0.0"), FriendlyName("VMNetworkAdapter")]

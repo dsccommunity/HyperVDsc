@@ -298,9 +298,9 @@ function Set-TargetResource
                     {
                         $parameters.Add('DefaultGateway', $defaultGateway)
                     }
-                    if ($dnsServers = $NetworkSetting.CimInstanceProperties['DnsServers'].Value)
+                    if ($dnsServer = $NetworkSetting.CimInstanceProperties['DnsServer'].Value)
                     {
-                        $parameters.Add('DnsServers', $dnsServers)
+                        $parameters.Add('DnsServer', $dnsServer)
                     }
 
                     Set-NetworkInformation -VMName $VMName -Name $Name @parameters
@@ -480,28 +480,28 @@ function Test-TargetResource
                         $ipAddress = $NetworkSetting.CimInstanceProperties['IpAddress'].Value
                         $subnet = $NetworkSetting.CimInstanceProperties['Subnet'].Value
                         $defaultGateway = $NetworkSetting.CimInstanceProperties['DefaultGateway'].Value
-                        $dnsServers = $NetworkSetting.CimInstanceProperties['DnsServers'].Value
+                        $dnsServer = $NetworkSetting.CimInstanceProperties['DnsServer'].Value
 
                         if (-not $IpAddress -or -not $subnet)
                         {
                             throw $script:localizedData.MissingIPAndSubnet
                         }
 
-                        if ($ipAddress -and -not $networkInfo.IPAddress.Contains($ipAddress))
+                        if ($ipAddress -and -not $networkInfo.IPAddress.Split(',').Contains($ipAddress))
                         {
                             Write-Verbose -Message $script:localizedData.IPAddressNotConfigured
                             return $false
                         }
 
-                        if ($defaultGateway -and -not $networkInfo.DefaultGateway.Contains($defaultGateway))
+                        if ($defaultGateway -and -not $networkInfo.DefaultGateway.Split(',').Contains($defaultGateway))
                         {
                             Write-Verbose -Message $script:localizedData.GatewayNotConfigured
                             return $false
                         }
 
-                        if ($dnsServers )
+                        if ($dnsServer )
                         {
-                            $missingDns = $dnsServers | Where-Object {$networkInfo.DNSServers -notcontains $_}
+                            $missingDns = $dnsServer | Where-Object {$networkInfo.DNSServer -notcontains $_}
 
                             if ($missingDns.Count -gt 0)
                             {
@@ -614,13 +614,12 @@ function Get-NetworkInformation
     }
     else
     {
-        # only the first IP address is returned
         return  @{
             DHCPEnabled    = $false
-            IpAddress      = $networkSettings.IPAddresses[0]
-            Subnet         = $networkSettings.Subnets[0]
-            DefaultGateway = $networkSettings.DefaultGateways[0]
-            DnsServers     = $networkSettings.DNSServers
+            IpAddress      = $networkSettings.IPAddresses -join ','
+            Subnet         = $networkSettings.Subnets -join ','
+            DefaultGateway = $networkSettings.DefaultGateways -join ','
+            DnsServer      = $networkSettings.DNSServers
         }
     }
 }
@@ -656,7 +655,7 @@ function Set-NetworkInformation
 
         [Parameter(ParameterSetName = 'Static')]
         [System.String[]]
-        $DnsServers
+        $DnsServer
     )
 
     $vm = Get-WmiObject -Namespace 'root\virtualization\v2' -Class 'Msvm_ComputerSystem' | Where-Object { $_.ElementName -ieq "$VmName" }
@@ -685,9 +684,9 @@ function Set-NetworkInformation
                 $networkSettings.DefaultGateways = $DefaultGateway
             }
 
-            if ($DnsServers)
+            if ($DnsServer)
             {
-                $networkSettings.DNSServers = $DNSServers
+                $networkSettings.DNSServers = $DNSServer
             }
 
             $networkSettings.DHCPEnabled = $false
