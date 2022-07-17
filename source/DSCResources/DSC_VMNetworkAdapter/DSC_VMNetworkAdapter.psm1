@@ -20,9 +20,6 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 .PARAMETER VMName
     Specifies the name of the VM to which the network adapter will be connected.
     Specify VMName as ManagementOS if you wish to connect the adapter to host OS.
-
-.PARAMETER IpAddress
-    Specifies the IpAddress information for the network adapter.
 #>
 function Get-TargetResource
 {
@@ -88,7 +85,7 @@ function Get-TargetResource
         $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
         if ($networkInfo)
         {
-            $item = New-CimInstance -ClassName MSFT_NetworkSettings -Property $networkInfo -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
+            $item = New-CimInstance -ClassName VMNetworkAdapterNetworkSettings -Property $networkInfo -Namespace root/microsoft/windows/desiredstateconfiguration -ClientOnly
             $configuration.Add('NetworkSetting', $item)
         }
 
@@ -131,8 +128,8 @@ function Get-TargetResource
     Specifies the MAC address for the network adapter. This is not applicable if VMName
     is set to ManagementOS. Use this parameter to specify a static MAC address.
 
-.PARAMETER IpAddress
-    Specifies the IpAddress information for the network adapter.
+.PARAMETER NetworkSetting
+    Specifies the DHCP or IpAddress & DNS sever information for the network adapter.
 
 .PARAMETER VlanId
     Specifies the Vlan Id for the network adapter.
@@ -269,44 +266,45 @@ function Set-TargetResource
 
         if ($VmName -ne 'ManagementOS')
         {
-            $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
-            if (-not $NetworkSetting)
+            if ($null -ne $NetworkSetting)
             {
-                if ($networkInfo)
+                [boolean]$dhcpEnabled = $NetworkSetting.CimInstanceProperties['DHCPEnabled'].Value
+
+                if ($dhcpEnabled)
                 {
                     Write-Verbose -Message $script:localizedData.EnableDhcp
                     Set-NetworkInformation -VMName $VMName -Name $Name -Dhcp
                 }
-            }
-            else
-            {
-                $parameters = @{ }
-                if ($ipAddress = $NetworkSetting.CimInstanceProperties['IpAddress'].Value)
+                else
                 {
-                    if (-not $ipAddress)
+                    $parameters = @{}
+                    if ($ipAddress = $NetworkSetting.CimInstanceProperties['IpAddress'].Value)
                     {
-                        throw $script:localizedData.MissingIPAndSubnet
+                        if (-not $ipAddress)
+                        {
+                            throw $script:localizedData.MissingIPAndSubnet
+                        }
+                        $parameters.Add('IPAddress', $ipAddress)
                     }
-                    $parameters.Add('IPAddress', $ipAddress)
-                }
-                if ($subnet = $NetworkSetting.CimInstanceProperties['Subnet'].Value)
-                {
-                    if (-not $subnet)
+                    if ($subnet = $NetworkSetting.CimInstanceProperties['Subnet'].Value)
                     {
-                        throw $script:localizedData.MissingIPAndSubnet
+                        if (-not $subnet)
+                        {
+                            throw $script:localizedData.MissingIPAndSubnet
+                        }
+                        $parameters.Add('Subnet', $subnet)
                     }
-                    $parameters.Add('Subnet', $subnet)
-                }
-                if ($defaultGateway = $NetworkSetting.CimInstanceProperties['DefaultGateway'].Value)
-                {
-                    $parameters.Add('DefaultGateway', $defaultGateway)
-                }
-                if ($dnsServer = $NetworkSetting.CimInstanceProperties['DnsServer'].Value)
-                {
-                    $parameters.Add('DnsServer', $dnsServer)
-                }
+                    if ($defaultGateway = $NetworkSetting.CimInstanceProperties['DefaultGateway'].Value)
+                    {
+                        $parameters.Add('DefaultGateway', $defaultGateway)
+                    }
+                    if ($dnsServer = $NetworkSetting.CimInstanceProperties['DnsServer'].Value)
+                    {
+                        $parameters.Add('DnsServer', $dnsServer)
+                    }
 
-                Set-NetworkInformation -VMName $VMName -Name $Name @parameters
+                    Set-NetworkInformation -VMName $VMName -Name $Name @parameters
+                }
             }
 
             Write-Verbose -Message $script:localizedData.GetVMNetAdapterVlan
@@ -363,8 +361,8 @@ function Set-TargetResource
     Specifies the MAC address for the network adapter. This is not applicable if VMName
     is set to ManagementOS. Use this parameter to specify a static MAC address.
 
-.PARAMETER IpAddress
-    Specifies the IpAddress information for the network adapter.
+.PARAMETER NetworkSetting
+    Specifies the DHCP or IpAddress & DNS sever information for the network adapter.
 
 .PARAMETER VlanId
     Specifies the Vlan Id for the network adapter.
@@ -457,24 +455,28 @@ function Test-TargetResource
                     }
                 }
 
-                $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
-                if (-not $NetworkSetting)
+                if ($null -ne $NetworkSetting)
                 {
-                    if ($networkInfo)
+                    $networkInfo = Get-NetworkInformation -VMName $VMName -Name $Name
+
+                    [boolean]$dhcpEnabled = $NetworkSetting.CimInstanceProperties['DHCPEnabled'].Value
+
+                    if ($dhcpEnabled)
                     {
-                        Write-Verbose -Message $script:localizedData.NotDhcp
-                        return $false
-                    }
-                }
-                else
-                {
-                    if (-not $networkInfo)
-                    {
-                        Write-Verbose -Message $script:localizedData.Dhcp
-                        return $false
+                        if (-not $networkInfo.DHCPEnabled)
+                        {
+                            Write-Verbose -Message $script:localizedData.NotDhcp
+                            return $false
+                        }
                     }
                     else
                     {
+                        if ($networkInfo.DHCPEnabled)
+                        {
+                            Write-Verbose -Message $script:localizedData.Dhcp
+                            return $false
+                        }
+
                         $ipAddress = $NetworkSetting.CimInstanceProperties['IpAddress'].Value
                         $subnet = $NetworkSetting.CimInstanceProperties['Subnet'].Value
                         $defaultGateway = $NetworkSetting.CimInstanceProperties['DefaultGateway'].Value
@@ -497,10 +499,15 @@ function Test-TargetResource
                             return $false
                         }
 
-                        if ($dnsServer -and -not $networkInfo.DNSServer.Split(',').Contains($dnsServer))
+                        if ($dnsServer )
                         {
-                            Write-Verbose -Message $script:localizedData.DNSServerNotConfigured
-                            return $false
+                            $missingDns = $dnsServer | Where-Object {$networkInfo.DNSServer -notcontains $_}
+
+                            if ($missingDns.Count -gt 0)
+                            {
+                                Write-Verbose -Message $script:localizedData.DNSServerNotConfigured
+                                return $false
+                            }
                         }
                     }
                 }
@@ -601,18 +608,20 @@ function Get-NetworkInformation
 
     if ($networkSettings.DHCPEnabled)
     {
-        return $null
+        return  @{
+            DHCPEnabled = $true
+        }
     }
     else
     {
         return  @{
+            DHCPEnabled    = $false
             IpAddress      = $networkSettings.IPAddresses -join ','
             Subnet         = $networkSettings.Subnets -join ','
             DefaultGateway = $networkSettings.DefaultGateways -join ','
-            DnsServer      = $networkSettings.DNSServers -join ','
+            DnsServer      = $networkSettings.DNSServers
         }
     }
-
 }
 
 function Set-NetworkInformation
@@ -645,7 +654,7 @@ function Set-NetworkInformation
         $DefaultGateway,
 
         [Parameter(ParameterSetName = 'Static')]
-        [System.String]
+        [System.String[]]
         $DnsServer
     )
 
