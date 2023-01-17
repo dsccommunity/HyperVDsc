@@ -155,12 +155,14 @@ try
 
         Describe 'DSC_VMNetworkAdapter\Set-TargetResource' {
             $newAdapter = [PSObject]@{
-                Id             = 'UniqueString'
-                Name           = $TestAdapter.Name
-                SwitchName     = $TestAdapter.SwitchName
-                VMName         = 'VMName'
-                NetworkSetting = $networkSettingsStatic
-                Ensure         = 'Present'
+                Id                 = 'UniqueString'
+                Name               = $TestAdapter.Name
+                SwitchName         = $TestAdapter.SwitchName
+                VMName             = 'VMName'
+                NetworkSetting     = $networkSettingsStatic
+                Ensure             = 'Present'
+                DeviceNaming       = 'On'
+                MacAddressSpoofing = 'On'
             }
 
             Context 'Adapter does not exist but should' {
@@ -172,6 +174,7 @@ try
                 Mock -CommandName Remove-VMNetworkAdapter
                 Mock -CommandName Set-VMNetworkAdapterVlan
                 Mock -CommandName Set-NetworkInformation
+                Mock -CommandName Set-VMNetworkAdapter
 
                 It 'should not throw error' {
                     {
@@ -185,6 +188,7 @@ try
                     Assert-MockCalled -commandName Add-VMNetworkAdapter -Exactly 1
                     Assert-MockCalled -commandName Remove-VMNetworkAdapter -Exactly 0
                     Assert-MockCalled -CommandName Set-NetworkInformation -Exactly 1
+                    Assert-MockCalled -CommandName Set-VMNetworkAdapter -Exactly 1
                 }
             }
 
@@ -212,11 +216,13 @@ try
 
         Describe 'DSC_VMNetworkAdapter\Test-TargetResource' {
             $newAdapter = [PSObject]@{
-                Id         = 'UniqueString'
-                Name       = $TestAdapter.Name
-                SwitchName = $TestAdapter.SwitchName
-                VMName     = 'ManagementOS'
-                Ensure     = 'Present'
+                Id                 = 'UniqueString'
+                Name               = $TestAdapter.Name
+                SwitchName         = $TestAdapter.SwitchName
+                VMName             = 'ManagementOS'
+                Ensure             = 'Present'
+                DeviceNaming       = 'On'
+                MacAddressSpoofing = 'On'
             }
 
             Context 'Adapter does not exist but should' {

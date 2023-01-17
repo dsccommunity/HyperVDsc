@@ -27,4 +27,8 @@ ConvertFrom-StringData @'
     VMNetAdapterDoesNotExistNoActionNeeded=VM Network adapter does not exist. No action needed.
     SwitchIsDifferent=Net Adapter is not connected to the requested switch.
     PerformSwitchConnect=Connecting VM Net adapter to the right switch.
+    SpoofingDifferent=MAC address spoofing configuration does not match.
+    SpoofingConfiguredNoActionNeeded=MAC address spoofing configured.
+    DeviceNamingDifferent=Device naming configuration does not match.
+    DeviceNamingConfiguredNoActionNeeded=Device naming configured.
 '@

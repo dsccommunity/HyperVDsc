@@ -19,5 +19,7 @@ class DSC_VMNetworkAdapter : OMI_BaseResource
     [Write, Description("Network Settings of the network adapter. If this parameter is not supplied, DHCP will be used."), EmbeddedInstance("VMNetworkAdapterNetworkSettings")] String NetworkSetting;
     [Write, Description("Use this to specify a Vlan id on the Network Adapter.")] String VlanId;
     [Write, Description("Ensures that the VM Network Adapter is Present or Absent. The default value is `Present`."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+    [Write, Description("Use this to enable or disable Device Naming. Default: Off"), ValueMap{"On","Off"}, Values{"On","Off"}] String DeviceNaming;
+    [Write, Description("Use this to enable or disable MAC address spoofing. Default: Off"), ValueMap{"On","Off"}, Values{"On","Off"}] String MacAddressSpoofing;
     [Read, Description("Returns `$true` if the network adapter uses a dynamic MAC address.")] Boolean DynamicMacAddress;
 };

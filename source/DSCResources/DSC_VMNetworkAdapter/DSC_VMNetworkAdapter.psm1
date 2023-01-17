@@ -134,6 +134,12 @@ function Get-TargetResource
 .PARAMETER VlanId
     Specifies the Vlan Id for the network adapter.
 
+.PARAMETER DeviceNaming
+    Use this to enable or disable Device Naming. Default: Off
+
+.PARAMETER MacAddressSpoofing
+    Use this to enable or disable MAC address spoofing. Default: Off
+
 .PARAMETER Ensure
     Specifies if the network adapter should be Present or Absent.
 #>
@@ -169,6 +175,16 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $VlanId,
+
+        [Parameter()]
+        [ValidateSet('On', 'Off')]
+        [System.String]
+        $DeviceNaming = 'Off',
+
+        [Parameter()]
+        [ValidateSet('On', 'Off')]
+        [System.String]
+        $MacAddressSpoofing = 'Off',
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -232,7 +248,10 @@ function Set-TargetResource
                 {
                     Write-Verbose -Message $script:localizedData.PerformVMNetModify
 
-                    $setArguments = @{ }
+                    $setArguments = @{
+                        DeviceNaming       = $DeviceNaming
+                        MacAddressSpoofing = $MacAddressSpoofing
+                    }
                     $setArguments.Add('VMNetworkAdapter', $netAdapterExists)
                     if ($MacAddress)
                     {
@@ -259,9 +278,11 @@ function Set-TargetResource
                     $arguments.Add('StaticMacAddress', $MacAddress)
                 }
                 $arguments.Add('SwitchName', $SwitchName)
+                $arguments.Add('DeviceNaming', $DeviceNaming)
             }
             Write-Verbose -Message $script:localizedData.AddVMNetAdapter
             $netAdapterExists = Add-VMNetworkAdapter @arguments -Passthru -ErrorAction Stop
+            Set-VMNetworkAdapter -VMNetworkAdapter $netAdapterExists -MacAddressSpoofing $MacAddressSpoofing
         }
 
         if ($VmName -ne 'ManagementOS')
@@ -367,6 +388,12 @@ function Set-TargetResource
 .PARAMETER VlanId
     Specifies the Vlan Id for the network adapter.
 
+.PARAMETER DeviceNaming
+    Use this to enable or disable Device Naming. Default: Off
+
+.PARAMETER MacAddressSpoofing
+    Use this to enable or disable MAC address spoofing. Default: Off
+
 .PARAMETER Ensure
     Specifies if the network adapter should be Present or Absent.
 #>
@@ -403,6 +430,16 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $VlanId,
+
+        [Parameter()]
+        [ValidateSet('On', 'Off')]
+        [System.String]
+        $DeviceNaming = 'Off',
+
+        [Parameter()]
+        [ValidateSet('On', 'Off')]
+        [System.String]
+        $MacAddressSpoofing = 'Off',
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -558,6 +595,28 @@ function Test-TargetResource
                     return $true
                 }
 
+                if ($netAdapterExists.MacAddressSpoofing -ne $MacAddressSpoofing)
+                {
+                    Write-Verbose -Message $script:localizedData.SpoofingDifferent
+                    return $false
+                }
+                else
+                {
+                    Write-Verbose -Message $script:localizedData.SpoofingConfiguredNoActionNeeded
+                    return $true
+
+                }
+
+                if ($netAdapterExists.DeviceNaming -ne $DeviceNaming)
+                {
+                    Write-Verbose -Message $script:localizedData.DeviceNamingDifferent
+                    return $false
+                }
+                else
+                {
+                    Write-Verbose -Message $script:localizedData.DeviceNamingConfiguredNoActionNeeded
+                    return $true
+                }
             }
             else
             {
