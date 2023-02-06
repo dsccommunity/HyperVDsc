@@ -45,6 +45,18 @@ function Get-TargetResource
     # Mount VHD.
     $mountVHD = EnsureVHDState -Mounted -vhdPath $vhdPath
 
+    if ($null -eq $mountVHD)
+    {
+        Write-Verbose -Message ( -join @(
+            "$($MyInvocation.MyCommand): "
+            $($script:localizedData.NoDiskMounted  -f $vhdPath)
+        ))
+        return @{
+            VhdPath       = $VhdPath
+            FileDirectory = @()
+        }
+    }
+
     $itemsFound = foreach ($Item in $FileDirectory)
     {
         $item = GetItemToCopy -item $item
@@ -64,7 +76,10 @@ function Get-TargetResource
 
         $finalPath = Join-Path $letterDrive $item.DestinationPath
 
-        Write-Verbose "Getting the current value at $finalPath ..."
+        Write-Verbose -Message ( -join @(
+            "$($MyInvocation.MyCommand): "
+            $($script:localizedData.GetCurrentValue  -f $finalPath)
+        ))
 
         if (Test-Path $finalPath)
         {
@@ -207,6 +222,15 @@ function Test-TargetResource
     # mount the vhd.
     $mountedVHD = EnsureVHDState -Mounted -vhdPath $VhdPath
 
+    if ($mountedVHD.Attached)
+    {
+        Write-Verbose -Message ( -join @(
+            "$($MyInvocation.MyCommand): "
+            $($script:localizedData.SkippingAttachedDisk  -f $VhdPath)
+        ))
+        return $true
+    }
+
     try
     {
         # Show the drive letters after mount
@@ -214,7 +238,10 @@ function Test-TargetResource
 
         $mountedDrive = $mountedVHD | Get-Disk | Get-Partition | Where-Object -FilterScript { $_.Type -ne 'Recovery' } | Get-Volume
         $letterDrive = (-join $mountedDrive.DriveLetter) + ':\'
-        Write-Verbose $letterDrive
+        Write-Verbose -Message ( -join @(
+            "$($MyInvocation.MyCommand): "
+            $($script:localizedData.GetDriveLetter  -f $letterDrive)
+        ))
 
         # return test result equal to true unless one of the tests in the loop below fails.
         $result = $true
@@ -223,7 +250,10 @@ function Test-TargetResource
         {
             $itemToCopy = GetItemToCopy -item $item
             $destination = $itemToCopy.DestinationPath
-            Write-Verbose ("Testing the file with relative VHD destination $destination")
+            Write-Verbose -Message ( -join @(
+                "$($MyInvocation.MyCommand): "
+                $($script:localizedData.TestRelativePath  -f $letterDrive)
+            ))
             $destination = $itemToCopy.DestinationPath
             $finalDestinationPath = $letterDrive
             $finalDestinationPath = Join-Path $letterDrive $destination
@@ -244,11 +274,17 @@ function Test-TargetResource
                     {
                         # Verify if the file exist inside the folder
                         $fileName = Split-Path $itemToCopy.SourcePath -Leaf
-                        Write-Verbose "Checking if $fileName exist under $finalDestinationPath"
+                        Write-Verbose -Message ( -join @(
+                            "$($MyInvocation.MyCommand): "
+                            $($script:localizedData.TestFileExists  -f $fileName,$finalDestinationPath)
+                        ))
                         $fileExistInDestination = Test-Path (Join-Path $finalDestinationPath $fileName)
 
                         # Report if the file exist on the destination folder.
-                        Write-Verbose "File exist on the destination under $finalDestinationPath :- $fileExistInDestination"
+                        Write-Verbose -Message ( -join @(
+                            "$($MyInvocation.MyCommand): "
+                            $($script:localizedData.TestFileExistsInDestination  -f $finalDestinationPath,$fileExistInDestination)
+                        ))
                         $result = $fileExistInDestination
                         $result = $result -and -not(ItemHasChanged -sourcePath $itemToCopy.SourcePath -destinationPath (Join-Path $finalDestinationPath $fileName) -CheckSum $CheckSum)
                     }
@@ -287,8 +323,10 @@ function Test-TargetResource
         EnsureVHDState -Dismounted -vhdPath $VhdPath
     }
 
-
-    Write-Verbose "Test returned $result"
+    Write-Verbose -Message ( -join @(
+        "$($MyInvocation.MyCommand): "
+        $($script:localizedData.TestResult  -f $result)
+    ))
     return $result
 }
 
@@ -308,20 +346,64 @@ function EnsureVHDState
         $vhdPath
     )
 
+    Write-Verbose -Message ( -join @(
+        "$($MyInvocation.MyCommand): "
+        $($script:localizedData.EnsureEntry  -f $vhdPath, $PSCmdlet.ParameterSetName)
+    ))
+
     if (-not (Get-Module -ListAvailable 'Hyper-V'))
     {
         throw 'Hyper-v-Powershell Windows Feature is required to run this resource. Please install Hyper-v feature and try again'
     }
 
+    $vhd = Get-VHD -Path $vhdPath
+    Write-Verbose -Message ( -join @(
+        "$($MyInvocation.MyCommand): "
+        $($script:localizedData.DiskDetails  -f $vhdPath, $vhd.Attached, $vhd.DiskNumber)
+    ))
+    if ($PSCmdlet.ParameterSetName -eq 'Mounted' -and $vhd.Attached -and $null -eq $vhd.DiskNumber)
+    {
+        Write-Verbose -Message ( -join @(
+            "$($MyInvocation.MyCommand): "
+            $($script:localizedData.UnableToMount  -f $vhdPath)
+        ))
+        return $vhd
+    }
+
+    if ($PSCmdlet.ParameterSetName -eq 'Mounted' -and $vhd.DiskNumber -ge 0)
+    {
+        Write-Verbose -Message ( -join @(
+            "$($MyInvocation.MyCommand): "
+            $($script:localizedData.AlreadyMounted  -f $vhdPath)
+        ))
+        return $vhd
+    }
+
+    if ($PSCmdlet.ParameterSetName -eq 'Dismounted' -and $null -eq $vhd.DiskNumber)
+    {
+        Write-Verbose -Message ( -join @(
+            "$($MyInvocation.MyCommand): "
+            $($script:localizedData.AlreadyDismounted  -f $vhdPath)
+        ))
+        return
+    }
+
     if ($PSCmdlet.ParameterSetName -eq 'Mounted')
     {
+        Write-Verbose -Message ( -join @(
+            "$($MyInvocation.MyCommand): "
+            $($script:localizedData.Mounting  -f $vhdPath)
+        ))
         # Try mounting the VHD.
         $mountedVHD = Mount-VHD -Path $vhdPath -Passthru -ErrorAction SilentlyContinue -ErrorVariable var
 
         # If mounting the VHD failed. Dismount the VHD and mount it again.
         if ($var)
         {
-            Write-Verbose 'Mounting Failed. Attempting to dismount and mount it back'
+            Write-Verbose -Message ( -join @(
+                "$($MyInvocation.MyCommand): "
+                $($script:localizedData.FailedToMount  -f $vhdPath)
+            ))
             Dismount-VHD $vhdPath
             $mountedVHD = Mount-VHD -Path $vhdPath -Passthru -ErrorAction SilentlyContinue
 
@@ -334,8 +416,11 @@ function EnsureVHDState
     }
     else
     {
-        Dismount-VHD $vhdPath -ea SilentlyContinue
-
+        Write-Verbose -Message ( -join @(
+            "$($MyInvocation.MyCommand): "
+            $($script:localizedData.Dismounting  -f $vhdPath)
+        ))
+        Dismount-VHD -Path $vhdPath -ErrorAction SilentlyContinue
     }
 }
 
@@ -447,7 +532,10 @@ function SetVHDFile
         $ensure
     )
 
-    Write-Verbose "Setting the VHD file $($PSCmdlet.ParameterSetName)"
+    Write-Verbose -Message ( -join @(
+        "$($MyInvocation.MyCommand): "
+        $($script:localizedData.SetVhdFileContent  -f $PSCmdlet.ParameterSetName))
+    )
     if ($PSCmdlet.ParameterSetName -eq 'Copy')
     {
         New-Item -Path (Split-Path $destinationPath) -ItemType Directory -ErrorAction SilentlyContinue
@@ -468,7 +556,10 @@ function SetVHDFile
     }
     elseif ($PSCmdlet.ParameterSetName -eq 'Set')
     {
-        Write-Verbose "Attempting to change the attribute of the file $destinationPath to value $attribute"
+        Write-Verbose -Message ( -join @(
+            "$($MyInvocation.MyCommand): "
+            $($script:localizedData.SetFileAttributes  -f $destinationPath, $attribute))
+        )
         Set-ItemProperty -Path $destinationPath -Name Attributes -Value $attribute
     }
     elseif (!($ensure))

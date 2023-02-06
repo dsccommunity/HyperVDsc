@@ -102,6 +102,11 @@ Mock -CommandName Mount-Vhd { [PSCustomObject] @{ Path = 'TestDrive:\VhdExists.v
 
 Mock -CommandName Dismount-Vhd { }
 
+Mock -CommandName Get-Vhd { [PSCustomObject] @{
+    Path       = 'TestDrive:\VhdExists.vhdx'
+    DiskNumber = 1
+    }}
+
 Mock -CommandName Get-Disk {
     New-CimInstance -ClassName MSFT_Disk -Namespace root/Microsoft/Windows/Storage -ClientOnly
 }
@@ -253,6 +258,40 @@ Describe 'DSC_VhdFileDirectory\Get-TargetResource' -Tag 'Get' {
             }
         }
     )
+
+    # Mount: Get-Vhd -> Skip mount and Get-Vhd -> Mount
+    $testCases_MountDismount = @(
+        @{
+            TestName                = 'Disk is attached to running VM'
+            VhdPath                 = 'TestDrive:\VhdExists.vhdx'
+            Type                    = 'Mount'
+            DiskNumber              = $null
+            Attached                = $true
+            GetVhdCount             = 1
+            MountVhdCount           = 0
+            DismountVhdCount        = 0
+        }
+        @{
+            TestName                = 'Disk is mounted'
+            VhdPath                 = 'TestDrive:\VhdExists.vhdx'
+            Type                    = 'Mount'
+            DiskNumber              = 1
+            Attached                = $false
+            GetVhdCount             = 1
+            MountVhdCount           = 0
+            DismountVhdCount        = 0
+        }
+        @{
+            TestName                = 'Disk is already dismounted'
+            VhdPath                 = 'TestDrive:\VhdExists.vhdx'
+            Type                    = 'Dismount'
+            DiskNumber              = $null
+            Attached                = $false
+            GetVhdCount             = 1
+            MountVhdCount           = 0
+            DismountVhdCount        = 0
+        }
+    )
     #endRegion
 
     It 'Should correctly return state when: <TestName>' -TestCases $testCases_Get {
@@ -269,6 +308,47 @@ Describe 'DSC_VhdFileDirectory\Get-TargetResource' -Tag 'Get' {
 
         $result['VhdPath'] |
             Should -Be $ExpectedResult['VhdPath']
+    }
+
+    It 'Should mount and/or dismount disk: <TestName>' -TestCases $testCases_MountDismount {
+        param(
+            $VhdPath,
+            [nullable[int]]$DiskNumber,
+            $Attached,
+            $Type,
+            $GetVhdCount,
+            $MountVhdCount,
+            $DismountVhdCount
+        )
+
+        [pscustomobject] $mockedobject = if ($null -eq $DiskNumber)
+        {
+            @{
+                Path       = $VhdPath
+                Attached   = $Attached
+            }
+        }
+        else
+        {
+            @{
+                Path       = $VhdPath
+                DiskNumber = $DiskNumber
+                Attached   = $Attached
+            }
+        }
+        Mock -CommandName Get-Vhd { $mockedobject }
+
+        $null = if ($Type -eq 'Mount')
+        {
+            EnsureVHDState -VhdPath $VhdPath -Mounted
+        }
+        else
+        {
+            EnsureVHDState -VhdPath $VhdPath -Dismounted
+        }
+        Assert-MockCalled -CommandName Get-VHD -Exactly -Times $GetVhdCount -Scope It
+        Assert-MockCalled -CommandName Mount-VHD -Exactly -Times $MountVhdCount -Scope It
+        Assert-MockCalled -CommandName Dismount-VHD -Exactly -Times $DismountVhdCount -Scope It
     }
 }
 
