@@ -222,7 +222,7 @@ function Test-TargetResource
     # mount the vhd.
     $mountedVHD = EnsureVHDState -Mounted -vhdPath $VhdPath
 
-    if ($mountedVHD.Attached)
+    if ($mountedVHD.Attached -and $null -eq $mountedVHD.DiskNumber)
     {
         Write-Verbose -Message ( -join @(
             "$($MyInvocation.MyCommand): "
