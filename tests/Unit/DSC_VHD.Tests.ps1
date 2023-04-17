@@ -1,5 +1,5 @@
 $script:dscModuleName = 'HyperVDsc'
-$script:dscResourceName = 'DSC_Vhd'
+$script:dscResourceName = 'DSC_VHD'
 
 function Invoke-TestSetup
 {
@@ -32,7 +32,7 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        Describe 'DSC_Vhd\Get-TargetResource' {
+        Describe 'DSC_VHD\Get-TargetResource' {
             Context 'Should stop when Hyper-V module is missing' {
                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
                     return $false
@@ -76,7 +76,7 @@ try
             }
         }
 
-        Describe 'DSC_Vhd\GetNameWithExtension' {
+        Describe 'DSC_VHD\GetNameWithExtension' {
             Context 'Name does not have extension' {
                 It 'Should return server.vhdx with generation vhdx' {
                     GetNameWithExtension -Name 'server' -Generation 'vhdx' |
@@ -107,7 +107,7 @@ try
             }
         }
 
-        Describe 'DSC_Vhd\Test-TargetResource' {
+        Describe 'DSC_VHD\Test-TargetResource' {
             # Create an empty function to be able to mock the missing Hyper-V cmdlet
             function Test-VHD
             {
@@ -212,7 +212,7 @@ try
             }
         }
 
-        Describe 'DSC_Vhd\Set-TargetResource' {
+        Describe 'DSC_VHD\Set-TargetResource' {
             Context 'Ensure is Absent' {
                 Mock -CommandName Test-Path -MockWith { $true }
                 Mock -CommandName Remove-Item

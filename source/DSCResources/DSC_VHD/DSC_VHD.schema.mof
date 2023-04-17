@@ -1,5 +1,5 @@
-[ClassVersion("1.0.0"), FriendlyName("Vhd")]
-class DSC_Vhd : OMI_BaseResource
+[ClassVersion("1.0.0"), FriendlyName("VHD)]
+class DSC_VHD : OMI_BaseResource
 {
     [Key, Description("The desired VHD file name.")] String Name;
     [Key, Description("The desired Path where the VHD will be created.")] String Path;
