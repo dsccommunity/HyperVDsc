@@ -20,6 +20,7 @@ function Invoke-TestSetup
 
     # Import the stub functions.
     Import-Module -Name "$PSScriptRoot/Stubs/Hyper-V.stubs.psm1" -Force
+    Import-Module -Name "$PSScriptRoot/Stubs/FailoverClusters" -Force
 }
 
 function Invoke-TestCleanup
@@ -32,7 +33,7 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        Describe 'xVMHyper-V' {
+        Describe 'VMHyperV' {
             $null = New-Item -Path 'TestDrive:\TestVM.vhdx' -ItemType File
             $null = New-Item -Path 'TestDrive:\TestVM.vhd' -ItemType File
 
@@ -80,6 +81,7 @@ try
                 $stubVM.DynamicMemoryEnabled = $true
                 $stubVM.Notes = ''
                 $stubVM.State = 'Running'
+                $stubVM.IsClustered = $false
                 $stubVM.NetworkAdapters = @(
                     $stubNIC1,
                     $stubNIC2
@@ -109,6 +111,7 @@ try
                 $stubVM.DynamicMemoryEnabled = $true
                 $stubVM.Notes = ''
                 $stubVM.State = 'Off'
+                $stubVM.IsClustered = $false
                 $stubVM.NetworkAdapters = @(
                     $stubNIC1,
                     $stubNIC2
@@ -138,6 +141,7 @@ try
                 $stubVM.DynamicMemoryEnabled = $true
                 $stubVM.Notes = ''
                 $stubVM.State = 'Paused'
+                $stubVM.IsClustered = $false
                 $stubVM.NetworkAdapters = @(
                     $stubNIC1,
                     $stubNIC2
@@ -171,6 +175,7 @@ try
                 $stubVM1.DynamicMemoryEnabled = $true
                 $stubVM1.Notes = ''
                 $stubVM1.State = 'Off'
+                $stubVM.IsClustered = $false
                 $stubVM1.NetworkAdapters = @(
                     $stubNIC1,
                     $stubNIC2
@@ -227,6 +232,7 @@ try
                 $stubVM.DynamicMemoryEnabled = $true
                 $stubVM.Notes = ''
                 $stubVM.State = 'Running'
+                $stubVM.IsClustered = $false
                 $stubVM.NetworkAdapters = @(
                     $stubNIC1,
                     $stubNIC2
@@ -255,6 +261,7 @@ try
                 $stubVM.DynamicMemoryEnabled = $true
                 $stubVM.Notes = ''
                 $stubVM.State = 'Running'
+                $stubVM.IsClustered = $false
                 $stubVM.NetworkAdapters = @(
                     $stubNIC1,
                     $stubNIC2
@@ -283,6 +290,7 @@ try
                 $stubVM.DynamicMemoryEnabled = $true
                 $stubVM.Notes = ''
                 $stubVM.State = 'Running'
+                $stubVM.IsClustered = $false
                 $stubVM.AutomaticCheckpointsEnabled = $true
                 $stubVM.NetworkAdapters = @(
                     $stubNIC1,
@@ -312,6 +320,7 @@ try
                 $stubVM.DynamicMemoryEnabled = $true
                 $stubVM.Notes = ''
                 $stubVM.State = 'Running'
+                $stubVM.IsClustered = $false
                 $stubVM.AutomaticCheckpointsEnabled = $false
                 $stubVM.NetworkAdapters = @(
                     $stubNIC1,
@@ -341,6 +350,127 @@ try
                 $stubVM.DynamicMemoryEnabled = $true
                 $stubVM.Notes = ''
                 $stubVM.State = 'Running'
+                $stubVM.IsClustered = $false
+                $stubVM.NetworkAdapters = @(
+                    $stubNIC1,
+                    $stubNIC2
+                )
+
+                return $stubVM
+            }
+
+            Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'ClusteredExistingVmNotInClusterPresent' } -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.Name = 'ClusteredExistingVmNotInClusterPresent'
+                $stubVM.HardDrives = @(
+                    $stubVhdxDisk,
+                    $stubVhdDisk
+                )
+                $stubVM.Path = $StubVMConfig.FullPath
+                $stubVM.Generation = 1
+                $stubVM.MemoryStartup = 512MB
+                $stubVM.MemoryMinimum = 128MB
+                $stubVM.MemoryMaximum = 4096MB
+                $stubVM.ProcessorCount = 1
+                $stubVM.ID = $mockVmGuid
+                $stubVM.CPUUsage = 10
+                $stubVM.MemoryAssigned = 512MB
+                $stubVM.Uptime = New-TimeSpan -Hours 12
+                $stubVM.CreationTime = (Get-Date).AddHours(-12)
+                $stubVM.DynamicMemoryEnabled = $true
+                $stubVM.Notes = ''
+                $stubVM.State = 'Running'
+                $stubVM.IsClustered = $false
+                $stubVM.NetworkAdapters = @(
+                    $stubNIC1,
+                    $stubNIC2
+                )
+
+                return $stubVM
+            }
+
+            Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'ClusteredExistingVmInClusterPresent' } -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.Name = 'ClusteredExistingVmInClusterPresent'
+                $stubVM.HardDrives = @(
+                    $stubVhdxDisk,
+                    $stubVhdDisk
+                )
+                $stubVM.Path = $StubVMConfig.FullPath
+                $stubVM.Generation = 1
+                $stubVM.MemoryStartup = 512MB
+                $stubVM.MemoryMinimum = 128MB
+                $stubVM.MemoryMaximum = 4096MB
+                $stubVM.ProcessorCount = 1
+                $stubVM.ID = $mockVmGuid
+                $stubVM.CPUUsage = 10
+                $stubVM.MemoryAssigned = 512MB
+                $stubVM.Uptime = New-TimeSpan -Hours 12
+                $stubVM.CreationTime = (Get-Date).AddHours(-12)
+                $stubVM.DynamicMemoryEnabled = $true
+                $stubVM.Notes = ''
+                $stubVM.State = 'Running'
+                $stubVM.IsClustered = $true
+                $stubVM.NetworkAdapters = @(
+                    $stubNIC1,
+                    $stubNIC2
+                )
+
+                return $stubVM
+            }
+
+            Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'ClusteredNewVmPresent' } -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.Name = 'ClusteredNewVmPresent'
+                $stubVM.HardDrives = @(
+                    $stubVhdxDisk,
+                    $stubVhdDisk
+                )
+                $stubVM.Path = $StubVMConfig.FullPath
+                $stubVM.Generation = 1
+                $stubVM.MemoryStartup = 512MB
+                $stubVM.MemoryMinimum = 128MB
+                $stubVM.MemoryMaximum = 4096MB
+                $stubVM.ProcessorCount = 1
+                $stubVM.ID = $mockVmGuid
+                $stubVM.CPUUsage = 10
+                $stubVM.MemoryAssigned = 512MB
+                $stubVM.Uptime = New-TimeSpan -Hours 12
+                $stubVM.CreationTime = (Get-Date).AddHours(-12)
+                $stubVM.DynamicMemoryEnabled = $true
+                $stubVM.Notes = ''
+                $stubVM.State = 'Running'
+                $stubVM.IsClustered = $false
+                $stubVM.NetworkAdapters = @(
+                    $stubNIC1,
+                    $stubNIC2
+                )
+
+                return $stubVM
+            }
+
+            Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'ClusteredExistingVmInClusterAbsent' } -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.Name = 'ClusteredExistingVmInClusterAbsent'
+                $stubVM.HardDrives = @(
+                    $stubVhdxDisk,
+                    $stubVhdDisk
+                )
+                $stubVM.Path = $StubVMConfig.FullPath
+                $stubVM.Generation = 1
+                $stubVM.MemoryStartup = 512MB
+                $stubVM.MemoryMinimum = 128MB
+                $stubVM.MemoryMaximum = 4096MB
+                $stubVM.ProcessorCount = 1
+                $stubVM.ID = $mockVmGuid
+                $stubVM.CPUUsage = 10
+                $stubVM.MemoryAssigned = 512MB
+                $stubVM.Uptime = New-TimeSpan -Hours 12
+                $stubVM.CreationTime = (Get-Date).AddHours(-12)
+                $stubVM.DynamicMemoryEnabled = $true
+                $stubVM.Notes = ''
+                $stubVM.State = 'Running'
+                $stubVM.IsClustered = $true
                 $stubVM.NetworkAdapters = @(
                     $stubNIC1,
                     $stubNIC2
@@ -360,6 +490,7 @@ try
             }
 
             Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith { return $true }
+            Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'FailoverClusters') -and ($ListAvailable -eq $true) } -MockWith { return $true }
             Mock -CommandName Get-VhdHierarchy -ParameterFilter { $VhdPath.EndsWith('.vhd') } -MockWith {
                 # Return single Vhd chain for .vhds
                 return @($stubVhdDisk.Path)
@@ -399,10 +530,19 @@ try
                     $targetResource = Get-TargetResource -Name 'VMWithAutomaticCheckpoints' -VhdPath $stubVhdxDisk.Path
                     $targetResource.ContainsKey('AutomaticCheckpointsEnabled') | Should -Be $true
                 }
+                It 'Hash table contains key IsClustered' {
+                    $targetResource = Get-TargetResource -Name 'ClusteredExistingVmInClusterPresent' -VhdPath $stubVhdxDisk.Path
+                    $targetResource.ContainsKey('IsClustered') | Should -Be $true
+                }
                 It 'throws when Hyper-V Tools are not installed' {
                     # This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
                     Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) }
-                    { Get-TargetResource -Name 'RunningVM' @testParams } | Should -Throw
+                    { Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.Path } | Should -Throw
+                }
+                It 'throws when Clustering feature is not installed but VM should be clustered' {
+                    # This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
+                    Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'FailoverClusters') -and ($ListAvailable -eq $true) } -MockWith { return $true }
+                    { Get-TargetResource -Name 'ClusteredExistingVmInClusterPresent' -VhdPath $stubVhdxDisk.Path -IsClustered $true } | Should -Throw
                 }
             } #end context Validates Get-TargetResource Method
 
@@ -561,6 +701,18 @@ try
                     Test-TargetResource -Name 'VMWithAutomaticCheckpoints' -AutomaticCheckpointsEnabled $false @testParams | Should -Be $false
                 }
 
+                It 'Returns $true when IsClustered is enabled, Ensure is Present and VM is clustered' {
+                    Test-TargetResource -Name ClusteredExistingVmInClusterPresent -IsClustered $true @testParams | Should -Be $true
+                }
+
+                It 'Returns $false when IsClustered is enabled, Ensure is Present and VM is not clustered' {
+                    Test-TargetResource -Name ClusteredExistingVmNotInClusterPresent -IsClustered $true @testParams | Should -Be $false
+                }
+
+                It 'Returns $false when IsClustered is enabled, Ensure is Absent VM is present and VM is clustered' {
+                    Test-TargetResource -Name ClusteredExistingVmInClusterAbsent -Ensure Absent -IsClustered $true @testParams | Should -Be $false
+                }
+
                 It 'Returns $true when EnableGuestService is on and requested "EnableGuestService" = "$true"' {
                     Mock -CommandName Get-VMIntegrationService -MockWith {
                         $guestServiceInterface = [Microsoft.HyperV.PowerShell.VMIntegrationComponent]::CreateTypeInstance()
@@ -577,6 +729,12 @@ try
                     # This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
                     Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) }
                     { Test-TargetResource -Name 'RunningVM' @testParams } | Should -Throw
+                }
+
+                It 'throws when Failover Clustering us not installed' {
+                    # This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
+                    Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'FailoverClusters') -and ($ListAvailable -eq $true) }
+                    { Test-TargetResource -Name 'RunningVM' -IsClustered $true @testParams} | Should -Throw
                 }
 
             } #end context Validates Test-TargetResource Method
@@ -798,6 +956,30 @@ try
                     Assert-MockCalled -CommandName Disable-VMIntegrationService -Exactly -Times 1 -Scope It
                 }
 
+                Mock -CommandName Get-ClusterGroup -MockWith {@{
+                    Name = 'VM'
+                    OwnerNode = 'HOST1'
+                    State = 'Online'
+                }}
+                Mock -CommandName Remove-ClusterGroup
+                Mock -CommandName Add-ClusterVirtualMachineRole
+
+                It 'Calls Get- and Remove-ClusterGroup if Ensure is Absent and VM exists' {
+                    Set-TargetResource -Name 'ClusteredExistingVmInClusterAbsent' -IsClustered $true -Ensure Absent @testParams
+                    Assert-MockCalled -CommandName Remove-ClusterGroup -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Get-ClusterGroup -Exactly -Times 1 -Scope It
+                }
+
+                It 'Calls Add-ClusterVirtualMachineRole if Ensure is Present and VM exists but is not clustered yet' {
+                    Set-TargetResource -Name 'ClusteredExistingVmNotInClusterPresent' -IsClustered $true @testParams
+                    Assert-MockCalled -CommandName Add-ClusterVirtualMachineRole -Exactly -Times 1 -Scope It
+                }
+
+                It 'Calls Add-ClusterVirtualMachineRole if Ensure is Present and VM does not exist' {
+                    Set-TargetResource -Name 'NonexistentVm' -IsClustered $true @testParams
+                    Assert-MockCalled -CommandName Add-ClusterVirtualMachineRole -Exactly -Times 1 -Scope It
+                }
+
                 Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'Set-VM' -and $Module -eq 'Hyper-V' } -MockWith {
                     [pscustomobject]@{
                         parameters = @{
@@ -901,6 +1083,11 @@ try
                     Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) }
                     { Set-TargetResource -Name 'RunningVM' @testParams } | Should -Throw
                 }
+
+                It 'Does not call "Set-VM" when "AutomaticCheckpointsEnabled" is unsupported and unspecified' {
+                    Set-TargetResource -Name 'VMAutomaticCheckpointsUnsupported' @testParams
+                    Assert-MockCalled -CommandName Set-VM -Exactly -Times 0 -Scope It
+                }
             } #end context Validates Set-TargetResource Method
 
             Context 'Validates Test-VMSecureBoot Method' {
@@ -955,7 +1142,7 @@ try
                 }
 
             } #end context validates Get-VhdHierarchy
-        } #end describe xVMHyper-V
+        } #end describe VMHyperV
     } #end inmodulescope
 }
 finally

@@ -21,4 +21,7 @@ ConvertFrom-StringData @'
     VMPropertySet                     = VM property '{0}' is '{1}'.
     VMPropertiesUpdated               = VM '{0}' properties have been updated.
     QueryingVM                        = Querying VM '{0}'.
+    NotAddedToCluster                 = VM '{0}' does not appear to be added as a cluster role when it should be.
+    RemoveClusterGroup                = Removing VM '{0}' from cluster.
+    AddingToCluster                   = Adding VM '{0}' to cluster.
 '@

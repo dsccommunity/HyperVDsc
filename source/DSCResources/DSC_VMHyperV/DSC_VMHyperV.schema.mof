@@ -19,6 +19,7 @@ class DSC_VMHyperV : OMI_BaseResource
     [Write, Description("Specifies if Secure Boot should be enabled for Generation 2 virtual machines. **Only supports generation 2 virtual machines**. Default value is `$true`.")] Boolean SecureBoot;
     [Write, Description("Enable Guest Service Interface for the VM. The default value is `$false`.")] Boolean EnableGuestService;
     [Write, Description("Enable AutomaticCheckpoints for the VM.")] Boolean AutomaticCheckpointsEnabled;
+    [Write, Description("Enable inclusion in running failover cluster if present.")] Boolean IsClustered;
     [Read, Description("Returns the unique ID for the VM.")] String ID;
     [Read, Description("Returns the current status of the VM.")] String Status;
     [Read, Description("Returns the current CPU usage of the VM.")] Uint32 CPUUsage;
