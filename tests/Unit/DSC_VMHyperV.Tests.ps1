@@ -1084,9 +1084,9 @@ try
                     { Set-TargetResource -Name 'RunningVM' @testParams } | Should -Throw
                 }
 
-                It 'Does not call "Set-VM" when "AutomaticCheckpointsEnabled" is unsupported and unspecified' {
-                    Set-TargetResource -Name 'VMAutomaticCheckpointsUnsupported' @testParams
-                    Assert-MockCalled -CommandName Set-VM -Exactly -Times 0 -Scope It
+                It 'throws when Clustering tools are not installed' {
+                    Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'FailoverClusters') -and ($ListAvailable -eq $true) }
+                    { Set-TargetResource -Name 'RunningVM' -IsClustered $true @testParams } | Should -Throw
                 }
             } #end context Validates Set-TargetResource Method
 
