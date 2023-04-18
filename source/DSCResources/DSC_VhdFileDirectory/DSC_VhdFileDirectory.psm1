@@ -545,11 +545,11 @@ function SetVHDFile
     {
         if ($type -eq 'Directory')
         {
-            New-Item -Path $destinationPath -ItemType $type
+            New-Item -Path $destinationPath -ItemType $type -Force:$force
         }
         else
         {
-            New-Item -Path $destinationPath -ItemType $type
+            New-Item -Path $destinationPath -ItemType $type -Force:$force
             $content | Out-File $destinationPath
         }
 
