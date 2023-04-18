@@ -380,7 +380,7 @@ function Test-ParameterValid
     } # if
 
     # Does the VM exist?
-    $null = Get-VM -Name $VMName
+    $null = Get-VMHyperV -VMName $VMName
 
     # Does the controller exist?
     if (-not (Get-VMScsiController -VMName $VMName -ControllerNumber $ControllerNumber) `

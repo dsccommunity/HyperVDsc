@@ -13,6 +13,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     - Changed all MSFT_xResourceName to DSC_ResourceName.
     - Updated DSCResources, Examples, Modules and Tests for new naming.
     - Updated README.md from _xHyper-V_ to _HyperVDsc
+    - VMHyperV now includes VMs in cluster if host is in cluster
   - Renamed default branch to `main` - Fixes [Issue #198](https://github.com/dsccommunity/HyperVDsc/issues/198).
   - Moved documentation to the HyperVDsc GitHub Wiki.
   - Updated all examples to correct folders and naming so they show up

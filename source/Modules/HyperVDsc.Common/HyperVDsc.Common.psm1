@@ -34,12 +34,9 @@ function Set-VMProperty
     param
     (
         [Parameter(Mandatory = $true, ParameterSetName = 'Name')]
+        [Alias('VMName')]
         [System.String]
         $Name,
-
-        [Parameter(Mandatory = $true, ParameterSetName = 'VMName')]
-        [System.String]
-        $VMName,
 
         [Parameter(Mandatory = $true)]
         [System.String]
@@ -58,32 +55,15 @@ function Set-VMProperty
         $RestartIfNeeded
     )
 
-    if ($PSBoundParameters.ContainsKey('VMName'))
-    {
-        # Add the -Name property to the ChangeProperty hashtable for splatting
-        $ChangeProperty['VMName'] = $VMName
-
-        # Set the common parameters for splatting against Get-VM and Set-VMState
-        $vmCommonProperty = @{
-            Name = $VMName
-        }
-
-        # Ensure that the name parameter is set for verbose messages
-        $Name = $VMName
-    }
-    else
-    {
-        # Add the -Name property to the ChangeProperty hashtable for splatting
-        $ChangeProperty['Name'] = $Name
-
-        # Set the common parameters for splatting against Get-VM and Set-VMState
-        $vmCommonProperty = @{
-            Name = $Name
-        }
+    # Set the common parameters for splatting against Get-VM and Set-VMState
+    $vmCommonProperty = @{
+        Name = $Name
     }
 
-    $vmObject = Get-VM @vmCommonProperty
+    $vmObject = Get-VMHyperV -VMName $Name
     $vmOriginalState = $vmObject.State
+
+    $ChangeProperty['VM'] = $vmObject
 
     if ($vmOriginalState -ne 'Off' -and $RestartIfNeeded)
     {
@@ -159,40 +139,42 @@ function Set-VMState
         $WaitForIP
     )
 
+    $vm = Get-VMHyperV -VMName $Name
+    $vmCurrentState = $vm.State
+
     switch ($State)
     {
         'Running' {
-            $vmCurrentState = (Get-VM -Name $Name).State
             if ($vmCurrentState -eq 'Paused')
             {
                 # If VM is in paused state, use resume-vm to make it running
                 Write-Verbose -Message ($script:localizedData.ResumingVM -f $Name)
-                Resume-VM -Name $Name
+                $vm | Resume-VM
             }
             elseif ($vmCurrentState -eq 'Off')
             {
                 # If VM is Off, use start-vm to make it running
                 Write-Verbose -Message ($script:localizedData.StartingVM -f $Name)
-                Start-VM -Name $Name
+                $vm | Start-VM
             }
 
             if ($WaitForIP)
             {
-                Wait-VMIPAddress -Name $Name -Verbose
+                Wait-VMIPAddress -Name $Name
             }
         }
         'Paused' {
             if ($vmCurrentState -ne 'Off')
             {
                 Write-Verbose -Message ($script:localizedData.SuspendingVM -f $Name)
-                Suspend-VM -Name $Name
+                $vm | Suspend-VM
             }
         }
         'Off' {
             if ($vmCurrentState -ne 'Off')
             {
                 Write-Verbose -Message ($script:localizedData.StoppingVM -f $Name)
-                Stop-VM -Name $Name -Force -WarningAction SilentlyContinue
+                $vm | Stop-VM -Force -WarningAction SilentlyContinue
             }
         }
     }
@@ -224,7 +206,8 @@ function Wait-VMIPAddress
     )
 
     [System.Int32] $elapsedSeconds = 0
-    while ((Get-VMNetworkAdapter -VMName $Name).IpAddresses.Count -lt 2)
+    $vm = Get-VMHyperV -VMName $Name
+    while (($vm | Get-VMNetworkAdapter).IpAddresses.Count -lt 2)
     {
         Write-Verbose -Message ($script:localizedData.WaitingForVMIPAddress -f $Name)
         Start-Sleep -Seconds 3
@@ -325,15 +308,55 @@ function Get-VMHyperV
     (
         [Parameter(Mandatory = $true)]
         [System.String]
-        $VMName
+        $VMName,
+
+        [Parameter()]
+        [switch]
+        $ThrowOnEmpty
     )
 
-    $vm = Get-VM -Name $VMName -ErrorAction SilentlyContinue
+    $vmParam = @{
+        ErrorAction = 'SilentlyContinue'
+    }
+
+    if (Get-Command -Name Get-Cluster -ErrorAction SilentlyContinue)
+    {
+        [bool] $isClustered = (Get-Cluster -WarningAction SilentlyContinue) -ne $null
+    }
+
+    if ($isClustered)
+    {
+        $clusterVm = Get-ClusterGroup -Name $VMName -ErrorAction SilentlyContinue
+        if (-not $clusterVm -and $ThrowOnEmpty.IsPresent)
+        {
+            $errorMessage = $script:localizedData.NoVMExistsError -f $VMName
+            New-InvalidResultException -Message $errorMessage
+        }
+
+        if (-not $clusterVm)
+        {
+            return
+        }
+
+        $vmParam['ClusterObject'] = $clusterVm
+    }
+    else
+    {
+        $vmParam['Name'] = $VMName
+    }
+
+    $vm = Get-VM @vmParam
 
     # Check if 1 or 0 VM with name = $name exist
     if ($vm.count -gt 1)
     {
         $errorMessage = $script:localizedData.MoreThanOneVMExistsError -f $VMName
+        New-InvalidResultException -Message $errorMessage
+    }
+
+    if (-not $vm -and $ThrowOnEmpty.IsPresent)
+    {
+        $errorMessage = $script:localizedData.NoVMExistsError -f $VMName
         New-InvalidResultException -Message $errorMessage
     }
 

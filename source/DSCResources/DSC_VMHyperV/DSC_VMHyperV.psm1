@@ -18,11 +18,7 @@ function Get-TargetResource
 
         [Parameter(Mandatory = $true)]
         [System.String]
-        $VhdPath,
-
-        [Parameter()]
-        [System.Boolean]
-        $IsClustered
+        $VhdPath
     )
 
     Write-Verbose -Message ($script:localizedData.QueryingVM -f $Name)
@@ -33,12 +29,7 @@ function Get-TargetResource
         throw ($script:localizedData.RoleMissingError -f 'Hyper-V')
     }
 
-    if ($IsClustered -and -not (Get-Module -ListAvailable -Name FailoverClusters -ErrorAction SilentlyContinue))
-    {
-        throw ($script:localizedData.RoleMissingError -f 'FailoverClusters')
-    }
-
-    $vmobj = Get-VM -Name $Name -ErrorAction SilentlyContinue
+    $vmobj = Get-VMHyperV -VMName $Name
 
     # Check if 1 or 0 VM with name = $name exist
     if ($vmobj.count -gt 1)
@@ -224,12 +215,7 @@ function Set-TargetResource
         # Enable AutomaticCheckpoints
         [Parameter()]
         [System.Boolean]
-        $AutomaticCheckpointsEnabled,
-
-        # Enable inclusion in running failover cluster if present.
-        [Parameter()]
-        [System.Boolean]
-        $IsClustered
+        $AutomaticCheckpointsEnabled
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
@@ -252,7 +238,7 @@ function Set-TargetResource
     }
 
     Write-Verbose -Message ($script:localizedData.CheckingVMExists -f $Name)
-    $vmObj = Get-VM -Name $Name -ErrorAction SilentlyContinue
+    $vmobj = Get-VMHyperV -VMName $Name
 
     # VM already exists
     if ($vmObj)
@@ -260,7 +246,7 @@ function Set-TargetResource
         Write-Verbose -Message ($script:localizedData.VMExists -f $Name)
 
         # If VM shouldn't be there, stop it and remove it
-        if ($Ensure -eq 'Absent' -and $IsClustered)
+        if ($Ensure -eq 'Absent' -and $vmobj.IsClustered)
         {
             $clusterGroup = Get-ClusterGroup -Name $Name -ErrorAction SilentlyContinue
 
@@ -274,7 +260,7 @@ function Set-TargetResource
         if ($Ensure -eq 'Absent')
         {
             Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'Ensure', $Ensure, 'Present')
-            Get-VM $Name | Stop-VM -Force -Passthru -WarningAction SilentlyContinue | Remove-VM -Force
+            $vmObj | Stop-VM -Force -Passthru -WarningAction SilentlyContinue | Remove-VM -Force
             Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'Ensure', $Ensure)
             return
         }
@@ -292,7 +278,7 @@ function Set-TargetResource
         }
 
         # If IsClustered is set in configuration
-        if ($PSBoundParameters.ContainsKey('IsClustered') -and -not $vmObj.IsClustered)
+        if ((Get-Command -ErrorAction SilentlyContinue -Name Get-Cluster) -and (Get-Cluster -WarningAction SilentlyContinue -ErrorAction SilentlyContinue) -and -not $vmObj.IsClustered)
         {
             Write-Verbose -Message ($script:localizedData.AddingToCluster -f $Name)
             $null = Add-ClusterVirtualMachineRole -VMName $Name -Name $Name -WarningAction SilentlyContinue
@@ -364,7 +350,7 @@ function Set-TargetResource
         )
         {
             # Refresh VM properties
-            $vmObj = Get-VM -Name $Name -ErrorAction SilentlyContinue
+            $vmobj = Get-VMHyperV -VMName $Name
             if ($vmObj.DynamicMemoryEnabled)
             {
                 Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'DynamicMemoryEnabled', $false, $vmObj.DynamicMemoryEnabled)
@@ -403,16 +389,16 @@ function Set-TargetResource
                 Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'NIC', $switch, '<missing>')
                 if ($MACAddress -and (-not [System.String]::IsNullOrEmpty($MACAddress[$i])))
                 {
-                    Add-VMNetworkAdapter -VMName $Name -SwitchName $switch -StaticMacAddress $MACAddress[$i]
+                    $vmobj | Add-VMNetworkAdapter -SwitchName $switch -StaticMacAddress $MACAddress[$i]
                     Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'NIC', $switch)
                 }
                 else
                 {
-                    Add-VMNetworkAdapter -VMName $Name -SwitchName $switch
+                    $vmobj | Add-VMNetworkAdapter -SwitchName $switch
                     Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'NIC', $switch)
                 }
                 # Refresh the NICs after we've added one
-                $vmObj = Get-VM -Name $Name -ErrorAction SilentlyContinue
+                $vmobj = Get-VMHyperV -VMName $Name
             }
         }
 
@@ -464,7 +450,7 @@ function Set-TargetResource
             # If the VM notes do not match the desire notes, update them.  This can be done while the VM is running.
             if ($vmObj.Notes -ne $Notes)
             {
-                Set-Vm -Name $Name -Notes $Notes
+                $vmobj | Set-Vm -Notes $Notes
             }
         }
 
@@ -490,7 +476,7 @@ function Set-TargetResource
         {
             if ($vmObj.AutomaticCheckpointsEnabled -ne $AutomaticCheckpointsEnabled)
             {
-                Set-VM -Name $Name -AutomaticCheckpointsEnabled $AutomaticCheckpointsEnabled
+                $vmobj | Set-VM -AutomaticCheckpointsEnabled $AutomaticCheckpointsEnabled
             }
         }
 
@@ -532,17 +518,16 @@ function Set-TargetResource
     {
         $parameters['MemoryStartupBytes'] = $MaximumMemory
     }
-    $null = New-VM @parameters
+    $vmobj = New-VM @parameters
 
     # If IsClustered is set in configuration
-    if ($PSBoundParameters.ContainsKey('IsClustered') -and -not $vmObj.IsClustered)
+    if ((Get-Command -ErrorAction SilentlyContinue -Name Get-Cluster) -and (Get-Cluster -WarningAction SilentlyContinue -ErrorAction SilentlyContinue) -and -not $vmObj.IsClustered)
     {
         Write-Verbose -Message ($script:localizedData.AddingToCluster -f $Name)
         $null = Add-ClusterVirtualMachineRole -VMName $Name -Name $Name -WarningAction SilentlyContinue
     }
 
     $parameters = @{ }
-    $parameters['Name'] = $Name
     $parameters['StaticMemory'] = $true
     $parameters['DynamicMemory'] = $false
     if ($PSBoundParameters.ContainsKey('MinimumMemory') -or $PSBoundParameters.ContainsKey('MaximumMemory'))
@@ -575,34 +560,34 @@ function Set-TargetResource
         $parameters['AutomaticCheckpointsEnabled'] = $AutomaticCheckpointsEnabled
     }
 
-    $null = Set-VM @parameters
+    $null = $vmobj | Set-VM @parameters
 
     # Special case: Disable dynamic memory if startup, minimum and maximum memory are equal
     if ($PSBoundParameters.ContainsKey('StartupMemory') -and
         ($StartupMemory -eq $MinimumMemory) -and
         ($StartupMemory -eq $MaximumMemory))
     {
-        Set-VMMemory -VMName $Name -DynamicMemoryEnabled $false
+        $vmobj | Set-VMMemory -DynamicMemoryEnabled $false
     }
 
     # There's always a NIC added with New-VM
     if ($MACAddress)
     {
-        Set-VMNetworkAdapter -VMName $Name -StaticMacAddress $MACAddress[0]
+        $vmobj | Set-VMNetworkAdapter -StaticMacAddress $MACAddress[0]
     }
 
     # Add additional NICs
     for ($i = 1; $i -lt $SwitchName.Count; $i++)
     {
         $addVMNetworkAdapterParams = @{
-            VMName     = $Name
             SwitchName = $SwitchName[$i]
         }
         if ($MACAddress -and (-not [System.String]::IsNullOrEmpty($MACAddress[$i])))
         {
             $addVMNetworkAdapterParams['StaticMacAddress'] = $MACAddress[$i]
         }
-        Add-VMNetworkAdapter @addVMNetworkAdapterParams
+
+        $vmobj | Add-VMNetworkAdapter @addVMNetworkAdapterParams
         Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'NIC', $SwitchName[$i])
     }
 
@@ -614,14 +599,14 @@ function Set-TargetResource
         #>
         if ($SecureBoot -eq $false)
         {
-            Set-VMFirmware -VMName $Name -EnableSecureBoot Off
+            $vmobj | Set-VMFirmware -EnableSecureBoot Off
         }
     }
 
     if ($EnableGuestService)
     {
-        $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f (Get-VM -Name $Name).Id
-        Get-VMIntegrationService -VMName $Name | Where-Object -FilterScript { $_.Id -eq $guestServiceId } | Enable-VMIntegrationService
+        $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f (Get-VMHyperV -VMName $Name).Id
+        $vmobj | Get-VMIntegrationService | Where-Object -FilterScript { $_.Id -eq $guestServiceId } | Enable-VMIntegrationService
     }
 
     Write-Verbose -Message ($script:localizedData.VMCreated -f $Name)
@@ -731,12 +716,7 @@ function Test-TargetResource
         # Enable AutomaticCheckpoints
         [Parameter()]
         [System.Boolean]
-        $AutomaticCheckpointsEnabled,
-
-        # Enable inclusion in running failover cluster if present.
-        [Parameter()]
-        [System.Boolean]
-        $IsClustered
+        $AutomaticCheckpointsEnabled
     )
 
     # Check if Hyper-V module is present for Hyper-V cmdlets
@@ -746,10 +726,7 @@ function Test-TargetResource
     }
 
     # Check if 1 or 0 VM with name = $name exist
-    if ((Get-VM -Name $Name -ErrorAction SilentlyContinue).count -gt 1)
-    {
-        throw ($script:localizedData.MoreThanOneVMExistsError -f $Name)
-    }
+    $null = Get-VMHyperV -VMName $Name -ErrorAction Stop
 
     # Check if AutomaticCheckpointsEnabled is set in configuration
     if ($PSBoundParameters.ContainsKey('AutomaticCheckpointsEnabled'))
@@ -766,7 +743,7 @@ function Test-TargetResource
 
     try
     {
-        $vmObj = Get-VM -Name $Name -ErrorAction Stop
+        $vmobj = Get-VMHyperV -VMName $Name -ErrorAction Stop -ThrowOnEmpty
         if ($Ensure -eq 'Present')
         {
             # Check if $VhdPath exist
@@ -812,6 +789,11 @@ function Test-TargetResource
             if ($Path -and !(Test-Path -Path $Path))
             {
                 throw ($script:localizedData.PathDoesNotExistError -f $Path)
+            }
+
+            if (-not $vmobj)
+            {
+                return $false
             }
 
             $vhdChain = @(Get-VhdHierarchy -VhdPath ($vmObj.HardDrives[0].Path))
@@ -995,7 +977,8 @@ function Set-VMMACAddress
         [System.Boolean]
         $RestartIfNeeded
     )
-    $vmObj = Get-VM -Name $Name
+
+    $vmobj = Get-VMHyperV -VMName $Name
     $originalState = $vmObj.state
     if ($originalState -ne 'Off' -and $RestartIfNeeded)
     {
@@ -1033,7 +1016,8 @@ function Test-VMSecureBoot
         [System.String]
         $Name
     )
-    $vm = Get-VM -Name $Name
+
+    $vm = Get-VMHyperV -VMName $Name
     return (Get-VMFirmware -VM $vm).SecureBoot -eq 'On'
 }
 
