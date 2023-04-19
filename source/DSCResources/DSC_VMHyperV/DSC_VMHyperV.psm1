@@ -113,7 +113,6 @@ function Get-TargetResource
         NetworkAdapters             = $ipAddress
         EnableGuestService          = ($vmobj | Get-VMIntegrationService | Where-Object -FilterScript { $_.Id -eq $guestServiceId }).Enabled
         AutomaticCheckpointsEnabled = $vmobj.AutomaticCheckpointsEnabled
-        IsClustered                 = $vmobj.IsClustered
     }
 }
 
@@ -922,7 +921,7 @@ function Test-TargetResource
             return $false
         }
     }
-    catch [System.Management.Automation.ActionPreferenceStopException]
+    catch
     {
         ($Ensure -eq 'Absent')
     }
