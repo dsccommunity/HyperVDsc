@@ -21,6 +21,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     - BREAKING CHANGE: Rename embedded instance class #203
     - Fix multiple DNS IP adresses does not work #190
     - NetworkSetting parameter is now optional and no default actions are taken if not specified
+  - Switch to use VM image `windows-latest` to build phase.
 
 ## [3.18.0] - 2022-06-04
 
