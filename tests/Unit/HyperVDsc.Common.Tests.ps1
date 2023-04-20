@@ -300,9 +300,9 @@ Describe 'HyperVDsc.Common\Get-VMHyperV' {
 
     It 'Should not throw when one VM is found' {
         Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common' -MockWith {
-            [PSCustomObject] @{
-                Name = $VMName
-            }
+            $mockVm = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+            $mockVm.Name = $VMName
+            $mockVm
         }
 
         $result = Get-VMHyperV -VMName $mockVMName
@@ -313,12 +313,9 @@ Describe 'HyperVDsc.Common\Get-VMHyperV' {
     It 'Should throw when more than one VM is found' {
         Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common' -MockWith {
             @(
-                [PSCustomObject] @{
-                    Name = $VMName
-                },
-                [PSCustomObject] @{
-                    Name = $VMName
-                }
+                $mockVm = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $mockVm.Name = $VMName
+                @($mockVm, $mockVm)
             )
         }
 
@@ -340,9 +337,11 @@ Describe 'HyperVDsc.Common\Get-VMHyperV' {
                 [Microsoft.FailoverClusters.PowerShell.ClusterObject]::new()
             }
             Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common' -MockWith {
-                [PSCustomObject] @{
-                    Name = $VMName
-                }
+                $mockVm = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $mockVm.Name = $VMName
+                # Test in case local cluster node is holding the machine object
+                $mockVm.IsClustered = $true
+                $mockVm
             }
 
             $result = Get-VMHyperV -VMName $mockVMName
@@ -350,11 +349,16 @@ Describe 'HyperVDsc.Common\Get-VMHyperV' {
         }
 
         It 'Should not throw when no clustered VM is found' {
+            Mock -CommandName Get-ClusterGroup -ModuleName 'HyperVDsc.Common'
+            Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common'
+
             $result = Get-VMHyperV -VMName $mockVMName
             $result | Should -BeNullOrEmpty
         }
 
         It 'Should throw when no clustered VM is found and caller wants it to' {
+            Mock -CommandName Get-ClusterGroup -ModuleName 'HyperVDsc.Common'
+            Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common'
             { Get-VMHyperV -VMName $mockVMName -ThrowOnEmpty -ErrorAction Stop} | Should -Throw -ExpectedMessage "No VM with the name '$mockVMName' exists."
         }
     }

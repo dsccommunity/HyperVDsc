@@ -503,10 +503,6 @@ try
                     $targetResource = Get-TargetResource -Name 'VMWithAutomaticCheckpoints' -VhdPath $stubVhdxDisk.Path
                     $targetResource.ContainsKey('AutomaticCheckpointsEnabled') | Should -Be $true
                 }
-                It 'Hash table contains key IsClustered' {
-                    $targetResource = Get-TargetResource -Name 'ClusteredExistingVmInClusterPresent' -VhdPath $stubVhdxDisk.Path
-                    $targetResource.ContainsKey('IsClustered') | Should -Be $true
-                }
                 It 'throws when Hyper-V Tools are not installed' {
                     # This test needs to be the last in the Context otherwise all subsequent Get-Module checks will fail
                     Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) }

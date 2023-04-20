@@ -303,6 +303,7 @@ function ConvertFrom-TimeSpan
 #>
 function Get-VMHyperV
 {
+    [OutputType([System.Collections.ArrayList])]
     [CmdletBinding()]
     param
     (
@@ -321,44 +322,45 @@ function Get-VMHyperV
 
     if (Get-Command -Name Get-Cluster -ErrorAction SilentlyContinue)
     {
-        [bool] $isClustered = (Get-Cluster -WarningAction SilentlyContinue) -ne $null
+        [bool] $isClustered = $null -ne (Get-Cluster -ErrorAction SilentlyContinue -WarningAction SilentlyContinue)
     }
+
+    $vms = [System.Collections.ArrayList]::new()
 
     if ($isClustered)
     {
         $clusterVm = Get-ClusterGroup -Name $VMName -ErrorAction SilentlyContinue
-        if (-not $clusterVm -and $ThrowOnEmpty.IsPresent)
+
+        if ($clusterVm)
         {
-            $errorMessage = $script:localizedData.NoVMExistsError -f $VMName
-            New-InvalidResultException -Message $errorMessage
+            [Microsoft.HyperV.PowerShell.VirtualMachine[]]$clusteredVm = Get-VM @vmParam -ClusterObject $clusterVm
         }
 
-        if (-not $clusterVm)
+        if ($clusteredVm)
         {
-            return
+            $vms.AddRange($clusteredVm)
         }
-
-        $vmParam['ClusterObject'] = $clusterVm
     }
-    else
+
+    [Microsoft.HyperV.PowerShell.VirtualMachine[]]$nonClusteredVm = Get-VM @vmParam -VMName $VMName | Where-Object IsClustered -eq $false
+
+    if ($nonClusteredVm)
     {
-        $vmParam['Name'] = $VMName
+        $vms.AddRange($nonClusteredVm)
     }
-
-    $vm = Get-VM @vmParam
 
     # Check if 1 or 0 VM with name = $name exist
-    if ($vm.count -gt 1)
+    if ($vms.count -gt 1)
     {
         $errorMessage = $script:localizedData.MoreThanOneVMExistsError -f $VMName
         New-InvalidResultException -Message $errorMessage
     }
 
-    if (-not $vm -and $ThrowOnEmpty.IsPresent)
+    if (-not $vms -and $ThrowOnEmpty.IsPresent)
     {
         $errorMessage = $script:localizedData.NoVMExistsError -f $VMName
         New-InvalidResultException -Message $errorMessage
     }
 
-    return $vm
+    return $vms
 } #end function Get-VMHyperV

@@ -907,13 +907,6 @@ function Test-TargetResource
                 }
             }
 
-            # If IsClustered is set in configuration
-            if ($PSBoundParameters.ContainsKey('IsClustered') -and -not $vmObj.IsClustered)
-            {
-                Write-Verbose -Message ($script:localizedData.NotAddedToCluster -f $vmObj.Name)
-                return $false
-            }
-
             return $true
         }
         else
