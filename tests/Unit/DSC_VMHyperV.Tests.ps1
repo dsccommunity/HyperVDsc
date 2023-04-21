@@ -46,13 +46,13 @@ try
             $StubVMConfig = New-Item -Path 'TestDrive:\TestVM.xml' -ItemType File
 
             # Mock the class VMNetworkAdapter to support piping to cmdlet Connect-VMNetworkAdapter
-            $stubNIC1 = [Microsoft.HyperV.PowerShell.VMNetworkAdapter]::CreateTypeInstance()
+            $stubNIC1 = [Microsoft.HyperV.PowerShell.VMNetworkAdapterBase]::CreateTypeInstance()
             $stubNIC1.SwitchName = 'Test Switch 1'
             $stubNIC1.MacAddress = 'AA-BB-CC-DD-EE-FF'
             $stubNIC1.IpAddresses = @('192.168.0.1', '10.0.0.1')
 
             # Mock the class VMNetworkAdapter to support piping to cmdlet Connect-VMNetworkAdapter
-            $stubNIC2 = [Microsoft.HyperV.PowerShell.VMNetworkAdapter]::CreateTypeInstance()
+            $stubNIC2 = [Microsoft.HyperV.PowerShell.VMNetworkAdapterBase]::CreateTypeInstance()
             $stubNIC2.SwitchName = 'Test Switch 2'
             $stubNIC2.MacAddress = 'AA-BB-CC-DD-EE-FE'
             $stubNIC2.IpAddresses = @('192.168.1.1')
@@ -602,7 +602,7 @@ try
                 Mock -CommandName Stop-VM -MockWith { return $true } # requires output to be able to pipe something into Remove-VM
                 Mock -CommandName Remove-VM -MockWith { return $true }
                 Mock -CommandName Set-VMNetworkAdapter -MockWith { return $true }
-                Mock -CommandName Get-VMNetworkAdapter -MockWith { return $stubVM.NetworkAdapters.IpAddresses }
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { return $stubVM.NetworkAdapters }
                 Mock -CommandName Set-VMState -MockWith { return $true }
                 Mock -CommandName Set-VMMemory
 

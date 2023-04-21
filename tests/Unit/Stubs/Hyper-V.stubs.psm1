@@ -340,7 +340,7 @@ namespace Microsoft.HyperV.PowerShell
         public System.DateTime CreationTime { get; set; }
         public System.Guid Id { get; set; }
         public System.String Name { get; set; }
-        public System.Collections.Generic.List<Microsoft.HyperV.PowerShell.VMNetworkAdapter> NetworkAdapters { get; set; }
+        public System.Collections.Generic.List<Microsoft.HyperV.PowerShell.VMNetworkAdapterBase> NetworkAdapters { get; set; }
         public Microsoft.Management.Infrastructure.CimSession CimSession { get; set; }
         public System.String ComputerName { get; set; }
         public System.Boolean IsDeleted { get; set; }
@@ -1255,6 +1255,8 @@ namespace Microsoft.HyperV.PowerShell
         // Manually added properties
         public System.String MacAddress { get; set; }
         public Microsoft.HyperV.PowerShell.OnOffState DeviceNaming { get; set; }
+        public System.Boolean DynamicMacAddressEnabled { get; set; }
+        public System.String[] IPAddresses { get; set; }
 
         // Property
         public System.String SwitchName { get; set; }
@@ -4862,13 +4864,13 @@ function Connect-VMNetworkAdapter {
     #>
 
     [CmdletBinding(DefaultParameterSetName='Name_SwitchName', SupportsShouldProcess=$true, ConfirmImpact='Medium')]
-    [OutputType([Microsoft.HyperV.PowerShell.VMNetworkAdapter])]
+    [OutputType([Microsoft.HyperV.PowerShell.VMNetworkAdapterBase])]
     param (
         [Parameter(ParameterSetName='Object_SwitchName', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
         [Parameter(ParameterSetName='Object_SwitchObject', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
         [Parameter(ParameterSetName='Object_UseAutomaticConnection', Mandatory=$true, Position=0, ValueFromPipeline=$true)]
         [ValidateNotNullOrEmpty()]
-        [Microsoft.HyperV.PowerShell.VMNetworkAdapter[]]
+        [Microsoft.HyperV.PowerShell.VMNetworkAdapterBase[]]
         ${VMNetworkAdapter},
 
         [Parameter(ParameterSetName='Name_SwitchObject', Position=1)]

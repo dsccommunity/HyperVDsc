@@ -223,7 +223,7 @@ function Set-TargetResource
                         Write-Verbose -Message $script:localizedData.EnableStaticMacAddress
                         $updateAdapter = $true
                     }
-                    elseif ($MacAddress -ne $netAdapterExists.StaicMacAddress)
+                    elseif ($MacAddress -ne $netAdapterExists.MacAddress)
                     {
                         Write-Verbose -Message $script:localizedData.EnableStaticMacAddress
                         $updateAdapter = $true
