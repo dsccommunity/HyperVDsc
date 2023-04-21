@@ -1254,6 +1254,7 @@ namespace Microsoft.HyperV.PowerShell
     {
         // Manually added properties
         public System.String MacAddress { get; set; }
+        public Microsoft.HyperV.PowerShell.OnOffState DeviceNaming { get; set; }
 
         // Property
         public System.String SwitchName { get; set; }
@@ -20498,4 +20499,3 @@ Wait-VM [-VM] <VirtualMachine[]> [-AsJob] [-Passthru] [-For <WaitVMTypes>] [-Del
         throw '{0}: StubNotImplemented' -f $MyInvocation.MyCommand
     }
 }
-
