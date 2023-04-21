@@ -221,12 +221,12 @@ function Set-TargetResource
                     if ($netAdapterExists.DynamicMacAddressEnabled)
                     {
                         Write-Verbose -Message $script:localizedData.EnableStaticMacAddress
-                        $updateMacAddress = $true
+                        $updateAdapter = $true
                     }
                     elseif ($MacAddress -ne $netAdapterExists.StaicMacAddress)
                     {
                         Write-Verbose -Message $script:localizedData.EnableStaticMacAddress
-                        $updateMacAddress = $true
+                        $updateAdapter = $true
                     }
                 }
                 else
@@ -234,8 +234,13 @@ function Set-TargetResource
                     if (-not $netAdapterExists.DynamicMacAddressEnabled)
                     {
                         Write-Verbose -Message $script:localizedData.EnableDynamicMacAddress
-                        $updateMacAddress = $true
+                        $updateAdapter = $true
                     }
+                }
+
+                if ($netAdapterExists.DeviceNaming -ne $DeviceNaming)
+                {
+                    $updateAdapter = $true
                 }
 
                 if ($netAdapterExists.SwitchName -ne $SwitchName)
@@ -244,7 +249,7 @@ function Set-TargetResource
                     Connect-VMNetworkAdapter -VMNetworkAdapter $netAdapterExists -SwitchName $SwitchName -ErrorAction Stop -Verbose
                 }
 
-                if (($updateMacAddress))
+                if (($updateAdapter))
                 {
                     Write-Verbose -Message $script:localizedData.PerformVMNetModify
 

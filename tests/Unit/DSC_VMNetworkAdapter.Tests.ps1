@@ -61,6 +61,8 @@ try
         $MockAdapter.VMName = $MockHostAdapter.VMName
         $MockAdapter.IsManagementOs = $true
         $MockAdapter.MacAddress = '14FEB5C6CE98'
+        $MockAdapter.DeviceNaming = 'Off'
+        $MockAdapter.MacAddressSpoofing = 'Off'
 
         $MockAdapterVlanUntagged = [PSObject]@{
             OperationMode = 'Untagged'
