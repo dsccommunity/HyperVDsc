@@ -350,6 +350,19 @@ Describe 'DSC_VhdFileDirectory\Get-TargetResource' -Tag 'Get' {
         Assert-MockCalled -CommandName Mount-VHD -Exactly -Times $MountVhdCount -Scope It
         Assert-MockCalled -CommandName Dismount-VHD -Exactly -Times $DismountVhdCount -Scope It
     }
+
+    It 'Should return empty list of FileDirectory if no disk is mounted' {
+        Mock -CommandName Test-Path -MockWith { $true }
+        Mock -CommandName EnsureVHDState
+
+        $result = Get-TargetResource -VhdPath 'APath' -FileDirectory (New-CimInstance -ClassName $script:dscFileDirClassName -Namespace  $script:dscNamespace -ClientOnly -Property @{
+            SourcePath      = 'TestDrive:\FileExists.txt'
+            DestinationPath = 'DestinationDirectoryExists\FileExists.txt'
+            Type            = 'File'
+            Ensure          = 'Present'
+        })
+        $result.FileDirectory.Count | Should -BeExactly 0
+    }
 }
 
 Describe "DSC_VhdFileDirectory\Test-TargetResource" -Tag 'Test' {
@@ -420,6 +433,23 @@ Describe "DSC_VhdFileDirectory\Test-TargetResource" -Tag 'Test' {
 
             $result = Test-TargetResource -VhdPath $VhdPath -FileDirectory $FileDirectory
             $result | Should -Be $true
+        }
+
+        It 'Should return true if disk is already attached and thus cannot be modified' {
+            Mock -CommandName Test-Path -MockWith { $true }
+            Mock -CommandName EnsureVHDState -MockWith {
+                @{
+                    Attached = $true
+                    DiskNumber = $null
+                }
+            }
+
+            Test-TargetResource -VhdPath 'APath' -FileDirectory (New-CimInstance -ClassName $script:dscFileDirClassName -Namespace  $script:dscNamespace -ClientOnly -Property @{
+                SourcePath      = 'TestDrive:\FileExists.txt'
+                DestinationPath = 'DestinationDirectoryExists\FileExists.txt'
+                Type            = 'File'
+                Ensure          = 'Present'
+            }) | Should -BeTrue
         }
     }
 
@@ -603,6 +633,104 @@ Describe "DSC_VhdFileDirectory\Set-TargetResource" -Tag 'Set' {
         }
     }
 }
+}
+
+Describe 'DSC_VhdFileDirectory\EnsureVHDState' -Tag 'Helper' {
+    InModuleScope $script:dscResourceName {
+        Mock -CommandName Dismount-VHD
+        $attachedNull = [Microsoft.Vhd.PowerShell.VirtualHardDisk]::CreateTypeInstance()
+        $attachedNull.Attached = $true
+        $unattachedNull = [Microsoft.Vhd.PowerShell.VirtualHardDisk]::CreateTypeInstance()
+        $unattachedNull.Attached = $false
+        $unattachedNumber = [Microsoft.Vhd.PowerShell.VirtualHardDisk]::CreateTypeInstance()
+        $unattachedNumber.Attached = $false
+        $unattachedNumber.DiskNumber = 1
+
+        $cases = @(
+            @{
+                VhdPath     = 'C:\SomeAttachedVhd.vhdx'
+                Mounted     = $true
+                VhdData     = $attachedNull
+                ReturnsNull = $true
+            }
+            @{
+                VhdPath = 'C:\SomeAlreadyMountedVhd.vhdx'
+                Mounted = $true
+                VhdData = $unattachedNumber
+            }
+            @{
+                VhdPath     = 'C:\SomeAlreadyDismountedVhd.vhdx'
+                Dismounted  = $true
+                VhdData     = $attachedNull
+                ReturnsNull = $true
+            }
+            @{
+                VhdPath = 'C:\SomeMountableVhd.vhdx'
+                Mounted = $true
+                VhdData = $unattachedNull
+            }
+            @{
+                VhdPath      = 'C:\SomeDoubleMountedVhd.vhdx'
+                Mounted      = $true
+                VhdData      = $unattachedNull
+                IsMountError = $true
+            }
+            @{
+                VhdPath    = 'C:\SomeDismountableVhd.vhdx'
+                Dismounted = $true
+                VhdData    = $unattachedNumber
+                ReturnsNull = $true
+            }
+        )
+        It 'Should return desired result for <VhdPath>' -TestCases $cases {
+            param
+            (
+                $VhdPath,
+                $Mounted,
+                $Dismounted,
+                $VhdData,
+                $ReturnsNull,
+                $IsMountError
+            )
+
+            Mock -CommandName Get-Vhd -MockWith { $VhdData }
+
+            if ($IsMountError)
+            {
+                Mock -CommandName Mount-VHD -ParameterFilter { $ErrorVariable -eq 'var' }
+                Mock -CommandName Mount-VHD -MockWith { $VhdData } -ParameterFilter { $ErrorVariable -eq 'mountError' }
+            }
+            else
+            {
+                Mock -CommandName Mount-VHD -MockWith { $VhdData }
+            }
+
+            $parm = @{
+                VhdPath = $VhdPath
+            }
+            if ($Mounted)
+            {
+                $parm['Mounted'] = $true
+                $parm.Remove('Dismounted')
+            }
+            if ($Dismounted)
+            {
+                $parm['Dismounted'] = $true
+                $parm.Remove('Mounted')
+            }
+
+            if ($ReturnsNull)
+            {
+                EnsureVHDState @parm | Should -BeNullOrEmpty
+            }
+            else
+            {
+                $state = EnsureVHDState @parm
+                $state.Attached | Should -Be $VhdData.Attached
+                $state.DiskNumber | Should -Be $VhdData.DiskNumber
+            }
+        }
+    }
 }
 }
 finally

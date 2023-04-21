@@ -361,13 +361,14 @@ function EnsureVHDState
         "$($MyInvocation.MyCommand): "
         $($script:localizedData.DiskDetails  -f $vhdPath, $vhd.Attached, $vhd.DiskNumber)
     ))
+
     if ($PSCmdlet.ParameterSetName -eq 'Mounted' -and $vhd.Attached -and $null -eq $vhd.DiskNumber)
     {
         Write-Verbose -Message ( -join @(
             "$($MyInvocation.MyCommand): "
             $($script:localizedData.UnableToMount  -f $vhdPath)
         ))
-        return $vhd
+        return
     }
 
     if ($PSCmdlet.ParameterSetName -eq 'Mounted' -and $vhd.DiskNumber -ge 0)
@@ -405,7 +406,7 @@ function EnsureVHDState
                 $($script:localizedData.FailedToMount  -f $vhdPath)
             ))
             Dismount-VHD $vhdPath
-            $mountedVHD = Mount-VHD -Path $vhdPath -Passthru -ErrorAction SilentlyContinue
+            $mountedVHD = Mount-VHD -Path $vhdPath -Passthru -ErrorAction SilentlyContinue -ErrorVariable mountError
 
             return $mountedVHD
         }
