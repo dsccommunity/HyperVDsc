@@ -22,6 +22,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     - Fix multiple DNS IP adresses does not work #190
     - NetworkSetting parameter is now optional and no default actions are taken if not specified
   - Switch to use VM image `windows-latest` to build phase.
+  - VhdFile
+    - Fix issue with Get- and Test-DscConfiguration if disk is mounted #207.
 
 ## [3.18.0] - 2022-06-04
 

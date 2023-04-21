@@ -9,6 +9,9 @@ file attribute to 'ReadOnly' or 'Hidden').
 This resource is particularly useful when bootstrapping DSC Configurations
 into a VM.
 
+If the VHD is going to be attached to a VM, the resource will silently
+skip mounting and dismounting the VHD and thus not copy any content.
+
 ## Requirements
 
 * The Hyper-V Role has to be installed on the machine.
