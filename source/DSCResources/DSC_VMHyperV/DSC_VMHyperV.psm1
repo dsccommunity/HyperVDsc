@@ -362,7 +362,7 @@ function Set-TargetResource
                     if ($nic.SwitchName -ne $switch)
                     {
                         Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'NIC', $switch, $nic.SwitchName)
-                        $nic | Connect-VMNetworkAdapter -SwitchName $switch
+                        Connect-VMNetworkAdapter -VMNetworkAdapter $nic -SwitchName $switch
                         Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'NIC', $switch)
                     }
                 }

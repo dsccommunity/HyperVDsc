@@ -61,6 +61,19 @@ try
         $MockAdapter.VMName = $MockHostAdapter.VMName
         $MockAdapter.IsManagementOs = $true
         $MockAdapter.MacAddress = '14FEB5C6CE98'
+        $MockAdapter.DeviceNaming = 'Off'
+        $MockAdapter.MacAddressSpoofing = 'Off'
+        $MockAdapter.DynamicMacAddressEnabled = $false
+
+        $dynamicMockAdapter = [Microsoft.HyperV.PowerShell.VMNetworkAdapterBase]::CreateTypeInstance()
+        $dynamicMockAdapter.Name = $MockHostAdapter.Name
+        $dynamicMockAdapter.SwitchName = $MockHostAdapter.SwitchName
+        $dynamicMockAdapter.VMName = 'VMName'
+        $dynamicMockAdapter.IsManagementOs = $true
+        $dynamicMockAdapter.MacAddress = '14FEB5C6CE98'
+        $dynamicMockAdapter.DeviceNaming = 'Off'
+        $dynamicMockAdapter.MacAddressSpoofing = 'Off'
+        $dynamicMockAdapter.DynamicMacAddressEnabled = $true
 
         $MockAdapterVlanUntagged = [PSObject]@{
             OperationMode = 'Untagged'
@@ -155,12 +168,14 @@ try
 
         Describe 'DSC_VMNetworkAdapter\Set-TargetResource' {
             $newAdapter = [PSObject]@{
-                Id             = 'UniqueString'
-                Name           = $TestAdapter.Name
-                SwitchName     = $TestAdapter.SwitchName
-                VMName         = 'VMName'
-                NetworkSetting = $networkSettingsStatic
-                Ensure         = 'Present'
+                Id                 = 'UniqueString'
+                Name               = $TestAdapter.Name
+                SwitchName         = $TestAdapter.SwitchName
+                VMName             = 'VMName'
+                NetworkSetting     = $networkSettingsStatic
+                Ensure             = 'Present'
+                DeviceNaming       = 'On'
+                MacAddressSpoofing = 'On'
             }
 
             Context 'Adapter does not exist but should' {
@@ -172,6 +187,7 @@ try
                 Mock -CommandName Remove-VMNetworkAdapter
                 Mock -CommandName Set-VMNetworkAdapterVlan
                 Mock -CommandName Set-NetworkInformation
+                Mock -CommandName Set-VMNetworkAdapter
 
                 It 'should not throw error' {
                     {
@@ -185,6 +201,7 @@ try
                     Assert-MockCalled -commandName Add-VMNetworkAdapter -Exactly 1
                     Assert-MockCalled -commandName Remove-VMNetworkAdapter -Exactly 0
                     Assert-MockCalled -CommandName Set-NetworkInformation -Exactly 1
+                    Assert-MockCalled -CommandName Set-VMNetworkAdapter -Exactly 1
                 }
             }
 
@@ -208,15 +225,93 @@ try
                     Assert-MockCalled -CommandName Set-VMNetworkAdapterVlan -Exactly 0
                 }
             }
+
+            Context 'Adapter exists but hw address is different' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $MockAdapter }
+                Mock -CommandName Set-VMNetworkAdapter
+                Mock -CommandName Get-VMNetworkAdapterVlan
+
+                It 'should return false' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.Remove('NetworkSetting')
+                    $updateAdapter.VMName = "VMName"
+                    $updateAdapter.MacAddress = '14FEB5C6CE99'
+
+                    { Set-TargetResource @updateAdapter } | Should -Not -throw
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
+                    Assert-MockCalled -commandName Set-VMNetworkAdapter -Exactly 1
+                }
+            }
+            Context 'Adapter exists but hw address is different and dynamic hw address is enabled' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $dynamicMockAdapter }
+                Mock -CommandName Set-VMNetworkAdapter
+                Mock -CommandName Get-VMNetworkAdapterVlan
+
+                It 'should return false' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.Remove('NetworkSetting')
+                    $updateAdapter.VMName = "VMName"
+                    $updateAdapter.MacAddress = '14FEB5C6CE99'
+
+                    { Set-TargetResource @updateAdapter } | Should -Not -throw
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
+                    Assert-MockCalled -commandName Set-VMNetworkAdapter -Exactly 1
+                }
+            }
+
+            Context 'Adapter exists but dynamic hw address setting is different' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $MockAdapter }
+                Mock -CommandName Set-VMNetworkAdapter
+                Mock -CommandName Get-VMNetworkAdapterVlan
+
+                It 'should return false' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.Remove('NetworkSetting')
+                    $updateAdapter.VMName = "VMName"
+
+                    { Set-TargetResource @updateAdapter } | Should -Not -throw
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
+                    Assert-MockCalled -commandName Set-VMNetworkAdapter -Exactly 1
+                }
+            }
+
+            Context 'Adapter exists but connected to wrong switch' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $MockAdapter }
+                Mock -CommandName Set-VMNetworkAdapter
+                Mock -CommandName Connect-VMNetworkAdapter
+                Mock -CommandName Get-VMNetworkAdapterVlan
+
+                It 'should return false' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.Remove('NetworkSetting')
+                    $updateAdapter.VMName = "VMName"
+                    $updateAdapter.SwitchName = "IAmAWrongSwitch"
+
+                    { Set-TargetResource @updateAdapter } | Should -Not -throw
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
+                    Assert-MockCalled -commandName Connect-VMNetworkAdapter -Exactly 1
+                    Assert-MockCalled -commandName Set-VMNetworkAdapter -Exactly 1
+                }
+            }
         }
 
         Describe 'DSC_VMNetworkAdapter\Test-TargetResource' {
             $newAdapter = [PSObject]@{
-                Id         = 'UniqueString'
-                Name       = $TestAdapter.Name
-                SwitchName = $TestAdapter.SwitchName
-                VMName     = 'ManagementOS'
-                Ensure     = 'Present'
+                Id                 = 'UniqueString'
+                Name               = $TestAdapter.Name
+                SwitchName         = $TestAdapter.SwitchName
+                VMName             = 'ManagementOS'
+                Ensure             = 'Present'
+                DeviceNaming       = 'On'
+                MacAddressSpoofing = 'On'
             }
 
             Context 'Adapter does not exist but should' {
@@ -266,6 +361,8 @@ try
                     $updateAdapter.VMName = "VMName"
                     $updateAdapter.MacAddress = '14FEB5C6CE98'
                     $updateAdapter.VlanId = '1'
+                    $updateAdapter.DeviceNaming = 'Off'
+                    $updateAdapter.MacAddressSpoofing = 'Off'
                     Test-TargetResource @updateAdapter | Should -Be $true
                 }
                 It 'should call expected Mocks' {
@@ -339,6 +436,120 @@ try
                 It 'should call expected Mocks' {
                     Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
                     Assert-MockCalled -commandName Get-NetworkInformation -Exactly 0
+                }
+            }
+
+            Context 'Adapter exists but hw address is different' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $MockAdapter }
+
+                It 'should return false' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.VMName = "VMName"
+                    $updateAdapter.MacAddress = '14FEB5C6CE99'
+
+                    Test-TargetResource @updateAdapter | Should -Be $false
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
+                }
+            }
+            Context 'Adapter exists but hw address is different and dynamic hw address is enabled' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $dynamicMockAdapter }
+                Mock -CommandName Get-VMNetworkAdapterVlan
+
+                It 'should return false' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.VMName = "VMName"
+                    $updateAdapter.MacAddress = '14FEB5C6CE99'
+
+                    Test-TargetResource @updateAdapter | Should -Be $false
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
+                }
+            }
+
+            Context 'Adapter exists but dynamic hw address setting is different' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $dynamicMockAdapter }
+                Mock -CommandName Get-VMNetworkAdapterVlan
+
+                It 'should return false' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.VMName = "VMName"
+                    $updateAdapter.MacAddress = '14FEB5C6CE98'
+
+                    Test-TargetResource @updateAdapter | Should -Be $false
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
+                }
+            }
+
+            Context 'Adapter exists and device naming setting OK' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $dynamicMockAdapter }
+                Mock -CommandName Get-VMNetworkAdapterVlan
+
+                It 'should return true' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.VMName = "VMName"
+                    $updateAdapter.DeviceNaming = "Off"
+                    $updateAdapter.MacAddressSpoofing = "Off"
+
+                    Test-TargetResource @updateAdapter | Should -Be $true
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
+                }
+            }
+
+            Context 'Adapter exists and device naming setting different' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $dynamicMockAdapter }
+                Mock -CommandName Get-VMNetworkAdapterVlan
+
+                It 'should return false' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.VMName = "VMName"
+                    $updateAdapter.DeviceNaming = "On"
+                    $updateAdapter.MacAddressSpoofing = "Off"
+
+                    Test-TargetResource @updateAdapter | Should -Be $false
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
+                }
+            }
+
+            Context 'Adapter exists and spoofing setting OK' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $dynamicMockAdapter }
+                Mock -CommandName Get-VMNetworkAdapterVlan
+
+                It 'should return true' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.VMName = "VMName"
+                    $updateAdapter.MacAddressSpoofing = "Off"
+                    $updateAdapter.DeviceNaming = "Off"
+
+                    Test-TargetResource @updateAdapter | Should -Be $true
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
+                }
+            }
+
+            Context 'Adapter exists and spoofing setting different' {
+                Mock -CommandName Get-VMNetworkAdapter -MockWith { $dynamicMockAdapter }
+                Mock -CommandName Get-VMNetworkAdapterVlan
+
+                It 'should return false' {
+                    $updateAdapter = $newAdapter.Clone()
+                    $updateAdapter.VMName = "VMName"
+                    $updateAdapter.MacAddressSpoofing = "On"
+                    $updateAdapter.DeviceNaming = "Off"
+
+                    Test-TargetResource @updateAdapter | Should -Be $false
+                }
+                It 'should call expected Mocks' {
+                    Assert-MockCalled -commandName Get-VMNetworkAdapter -Exactly 1
                 }
             }
         }
