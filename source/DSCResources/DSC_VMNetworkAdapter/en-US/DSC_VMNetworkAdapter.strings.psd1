@@ -26,6 +26,7 @@ ConvertFrom-StringData @'
     VMNetAdapterExistsShouldRemove=VM Network Adapter Exists. It will be removed.
     VMNetAdapterDoesNotExistNoActionNeeded=VM Network adapter does not exist. No action needed.
     SwitchIsDifferent=Net Adapter is not connected to the requested switch.
+    SwitchIsCorrect=Net Adapter is connected to the requested switch.
     PerformSwitchConnect=Connecting VM Net adapter to the right switch.
     SpoofingDifferent=MAC address spoofing configuration does not match.
     SpoofingConfiguredNoActionNeeded=MAC address spoofing configured.

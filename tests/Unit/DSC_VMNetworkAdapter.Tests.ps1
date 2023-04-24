@@ -361,6 +361,8 @@ try
                     $updateAdapter.VMName = "VMName"
                     $updateAdapter.MacAddress = '14FEB5C6CE98'
                     $updateAdapter.VlanId = '1'
+                    $updateAdapter.DeviceNaming = 'Off'
+                    $updateAdapter.MacAddressSpoofing = 'Off'
                     Test-TargetResource @updateAdapter | Should -Be $true
                 }
                 It 'should call expected Mocks' {
@@ -491,6 +493,7 @@ try
                     $updateAdapter = $newAdapter.Clone()
                     $updateAdapter.VMName = "VMName"
                     $updateAdapter.DeviceNaming = "Off"
+                    $updateAdapter.MacAddressSpoofing = "Off"
 
                     Test-TargetResource @updateAdapter | Should -Be $true
                 }
@@ -507,6 +510,7 @@ try
                     $updateAdapter = $newAdapter.Clone()
                     $updateAdapter.VMName = "VMName"
                     $updateAdapter.DeviceNaming = "On"
+                    $updateAdapter.MacAddressSpoofing = "Off"
                     $updateAdapter.MacAddress = '14FEB5C6CE98'
 
                     Test-TargetResource @updateAdapter | Should -Be $false
@@ -524,6 +528,7 @@ try
                     $updateAdapter = $newAdapter.Clone()
                     $updateAdapter.VMName = "VMName"
                     $updateAdapter.MacAddressSpoofing = "Off"
+                    $updateAdapter.DeviceNaming = "Off"
 
                     Test-TargetResource @updateAdapter | Should -Be $true
                 }
@@ -540,6 +545,7 @@ try
                     $updateAdapter = $newAdapter.Clone()
                     $updateAdapter.VMName = "VMName"
                     $updateAdapter.MacAddressSpoofing = "On"
+                    $updateAdapter.DeviceNaming = "Off"
                     $updateAdapter.MacAddress = '14FEB5C6CE98'
 
                     Test-TargetResource @updateAdapter | Should -Be $false

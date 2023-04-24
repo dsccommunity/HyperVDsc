@@ -596,8 +596,7 @@ function Test-TargetResource
                 }
                 else
                 {
-                    Write-Verbose -Message $script:localizedData.VMNetAdapterExistsNoActionNeeded
-                    return $true
+                    Write-Verbose -Message $script:localizedData.SwitchIsCorrect
                 }
 
                 if ($netAdapterExists.MacAddressSpoofing -ne $MacAddressSpoofing)
@@ -608,8 +607,6 @@ function Test-TargetResource
                 else
                 {
                     Write-Verbose -Message $script:localizedData.SpoofingConfiguredNoActionNeeded
-                    return $true
-
                 }
 
                 if ($netAdapterExists.DeviceNaming -ne $DeviceNaming)
@@ -620,8 +617,9 @@ function Test-TargetResource
                 else
                 {
                     Write-Verbose -Message $script:localizedData.DeviceNamingConfiguredNoActionNeeded
-                    return $true
                 }
+
+                return $true
             }
             else
             {
