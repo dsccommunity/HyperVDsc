@@ -25,16 +25,17 @@ Import-Module $script:subModuleFile -Force -ErrorAction 'Stop'
 # Import the stub functions.
 #Get-Module -Name 'Hyper-V' -All | Remove-Module -Force
 Import-Module -Name "$PSScriptRoot/Stubs/Hyper-V.stubs.psm1" -Force
+Import-Module -Name "$PSScriptRoot/Stubs/FailoverClusters.stubs.psm1" -Force
 
 InModuleScope $script:subModuleName {
     Describe 'HyperVDsc.Common\Set-VMProperty' {
         It "Should throw if VM is running and 'RestartIfNeeded' is False" {
             $mockVMName = 'Test'
 
-            Mock -CommandName Get-VM -MockWith {
-                return @{
-                    State = 'Running'
-                }
+            Mock -CommandName Get-VMHyperV -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.State = 'Running'
+                return $stubVM
             }
 
             $setVMPropertyParams = @{
@@ -54,10 +55,10 @@ InModuleScope $script:subModuleName {
             Mock -CommandName Stop-VM
             Mock -CommandName Set-VMProcessor
             Mock -CommandName Set-VMState
-            Mock -CommandName Get-VM -MockWith {
-                return @{
-                    State = 'Running'
-                }
+            Mock -CommandName Get-VMHyperV -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.State = 'Running'
+                return $stubVM
             }
 
             $setVMPropertyParams = @{
@@ -85,10 +86,10 @@ InModuleScope $script:subModuleName {
         It 'Should resume VM when current "State" is "Paused" and target state is "Running"' {
             Mock -CommandName Resume-VM
             Mock -CommandName Wait-VMIPAddress
-            Mock -CommandName Get-VM -MockWith {
-                return @{
-                    State = 'Paused'
-                }
+            Mock -CommandName Get-VMHyperV -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.State = 'Paused'
+                return $stubVM
             }
 
             Set-VMState -Name 'TestVM' -State 'Running'
@@ -100,10 +101,10 @@ InModuleScope $script:subModuleName {
         It 'Should resume VM and wait when current "State" is "Paused" and target state is "Running"' {
             Mock -CommandName Resume-VM
             Mock -CommandName Wait-VMIPAddress
-            Mock -CommandName Get-VM -MockWith {
-                return @{
-                    State = 'Paused'
-                }
+            Mock -CommandName Get-VMHyperV -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.State = 'Paused'
+                return $stubVM
             }
 
             Set-VMState -Name 'TestVM' -State 'Running' -WaitForIP $true
@@ -115,10 +116,10 @@ InModuleScope $script:subModuleName {
         It 'Should start VM when current "State" is "Off" and target state is "Running"' {
             Mock -CommandName Start-VM
             Mock -CommandName Wait-VMIPAddress
-            Mock -CommandName Get-VM -MockWith {
-                return @{
-                    State = 'Off'
-                }
+            Mock -CommandName Get-VMHyperV -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.State = 'Off'
+                return $stubVM
             }
 
             Set-VMState -Name 'TestVM' -State 'Running'
@@ -130,10 +131,10 @@ InModuleScope $script:subModuleName {
         It 'Should start VM and wait when current "State" is "Off" and target state is "Running"' {
             Mock -CommandName Start-VM
             Mock -CommandName Wait-VMIPAddress
-            Mock -CommandName Get-VM -MockWith {
-                return @{
-                    State = 'Off'
-                }
+            Mock -CommandName Get-VMHyperV -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.State = 'Off'
+                return $stubVM
             }
 
             Set-VMState -Name 'TestVM' -State 'Running' -WaitForIP $true
@@ -144,10 +145,10 @@ InModuleScope $script:subModuleName {
 
         It 'Should suspend VM when current "State" is "Running" and target state is "Paused"' {
             Mock -CommandName Suspend-VM
-            Mock -CommandName Get-VM -MockWith {
-                return @{
-                    State = 'Running'
-                }
+            Mock -CommandName Get-VMHyperV -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.State = 'Running'
+                return $stubVM
             }
 
             Set-VMState -Name 'TestVM' -State 'Paused'
@@ -157,10 +158,10 @@ InModuleScope $script:subModuleName {
 
         It 'Should stop VM when current "State" is "Running" and target state is "Off"' {
             Mock -CommandName Stop-VM
-            Mock -CommandName Get-VM -MockWith {
-                return @{
-                    State = 'Running'
-                }
+            Mock -CommandName Get-VMHyperV -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.State = 'Running'
+                return $stubVM
             }
 
             Set-VMState -Name 'TestVM' -State 'Off'
@@ -170,10 +171,10 @@ InModuleScope $script:subModuleName {
 
         It 'Should stop VM when current "State" is "Paused" and target state is "Off"' {
             Mock -CommandName Stop-VM
-            Mock -CommandName Get-VM -MockWith {
-                return @{
-                    State = 'Paused'
-                }
+            Mock -CommandName Get-VMHyperV -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.State = 'Paused'
+                return $stubVM
             }
 
             Set-VMState -Name 'TestVM' -State 'Off'
@@ -191,6 +192,12 @@ Describe 'HyperVDsc.Common\Wait-VMIPAddress' {
                     IpAddresses = @('192.168.0.1', '172.16.0.1')
                 }
             }
+            Mock -CommandName Get-VMHyperV -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.State = 'Paused'
+                return $stubVM
+            } -ModuleName 'HyperVDsc.Common'
+            Mock -CommandName Get-Command -ParameterFilter {$Name -eq 'Get-Cluster'} -ModuleName 'HyperVDsc.Common'
         }
 
         It 'Should return without throwing an exception' {
@@ -275,6 +282,8 @@ Describe 'HyperVDsc.Common\Get-VMHyperV' {
         $mockVMName = 'TestVM'
     }
 
+    Mock -CommandName Get-Command -ParameterFilter {$Name -eq 'Get-Cluster'} -ModuleName 'HyperVDsc.Common'
+
     # Guard mocks
     It 'Should not throw when no VM is found' {
         Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common'
@@ -283,12 +292,17 @@ Describe 'HyperVDsc.Common\Get-VMHyperV' {
 
         $result | Should -BeNullOrEmpty
     }
+    It 'Should throw when no VM is found and caller wants it to' {
+        Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common'
+
+        { Get-VMHyperV -VMName $mockVMName -ThrowOnEmpty -ErrorAction Stop} | Should -Throw -ExpectedMessage "No VM with the name '$mockVMName' exists."
+    }
 
     It 'Should not throw when one VM is found' {
         Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common' -MockWith {
-            [PSCustomObject] @{
-                Name = $VMName
-            }
+            $mockVm = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+            $mockVm.Name = $VMName
+            $mockVm
         }
 
         $result = Get-VMHyperV -VMName $mockVMName
@@ -299,17 +313,53 @@ Describe 'HyperVDsc.Common\Get-VMHyperV' {
     It 'Should throw when more than one VM is found' {
         Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common' -MockWith {
             @(
-                [PSCustomObject] @{
-                    Name = $VMName
-                },
-                [PSCustomObject] @{
-                    Name = $VMName
-                }
+                $mockVm = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $mockVm.Name = $VMName
+                @($mockVm, $mockVm)
             )
         }
 
         { Get-VMHyperV -VMName $mockVMName } | Should -Throw (
             $script:localizedData.MoreThanOneVMExistsError -f $mockVMName
         )
+    }
+
+    Context 'Clustered VMs' {
+        BeforeEach {
+            $mockVMName = 'TestVM'
+            Mock -CommandName Get-Command -ParameterFilter {$Name -eq 'Get-Cluster'} -MockWith { 'Get-Cluster' } -ModuleName 'HyperVDsc.Common'
+            Mock -CommandName Get-Cluster -MockWith { 'A Cluster' } -ModuleName 'HyperVDsc.Common'
+            Mock -CommandName Get-ClusterGroup -ModuleName 'HyperVDsc.Common'
+        }
+
+        It 'Should not throw when one clustered VM is found' {
+            Mock -CommandName Get-ClusterGroup -ModuleName 'HyperVDsc.Common' -MockWith {
+                [Microsoft.FailoverClusters.PowerShell.ClusterObject]::new()
+            }
+            Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common' -MockWith {
+                $mockVm = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $mockVm.Name = $VMName
+                # Test in case local cluster node is holding the machine object
+                $mockVm.IsClustered = $true
+                $mockVm
+            }
+
+            $result = Get-VMHyperV -VMName $mockVMName
+            $result.Name | Should -Be $mockVMName
+        }
+
+        It 'Should not throw when no clustered VM is found' {
+            Mock -CommandName Get-ClusterGroup -ModuleName 'HyperVDsc.Common'
+            Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common'
+
+            $result = Get-VMHyperV -VMName $mockVMName
+            $result | Should -BeNullOrEmpty
+        }
+
+        It 'Should throw when no clustered VM is found and caller wants it to' {
+            Mock -CommandName Get-ClusterGroup -ModuleName 'HyperVDsc.Common'
+            Mock -CommandName Get-VM -ModuleName 'HyperVDsc.Common'
+            { Get-VMHyperV -VMName $mockVMName -ThrowOnEmpty -ErrorAction Stop} | Should -Throw -ExpectedMessage "No VM with the name '$mockVMName' exists."
+        }
     }
 } # describe HyperVDsc.Common\Get-VMHyperV

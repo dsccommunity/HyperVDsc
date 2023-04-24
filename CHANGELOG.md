@@ -13,6 +13,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     - Changed all MSFT_xResourceName to DSC_ResourceName.
     - Updated DSCResources, Examples, Modules and Tests for new naming.
     - Updated README.md from _xHyper-V_ to _HyperVDsc
+    - VMHyperV now includes VMs in cluster if host is in cluster
   - Renamed default branch to `main` - Fixes [Issue #198](https://github.com/dsccommunity/HyperVDsc/issues/198).
   - Moved documentation to the HyperVDsc GitHub Wiki.
   - Updated all examples to correct folders and naming so they show up
@@ -22,6 +23,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     - Fix multiple DNS IP adresses does not work #190
     - NetworkSetting parameter is now optional and no default actions are taken if not specified
   - Switch to use VM image `windows-latest` to build phase.
+  VMHyperV
+    - Enable adding VMs to failover cluster.
 
 ## [3.18.0] - 2022-06-04
 
