@@ -391,6 +391,12 @@ try
                     Assert-MockCalled -CommandName Get-VMFirmware -Scope It -Exactly 1
                 }
 
+                It 'Calls Get-VMSecurity if a generation 2 VM' {
+                    Mock -CommandName Get-VMSecurity -MockWith { return $true }
+                    $null = Get-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk.Path
+                    Assert-MockCalled -CommandName Get-VMSecurity -Scope It -Exactly 1
+                }
+
                 It 'Hash table contains key EnableGuestService' {
                     $targetResource = Get-TargetResource -Name 'RunningVM' -VhdPath $stubVhdxDisk.Path
                     $targetResource.ContainsKey('EnableGuestService') | Should -Be $true
@@ -474,6 +480,7 @@ try
 
                 It 'Returns $true when VM .vhdx file is specified with a generation 2 VM' {
                     Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
+                    Mock -CommandName Test-VMTpmEnabled -MockWith { return $false }
                     Test-TargetResource -Name 'Generation2VM' -Generation 2 @testParams | Should -Be $true
                 }
 
@@ -510,6 +517,16 @@ try
                 It 'Returns $false when SecureBoot is On and requested "SecureBoot" = "$false"' {
                     Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
                     Test-TargetResource -Name 'Generation2VM' -SecureBoot $false -Generation 2 @testParams | Should -Be $false
+                }
+
+                It 'Returns $true when TpmEnabled is disabled and requested "TpmEnabled" = "$true"' {
+                    Mock -CommandName Test-VMSecurity -MockWith { return $false }
+                    Test-TargetResource -Name 'Generation2VM' -TpmEnabled $true -Generation 2 @testParams | Should -Be $true
+                }
+
+                It 'Returns $false when TpmEnabled is disabled and requested "TpmEnabled" = "$false"' {
+                    Mock -CommandName Test-VMSecurity -MockWith { return $false }
+                    Test-TargetResource -Name 'Generation2VM' TpmEnabled $false -Generation 2 @testParams | Should -Be $false
                 }
 
                 It 'Returns $true when VM has snapshot chain' {
