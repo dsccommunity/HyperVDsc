@@ -47,11 +47,16 @@ function Get-TargetResource
     }
 
     $vmSecureBootState = $false
+    $vmTPMState = $false
     if ($vmobj.Generation -eq 2)
     {
         # Retrieve secure boot status (can only be enabled on Generation 2 VMs) and convert to a boolean.
         $vmSecureBootState = ($vmobj | Get-VMFirmware).SecureBoot -eq 'On'
+
+        # Retrieve TPM status (can only be enabled on Generation 2 VMs) and return boolean.
+        $vmTPMState = ($vmobj | Get-VMSecurity).TpmEnabled
     }
+
 
     $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
 
@@ -90,6 +95,7 @@ function Get-TargetResource
         Path                        = $vmobj.Path
         Generation                  = $vmobj.Generation
         SecureBoot                  = $vmSecureBootState
+        TpmEnabled                  = $vmTPMState
         StartupMemory               = $vmobj.MemoryStartup
         MinimumMemory               = $vmobj.MemoryMinimum
         MaximumMemory               = $vmobj.MemoryMaximum
@@ -205,6 +211,11 @@ function Set-TargetResource
         [Parameter()]
         [System.Boolean]
         $SecureBoot = $true,
+
+        # Enable Trusted Platform Module for Generation 2 VMs
+        [Parameter()]
+        [System.Boolean]
+        $EnableTPM = $false,
 
         # Enable Guest Services
         [Parameter()]
@@ -425,6 +436,44 @@ function Set-TargetResource
                     Set-VMProperty @setVMPropertyParams
                     Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'SecureBoot', $SecureBoot)
                 }
+
+                # Retrive the current TPM state
+                $vmTPMEnabled = Test-VMTpmEnabled -Name $Name
+                if ($EnableTPM -ne $vmTPMEnabled)
+                {
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'TPMEnabled', $EnableTPM, $vmTPMEnabled)
+
+                    # Cannot change the TPM state whilst the VM is powered on.
+                    if (-not $EnableTPM)
+                    {
+                        # The default value for the key protector is 0,0,0,4
+                        $keyProtectorDefaultValue = @(0,0,0,4)
+                        # compare the default key protector value and the VM's key protector value
+                        $isVMKeyProtectorDefault = -not(Compare-Object -ReferenceObject (Get-VMKeyProtector -VMName $Name) -DifferenceObject $keyProtectorDefaultValue)
+
+                        # If the VM has a default key protector, we need to create a new one before enabling the TPM
+                        if ($isVMKeyProtectorDefault) {
+                            Set-VMKeyProtector -VMName $Name -NewLocalKeyProtector
+                        }
+
+                        $setVMPropertyParams = @{
+                            VMName          = $Name
+                            VMCommand       = 'Enable-VMTPM'
+                            RestartIfNeeded = $RestartIfNeeded
+                        }
+                    }
+                    else
+                    {
+                        $setVMPropertyParams = @{
+                            VMName          = $Name
+                            VMCommand       = 'Disable-VMTPM'
+                            RestartIfNeeded = $RestartIfNeeded
+                        }
+                    }
+
+                    Set-VMProperty @setVMPropertyParams
+                    Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'TPMEnabled', $EnableTPM)
+                }
             }
 
             if ($Notes -ne $null)
@@ -576,6 +625,25 @@ function Set-TargetResource
                 {
                     Set-VMFirmware -VMName $Name -EnableSecureBoot Off
                 }
+
+                <#
+                    TPM is only applicable to Generation 2 VMs and it defaults to disabled.
+                    Therefore, we only need to explicitly set it to enabled if specified.
+                #>
+                if ($EnableTPM -eq $true)
+                {
+                    # The default value for the key protector is 0,0,0,4
+                    $keyProtectorDefaultValue = @(0,0,0,4)
+                    # compare the default key protector value and the VM's key protector value
+                    $isVMKeyProtectorDefault = -not(Compare-Object -ReferenceObject (Get-VMKeyProtector -VMName $Name) -DifferenceObject $keyProtectorDefaultValue)
+
+                    # If the VM has a default key protector, we need to create a new one before enabling the TPM
+                    if ($isVMKeyProtectorDefault) {
+                        Set-VMKeyProtector -VMName $Name -NewLocalKeyProtector
+                    }
+
+                    Enable-VMTPM -VMName $Name
+                }
             }
 
             if ($EnableGuestService)
@@ -686,6 +754,11 @@ function Test-TargetResource
         [Parameter()]
         [System.Boolean]
         $SecureBoot = $true,
+
+        # Enable Trusted Platform Module for Generation 2 VMs
+        [Parameter()]
+        [System.Boolean]
+        $EnableTPM = $false,
 
         [Parameter()]
         [System.Boolean]
@@ -864,6 +937,13 @@ function Test-TargetResource
                     Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'SecureBoot', $SecureBoot, $vmSecureBoot)
                     return $false
                 }
+
+                $vmTPMEnabled = Test-VMTpmEnabled -Name $Name
+                if ($EnableTPM -ne $vmTPMEnabled)
+                {
+                    Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'TPMEnabled', $EnableTPM, $vmTPMEnabled)
+                    return $false
+                }
             }
 
             $guestServiceId = 'Microsoft:{0}\6C09BB55-D683-4DA0-8931-C9BF705F6480' -f $vmObj.Id
@@ -986,6 +1066,18 @@ function Test-VMSecureBoot
     )
     $vm = Get-VM -Name $Name
     return (Get-VMFirmware -VM $vm).SecureBoot -eq 'On'
+}
+
+function Test-VMTpmEnabled
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $Name
+    )
+    $vm = Get-VM -Name $Name
+    return (Get-VMSecurity -VM $vm).TpmEnabled
 }
 
 #endregion
