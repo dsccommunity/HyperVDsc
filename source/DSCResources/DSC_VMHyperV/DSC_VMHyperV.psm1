@@ -215,7 +215,7 @@ function Set-TargetResource
         # Enable Trusted Platform Module for Generation 2 VMs
         [Parameter()]
         [System.Boolean]
-        $EnableTPM = $true,
+        $EnableTPM = $false,
 
         # Enable Guest Services
         [Parameter()]
@@ -738,7 +738,7 @@ function Test-TargetResource
         # Enable Trusted Platform Module for Generation 2 VMs
         [Parameter()]
         [System.Boolean]
-        $EnableTPM = $true,
+        $EnableTPM = $false,
 
         [Parameter()]
         [System.Boolean]
