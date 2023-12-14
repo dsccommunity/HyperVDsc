@@ -446,6 +446,16 @@ function Set-TargetResource
                     # Cannot change the TPM state whilst the VM is powered on.
                     if (-not $EnableTPM)
                     {
+                        # The default value for the key protector is 0,0,0,4
+                        $keyProtectorDefaultValue = @(0,0,0,4)
+                        # compare the default key protector value and the VM's key protector value
+                        $isVMKeyProtectorDefault = -not(Compare-Object -ReferenceObject (Get-VMKeyProtector -VMName $Name) -DifferenceObject $keyProtectorDefaultValue)
+
+                        # If the VM has a default key protector, we need to create a new one before enabling the TPM
+                        if ($isVMKeyProtectorDefault) {
+                            Set-VMKeyProtector -VMName $Name -NewLocalKeyProtector
+                        }
+
                         $setVMPropertyParams = @{
                             VMName          = $Name
                             VMCommand       = 'Enable-VMTPM'
@@ -622,6 +632,16 @@ function Set-TargetResource
                 #>
                 if ($EnableTPM -eq $true)
                 {
+                    # The default value for the key protector is 0,0,0,4
+                    $keyProtectorDefaultValue = @(0,0,0,4)
+                    # compare the default key protector value and the VM's key protector value
+                    $isVMKeyProtectorDefault = -not(Compare-Object -ReferenceObject (Get-VMKeyProtector -VMName $Name) -DifferenceObject $keyProtectorDefaultValue)
+
+                    # If the VM has a default key protector, we need to create a new one before enabling the TPM
+                    if ($isVMKeyProtectorDefault) {
+                        Set-VMKeyProtector -VMName $Name -NewLocalKeyProtector
+                    }
+
                     Enable-VMTPM -VMName $Name
                 }
             }
