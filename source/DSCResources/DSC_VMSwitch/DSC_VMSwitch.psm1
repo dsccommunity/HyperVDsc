@@ -241,19 +241,24 @@ function Set-TargetResource
             }
             else
             {
-				$NetAdapterInterfaceGuids = $switch.NetAdapterInterfaceGuid
-				$adapters = @()
-				$NICS = @()
-				foreach ($n in $NetAdapterInterfaceGuids) {
-				$guid = "{" + ($n.Guid).ToUpper() + "}"
-				$NICs += get-netadapter | where-object {$_.InterfaceGuid -eq $guid }
-				$tmp_data = New-Object PSObject
-				Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name Name $($nics.name)
-				Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name InterfaceGuid $($guid)
-				$adapters += $tmp_data   
-				$NICS = @()
-				}
-                if ($null -ne (Compare-Object -ReferenceObject $adapters.name -DifferenceObject $NetAdapterName))
+                try {
+                    $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction stop).Name
+                } Catch {
+                    write-output "ERROR"
+                    $NetAdapterInterfaceGuids = $switch.NetAdapterInterfaceGuid
+                    $adapters = @()
+                    $NICS = @()
+                    foreach ($n in $NetAdapterInterfaceGuids) {
+                    $guid = "{" + ($n.Guid).ToUpper() + "}"
+                    $NICs += get-netadapter | where-object {$_.InterfaceGuid -eq $guid }
+                    $tmp_data = New-Object PSObject
+                    Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name Name $($nics.name)
+                    Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name InterfaceGuid $($guid)
+                    $adapters += $tmp_data   
+                    $NICS = @()
+                    }
+                }
+                if ($null -ne (Compare-Object -ReferenceObject $adapters.Name -DifferenceObject $NetAdapterName))
                 {
                     Write-Verbose -Message ($script:localizedData.SwitchIncorrectNetworkAdapters -f $Name)
                     $removeReaddSwitch = $true
@@ -591,19 +596,21 @@ function Test-TargetResource
                         Write-Verbose -Message ($script:localizedData.CheckingNetAdapterInterfaces -f $Name)
                         if ($null -ne $switch.NetAdapterInterfaceDescriptions)
                         {
-							$NetAdapterInterfaceGuids = $switch.NetAdapterInterfaceGuid
-							$adapters = @()
-							$NICS = @()
-							foreach ($n in $NetAdapterInterfaceGuids) {
-							$guid = "{" + ($n.Guid).ToUpper() + "}"
-							$NICs += get-netadapter | where-object {$_.InterfaceGuid -eq $guid }
-							$tmp_data = New-Object PSObject
-							Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name Name $($nics.name)
-							Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name InterfaceGuid $($guid)
-							$adapters += $tmp_data   
-							$NICS = @()
-							}
-                            if ($null -ne (Compare-Object -ReferenceObject $adapters.name -DifferenceObject $NetAdapterName))
+                            $NetAdapterInterfaceGuids = $switch.NetAdapterInterfaceGuid
+                            $adapters = @()
+                            $NICS = @()
+                            foreach ($n in $NetAdapterInterfaceGuids) {
+                            $guid = "{" + ($n.Guid).ToUpper() + "}"
+                            $NICs += get-netadapter | where-object {$_.InterfaceGuid -eq $guid }
+                            $tmp_data = New-Object PSObject
+                            Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name Name $($nics.name)
+                            Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name InterfaceGuid $($guid)
+                            Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name InterfaceDescription $($NICS.InterfaceDescription)
+                            $adapters += $tmp_data   
+                            $NICS = @()
+                            }
+                      
+                            if ($null -ne (Compare-Object -ReferenceObject $adapters.Name -DifferenceObject $NetAdapterName))
                             {
                                 Write-Verbose -Message ($script:localizedData.IncorrectNetAdapterInterfaces -f $Name)
                                 return $false
