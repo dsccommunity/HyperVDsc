@@ -241,13 +241,17 @@ function Set-TargetResource
             }
             else
             {
-                Try { 
+                try 
+                { 
                     $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction Stop).Name 
-                } Catch {
+                } 
+                catch 
+                {
                     $NetAdapterInterfaceGuids = $switch.NetAdapterInterfaceGuid
                     $adapters = @()
                     $NICS = @()
-                    foreach ($n in $NetAdapterInterfaceGuids) {
+                    foreach ($n in $NetAdapterInterfaceGuids) 
+                    {
                     $guid = "{" + ($n.Guid).ToUpper() + "}"
                     $NICs += get-netadapter | where-object {$_.InterfaceGuid -eq $guid }
                     $tmp_data = New-Object PSObject
@@ -256,9 +260,9 @@ function Set-TargetResource
                     Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name InterfaceDescription $($NICS.InterfaceDescription)
                     $adapters += $tmp_data   
                     $NICS = @()
-                }
+                    }
                 $adapters = (Get-NetAdapter -Name $($adapters.Name)).Name
-                } 
+                }  
                 if ($null -ne (Compare-Object -ReferenceObject $adapters -DifferenceObject $NetAdapterName))
                 {
                     Write-Verbose -Message ($script:localizedData.SwitchIncorrectNetworkAdapters -f $Name)
@@ -597,13 +601,17 @@ function Test-TargetResource
                         Write-Verbose -Message ($script:localizedData.CheckingNetAdapterInterfaces -f $Name)
                         if ($null -ne $switch.NetAdapterInterfaceDescriptions)
                         {
-                            Try { 
+                            try 
+                            { 
                                 $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction Stop).Name 
-                            } Catch {
+                            } 
+                            catch 
+                            {
                                 $NetAdapterInterfaceGuids = $switch.NetAdapterInterfaceGuid
                                 $adapters = @()
                                 $NICS = @()
-                                foreach ($n in $NetAdapterInterfaceGuids) {
+                                foreach ($n in $NetAdapterInterfaceGuids) 
+                                {
                                 $guid = "{" + ($n.Guid).ToUpper() + "}"
                                 $NICs += get-netadapter | where-object {$_.InterfaceGuid -eq $guid }
                                 $tmp_data = New-Object PSObject
@@ -612,7 +620,7 @@ function Test-TargetResource
                                 Add-Member -InputObject $tmp_data -MemberType NoteProperty -Name InterfaceDescription $($NICS.InterfaceDescription)
                                 $adapters += $tmp_data   
                                 $NICS = @()
-                            }
+                                }
                             $adapters = (Get-NetAdapter -Name $($adapters.Name)).Name
                             } 
                             if ($null -ne (Compare-Object -ReferenceObject $adapters -DifferenceObject $NetAdapterName))
