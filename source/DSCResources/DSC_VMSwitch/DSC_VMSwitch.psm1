@@ -241,7 +241,7 @@ function Set-TargetResource
             }
             else
             {
-                try 
+                try
                 { 
                     $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction Stop).Name 
                 } 
@@ -601,7 +601,7 @@ function Test-TargetResource
                         Write-Verbose -Message ($script:localizedData.CheckingNetAdapterInterfaces -f $Name)
                         if ($null -ne $switch.NetAdapterInterfaceDescriptions)
                         {
-                            try 
+                            try
                             { 
                                 $adapters = (Get-NetAdapter -InterfaceDescription $switch.NetAdapterInterfaceDescriptions -ErrorAction Stop).Name 
                             } 
