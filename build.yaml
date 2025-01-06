@@ -5,14 +5,34 @@
 CopyPaths:
   - en-US
   - DSCResources
-  - Modules
+Prefix: prefix.ps1
 Encoding: UTF8
-VersionedOutputDirectory: true
+BuiltModuleSubdirectory: builtModule
+
+ModuleBuildTasks:
+  Sampler:
+    - '*.build.Sampler.ib.tasks'
+  Sampler.GitHubTasks:
+    - '*.ib.tasks'
+  DscResource.DocGenerator:
+    - 'Task.*'
+  DscResource.Test:
+    - 'Task.*'
+
+TaskHeader: |
+  param($Path)
+  ""
+  "=" * 79
+  Write-Build Cyan "`t`t`t$($Task.Name.replace("_"," ").ToUpper())"
+  Write-Build DarkGray  "$(Get-BuildSynopsis $Task)"
+  "-" * 79
+  Write-Build DarkGray "  $Path"
+  Write-Build DarkGray "  $($Task.InvocationInfo.ScriptName):$($Task.InvocationInfo.ScriptLineNumber)"
+  ""
 
 ####################################################
 #      ModuleBuilder Submodules Configuration      #
 ####################################################
-
 NestedModule:
     DscResource.Common:
       CopyOnly: true
@@ -33,11 +53,17 @@ BuildWorkflow:
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
     - Create_Changelog_Release_Output
+
+  docs:
     - Generate_Conceptual_Help
     - Generate_Wiki_Content
+    - Generate_Wiki_Sidebar
+    - Clean_Markdown_Metadata
+    - Package_Wiki_Content
 
   pack:
     - build
+    - docs
     - package_module_nupkg
 
   hqrmtest:
@@ -45,6 +71,7 @@ BuildWorkflow:
 
   test:
     - Pester_Tests_Stop_On_Fail
+    - Convert_Pester_Coverage
     - Pester_If_Code_Coverage_Under_Threshold
 
   publish:
@@ -67,6 +94,9 @@ Pester:
   CodeCoverageOutputFileEncoding: ascii
   CodeCoverageThreshold: 80
 
+####################################################
+#      Pester Configuration (DscResource.Test)     #
+####################################################
 DscTest:
   OutputFormat: NUnitXML
   ExcludeTag:
@@ -77,25 +107,9 @@ DscTest:
     - Modules/DscResource.Common
   MainGitBranch: main
 
-ModuleBuildTasks:
-  Sampler:
-    - '*.build.Sampler.ib.tasks'
-  Sampler.GitHubTasks:
-    - '*.ib.tasks'
-  DscResource.DocGenerator:
-    - 'Task.*'
-
-TaskHeader: |
-  param($Path)
-  ""
-  "=" * 79
-  Write-Build Cyan "`t`t`t$($Task.Name.replace("_"," ").ToUpper())"
-  Write-Build DarkGray  "$(Get-BuildSynopsis $Task)"
-  "-" * 79
-  Write-Build DarkGray "  $Path"
-  Write-Build DarkGray "  $($Task.InvocationInfo.ScriptName):$($Task.InvocationInfo.ScriptLineNumber)"
-  ""
-
+####################################################
+#               GitHub Configuration               #
+####################################################
 GitHubConfig:
   GitHubFilesToAdd:
     - 'CHANGELOG.md'
@@ -115,3 +129,18 @@ DscResource.DocGenerator:
       - '_(.+?)_' # Match Italic (underscore)
       - '\*\*(.+?)\*\*' # Match bold
       - '\*(.+?)\*' # Match Italic (asterisk)
+  Publish_GitHub_Wiki_Content:
+    Debug: false
+  Generate_Markdown_For_DSC_Resources:
+    MofResourceMetadata:
+      Type: MofResource
+      Category: Resources
+    ClassResourceMetadata:
+      Type: ClassResource
+      Category: Resources
+    CompositeResourceMetadata:
+      Type: CompositeResource
+      Category: Resources
+  Generate_Wiki_Sidebar:
+    Debug: false
+    AlwaysOverwrite: true
