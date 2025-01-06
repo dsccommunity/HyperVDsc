@@ -24,7 +24,7 @@ Import-Module $script:subModuleFile -Force -ErrorAction 'Stop'
 
 # Import the stub functions.
 #Get-Module -Name 'Hyper-V' -All | Remove-Module -Force
-Import-Module -Name "$PSScriptRoot/../../TestHelpers/Stubs/Hyper-V.stubs.psm1" -Force
+Import-Module -Name "$PSScriptRoot/../Stubs/Hyper-V.stubs.psm1" -Force
 
 InModuleScope $script:subModuleName {
     Describe 'Public\Get-VMHyperV' {
