@@ -15,7 +15,7 @@ configuration DSC_VMHost_Set_Config
         $EnableEnhancedSessionMode
     )
 
-    Import-DscResource -ModuleName 'xHyperV'
+    Import-DscResource -ModuleName 'HyperVDsc'
 
     node localhost {
         VMHost Integration_Test {
