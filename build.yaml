@@ -105,6 +105,7 @@ DscTest:
     - output
   ExcludeModuleFile:
     - Modules/DscResource.Common
+    - HyperVDsc.psm1
   MainGitBranch: main
 
 ####################################################
