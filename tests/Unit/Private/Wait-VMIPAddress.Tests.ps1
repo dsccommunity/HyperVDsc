@@ -13,11 +13,6 @@ $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Wher
     }).BaseName
 
 $script:parentModule = Get-Module -Name $script:projectName -ListAvailable | Select-Object -First 1
-#$script:subModulesFolder = Join-Path -Path $script:parentModule.ModuleBase -ChildPath 'Modules'
-#Remove-Module -Name $script:parentModule -Force -ErrorAction 'SilentlyContinue'
-
-#$script:subModuleName = (Split-Path -Path $PSCommandPath -Leaf) -replace '\.Tests.ps1'
-#$script:subModuleFile = Join-Path -Path $script:subModulesFolder -ChildPath "$($script:subModuleName)"
 
 Import-Module $script:parentModule -Force -ErrorAction 'Stop'
 #endregion HEADER

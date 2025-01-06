@@ -13,20 +13,15 @@ $script:projectName = (Get-ChildItem -Path "$script:projectPath\*\*.psd1" | Wher
     }).BaseName
 
 $script:parentModule = Get-Module -Name $script:projectName -ListAvailable | Select-Object -First 1
-$script:subModulesFolder = Join-Path -Path $script:parentModule.ModuleBase -ChildPath 'Modules'
-Remove-Module -Name $script:parentModule -Force -ErrorAction 'SilentlyContinue'
 
-$script:subModuleName = (Split-Path -Path $PSCommandPath -Leaf) -replace '\.Tests.ps1'
-$script:subModuleFile = Join-Path -Path $script:subModulesFolder -ChildPath "$($script:subModuleName)"
-
-Import-Module $script:subModuleFile -Force -ErrorAction 'Stop'
+Import-Module $script:parentModule -Force -ErrorAction 'Stop'
 #endregion HEADER
 
 # Import the stub functions.
 #Get-Module -Name 'Hyper-V' -All | Remove-Module -Force
 Import-Module -Name "$PSScriptRoot/../Stubs/Hyper-V.stubs.psm1" -Force
 
-InModuleScope $script:subModuleName {
+InModuleScope $script:parentModule {
     Describe 'Public\ConvertTo-TimeSpan' {
         It 'Should convert 60 seconds to "System.TimeSpan" of 1 minute' {
             $testSeconds = 60
