@@ -7,6 +7,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+### Changed
+
 - HyperVDsc
   - BREAKING CHANGE
     - Renamed _xHyper-V_ to _HyperVDsc - fixes [Issue #69](https://github.com/dsccommunity/HyperVDsc/issues/213).
@@ -22,6 +24,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     - Fix multiple DNS IP adresses does not work #190
     - NetworkSetting parameter is now optional and no default actions are taken if not specified
   - Switch to use VM image `windows-latest` to build phase.
+  - Use latest DscCommunity scripts and files
+  - Moved functions from .Common module to Private/Public files.
 
 ## [3.18.0] - 2022-06-04
 
