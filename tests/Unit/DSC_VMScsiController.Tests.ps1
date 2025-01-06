@@ -19,7 +19,7 @@ function Invoke-TestSetup
         -TestType 'Unit'
 
     # Import the stub functions.
-    Import-Module -Name "$PSScriptRoot/Stubs/Hyper-V.stubs.psm1" -Force
+    Import-Module -Name "$PSScriptRoot/../TestHelpers/Stubs/Hyper-V.stubs.psm1" -Force
 }
 
 function Invoke-TestCleanup
