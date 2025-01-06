@@ -1,8 +1,6 @@
 $script:dscResourceCommonModulePath = Join-Path -Path $PSScriptRoot -ChildPath '../../Modules/DscResource.Common'
-$script:hyperVDscCommonModulePath = Join-Path -Path $PSScriptRoot -ChildPath '../../Modules/HyperVDsc.Common'
 
 Import-Module -Name $script:dscResourceCommonModulePath
-Import-Module -Name $script:hyperVDscCommonModulePath
 
 $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
