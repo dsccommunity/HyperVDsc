@@ -8,7 +8,7 @@
     .PARAMETER TimeSpanType
     Convert using specified interval type.
 #>
-function ConvertTo-TimeSpan
+function ConvertTo-TimeSpanHvDsc
 {
     [CmdletBinding()]
     [OutputType([System.TimeSpan])]

@@ -398,7 +398,7 @@ function Set-TargetResource
             TimeInterval = $PSBoundParameters['ResourceMeteringSaveIntervalMinute']
             TimeIntervalType = 'Minutes'
         }
-        $resourceMeteringSaveInterval = ConvertTo-TimeSpan @convertToTimeSpanParams
+        $resourceMeteringSaveInterval = ConvertTo-TimeSpanHvDsc @convertToTimeSpanParams
 
         # Remove the existing UInt32 explicit type and add the TimeSpan type parameter
         $null = $PSBoundParameters.Remove('ResourceMeteringSaveIntervalMinute')
