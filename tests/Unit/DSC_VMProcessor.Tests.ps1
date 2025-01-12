@@ -175,7 +175,7 @@ try
             Mock -CommandName Assert-TargetResourceParameter
             Mock -CommandName Get-VM
             Mock -CommandName Set-VMProcessor
-            Mock -CommandName Set-VMProperty
+            Mock -CommandName Set-VMPropertyHvDsc
 
             It 'Should assert Hyper-V module is installed' {
                 $null = Set-TargetResource -VMName $testVMName
@@ -227,7 +227,7 @@ try
 
                     Set-TargetResource @setTargetResourceParams -RestartIfNeeded $true
 
-                    Assert-MockCalled -CommandName Set-VMProperty -Scope It -Exactly 1
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -Scope It -Exactly 1
                 }
             }
 
@@ -255,7 +255,7 @@ try
                     Set-TargetResource @setTargetResourceParams
 
                     Assert-MockCalled -CommandName Set-VMProcessor -Scope It -Exactly 1
-                    Assert-MockCalled -CommandName Set-VMProperty -Scope It -Exactly 0
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -Scope It -Exactly 0
                 }
             }
         } # describe Set-TargetResource

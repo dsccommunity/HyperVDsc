@@ -310,7 +310,7 @@ function Set-TargetResource
             # Stop the VM, set the right properties, start the VM only if there are properties to change
             if ($changeProperty.Count -gt 0)
             {
-                Set-VMProperty -Name $Name -VMCommand 'Set-VM' -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
+                Set-VMPropertyHvDsc -Name $Name -VMCommand 'Set-VM' -ChangeProperty $changeProperty -WaitForIP $WaitForIP -RestartIfNeeded $RestartIfNeeded
                 Write-Verbose -Message ($script:localizedData.VMPropertiesUpdated -f $Name)
             }
 
@@ -344,7 +344,7 @@ function Set-TargetResource
                         WaitForIP       = $WaitForIP
                         RestartIfNeeded = $RestartIfNeeded
                     }
-                    Set-VMProperty @setVMPropertyParams
+                    Set-VMPropertyHvDsc @setVMPropertyParams
                     Write-Verbose -Message ($script:localizedData.VMPropertiesUpdated -f $Name)
                 }
             }
@@ -420,7 +420,7 @@ function Set-TargetResource
                         }
                         RestartIfNeeded = $RestartIfNeeded
                     }
-                    Set-VMProperty @setVMPropertyParams
+                    Set-VMPropertyHvDsc @setVMPropertyParams
                     Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'SecureBoot', $SecureBoot)
                 }
             }
@@ -917,7 +917,7 @@ function Get-VhdHierarchy
 }
 
 <#
-    The 'Set-VMProperty' method cannot be used as it cannot deal with piped
+    The 'Set-VMPropertyHvDsc' method cannot be used as it cannot deal with piped
     command in it's current implementation
 #>
 function Set-VMMACAddress

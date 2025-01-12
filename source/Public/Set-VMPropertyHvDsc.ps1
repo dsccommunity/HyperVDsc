@@ -22,7 +22,7 @@
     .PARAMETER RestartIfNeeded
     Power cycle the virtual machine if changes are required.
 #>
-function Set-VMProperty
+function Set-VMPropertyHvDsc
 {
     [CmdletBinding(DefaultParameterSetName = 'Name')]
     param
@@ -57,7 +57,7 @@ function Set-VMProperty
         # Add the -Name property to the ChangeProperty hashtable for splatting
         $ChangeProperty['VMName'] = $VMName
 
-        # Set the common parameters for splatting against Get-VM and Set-VMState
+        # Set the common parameters for splatting against Get-VM and Set-VMStateHvDsc
         $vmCommonProperty = @{
             Name = $VMName
         }
@@ -70,7 +70,7 @@ function Set-VMProperty
         # Add the -Name property to the ChangeProperty hashtable for splatting
         $ChangeProperty['Name'] = $Name
 
-        # Set the common parameters for splatting against Get-VM and Set-VMState
+        # Set the common parameters for splatting against Get-VM and Set-VMStateHvDsc
         $vmCommonProperty = @{
             Name = $Name
         }
@@ -82,7 +82,7 @@ function Set-VMProperty
     if ($vmOriginalState -ne 'Off' -and $RestartIfNeeded)
     {
         # Turn the vm off to make changes
-        Set-VMState @vmCommonProperty -State Off
+        Set-VMStateHvDsc @vmCommonProperty -State Off
 
         Write-Verbose -Message ($script:localizedData.UpdatingVMProperties -f $Name)
         # Make changes using the passed hashtable
@@ -91,7 +91,7 @@ function Set-VMProperty
         # Cannot move an off VM to a paused state - only to running state
         if ($vmOriginalState -eq 'Running')
         {
-            Set-VMState @vmCommonProperty -State Running -WaitForIP $WaitForIP
+            Set-VMStateHvDsc @vmCommonProperty -State Running -WaitForIP $WaitForIP
         }
 
         Write-Verbose -Message ($script:localizedData.VMPropertiesUpdated -f $Name)

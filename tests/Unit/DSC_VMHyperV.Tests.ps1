@@ -743,39 +743,39 @@ try
                     Assert-MockCalled -CommandName Set-VMNetworkAdapter -Exactly 2 -Scope It
                 }
 
-                It 'Does not change Secure Boot call "Set-VMProperty" when creating a generation 1 VM' {
-                    Mock -CommandName Set-VMProperty
+                It 'Does not change Secure Boot call "Set-VMPropertyHvDsc" when creating a generation 1 VM' {
+                    Mock -CommandName Set-VMPropertyHvDsc
                     Set-TargetResource -Name 'RunningVM' @testParams
-                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It
                 }
 
-                It 'Does call "Set-VMProperty" when creating a generation 2 VM' {
+                It 'Does call "Set-VMPropertyHvDsc" when creating a generation 2 VM' {
                     Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
-                    Mock -CommandName Set-VMProperty
+                    Mock -CommandName Set-VMPropertyHvDsc
                     Set-TargetResource -Name 'RunningVM' -Generation 2 -SecureBoot $false @testParams
-                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 1 -Scope It
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 1 -Scope It
                 }
 
                 It 'Does not change Secure Boot for generation 1 VM' {
                     Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
-                    Mock -CommandName Set-VMProperty
+                    Mock -CommandName Set-VMPropertyHvDsc
                     Set-TargetResource -Name 'StoppedVM' -SecureBoot $true @testParams
                     Set-TargetResource -Name 'StoppedVM' -SecureBoot $false @testParams
-                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It
                 }
 
                 It 'Does not change Secure Boot for generation 2 VM with VM "SecureBoot" match' {
                     Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
-                    Mock -CommandName Set-VMProperty
+                    Mock -CommandName Set-VMPropertyHvDsc
                     Set-TargetResource -Name 'StoppedVM' -SecureBoot $true -Generation 2 @testParams
-                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 0 -Scope It
                 }
 
                 It 'Does change Secure Boot for generation 2 VM with VM "SecureBoot" mismatch' {
                     Mock -CommandName Test-VMSecureBoot -MockWith { return $false }
-                    Mock -CommandName Set-VMProperty
+                    Mock -CommandName Set-VMPropertyHvDsc
                     Set-TargetResource -Name 'StoppedVM' -SecureBoot $true -Generation 2 @testParams
-                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 1 -Scope It
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 1 -Scope It
                 }
 
                 It 'Does call "Enable-VMIntegrationService" when "EnableGuestService" = "$true"' {
@@ -858,9 +858,9 @@ try
                     Assert-MockCalled -CommandName Set-VM -ParameterFilter { $Name -eq $VMName -and $AutomaticCheckpointsEnabled -eq $SetAutomaticCheckpointsEnabled } -Exactly -Times $Times -Scope It
                 }
                 It 'Disables dynamic memory of RuningVM if only StartupMemory specified' {
-                    Mock -CommandName Set-VMProperty
+                    Mock -CommandName Set-VMPropertyHvDsc
                     Set-TargetResource -Name 'RunningVM' -StartupMemory 4GB @testParams
-                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -ParameterFilter {
                         $VMCommand -eq 'Set-VM' -and
                         ($ChangeProperty.StaticMemory -eq $true) -and
                         ($ChangeProperty.DynamicMemory -eq $false)
@@ -868,9 +868,9 @@ try
                 }
 
                 It 'Disables dynamic memory of RunningVM if StartupMemory, MinimumMemory and MaximumMemory are specified with the same values' {
-                    Mock -CommandName Set-VMProperty
+                    Mock -CommandName Set-VMPropertyHvDsc
                     Set-TargetResource -Name 'RunningVM' -StartupMemory 4GB -MinimumMemory 4GB -MaximumMemory 4GB @testParams
-                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -ParameterFilter {
                         $VMCommand -eq 'Set-VM' -and
                         ($ChangeProperty.StaticMemory -eq $true) -and
                         ($ChangeProperty.DynamicMemory -eq $false)
@@ -878,9 +878,9 @@ try
                 }
 
                 It 'Enables dynamic memory of RuningVM if MinimumMemory is specified ' {
-                    Mock -CommandName Set-VMProperty
+                    Mock -CommandName Set-VMPropertyHvDsc
                     Set-TargetResource -Name 'RunningVM' -MinimumMemory 4GB @testParams
-                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -ParameterFilter {
                         $VMCommand -eq 'Set-VM' -and
                         ($ChangeProperty.StaticMemory -eq $false) -and
                         ($ChangeProperty.DynamicMemory -eq $true)
@@ -888,9 +888,9 @@ try
                 }
 
                 It 'Enables dynamic memory of RuningVM if MaximumMemory is specified ' {
-                    Mock -CommandName Set-VMProperty
+                    Mock -CommandName Set-VMPropertyHvDsc
                     Set-TargetResource -Name 'RunningVM' -MaximumMemory 4GB @testParams
-                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
+                    Assert-MockCalled -CommandName Set-VMPropertyHvDsc -ParameterFilter {
                         $VMCommand -eq 'Set-VM' -and
                         ($ChangeProperty.StaticMemory -eq $false) -and
                         ($ChangeProperty.DynamicMemory -eq $true)

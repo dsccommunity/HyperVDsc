@@ -22,7 +22,7 @@ Import-Module $script:parentModule -Force -ErrorAction 'Stop'
 Import-Module -Name "$PSScriptRoot/../Stubs/Hyper-V.stubs.psm1" -Force
 
 InModuleScope $script:parentModule {
-    Describe 'Public\Set-VMProperty' {
+    Describe 'Public\Set-VMPropertyHvDsc' {
         It "Should throw if VM is running and 'RestartIfNeeded' is False" {
             $mockVMName = 'Test'
 
@@ -40,7 +40,7 @@ InModuleScope $script:parentModule {
                 }
             }
 
-            { Set-VMProperty @setVMPropertyParams } | Should -Throw (
+            { Set-VMPropertyHvDsc @setVMPropertyParams } | Should -Throw (
                 $script:localizedData.CannotUpdatePropertiesOnlineError -f $mockVMName, 'Running'
             )
         }
@@ -48,7 +48,7 @@ InModuleScope $script:parentModule {
         It "Should stop and restart VM when running and 'RestartIfNeeded' is True" {
             Mock -CommandName Stop-VM
             Mock -CommandName Set-VMProcessor
-            Mock -CommandName Set-VMState
+            Mock -CommandName Set-VMStateHvDsc
             Mock -CommandName Get-VM -MockWith {
                 return @{
                     State = 'Running'
@@ -63,13 +63,13 @@ InModuleScope $script:parentModule {
                 }
                 RestartIfNeeded = $true
             }
-            Set-VMProperty @setVMPropertyParams
+            Set-VMPropertyHvDsc @setVMPropertyParams
 
-            Assert-MockCalled -CommandName Set-VMState -ParameterFilter {
+            Assert-MockCalled -CommandName Set-VMStateHvDsc -ParameterFilter {
                 $State -eq 'Off'
             } -Scope It
 
-            Assert-MockCalled -CommandName Set-VMState -ParameterFilter {
+            Assert-MockCalled -CommandName Set-VMStateHvDsc -ParameterFilter {
                 $State -eq 'Running'
             } -Scope It
         }

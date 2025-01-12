@@ -364,7 +364,7 @@ function Set-TargetResource
             RestartIfNeeded = $true
             Verbose         = $Verbose
         }
-        Set-VMProperty @setVMPropertyParameters
+        Set-VMPropertyHvDsc @setVMPropertyParameters
     }
 } #end function
 
