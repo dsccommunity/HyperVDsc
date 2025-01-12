@@ -16,7 +16,7 @@
     Waits for the virtual machine to be report an IP address when transitioning
     into a running state.
 #>
-function Set-VMState
+function Set-VMStateHvDsc
 {
     [CmdletBinding()]
     param
@@ -27,7 +27,7 @@ function Set-VMState
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Running','Paused','Off')]
+        [ValidateSet('Running', 'Paused', 'Off')]
         [System.String]
         $State,
 
@@ -38,7 +38,8 @@ function Set-VMState
 
     switch ($State)
     {
-        'Running' {
+        'Running'
+        {
             $vmCurrentState = (Get-VM -Name $Name).State
             if ($vmCurrentState -eq 'Paused')
             {
@@ -58,14 +59,16 @@ function Set-VMState
                 Wait-VMIPAddress -Name $Name -Verbose
             }
         }
-        'Paused' {
+        'Paused'
+        {
             if ($vmCurrentState -ne 'Off')
             {
                 Write-Verbose -Message ($script:localizedData.SuspendingVM -f $Name)
                 Suspend-VM -Name $Name
             }
         }
-        'Off' {
+        'Off'
+        {
             if ($vmCurrentState -ne 'Off')
             {
                 Write-Verbose -Message ($script:localizedData.StoppingVM -f $Name)

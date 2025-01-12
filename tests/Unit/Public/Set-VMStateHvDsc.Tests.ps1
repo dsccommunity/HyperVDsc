@@ -22,7 +22,7 @@ Import-Module $script:parentModule -Force -ErrorAction 'Stop'
 Import-Module -Name "$PSScriptRoot/../Stubs/Hyper-V.stubs.psm1" -Force
 
 InModuleScope $script:parentModule {
-    Describe 'Public\Set-VMState' {
+    Describe 'Public\Set-VMStateHvDsc' {
         It 'Should resume VM when current "State" is "Paused" and target state is "Running"' {
             Mock -CommandName Resume-VM
             Mock -CommandName Wait-VMIPAddress
@@ -32,7 +32,7 @@ InModuleScope $script:parentModule {
                 }
             }
 
-            Set-VMState -Name 'TestVM' -State 'Running'
+            Set-VMStateHvDsc -Name 'TestVM' -State 'Running'
 
             Assert-MockCalled -CommandName Resume-VM -Scope It
             Assert-MockCalled -CommandName Wait-VMIPAddress -Scope It -Exactly 0
@@ -47,7 +47,7 @@ InModuleScope $script:parentModule {
                 }
             }
 
-            Set-VMState -Name 'TestVM' -State 'Running' -WaitForIP $true
+            Set-VMStateHvDsc -Name 'TestVM' -State 'Running' -WaitForIP $true
 
             Assert-MockCalled -CommandName Resume-VM -Scope It
             Assert-MockCalled -CommandName Wait-VMIPAddress -Scope It
@@ -62,7 +62,7 @@ InModuleScope $script:parentModule {
                 }
             }
 
-            Set-VMState -Name 'TestVM' -State 'Running'
+            Set-VMStateHvDsc -Name 'TestVM' -State 'Running'
 
             Assert-MockCalled -CommandName Start-VM -Scope It
             Assert-MockCalled -CommandName Wait-VMIPAddress -Scope It -Exactly 0
@@ -77,7 +77,7 @@ InModuleScope $script:parentModule {
                 }
             }
 
-            Set-VMState -Name 'TestVM' -State 'Running' -WaitForIP $true
+            Set-VMStateHvDsc -Name 'TestVM' -State 'Running' -WaitForIP $true
 
             Assert-MockCalled -CommandName Start-VM -Scope It
             Assert-MockCalled -CommandName Wait-VMIPAddress -Scope It
@@ -91,7 +91,7 @@ InModuleScope $script:parentModule {
                 }
             }
 
-            Set-VMState -Name 'TestVM' -State 'Paused'
+            Set-VMStateHvDsc -Name 'TestVM' -State 'Paused'
 
             Assert-MockCalled -CommandName Suspend-VM -Scope It
         }
@@ -104,7 +104,7 @@ InModuleScope $script:parentModule {
                 }
             }
 
-            Set-VMState -Name 'TestVM' -State 'Off'
+            Set-VMStateHvDsc -Name 'TestVM' -State 'Off'
 
             Assert-MockCalled -CommandName Stop-VM -Scope It
         }
@@ -117,7 +117,7 @@ InModuleScope $script:parentModule {
                 }
             }
 
-            Set-VMState -Name 'TestVM' -State 'Off'
+            Set-VMStateHvDsc -Name 'TestVM' -State 'Off'
 
             Assert-MockCalled -CommandName Stop-VM -Scope It
         }

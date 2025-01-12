@@ -260,7 +260,7 @@ function Set-TargetResource
             if ($State -and ($vmObj.State -ne $State))
             {
                 Write-Verbose -Message ($script:localizedData.VMPropertyShouldBe -f 'State', $State, $vmObj.State)
-                Set-VMState -Name $Name -State $State -WaitForIP $WaitForIP
+                Set-VMStateHvDsc -Name $Name -State $State -WaitForIP $WaitForIP
                 Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'State', $State)
             }
 
@@ -586,7 +586,7 @@ function Set-TargetResource
 
             if ($State)
             {
-                Set-VMState -Name $Name -State $State -WaitForIP $WaitForIP
+                Set-VMStateHvDsc -Name $Name -State $State -WaitForIP $WaitForIP
                 Write-Verbose -Message ($script:localizedData.VMPropertySet -f 'State', $State)
             }
 
@@ -948,13 +948,13 @@ function Set-VMMACAddress
     $originalState = $vmObj.state
     if ($originalState -ne 'Off' -and $RestartIfNeeded)
     {
-        Set-VMState -Name $Name -State Off
+        Set-VMStateHvDsc -Name $Name -State Off
         $vmObj.NetworkAdapters[$NICIndex] | Set-VMNetworkAdapter -StaticMacAddress $MACAddress
 
         # Can not move a off VM to paused, but only to running state
         if ($originalState -eq 'Running')
         {
-            Set-VMState -Name $Name -State Running -WaitForIP $WaitForIP
+            Set-VMStateHvDsc -Name $Name -State Running -WaitForIP $WaitForIP
         }
 
         # Cannot make a paused VM to go back to Paused state after turning Off

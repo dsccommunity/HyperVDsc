@@ -603,7 +603,7 @@ try
                 Mock -CommandName Remove-VM -MockWith { return $true }
                 Mock -CommandName Set-VMNetworkAdapter -MockWith { return $true }
                 Mock -CommandName Get-VMNetworkAdapter -MockWith { return $stubVM.NetworkAdapters.IpAddresses }
-                Mock -CommandName Set-VMState -MockWith { return $true }
+                Mock -CommandName Set-VMStateHvDsc -MockWith { return $true }
                 Mock -CommandName Set-VMMemory
 
                 It 'Removes an existing VM when "Ensure" = "Absent"' {
@@ -615,21 +615,21 @@ try
                     Set-TargetResource -Name 'NewVM' -State Running @testParams
                     Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It
-                    Assert-MockCalled -CommandName Set-VMState -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Set-VMStateHvDsc -Exactly -Times 1 -Scope It
                 }
 
                 It 'Creates but does not start a VM with disabled dynamic memory that does not exist when "Ensure" = "Present"' {
                     Set-TargetResource -Name 'NewVM' @testParams
                     Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It
-                    Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It
+                    Assert-MockCalled -CommandName Set-VMStateHvDsc -Exactly -Times 0 -Scope It
                 }
 
                 It 'Creates but does not start a VM with disabled dynamic memory when only StartupMemory is specified' {
                     Set-TargetResource -Name 'NewVM' @testParams -StartupMemory 4GB
                     Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It
-                    Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It
+                    Assert-MockCalled -CommandName Set-VMStateHvDsc -Exactly -Times 0 -Scope It
                 }
 
                 It 'Creates but does not start a VM with disabled dynamic memory when identical values for startup, minimum and maximum memory are specified' {
@@ -637,7 +637,7 @@ try
                     Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Set-VMMemory -Exactly -Times 1 -Scope It
-                    Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It
+                    Assert-MockCalled -CommandName Set-VMStateHvDsc -Exactly -Times 0 -Scope It
                 }
 
                 It 'Creates but does not start a VM with enabled dynamic memory because a MinimumMemory value is specified' {
@@ -645,7 +645,7 @@ try
                     Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Set-VMMemory -Exactly -Times 0 -Scope It
-                    Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It
+                    Assert-MockCalled -CommandName Set-VMStateHvDsc -Exactly -Times 0 -Scope It
                 }
 
                 It 'Creates but does not start a VM with enabled dynamic memory because a MaximumMemory value is specified' {
@@ -653,27 +653,27 @@ try
                     Assert-MockCalled -CommandName New-VM -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Set-VM -Exactly -Times 1 -Scope It
                     Assert-MockCalled -CommandName Set-VMMemory -Exactly -Times 0 -Scope It
-                    Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It
+                    Assert-MockCalled -CommandName Set-VMStateHvDsc -Exactly -Times 0 -Scope It
                 }
 
                 It 'Does not change VM state when VM "State" = "Running" and requested "State" = "Running"' {
                     Set-TargetResource -Name 'RunningVM' -State Running @testParams
-                    Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It
+                    Assert-MockCalled -CommandName Set-VMStateHvDsc -Exactly -Times 0 -Scope It
                 }
 
                 It 'Does not change VM state when VM "State" = "Off" and requested "State" = "Off"' {
                     Set-TargetResource -Name 'StoppedVM' -State Off @testParams
-                    Assert-MockCalled -CommandName Set-VMState -Exactly -Times 0 -Scope It
+                    Assert-MockCalled -CommandName Set-VMStateHvDsc -Exactly -Times 0 -Scope It
                 }
 
                 It 'Changes VM state when existing VM "State" = "Off" and requested "State" = "Running"' {
                     Set-TargetResource -Name 'StoppedVM' -State Running @testParams
-                    Assert-MockCalled -CommandName Set-VMState -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Set-VMStateHvDsc -Exactly -Times 1 -Scope It
                 }
 
                 It 'Changes VM state when existing VM "State" = "Running" and requested "State" = "Off"' {
                     Set-TargetResource -Name 'RunningVM' -State Off @testParams
-                    Assert-MockCalled -CommandName Set-VMState -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName Set-VMStateHvDsc -Exactly -Times 1 -Scope It
                 }
 
                 It 'Creates a generation 1 VM by default/when not explicitly specified' {

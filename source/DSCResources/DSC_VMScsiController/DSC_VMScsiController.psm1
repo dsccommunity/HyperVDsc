@@ -179,7 +179,7 @@ function Set-TargetResource
             New-InvalidOperationException -Message $errorMessage
         }
 
-        Set-VMState -Name $VMName -State 'Off'
+        Set-VMStateHvDsc -Name $VMName -State 'Off'
         Write-Verbose -Message ($script:localizedData.AddingController -f $scsiControllerCount)
         Add-VMScsiController -VMName $VMName
     }
@@ -198,7 +198,7 @@ function Set-TargetResource
             New-InvalidOperationException -Message $errorMessage
         }
 
-        Set-VMState -Name $VMName -State 'Off'
+        Set-VMStateHvDsc -Name $VMName -State 'Off'
         Write-Verbose -Message ($script:localizedData.CheckingExistingDisks -f $ControllerNumber)
         $controller = Get-VMScsiController -VMName $VmName -ControllerNumber $ControllerNumber
 
@@ -214,7 +214,7 @@ function Set-TargetResource
     }
 
     # Restore the previous state
-    Set-VMState -Name $VMName -State $existingVmState
+    Set-VMStateHvDsc -Name $VMName -State $existingVmState
 }
 
 Export-ModuleMember -Function *-TargetResource

@@ -136,7 +136,7 @@ try
             Mock -CommandName Add-VMScsiController
             Mock -CommandName Remove-VMScsiController
             Mock -CommandName Remove-VMHardDiskDrive
-            Mock -CommandName Set-VMState
+            Mock -CommandName Set-VMStateHvDsc
 
             It 'Should assert Hyper-V module is installed' {
                 Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
@@ -181,10 +181,10 @@ try
 
                 $null = Set-TargetResource @setTargetResourceParams
 
-                Assert-MockCalled -CommandName Set-VMState -ParameterFilter { $State -eq 'Off' } -Scope It
+                Assert-MockCalled -CommandName Set-VMStateHvDsc -ParameterFilter { $State -eq 'Off' } -Scope It
             }
 
-            It 'Should call "Set-VMState" to restore VM to its previous state' {
+            It 'Should call "Set-VMStateHvDsc" to restore VM to its previous state' {
                 $testVMState = 'Paused'
                 Mock -CommandName Get-VMHyperV { return @{ State = $testVMState } }
                 $setTargetResourceParams = @{
@@ -195,7 +195,7 @@ try
 
                 $null = Set-TargetResource @setTargetResourceParams
 
-                Assert-MockCalled -CommandName Set-VMState -ParameterFilter { $State -eq $testVMState } -Scope It
+                Assert-MockCalled -CommandName Set-VMStateHvDsc -ParameterFilter { $State -eq $testVMState } -Scope It
             }
 
             It 'Should add single controller when it does not exist' {
