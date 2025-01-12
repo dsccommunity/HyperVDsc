@@ -139,7 +139,7 @@ try
             Mock -CommandName Set-VMStateHvDsc
 
             It 'Should assert Hyper-V module is installed' {
-                Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
+                Mock -CommandName Get-VMHyperVHvDsc { return @{ State = 'Running' } }
                 $setTargetResourceParams = @{
                     VMName           = $testVMName
                     ControllerNumber = 0
@@ -152,7 +152,7 @@ try
             }
 
             It 'Should throw if "RestartIfNeeded" is not specified and VM is "Running"' {
-                Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
+                Mock -CommandName Get-VMHyperVHvDsc { return @{ State = 'Running' } }
                 $setTargetResourceParams = @{
                     VMName           = $testVMName
                     ControllerNumber = 0
@@ -162,7 +162,7 @@ try
             }
 
             It 'Should not throw if "RestartIfNeeded" is not specified and VM is "Off"' {
-                Mock -CommandName Get-VMHyperV { return @{ State = 'Off' } }
+                Mock -CommandName Get-VMHyperVHvDsc { return @{ State = 'Off' } }
                 $setTargetResourceParams = @{
                     VMName           = $testVMName
                     ControllerNumber = 0
@@ -171,8 +171,8 @@ try
                 { Set-TargetResource @setTargetResourceParams } | Should -Not -throw
             }
 
-            It 'Should call "Set-VMState" to stop running VM' {
-                Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
+            It 'Should call "Set-VMStateHvDsc" to stop running VM' {
+                Mock -CommandName Get-VMHyperVHvDsc { return @{ State = 'Running' } }
                 $setTargetResourceParams = @{
                     VMName           = $testVMName
                     ControllerNumber = 0
@@ -186,7 +186,7 @@ try
 
             It 'Should call "Set-VMStateHvDsc" to restore VM to its previous state' {
                 $testVMState = 'Paused'
-                Mock -CommandName Get-VMHyperV { return @{ State = $testVMState } }
+                Mock -CommandName Get-VMHyperVHvDsc { return @{ State = $testVMState } }
                 $setTargetResourceParams = @{
                     VMName           = $testVMName
                     ControllerNumber = 0
@@ -199,7 +199,7 @@ try
             }
 
             It 'Should add single controller when it does not exist' {
-                Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
+                Mock -CommandName Get-VMHyperVHvDsc { return @{ State = 'Running' } }
                 Mock -CommandName Get-VMScsiController
                 $setTargetResourceParams = @{
                     VMName           = $testVMName
@@ -213,7 +213,7 @@ try
             }
 
             It 'Should add single controller when one already exists' {
-                Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
+                Mock -CommandName Get-VMHyperVHvDsc { return @{ State = 'Running' } }
                 $fakeVMScsiController = [PSCustomObject] @{ ControllerNumber = 0 }
                 Mock -CommandName Get-VMScsiController { return $fakeVMScsiController }
                 $setTargetResourceParams = @{
@@ -228,7 +228,7 @@ try
             }
 
             It 'Should throw when adding controller when intermediate controller(s) do not exist' {
-                Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
+                Mock -CommandName Get-VMHyperVHvDsc { return @{ State = 'Running' } }
                 Mock -CommandName Get-VMScsiController
                 $setTargetResourceParams = @{
                     VMName           = $testVMName
@@ -240,7 +240,7 @@ try
             }
 
             It 'Should remove controller when Ensure = "Absent"' {
-                Mock -CommandName Get-VMHyperV {
+                Mock -CommandName Get-VMHyperVHvDsc {
                     return @{
                         State = 'Running'
                     }
@@ -286,7 +286,7 @@ try
             }
 
             It 'Should remove all attached disks when Ensure = "Absent"' {
-                Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
+                Mock -CommandName Get-VMHyperVHvDsc { return @{ State = 'Running' } }
 
                 $stubHardDiskDrive1 = [Microsoft.HyperV.PowerShell.HardDiskDrive]::CreateTypeInstance()
                 $stubHardDiskDrive1.CimSession = New-MockObject -Type CimSession
@@ -325,7 +325,7 @@ try
             }
 
             It 'Should throw removing a controller when additional/subsequent controller(s) exist' {
-                Mock -CommandName Get-VMHyperV { return @{ State = 'Running' } }
+                Mock -CommandName Get-VMHyperVHvDsc { return @{ State = 'Running' } }
                 $fakeVMScsiControllers = @(
                     [PSCustomObject] @{ ControllerNumber = 0 }
                     [PSCustomObject] @{ ControllerNumber = 1 }

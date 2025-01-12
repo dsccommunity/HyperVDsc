@@ -154,7 +154,7 @@ function Set-TargetResource
     Assert-Module -ModuleName 'Hyper-V'
 
     # Getting the state of the VM so we can restore it later
-    $existingVmState = (Get-VMHyperV -VMName $VMName).State
+    $existingVmState = (Get-VMHyperVHvDsc -VMName $VMName).State
 
     if ((-not $RestartIfNeeded) -and ($existingVmState -ne 'Off'))
     {

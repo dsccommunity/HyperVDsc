@@ -5,7 +5,7 @@
     .PARAMETER VMName
     Name of the Hyper-V virtual machine to return
 #>
-function Get-VMHyperV
+function Get-VMHyperVHvDsc
 {
     [CmdletBinding()]
     param

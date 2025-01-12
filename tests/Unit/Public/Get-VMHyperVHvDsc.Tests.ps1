@@ -22,7 +22,7 @@ Import-Module $script:parentModule -Force -ErrorAction 'Stop'
 Import-Module -Name "$PSScriptRoot/../Stubs/Hyper-V.stubs.psm1" -Force
 
 InModuleScope $script:parentModule {
-    Describe 'Public\Get-VMHyperV' {
+    Describe 'Public\Get-VMHyperVHvDsc' {
         BeforeAll {
             $mockVMName = 'TestVM'
         }
@@ -31,7 +31,7 @@ InModuleScope $script:parentModule {
         It 'Should not throw when no VM is found' {
             Mock -CommandName Get-VM
 
-            $result = Get-VMHyperV -VMName $mockVMName
+            $result = Get-VMHyperVHvDsc -VMName $mockVMName
 
             $result | Should -BeNullOrEmpty
         }
@@ -43,7 +43,7 @@ InModuleScope $script:parentModule {
                 }
             }
 
-            $result = Get-VMHyperV -VMName $mockVMName
+            $result = Get-VMHyperVHvDsc -VMName $mockVMName
 
             $result.Name | Should -Be $mockVMName
         }
@@ -60,7 +60,7 @@ InModuleScope $script:parentModule {
                 )
             }
 
-            { Get-VMHyperV -VMName $mockVMName } | Should -Throw (
+            { Get-VMHyperVHvDsc -VMName $mockVMName } | Should -Throw (
                 $script:localizedData.MoreThanOneVMExistsError -f $mockVMName
             )
         }
