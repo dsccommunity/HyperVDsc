@@ -22,11 +22,11 @@ Import-Module $script:parentModule -Force -ErrorAction 'Stop'
 Import-Module -Name "$PSScriptRoot/../Stubs/Hyper-V.stubs.psm1" -Force
 
 InModuleScope $script:parentModule {
-    Describe 'Public\ConvertFrom-TimeSpan' {
+    Describe 'Public\ConvertFrom-TimeSpanHvDsc' {
         It 'Should convert a "System.TimeSpan" of 1 minute to 60 seconds' {
             $testTimeSpan = New-TimeSpan -Minutes 1
 
-            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Seconds
+            $result = ConvertFrom-TimeSpanHvDsc -TimeSpan $testTimeSpan -TimeSpanType Seconds
 
             $result | Should -Be 60
         }
@@ -34,7 +34,7 @@ InModuleScope $script:parentModule {
         It 'Should convert a "System.TimeSpan" of 1 hour to 60 minutes' {
             $testTimeSpan = New-TimeSpan -Hours 1
 
-            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Minutes
+            $result = ConvertFrom-TimeSpanHvDsc -TimeSpan $testTimeSpan -TimeSpanType Minutes
 
             $result | Should -Be 60
         }
@@ -42,7 +42,7 @@ InModuleScope $script:parentModule {
         It 'Should convert a "System.TimeSpan" of 2 dayes to 48 hours' {
             $testTimeSpan = New-TimeSpan -Days 2
 
-            $result = ConvertFrom-TimeSpan -TimeSpan $testTimeSpan -TimeSpanType Hours
+            $result = ConvertFrom-TimeSpanHvDsc -TimeSpan $testTimeSpan -TimeSpanType Hours
 
             $result | Should -Be 48
         }

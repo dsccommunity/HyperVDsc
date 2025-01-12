@@ -8,7 +8,7 @@
     .PARAMETER TimeSpanType
     Convert timespan into the total number of seconds, minutes, hours or days.
 #>
-function ConvertFrom-TimeSpan
+function ConvertFrom-TimeSpanHvDsc
 {
     [CmdletBinding()]
     [OutputType([System.Int32])]

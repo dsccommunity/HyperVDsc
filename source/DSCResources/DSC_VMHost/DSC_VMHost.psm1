@@ -33,7 +33,7 @@ function Get-TargetResource
         TimeSpan = $vmHost.ResourceMeteringSaveInterval
         TimeSpanType = 'Minutes'
     }
-    $resourceMeteringSaveInterval = ConvertFrom-TimeSpan @convertFromTimeSpanParams
+    $resourceMeteringSaveInterval = ConvertFrom-TimeSpanHvDsc @convertFromTimeSpanParams
 
     $configuration = @{
         IsSingleInstance = $IsSingleInstance
