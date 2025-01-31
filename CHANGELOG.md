@@ -22,6 +22,8 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
     - Fix multiple DNS IP adresses does not work #190
     - NetworkSetting parameter is now optional and no default actions are taken if not specified
   - Switch to use VM image `windows-latest` to build phase.
+  - Use latest DscCommunity scripts and files
+  - Changed `HyperVDsc.Common` to a buildable module.
 
 ## [3.18.0] - 2022-06-04
 
