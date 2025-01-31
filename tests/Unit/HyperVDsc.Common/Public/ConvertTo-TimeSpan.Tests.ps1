@@ -27,36 +27,30 @@ Import-Module $script:subModuleFile -Force -ErrorAction 'Stop'
 Import-Module -Name "$PSScriptRoot/../../Stubs/Hyper-V.stubs.psm1" -Force -DisableNameChecking
 
 InModuleScope $script:subModuleName {
-    Describe 'Private\Wait-VMIPAddress' {
-        Context 'When VM network adapter reports 2 IP addresses' {
-            BeforeAll {
-                Mock -CommandName Get-VMNetworkAdapter -MockWith {
-                    return @{
-                        IpAddresses = @('192.168.0.1', '172.16.0.1')
-                    }
-                }
-            }
+    Describe 'Public\ConvertTo-TimeSpan' {
+        It 'Should convert 60 seconds to "System.TimeSpan" of 1 minute' {
+            $testSeconds = 60
 
-            It 'Should return without throwing an exception' {
-                $result = Wait-VMIPAddress -Name 'Test' -Verbose
+            $result = ConvertTo-TimeSpan -TimeInterval $testSeconds -TimeIntervalType Seconds
 
-                $result | Should -BeNullOrEmpty
-            }
+            $result.TotalMinutes | Should -Be 1
         }
 
-        Context 'When VM network adapter reports 2 IP addresses' {
-            BeforeAll {
-                Mock -CommandName Start-Sleep
-                Mock -CommandName Get-VMNetworkAdapter -MockWith {
-                    return $null
-                }
-            }
+        It 'Should convert 60 minutes to "System.TimeSpan" of 60 minutes' {
+            $testMinutes = 60
 
-            It 'Should throw the correct exception' {
-                { Wait-VMIPAddress -Name 'Test' -Timeout 2 -Verbose } | Should -Throw (
-                    $script:localizedData.WaitForVMIPAddressTimeoutError -f 'Test', '2'
-                )
-            }
+            $result = ConvertTo-TimeSpan -TimeInterval $testMinutes -TimeIntervalType Minutes
+
+            $result.TotalHours | Should -Be 1
         }
+
+        It 'Should convert 48 hours to "System.TimeSpan" of 2 days' {
+            $testHours = 48
+
+            $result = ConvertTo-TimeSpan -TimeInterval $testHours -TimeIntervalType Hours
+
+            $result.TotalDays | Should -Be 2
+        }
+
     }
 }

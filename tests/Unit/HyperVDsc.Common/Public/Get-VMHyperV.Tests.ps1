@@ -27,36 +27,47 @@ Import-Module $script:subModuleFile -Force -ErrorAction 'Stop'
 Import-Module -Name "$PSScriptRoot/../../Stubs/Hyper-V.stubs.psm1" -Force -DisableNameChecking
 
 InModuleScope $script:subModuleName {
-    Describe 'Private\Wait-VMIPAddress' {
-        Context 'When VM network adapter reports 2 IP addresses' {
-            BeforeAll {
-                Mock -CommandName Get-VMNetworkAdapter -MockWith {
-                    return @{
-                        IpAddresses = @('192.168.0.1', '172.16.0.1')
-                    }
-                }
-            }
-
-            It 'Should return without throwing an exception' {
-                $result = Wait-VMIPAddress -Name 'Test' -Verbose
-
-                $result | Should -BeNullOrEmpty
-            }
+    Describe 'Public\Get-VMHyperV' {
+        BeforeAll {
+            $mockVMName = 'TestVM'
         }
 
-        Context 'When VM network adapter reports 2 IP addresses' {
-            BeforeAll {
-                Mock -CommandName Start-Sleep
-                Mock -CommandName Get-VMNetworkAdapter -MockWith {
-                    return $null
+        # Guard mocks
+        It 'Should not throw when no VM is found' {
+            Mock -CommandName Get-VM
+
+            $result = Get-VMHyperV -VMName $mockVMName
+
+            $result | Should -BeNullOrEmpty
+        }
+
+        It 'Should not throw when one VM is found' {
+            Mock -CommandName Get-VM -MockWith {
+                [PSCustomObject] @{
+                    Name = $VMName
                 }
             }
 
-            It 'Should throw the correct exception' {
-                { Wait-VMIPAddress -Name 'Test' -Timeout 2 -Verbose } | Should -Throw (
-                    $script:localizedData.WaitForVMIPAddressTimeoutError -f 'Test', '2'
+            $result = Get-VMHyperV -VMName $mockVMName
+
+            $result.Name | Should -Be $mockVMName
+        }
+
+        It 'Should throw when more than one VM is found' {
+            Mock -CommandName Get-VM -MockWith {
+                @(
+                    [PSCustomObject] @{
+                        Name = $VMName
+                    },
+                    [PSCustomObject] @{
+                        Name = $VMName
+                    }
                 )
             }
+
+            { Get-VMHyperV -VMName $mockVMName } | Should -Throw (
+                $script:localizedData.MoreThanOneVMExistsError -f $mockVMName
+            )
         }
     }
 }
