@@ -1,274 +1,274 @@
-# $script:dscModuleName = 'HyperVDsc'
-# $script:dscResourceName = 'DSC_Vhd'
+$script:dscModuleName = 'HyperVDsc'
+$script:dscResourceName = 'DSC_Vhd'
 
-# function Invoke-TestSetup
-# {
-#     try
-#     {
-#         Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
-#     }
-#     catch [System.IO.FileNotFoundException]
-#     {
-#         throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-#     }
+function Invoke-TestSetup
+{
+    try
+    {
+        Import-Module -Name DscResource.Test -Force -ErrorAction 'Stop'
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
 
-#     $script:testEnvironment = Initialize-TestEnvironment `
-#         -DSCModuleName $script:dscModuleName `
-#         -DSCResourceName $script:dscResourceName `
-#         -ResourceType 'Mof' `
-#         -TestType 'Unit'
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
 
-#     # Import the stub functions.
-#     Import-Module -Name "$PSScriptRoot/Stubs/Hyper-V.stubs.psm1" -Force
-# }
+    # Import the stub functions.
+    Import-Module -Name "$PSScriptRoot/Stubs/Hyper-V.stubs.psm1" -Force
+}
 
-# function Invoke-TestCleanup
-# {
-#     Restore-TestEnvironment -TestEnvironment $script:testEnvironment
-# }
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-# Invoke-TestSetup
+Invoke-TestSetup
 
-# try
-# {
-#     InModuleScope $script:dscResourceName {
-#         Describe 'DSC_Vhd\Get-TargetResource' {
-#             Context 'Should stop when Hyper-V module is missing' {
-#                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
-#                     return $false
-#                 }
+try
+{
+    InModuleScope $script:dscResourceName {
+        Describe 'DSC_Vhd\Get-TargetResource' {
+            Context 'Should stop when Hyper-V module is missing' {
+                Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
+                    return $false
+                }
 
-#                 It 'Should throw when the module is missing' {
-#                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-#                         Should -Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
-#                 }
-#             }
+                It 'Should throw when the module is missing' {
+                    { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
+                        Should -Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
+                }
+            }
 
-#             # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
-#             Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
-#                 return $true
-#             }
+            # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
+            Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
+                return $true
+            }
 
-#             Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
+            Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
 
-#             Context 'VHD Present' {
-#                 It 'Should return a hashtable with Ensure being Present' {
-#                     Mock -CommandName Get-VHD -MockWith {
-#                         [pscustomobject]@{
-#                             Path = 'server.vhdx'
-#                         }
-#                     }
+            Context 'VHD Present' {
+                It 'Should return a hashtable with Ensure being Present' {
+                    Mock -CommandName Get-VHD -MockWith {
+                        [pscustomobject]@{
+                            Path = 'server.vhdx'
+                        }
+                    }
 
-#                     $getTargetResult = Get-TargetResource -Name 'server' -Path 'c:\boguspath' -Generation 'vhdx'
-#                     $getTargetResult.Ensure | Should -Be 'Present'
-#                     $getTargetResult | Should -BeOfType hashtable
-#                 }
-#             }
+                    $getTargetResult = Get-TargetResource -Name 'server' -Path 'c:\boguspath' -Generation 'vhdx'
+                    $getTargetResult.Ensure | Should -Be 'Present'
+                    $getTargetResult | Should -BeOfType hashtable
+                }
+            }
 
-#             Context 'VHD Not Present' {
-#                 It 'Should return a hashtable with Ensure being Absent' {
-#                     Mock -CommandName Get-VHD
+            Context 'VHD Not Present' {
+                It 'Should return a hashtable with Ensure being Absent' {
+                    Mock -CommandName Get-VHD
 
-#                     $getTargetResult = Get-TargetResource -Name 'server' -Path 'c:\boguspath' -Generation 'vhdx'
-#                     $getTargetResult.Ensure | Should -Be 'Absent'
-#                     $getTargetResult | Should -BeOfType hashtable
-#                 }
-#             }
-#         }
+                    $getTargetResult = Get-TargetResource -Name 'server' -Path 'c:\boguspath' -Generation 'vhdx'
+                    $getTargetResult.Ensure | Should -Be 'Absent'
+                    $getTargetResult | Should -BeOfType hashtable
+                }
+            }
+        }
 
-#         Describe 'DSC_Vhd\GetNameWithExtension' {
-#             Context 'Name does not have extension' {
-#                 It 'Should return server.vhdx with generation vhdx' {
-#                     GetNameWithExtension -Name 'server' -Generation 'vhdx' |
-#                         Should -Be 'server.vhdx'
-#                 }
+        Describe 'DSC_Vhd\GetNameWithExtension' {
+            Context 'Name does not have extension' {
+                It 'Should return server.vhdx with generation vhdx' {
+                    GetNameWithExtension -Name 'server' -Generation 'vhdx' |
+                        Should -Be 'server.vhdx'
+                }
 
-#                 It 'Should return server.vhd with generation vhd' {
-#                     GetNameWithExtension -Name 'server' -Generation 'vhd' |
-#                         Should -Be 'server.vhd'
-#                 }
+                It 'Should return server.vhd with generation vhd' {
+                    GetNameWithExtension -Name 'server' -Generation 'vhd' |
+                        Should -Be 'server.vhd'
+                }
 
-#                 It 'Should not throw' {
-#                     { GetNameWithExtension -Name 'server' -Generation 'vhd' } |
-#                         Should -Not -throw
-#                 }
-#             }
+                It 'Should not throw' {
+                    { GetNameWithExtension -Name 'server' -Generation 'vhd' } |
+                        Should -Not -throw
+                }
+            }
 
-#             Context 'Name has extension' {
-#                 It 'Should return server.vhdx with Name server.vhdx and generation vhdx' {
-#                     GetNameWithExtension -Name 'server.vhd' -Generation 'vhd' |
-#                         Should -Be 'server.vhd'
-#                 }
+            Context 'Name has extension' {
+                It 'Should return server.vhdx with Name server.vhdx and generation vhdx' {
+                    GetNameWithExtension -Name 'server.vhd' -Generation 'vhd' |
+                        Should -Be 'server.vhd'
+                }
 
-#                 It 'Should throw with mismatch with extension from name and generation' {
-#                     { GetNameWithExtension -Name 'server.vhdx' -Generation 'vhd' } |
-#                         Should -Throw 'the extension vhdx on the name does not match the generation vhd'
-#                 }
-#             }
-#         }
+                It 'Should throw with mismatch with extension from name and generation' {
+                    { GetNameWithExtension -Name 'server.vhdx' -Generation 'vhd' } |
+                        Should -Throw 'the extension vhdx on the name does not match the generation vhd'
+                }
+            }
+        }
 
-#         Describe 'DSC_Vhd\Test-TargetResource' {
-#             # Create an empty function to be able to mock the missing Hyper-V cmdlet
-#             function Test-VHD
-#             {
+        Describe 'DSC_Vhd\Test-TargetResource' {
+            # Create an empty function to be able to mock the missing Hyper-V cmdlet
+            function Test-VHD
+            {
 
-#             }
+            }
 
-#             Context 'Should stop when Hyper-V module is missing' {
-#                 Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
-#                     return $false
-#                 }
+            Context 'Should stop when Hyper-V module is missing' {
+                Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
+                    return $false
+                }
 
-#                 It 'Should throw when the module is missing' {
-#                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-#                         Should -Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
-#                 }
-#             }
+                It 'Should throw when the module is missing' {
+                    { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
+                        Should -Throw 'Please ensure that Hyper-V role is installed with its PowerShell module'
+                }
+            }
 
-#             # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
-#             Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
-#                 return $true
-#             }
+            # Mocks "Get-Module -Name Hyper-V" so that the DSC resource thinks the Hyper-V module is on the test system
+            Mock -CommandName Get-Module -ParameterFilter { ($Name -eq 'Hyper-V') -and ($ListAvailable -eq $true) } -MockWith {
+                return $true
+            }
 
-#             Context 'Parameter validation' {
-#                 It 'Fixed and Dynamic VHDs need MaximumSizeBytes specified' {
-#                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Dynamic' } |
-#                         Should -Throw 'Specify MaximumSizeBytes property for Fixed and Dynamic VHDs.'
-#                 }
+            Context 'Parameter validation' {
+                It 'Fixed and Dynamic VHDs need MaximumSizeBytes specified' {
+                    { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Dynamic' } |
+                        Should -Throw 'Specify MaximumSizeBytes property for Fixed and Dynamic VHDs.'
+                }
 
-#                 It 'Parent Path is passed for a non Differencing disk' {
-#                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -ParentPath 'C:\VMs\Parent' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-#                         Should -Throw 'Parent path is only supported for Differencing disks'
-#                 }
+                It 'Parent Path is passed for a non Differencing disk' {
+                    { Test-TargetResource -Name 'server' -Path 'C:\VMs' -ParentPath 'C:\VMs\Parent' -Type 'Fixed' -MaximumSizeBytes 1GB } |
+                        Should -Throw 'Parent path is only supported for Differencing disks'
+                }
 
-#                 It 'Differencing disk needs a Parent Path' {
-#                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' } |
-#                         Should -Throw 'Differencing requires a parent path'
-#                 }
-#             }
+                It 'Differencing disk needs a Parent Path' {
+                    { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' } |
+                        Should -Throw 'Differencing requires a parent path'
+                }
+            }
 
-#             Context 'ParentPath specified' {
-#                 It 'Should throw when ParentPath does not exist' {
-#                     Mock -CommandName Test-Path -MockWith { $false }
+            Context 'ParentPath specified' {
+                It 'Should throw when ParentPath does not exist' {
+                    Mock -CommandName Test-Path -MockWith { $false }
 
-#                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' -ParentPath 'c:\boguspath' } |
-#                         Should -Throw 'c:\boguspath does not exists'
-#                 }
+                    { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' -ParentPath 'c:\boguspath' } |
+                        Should -Throw 'c:\boguspath does not exists'
+                }
 
-#                 # "Generation $Generation should match ParentPath extension $($ParentPath.Split('.')[-1])"
-#                 It 'Should throw when file extension and generation have a mismatch' {
-#                     Mock -CommandName Test-Path -MockWith { $true }
+                # "Generation $Generation should match ParentPath extension $($ParentPath.Split('.')[-1])"
+                It 'Should throw when file extension and generation have a mismatch' {
+                    Mock -CommandName Test-Path -MockWith { $true }
 
-#                     { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' -ParentPath 'c:\boguspath.vhd' -Generation 'Vhdx' } |
-#                         Should -Throw 'Generation Vhdx should match ParentPath extension vhd'
-#                 }
-#             }
+                    { Test-TargetResource -Name 'server' -Path 'C:\VMs' -Type 'Differencing' -ParentPath 'c:\boguspath.vhd' -Generation 'Vhdx' } |
+                        Should -Throw 'Generation Vhdx should match ParentPath extension vhd'
+                }
+            }
 
-#             Context 'Path does not exist' {
-#                 It 'Should throw when the path does not exist' {
-#                     Mock -CommandName Test-Path -MockWith { $false }
+            Context 'Path does not exist' {
+                It 'Should throw when the path does not exist' {
+                    Mock -CommandName Test-Path -MockWith { $false }
 
-#                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-#                         Should -Throw 'C:\VMs does not exists'
-#                 }
-#             }
+                    { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
+                        Should -Throw 'C:\VMs does not exists'
+                }
+            }
 
-#             Context 'Vhd exists' {
-#                 BeforeEach {
-#                     Mock -CommandName Test-Path -MockWith { $true }
-#                     Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
-#                     Mock -CommandName Test-VHD -MockWith { $true }
-#                 }
+            Context 'Vhd exists' {
+                BeforeEach {
+                    Mock -CommandName Test-Path -MockWith { $true }
+                    Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
+                    Mock -CommandName Test-VHD -MockWith { $true }
+                }
 
-#                 It 'Should not throw' {
-#                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-#                         Should -not -throw
-#                 }
+                It 'Should not throw' {
+                    { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
+                        Should -not -throw
+                }
 
-#                 It 'Should return a boolean and it should be true' {
-#                     $testResult = Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB
-#                     $testResult | Should -BeOfType bool
-#                     $testResult -eq $true | Should -Be $true
-#                 }
-#             }
+                It 'Should return a boolean and it should be true' {
+                    $testResult = Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB
+                    $testResult | Should -BeOfType bool
+                    $testResult -eq $true | Should -Be $true
+                }
+            }
 
-#             Context 'Vhd does not exist' {
-#                 BeforeEach {
-#                     Mock -CommandName Test-Path -MockWith { $true }
-#                     Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
-#                     Mock -CommandName Test-VHD -MockWith { $false }
-#                 }
+            Context 'Vhd does not exist' {
+                BeforeEach {
+                    Mock -CommandName Test-Path -MockWith { $true }
+                    Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
+                    Mock -CommandName Test-VHD -MockWith { $false }
+                }
 
-#                 It 'Should not throw' {
-#                     { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
-#                         Should -not -throw
-#                 }
+                It 'Should not throw' {
+                    { Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB } |
+                        Should -not -throw
+                }
 
-#                 It 'Should return a boolean and it should be false' {
-#                     $testResult = Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB
-#                     $testResult | Should -BeOfType bool
-#                     $testResult -eq $true | Should -Be $false
-#                 }
-#             }
-#         }
+                It 'Should return a boolean and it should be false' {
+                    $testResult = Test-TargetResource -Name 'server.vhdx' -Path 'C:\VMs' -Type 'Fixed' -MaximumSizeBytes 1GB
+                    $testResult | Should -BeOfType bool
+                    $testResult -eq $true | Should -Be $false
+                }
+            }
+        }
 
-#         Describe 'DSC_Vhd\Set-TargetResource' {
-#             Context 'Ensure is Absent' {
-#                 Mock -CommandName Test-Path -MockWith { $true }
-#                 Mock -CommandName Remove-Item
-#                 Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
+        Describe 'DSC_Vhd\Set-TargetResource' {
+            Context 'Ensure is Absent' {
+                Mock -CommandName Test-Path -MockWith { $true }
+                Mock -CommandName Remove-Item
+                Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
 
-#                 It 'Should remove when Ensure is Absent and vhdx exists' {
-#                     $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Absent'
-#                     Assert-MockCalled -CommandName Remove-Item -Times 1 -Exactly
-#                 }
-#             }
+                It 'Should remove when Ensure is Absent and vhdx exists' {
+                    $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Absent'
+                    Assert-MockCalled -CommandName Remove-Item -Times 1 -Exactly
+                }
+            }
 
-#             Context 'Ensure is Present' {
-#                 BeforeEach {
-#                     Mock -CommandName Get-VHD -MockWith {
-#                         [pscustomobject]@{
-#                             Path = 'server.vhdx'
-#                             ParentPath = 'c:\boguspath\server.vhdx'
-#                             Size = 1073741824
-#                             Type = 'Differencing'
-#                         }
-#                     }
+            Context 'Ensure is Present' {
+                BeforeEach {
+                    Mock -CommandName Get-VHD -MockWith {
+                        [pscustomobject]@{
+                            Path = 'server.vhdx'
+                            ParentPath = 'c:\boguspath\server.vhdx'
+                            Size = 1073741824
+                            Type = 'Differencing'
+                        }
+                    }
 
-#                     Mock -CommandName Set-VHD
-#                     Mock -CommandName Resize-VHD
-#                     Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
-#                     Mock -CommandName New-VHD
-#                 }
+                    Mock -CommandName Set-VHD
+                    Mock -CommandName Resize-VHD
+                    Mock -CommandName GetNameWithExtension -MockWith { 'server.vhdx' }
+                    Mock -CommandName New-VHD
+                }
 
-#                 It 'Should Create a VHD when Ensure is present and no VHD exists yet for non Differencing disk' {
-#                     Mock -CommandName Get-VHD -MockWith { throw }
+                It 'Should Create a VHD when Ensure is present and no VHD exists yet for non Differencing disk' {
+                    Mock -CommandName Get-VHD -MockWith { throw }
 
-#                     $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Present'
-#                     Assert-MockCalled -CommandName New-VHD -Exactly -Times 1 -Scope It
-#                 }
+                    $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Present'
+                    Assert-MockCalled -CommandName New-VHD -Exactly -Times 1 -Scope It
+                }
 
-#                 It 'Should Create a VHD when Ensure is present and no VHD exists yet for Differencing disk' {
-#                     Mock -CommandName Get-VHD -MockWith { throw }
+                It 'Should Create a VHD when Ensure is present and no VHD exists yet for Differencing disk' {
+                    Mock -CommandName Get-VHD -MockWith { throw }
 
-#                     $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Present' -ParentPath 'c:\boguspath\server.vhdx' -Type 'Differencing'
-#                     Assert-MockCalled -CommandName New-VHD -Exactly -Times 1 -Scope It
-#                 }
+                    $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -Ensure 'Present' -ParentPath 'c:\boguspath\server.vhdx' -Type 'Differencing'
+                    Assert-MockCalled -CommandName New-VHD -Exactly -Times 1 -Scope It
+                }
 
-#                 It 'Should resize a VHD which has a different size as intended' {
-#                     $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -MaximumSizeBytes 2GB -Ensure 'Present'
-#                     Assert-MockCalled -CommandName Resize-VHD -Exactly -Times 1 -Scope It
-#                 }
+                It 'Should resize a VHD which has a different size as intended' {
+                    $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -MaximumSizeBytes 2GB -Ensure 'Present'
+                    Assert-MockCalled -CommandName Resize-VHD -Exactly -Times 1 -Scope It
+                }
 
-#                 It 'Should update the parentpath if it is different from intent' {
-#                     $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -ParentPath 'c:\boguspath2\server.vhdx' -Ensure 'Present'
-#                     Assert-MockCalled -CommandName Set-VHD -Exactly -Times 1 -Scope It
-#                 }
-#             }
-#         }
-#     }
-# }
-# finally
-# {
-#     Invoke-TestCleanup
-# }
+                It 'Should update the parentpath if it is different from intent' {
+                    $null = Set-TargetResource -Name 'server.vhdx' -Path 'TestDrive:\' -ParentPath 'c:\boguspath2\server.vhdx' -Ensure 'Present'
+                    Assert-MockCalled -CommandName Set-VHD -Exactly -Times 1 -Scope It
+                }
+            }
+        }
+    }
+}
+finally
+{
+    Invoke-TestCleanup
+}
