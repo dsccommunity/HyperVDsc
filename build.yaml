@@ -5,7 +5,6 @@
 CopyPaths:
   - en-US
   - DSCResources
-Prefix: prefix.ps1
 Encoding: UTF8
 BuiltModuleSubdirectory: builtModule
 
@@ -34,11 +33,20 @@ TaskHeader: |
 #      ModuleBuilder Submodules Configuration      #
 ####################################################
 NestedModule:
-    DscResource.Common:
-      CopyOnly: true
-      Path: ./output/RequiredModules/DscResource.Common
-      AddToManifest: false
-      Exclude: PSGetModuleInfo.xml
+  DscResource.Common:
+    CopyOnly: true
+    Path: ./output/RequiredModules/DscResource.Common
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
+  HyperVDsc.Common:
+    Prefix: prefix.ps1
+    VersionedOutputDirectory: false
+    CopyPaths:
+      - en-US
+    Encoding: UTF8
+
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
 
 ####################################################
 #       Pipeline Configuration                     #

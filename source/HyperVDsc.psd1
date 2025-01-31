@@ -1,4 +1,7 @@
 @{
+    # Script module or binary module file associated with this manifest.
+    RootModule        = 'HyperVDsc.psm1'
+
     # Version number of this module.
     moduleVersion     = '0.0.1'
 
