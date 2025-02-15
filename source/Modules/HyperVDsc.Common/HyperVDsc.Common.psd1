@@ -30,14 +30,7 @@
     Description       = 'Functions used by the DSC resources in HyperVDsc.'
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @(
-        'Set-VMProperty'
-        'Set-VMState'
-        'Wait-VMIPAddress'
-        'ConvertTo-TimeSpan'
-        'ConvertFrom-TimeSpan'
-        'Get-VMHyperV'
-    )
+    FunctionsToExport = @()
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()
@@ -54,4 +47,3 @@
         } # End of PSData hashtable
     } # End of PrivateData hashtable
 }
-
