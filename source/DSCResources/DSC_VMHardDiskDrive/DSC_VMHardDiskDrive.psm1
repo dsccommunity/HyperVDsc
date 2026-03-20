@@ -31,6 +31,24 @@ function Get-TargetResource
 
     Assert-Module -ModuleName 'Hyper-V'
 
+    # Check if the VM exists before querying its hard disk drives.
+    # When the VM has not been created yet (e.g., during initial provisioning
+    # with dependsOn), return Absent rather than throwing so that
+    # Test-TargetResource can report the resource is not in desired state.
+    $vm = Get-VM -Name $VMName -ErrorAction SilentlyContinue
+    if ($null -eq $vm)
+    {
+        Write-Verbose -Message ($script:localizedData.VMNotFound -f $VMName)
+        return @{
+            VMName             = $VMName
+            Path               = $null
+            ControllerType     = $null
+            ControllerNumber   = $null
+            ControllerLocation = $null
+            Ensure             = 'Absent'
+        }
+    }
+
     $hardDiskDrive = Get-VMHardDiskDrive -VMName $VMName -ErrorAction Stop |
         Where-Object -FilterScript { $_.Path -eq $Path }
 

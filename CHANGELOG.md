@@ -7,6 +7,11 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
 
 ## [Unreleased]
 
+- VMHardDiskDrive
+  - `Get-TargetResource` no longer throws when the VM does not exist. Returns
+    `Ensure = 'Absent'` so `Test-TargetResource` correctly reports the resource
+    is not in desired state instead of aborting the configuration - Fixes
+    [Issue #223](https://github.com/dsccommunity/HyperVDsc/issues/223).
 - HyperVDsc
   - BREAKING CHANGE
     - Renamed _xHyper-V_ to _HyperVDsc - fixes [Issue #69](https://github.com/dsccommunity/HyperVDsc/issues/213).
