@@ -117,6 +117,35 @@ try
                 return $stubVM
             }
 
+            Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'StoppedGeneration2VM' } -MockWith {
+                $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
+                $stubVM.Name = 'StoppedGeneration2VM'
+                $stubVM.HardDrives = @(
+                    $stubVhdxDisk,
+                    $stubVhdDisk
+                )
+                $stubVM.Path = $StubVMConfig.FullPath
+                $stubVM.Generation = 2
+                $stubVM.MemoryStartup = 512MB
+                $stubVM.MemoryMinimum = 128MB
+                $stubVM.MemoryMaximum = 4096MB
+                $stubVM.ProcessorCount = 1
+                $stubVM.ID = $mockVmGuid
+                $stubVM.CPUUsage = 10
+                $stubVM.MemoryAssigned = 512MB
+                $stubVM.Uptime = New-TimeSpan -Hours 12
+                $stubVM.CreationTime = (Get-Date).AddHours(-12)
+                $stubVM.DynamicMemoryEnabled = $true
+                $stubVM.Notes = ''
+                $stubVM.State = 'Off'
+                $stubVM.NetworkAdapters = @(
+                    $stubNIC1,
+                    $stubNIC2
+                )
+
+                return $stubVM
+            }
+
             Mock -CommandName Get-VM -ParameterFilter { $Name -eq 'PausedVM' } -MockWith {
                 $stubVM = [Microsoft.HyperV.PowerShell.VirtualMachine]::CreateTypeInstance()
                 $stubVM.Name = 'PausedVM'
@@ -387,8 +416,15 @@ try
 
                 It 'Calls Get-VMFirmware if a generation 2 VM' {
                     Mock -CommandName Get-VMFirmware -MockWith { return $true }
+                    Mock -CommandName Get-VMSecurity -MockWith { return @{ TpmEnabled = $false } }
                     $null = Get-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk.Path
                     Assert-MockCalled -CommandName Get-VMFirmware -Scope It -Exactly 1
+                }
+
+                It 'Calls Get-VMSecurity if a generation 2 VM' {
+                    Mock -CommandName Get-VMSecurity -MockWith { return @{ TpmEnabled = $false } }
+                    $null = Get-TargetResource -Name 'Generation2VM' -VhdPath $stubVhdxDisk.Path
+                    Assert-MockCalled -CommandName Get-VMSecurity -Scope It -Exactly 1
                 }
 
                 It 'Hash table contains key EnableGuestService' {
@@ -474,6 +510,7 @@ try
 
                 It 'Returns $true when VM .vhdx file is specified with a generation 2 VM' {
                     Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
+                    Mock -CommandName Test-VMTpmEnabled -MockWith { return $false }
                     Test-TargetResource -Name 'Generation2VM' -Generation 2 @testParams | Should -Be $true
                 }
 
@@ -510,6 +547,20 @@ try
                 It 'Returns $false when SecureBoot is On and requested "SecureBoot" = "$false"' {
                     Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
                     Test-TargetResource -Name 'Generation2VM' -SecureBoot $false -Generation 2 @testParams | Should -Be $false
+                }
+
+                It 'Returns $true when TPM is enabled and requested "EnableTPM" = "$true"' {
+                    Mock -CommandName Test-VMTpmEnabled -MockWith { return $true }
+
+                    Test-TargetResource -Name 'Generation2VM' -EnableTPM $true -Generation 2 @testParams |
+                        Should -BeTrue
+                }
+
+                It 'Returns $false when TPM is disabled and requested "EnableTPM" = "$true"' {
+                    Mock -CommandName Test-VMTpmEnabled -MockWith { return $false }
+
+                    Test-TargetResource -Name 'Generation2VM' -EnableTPM $true -Generation 2 @testParams |
+                        Should -BeFalse
                 }
 
                 It 'Returns $true when VM has snapshot chain' {
@@ -605,6 +656,8 @@ try
                 Mock -CommandName Get-VMNetworkAdapter -MockWith { return $stubVM.NetworkAdapters.IpAddresses }
                 Mock -CommandName Set-VMState -MockWith { return $true }
                 Mock -CommandName Set-VMMemory
+                # Default TPM state for generation 2 VMs so the new TPM code path does not hit the Hyper-V stub.
+                Mock -CommandName Test-VMTpmEnabled -MockWith { return $false }
 
                 It 'Removes an existing VM when "Ensure" = "Absent"' {
                     Set-TargetResource -Name 'RunningVM' -Ensure Absent @testParams
@@ -776,6 +829,47 @@ try
                     Mock -CommandName Set-VMProperty
                     Set-TargetResource -Name 'StoppedVM' -SecureBoot $true -Generation 2 @testParams
                     Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter { $VMCommand -eq 'Set-VMFirmware' } -Exactly 1 -Scope It
+                }
+
+                It 'Enables TPM without prompting when an existing generation 2 VM has TPM disabled' {
+                    Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
+                    Mock -CommandName Test-VMTpmEnabled -MockWith { return $false }
+                    Mock -CommandName Get-VMKeyProtector -MockWith { return @(0, 0, 0, 4) }
+                    Mock -CommandName Set-VMKeyProtector
+                    Mock -CommandName Set-VMProperty
+
+                    Set-TargetResource -Name 'StoppedGeneration2VM' -Generation 2 -EnableTPM $true @testParams
+
+                    Assert-MockCalled -CommandName Set-VMKeyProtector -Exactly 1 -Scope It
+                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
+                        $VMCommand -eq 'Enable-VMTPM' -and
+                        $ChangeProperty.Confirm -eq $false
+                    } -Exactly 1 -Scope It
+                }
+
+                It 'Disables TPM without prompting when an existing generation 2 VM has TPM enabled' {
+                    Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
+                    Mock -CommandName Test-VMTpmEnabled -MockWith { return $true }
+                    Mock -CommandName Set-VMProperty
+
+                    Set-TargetResource -Name 'StoppedGeneration2VM' -Generation 2 -EnableTPM $false @testParams
+
+                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
+                        $VMCommand -eq 'Disable-VMTPM' -and
+                        $ChangeProperty.Confirm -eq $false
+                    } -Exactly 1 -Scope It
+                }
+
+                It 'Does not configure TPM on an existing generation 1 VM when generation 2 is requested' {
+                    Mock -CommandName Test-VMSecureBoot -MockWith { return $true }
+                    Mock -CommandName Test-VMTpmEnabled -MockWith { return $false }
+                    Mock -CommandName Set-VMProperty
+
+                    Set-TargetResource -Name 'StoppedVM' -Generation 2 -EnableTPM $true @testParams
+
+                    Assert-MockCalled -CommandName Set-VMProperty -ParameterFilter {
+                        $VMCommand -in @('Enable-VMTPM', 'Disable-VMTPM')
+                    } -Exactly 0 -Scope It
                 }
 
                 It 'Does call "Enable-VMIntegrationService" when "EnableGuestService" = "$true"' {

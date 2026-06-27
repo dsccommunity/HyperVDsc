@@ -32,6 +32,7 @@ For older change log history see the [historic changelog](HISTORIC_CHANGELOG.md)
   - Switch to use VM image `windows-latest` to build phase.
   - Use latest DscCommunity scripts and files
   - Changed `HyperVDsc.Common` to a buildable module.
+  - Added support to enable or disable the TPM on a virtual machine - Fixes [Issue #214](https://github.com/dsccommunity/HyperVDsc/issues/214).
 
 ## [3.18.0] - 2022-06-04
 

@@ -17,6 +17,7 @@ class DSC_VMHyperV : OMI_BaseResource
     [Write, Description("Specifies if the VM should be Present (created) or Absent (removed). The default value is `Present`."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
     [Write, Description("Notes about the VM.")] String Notes;
     [Write, Description("Specifies if Secure Boot should be enabled for Generation 2 virtual machines. **Only supports generation 2 virtual machines**. Default value is `$true`.")] Boolean SecureBoot;
+    [Write, Description("Specifies if Trusted Platform Module (TPM) should be enabled for Generation 2 virtual machines. **Only supports generation 2 virtual machines**. Default value is `$false`.")] Boolean EnableTPM;
     [Write, Description("Enable Guest Service Interface for the VM. The default value is `$false`.")] Boolean EnableGuestService;
     [Write, Description("Enable AutomaticCheckpoints for the VM.")] Boolean AutomaticCheckpointsEnabled;
     [Read, Description("Returns the unique ID for the VM.")] String ID;
